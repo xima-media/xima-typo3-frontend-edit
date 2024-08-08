@@ -1,0 +1,9 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    Xima\XimaTypo3FrontendEdit\:
+        resource: '../Classes/*'
+        exclude: '../Classes/Domain/Model/*'

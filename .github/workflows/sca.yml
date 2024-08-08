@@ -1,0 +1,12 @@
+name: Static Code Analysis
+
+on:
+  - pull_request
+  - push
+
+jobs:
+
+  tests:
+    uses: maikschneider/reusable-workflows/.github/workflows/sca.yml@main
+    with:
+      php-version: 8.2

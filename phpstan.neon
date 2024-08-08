@@ -1,0 +1,17 @@
+includes:
+   - vendor/saschaegerer/phpstan-typo3/extension.neon
+   - phpstan-baseline.neon
+
+parameters:
+    parallel:
+        maximumNumberOfProcesses: 5
+
+    level: 5
+
+    bootstrapFiles:
+        - vendor/autoload.php
+
+    paths:
+        - Classes
+        - Configuration
+        - Resources

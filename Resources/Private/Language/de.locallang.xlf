@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file source-language="en" datatype="plaintext" original="messages">
+		<header/>
+		<body>
+			<trans-unit id="edit_menu">
+				<source />
+				<target>Bearbeitungsmenü</target>
+			</trans-unit>
+			<trans-unit id="edit_content_element">
+				<source />
+				<target>Inhaltselement bearbeiten</target>
+			</trans-unit>
+			<trans-unit id="edit_plugin">
+				<source />
+				<target>Plugin bearbeiten</target>
+			</trans-unit>
+			<trans-unit id="edit_pages">
+				<source />
+				<target>Seite bearbeiten</target>
+			</trans-unit>
+			<trans-unit id="history">
+				<source />
+				<target>Verlauf</target>
+			</trans-unit>
+			<trans-unit id="info">
+				<source />
+				<target>Info</target>
+			</trans-unit>
+			<trans-unit id="hide">
+				<source />
+				<target>Deaktivieren</target>
+			</trans-unit>
+			<trans-unit id="div_info">
+				<source />
+				<target>Info</target>
+			</trans-unit>
+			<trans-unit id="div_edit">
+				<source />
+				<target>Bearbeiten</target>
+			</trans-unit>
+			<trans-unit id="div_action">
+				<source />
+				<target>Aktionen</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

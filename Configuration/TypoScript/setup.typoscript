@@ -1,0 +1,15 @@
+[isFrontendEditEnabled()]
+  page.includeCSS {
+    customFrontendEdit = EXT:xima_typo3_frontend_edit/Resources/Public/Css/FrontendEdit.css
+  }
+  page.includeJS {
+    customFrontendEdit = EXT:xima_typo3_frontend_edit/Resources/Public/JavaScript/frontend_edit.js
+  }
+  page.jsInline {
+      1722340759 = TEXT
+      1722340759.stdWrap.dataWrap (
+        const pid = {TSFE:id};
+        const baseUrl = '{site:base}';
+      )
+  }
+[GLOBAL]
