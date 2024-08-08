@@ -14,7 +14,7 @@ This extension provides an edit button for editors within frontend content eleme
 
 ## Note
 
-This is **not** a further development of the original extension [frontend_editing](https://extensions.typo3.org/extension/frontend_editing). It is similar in some ways to the realisation of the [feedit](https://extensions.typo3.org/extension/feedit) extension. This extension is an independent implementation with a different approach.
+This is **not** a further development of the "original" extension [frontend_editing](https://extensions.typo3.org/extension/frontend_editing). It is similar in some ways to the realisation of the [feedit](https://extensions.typo3.org/extension/feedit) extension. This extension is an independent implementation with a different approach.
 
 The extension has been developed to provide a simple and lightweight solution to easily start the editing of content elements from the frontend and thus reduce the gap between frontend and backend. Therefore a simple javascript is injected into the frontend, which generates action links to the TYPO3 backend with the corresponding edit views.
 
@@ -35,7 +35,7 @@ Include the static TypoScript template "Frontend edit" or directly import it in 
 
 ## How it works
 
-ToDo
+On page load a script calls an ajax endpoint, to fetch information about all editable (by the current backend user) content elements on the current page. The script then injects an edit button into the frontend for each editable content element. The edit button links to the corresponding edit view in the TYPO3 backend.
 
 > Hint: The script is only injected if the current backend user is logged in.
 
