@@ -4,7 +4,10 @@
 
 # TYPO3 extension `xima_typo3_frontend_edit`
 
-[![Supported TYPO3 versions](https://badgen.net/badge/TYPO3/12%20&%2013/orange)]()
+[![Latest Stable Version](https://typo3-badges.dev/badge/xima_typo3_frontend_edit/version/shields.svg)](https://extensions.typo3.org/extension/xima_typo3_frontend_edit)
+[![TYPO3 12](https://img.shields.io/badge/TYPO3-12-orange.svg)](https://get.typo3.org/version/12)
+[![TYPO3 13](https://img.shields.io/badge/TYPO3-13-orange.svg)](https://get.typo3.org/version/13)
+[![Total Downloads](https://poser.pugx.org/xima/xima-typo3-frontend-edit/d/total)](https://packagist.org/packages/xima/xima-typo3-frontend-edit)
 
 </div>
 
