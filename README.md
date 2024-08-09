@@ -33,9 +33,20 @@ Include the static TypoScript template "Frontend edit" or directly import it in 
 @import 'EXT:xima_typo3_frontend_edit/Configuration/TypoScript/setup.typoscript'
 ```
 
+Adjust the constants to restrict the usage of the frontend edit:
+``` typoscript
+plugin.tx_ximatypo3frontendedit {
+  settings {
+    ignorePids =
+    ignoreCTypes =
+    ignoreListTypes =
+  }
+}
+```
+
 ## How it works
 
-On page load a script calls an ajax endpoint, to fetch information about all editable (by the current backend user) content elements on the current page. The script then injects an edit button into the frontend for each editable content element. The edit button links to the corresponding edit view in the TYPO3 backend.
+On page load a script calls an ajax endpoint, to fetch information about all editable (by the current backend user) content elements on the current page. The script then injects an edit menu into the frontend for each editable content element. The edit menu links easily to the corresponding edit views in the TYPO3 backend.
 
 > Hint: The script is only injected if the current backend user is logged in.
 

@@ -7,14 +7,16 @@ namespace Xima\XimaTypo3FrontendEdit\Template\Component;
 use TYPO3\CMS\Core\Imaging\Icon;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 
-class Button {
+class Button
+{
     protected string $label;
     protected ButtonType $type;
     protected ?string $url;
     protected ?Icon $icon;
     protected array $children;
 
-    public function __construct(string $label, ButtonType $type, ?string $url = null, ?Icon $icon = null) {
+    public function __construct(string $label, ButtonType $type, ?string $url = null, ?Icon $icon = null)
+    {
         $this->label = $label;
         $this->type = $type;
         $this->url = $url;
@@ -83,7 +85,8 @@ class Button {
         $this->children[] = $button;
     }
 
-    public function render(): array {
+    public function render(): array
+    {
         $result = [
             'label' => $GLOBALS['LANG']->sL($this->label),
             'type' => $this->type->value,
@@ -98,7 +101,7 @@ class Button {
         }
 
         if (!empty($this->children)) {
-            $result['children'] = array_map(fn(Button $button) => $button->render(), $this->children);
+            $result['children'] = array_map(fn (Button $button) => $button->render(), $this->children);
         }
 
         return $result;

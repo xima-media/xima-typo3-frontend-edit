@@ -1,7 +1,7 @@
 <?php
 
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-use Xima\XimaTypo3ContentPlanner\Configuration;
+use Xima\XimaTypo3FrontendEdit\Configuration;
 
 defined('TYPO3') or die();
 
@@ -22,10 +22,6 @@ call_user_func(function () {
             ],
         ],
     ];
-    $GLOBALS['TCA']['pages']['palettes']['tx_ximatypo3contentplanner'] = [
-        'showitem' => 'tx_ximatypo3contentplanner_hide, tx_ximatypo3contentplanner_subscribe',
-    ];
 
     ExtensionManagementUtility::addTCAcolumns('be_users', $temporaryColumns);
-    ExtensionManagementUtility::addToAllTCAtypes('be_users', '--div--;Content  Planner,--palette--;;tx_ximatypo3contentplanner');
 });

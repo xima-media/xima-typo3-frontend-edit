@@ -2,21 +2,46 @@
   page.includeCSS {
     customFrontendEdit = EXT:xima_typo3_frontend_edit/Resources/Public/Css/FrontendEdit.css
   }
-  page.includeJS {
-    customFrontendEdit = EXT:xima_typo3_frontend_edit/Resources/Public/JavaScript/frontend_edit.js
-  }
-  page.jsInline {
-      1722340759 = TEXT
-      1722340759.stdWrap.dataWrap (
-        const pid = {TSFE:id};
-        const baseUrl = '{site:base}';
-      )
-  }
+
+  lib.frontendEditAction = FLUIDTEMPLATE
+  lib.frontendEditAction {
+      file = EXT:xima_typo3_frontend_edit/Resources/Private/Templates/FrontendEdit.html
+      variables {
+        baseUrl = TEXT
+        baseUrl {
+            data = site:base
+        }
+      }
+    }
+
+    page.1722340766 =< lib.frontendEditAction
 [GLOBAL]
 
 plugin.tx_ximatypo3frontendedit {
   settings {
     ignorePids = {$plugin.tx_ximatypo3frontendedit.settings.ignorePids}
     ignoreCTypes = {$plugin.tx_ximatypo3frontendedit.settings.ignoreCTypes}
+    ignoreListTypes = {$plugin.tx_ximatypo3frontendedit.settings.ignoreListTypes}
   }
+}
+
+tx_ximatypo3frontendedit_ajaxFrontendEdit = PAGE
+tx_ximatypo3frontendedit_ajaxFrontendEdit {
+    typeNum = 1723195241
+    config {
+        disableAllHeaderCode = 1
+        additionalHeaders.10.header = Content-type:application/json
+        xhtml_cleaning = 0
+        admPanel = 0
+        debug = 0
+        no_cache = 1
+    }
+    10 = USER
+    10 {
+        userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
+        extensionName = XimaTypo3FrontendEdit
+        pluginName = FrontendEdit
+        vendorName = Xima
+        controller = Edit
+    }
 }

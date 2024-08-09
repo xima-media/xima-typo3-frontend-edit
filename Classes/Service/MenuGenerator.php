@@ -8,10 +8,10 @@ use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
-use TYPO3\CMS\Core\Domain\Repository\PageRepository;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\RootlineUtility;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
@@ -33,7 +33,7 @@ final class MenuGenerator
     {
         $ignoredPids = $this->configuration['settings.']['ignorePids'] ? explode(',', $this->configuration['settings.']['ignorePids']) : [];
         foreach ($ignoredPids as $ignoredPid) {
-            if ($this->isSubpageOf($pid, $ignoredPid)) {
+            if ($this->isSubpageOf($pid, (int)$ignoredPid)) {
                 return [];
             }
         }
@@ -51,6 +51,7 @@ final class MenuGenerator
         }
 
         $ignoredCTypes = $this->configuration['settings.']['ignoreCTypes'] ? explode(',', $this->configuration['settings.']['ignoreCTypes']) : [];
+        $ignoredListTypes = $this->configuration['settings.']['ignoreListTypes'] ? explode(',', $this->configuration['settings.']['ignoreListTypes']) : [];
 
         $result = [];
         foreach ($this->fetchContentElements($pid, $languageUid) as $contentElement) {
@@ -63,11 +64,15 @@ final class MenuGenerator
                 continue;
             }
 
+            if ($contentElement['CType'] === 'list' && in_array($contentElement['list_type'], $ignoredListTypes, true)) {
+                continue;
+            }
+
             $contentElementConfig = $this->getContentElementConfig($contentElement['CType'], $contentElement['list_type']);
 
             $menuButton = new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_menu',
-                    ButtonType::Menu,
+                ButtonType::Menu,
                 icon: $this->iconFactory->getIcon('actions-open', 'small')
             );
 
@@ -155,7 +160,6 @@ final class MenuGenerator
                 $this->iconFactory->getIcon('actions-info', 'small')
             ));
 
-
             $menuButton->addChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:history',
                 ButtonType::Link,
@@ -182,7 +186,6 @@ final class MenuGenerator
         }
         return $result;
     }
-
 
     private function fetchContentElements(int $pid, int $languageUid): array
     {
@@ -213,13 +216,10 @@ final class MenuGenerator
         return false;
     }
 
-    private function isSubpageOf($subPageId, $parentPageId)
+    private function isSubpageOf(int $subPageId, int $parentPageId): bool
     {
-        $pageRepository = GeneralUtility::makeInstance(PageRepository::class);
-        $pageRepository->init(false);
-        $rootline = $pageRepository->getRootLine($subPageId);
-
-        foreach ($rootline as $page) {
+        $rootLine = $rootLineUtility = GeneralUtility::makeInstance(RootlineUtility::class, $subPageId)->get();
+        foreach ($rootLine as $page) {
             if ((int)$page['uid'] === (int)$parentPageId) {
                 return true;
             }

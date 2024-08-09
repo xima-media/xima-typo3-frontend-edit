@@ -4,5 +4,7 @@ plugin.tx_ximatypo3frontendedit {
     ignorePids =
     # cat=xima_typo3_frontend_edit/settings/p; type=string; label=Ignore content types from frontend edit
     ignoreCTypes =
+    # cat=xima_typo3_frontend_edit/settings/p; type=string; label=Ignore plugin types from frontend edit
+    ignoreListTypes =
   }
 }

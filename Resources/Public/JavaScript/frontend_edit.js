@@ -1,13 +1,16 @@
 document.addEventListener('DOMContentLoaded', function () {
   const getContentElements = async () => {
-    if (!pid) return;
+    const scriptTag = document.querySelector('script[src*="frontend_edit.js"]');
+    if (!scriptTag) return;
 
-    const url = encodeURIComponent(window.location.href);
+    const baseUrl = scriptTag.dataset.baseUrl;
+    const action = scriptTag.dataset.frontendEditAction;
+
     const base = baseUrl ? baseUrl : '';
-    const endpoint = `${base}/typo3/editable-content-elements?pid=${pid}&returnUrl=${url}`.replace(/([^:]\/)\/+/g, "$1");
+    const endpoint = `${base}/${action}`.replace(/([^:]\/)\/+/g, "$1");
 
     try {
-      const response = await fetch(endpoint, {cache: 'no-cache'});
+      const response = await fetch(endpoint, { cache: 'no-cache' });
       if (!response.ok) return;
 
       const jsonResponse = await response.json();

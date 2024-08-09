@@ -5,30 +5,26 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Controller;
 
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Attribute\AsController;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use Xima\XimaTypo3FrontendEdit\Service\MenuGenerator;
 
 #[AsController]
-final class EditController
+final class EditController extends ActionController
 {
     public function __construct(protected readonly MenuGenerator $menuGenerator)
     {
     }
 
-    public function getContentElementsByPage(ServerRequestInterface $request): ResponseInterface
+    public function contentElementsAction(): ResponseInterface
     {
-        $pid = $request->getQueryParams()['pid']
-            ?? throw new \InvalidArgumentException(
-                'Please provide pid',
-                1722599959,
-            );
-        $returnUrl = $request->getQueryParams()['returnUrl'] ? strtok(urldecode($request->getQueryParams()['returnUrl']), '#') : '';
-        $languageUid = $request->getQueryParams()['language_uid'] ?? 0;
+        $pid = $GLOBALS['TSFE']->id;
+        $returnUrl = $this->request->getHeaderLine('Referer');
+        $languageUid = $this->request->getQueryParams()['language_uid'] ?? 0;
 
         if (!$this->checkBackendUserPageAccess((int)$pid)) {
             return new JsonResponse([]);
