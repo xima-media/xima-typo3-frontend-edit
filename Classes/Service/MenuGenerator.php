@@ -146,7 +146,7 @@ final class MenuGenerator
                                 ],
                             ],
                         ],
-                        'returnUrl' => $returnUrlAnchor,
+                        'redirect' => $returnUrlAnchor,
                     ],
                 )->__toString(),
                 $this->iconFactory->getIcon('actions-toggle-on', 'small')
