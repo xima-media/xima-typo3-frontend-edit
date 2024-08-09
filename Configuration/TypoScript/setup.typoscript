@@ -13,3 +13,10 @@
       )
   }
 [GLOBAL]
+
+plugin.tx_ximatypo3frontendedit {
+  settings {
+    ignorePids = {$plugin.tx_ximatypo3frontendedit.settings.ignorePids}
+    ignoreCTypes = {$plugin.tx_ximatypo3frontendedit.settings.ignoreCTypes}
+  }
+}

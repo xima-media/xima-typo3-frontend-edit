@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const editButton = document.createElement('button');
         editButton.className = 'xima-typo3-frontend-edit--edit-button';
-        editButton.title = contentElement.label;
-        editButton.innerHTML = contentElement.icon;
+        editButton.title = contentElement.menu.label;
+        editButton.innerHTML = contentElement.menu.icon;
         editButton.setAttribute('data-cid', uid);
 
         const dropdownMenu = document.createElement('div');
@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', function () {
         dropdownMenuInner.className = 'xima-typo3-frontend-edit--dropdown-menu-inner';
         dropdownMenu.appendChild(dropdownMenuInner);
 
-        for (let actionName in contentElement.actions) {
-          const action = contentElement.actions[actionName];
+        for (let actionName in contentElement.menu.children) {
+          const action = contentElement.menu.children[actionName];
           let actionElement;
 
           if (action.type === 'link') {

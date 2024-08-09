@@ -1,0 +1,8 @@
+plugin.tx_ximatypo3frontendedit {
+  settings {
+    # cat=xima_typo3_frontend_edit/settings/p; type=string; label=Ignore PIDs (and subpages) from frontend edit
+    ignorePids =
+    # cat=xima_typo3_frontend_edit/settings/p; type=string; label=Ignore content types from frontend edit
+    ignoreCTypes =
+  }
+}
