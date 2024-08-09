@@ -17,8 +17,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
       for (let uid in jsonResponse) {
         const contentElement = jsonResponse[uid];
-        const element = document.querySelector(`#c${uid}`);
-        if (!element) continue;
+        let element = document.querySelector(`#c${uid}`);
+        if (!element) {
+          // check for translated element
+          if (contentElement.element.l18n_parent) {
+            element = document.querySelector(`#c${contentElement.element.l18n_parent}`);
+            if (element) {
+              uid = contentElement.element.l18n_parent;
+            } else {
+              continue;
+            }
+          } else {
+            continue;
+          }
+        }
 
         const editButton = document.createElement('button');
         editButton.className = 'xima-typo3-frontend-edit--edit-button';

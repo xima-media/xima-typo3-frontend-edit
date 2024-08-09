@@ -108,6 +108,7 @@ final class MenuGenerator
                             'tt_content' => [
                                 $contentElement['uid'] => 'edit',
                             ],
+                            'language' => $languageUid,
                         ],
                         'returnUrl' => $returnUrlAnchor,
                     ],
@@ -122,6 +123,7 @@ final class MenuGenerator
                     'web_layout',
                     [
                         'id' => $pid,
+                        'language' => $languageUid,
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
