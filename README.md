@@ -45,9 +45,25 @@ plugin.tx_ximatypo3frontendedit {
 }
 ```
 
+Backend user can easily disable the whole frontend edit functionality within their user settings.
+
+*User Settings > Edit and advanced functions > Disable frontend edit*
+
 ## How it works
 
-On page load a script calls an ajax endpoint, to fetch information about all editable (by the current backend user) content elements on the current page. The script then injects an edit menu into the frontend for each editable content element. The edit menu links easily to the corresponding edit views in the TYPO3 backend.
+On page load a script calls an ajax endpoint, to fetch information about all editable (by the current backend user) content elements on the current page.
+
+The script then injects (if it's possible) an edit menu into the frontend for each editable content element.
+
+This is __only possible__, if the content element "c-ids" (Content Element IDs) are available in the frontend template, e.g. "c908". By default the fluid styled content elements provide these ids.
+
+```html
+<div id="c10" class="frame frame-default frame-type-textpic frame-layout-0">
+    ...
+</div>
+```
+
+The rendered dropdown menu links easily to the corresponding edit views in the TYPO3 backend.
 
 > Hint: The script is only injected if the current backend user is logged in.
 
@@ -56,7 +72,7 @@ On page load a script calls an ajax endpoint, to fetch information about all edi
 
 ## Extend
 
-Use the `FrontendEditDropdownModifyEvent` to modify the edit menu to your needs. You can add, remove or modify buttons for specific content elements.
+Use the `FrontendEditDropdownModifyEvent` to modify the edit menu to your needs. You can add, remove or modify buttons for specific content elements. See the example below:
 
 ```php
 <?php
@@ -83,7 +99,7 @@ class ModifyFrontendEditListener
         $contentElement = $event->getContentElement();
         $menuButton = $event->getMenuButton();
 
-        // Add a custom button for your plugin to e.g. edit the referenced entity
+        // Append a custom button (after the existing edit_page button) for your plugin to e.g. edit the referenced entity
         if ($contentElement['CType'] === 'list' && $contentElement['list_type'] === 'custom_plugin_name') {
             $menuButton->appendAfterChild(new Button(
                 'Edit entity',
@@ -110,6 +126,42 @@ class ModifyFrontendEditListener
     }
 }
 ```
+
+## FAQ
+
+<details>
+<summary>
+Missing frontend edit menu
+</summary>
+
+*Why is the frontend edit menu not displayed on my page / for my content element?*
+
+There may be a number of reasons for this:
+
+1. __Backend user session__
+
+    Are you currently logged into the TYPO3 backend? Otherwise the frontend edit will not working.
+2. __Backend user permission__
+
+   Does your user have all permissions to edit the page as well as the content elements?
+3. __TypoScript__
+
+    Is the TypoScript template "Frontend edit" included in your sitepackage? Do you have declared the constants to restrict the usage of the frontend edit?
+
+4. __Content Element IDs__
+
+    Make sure that the content element "c-ids" (Content Element IDs) are available within your frontend template, e.g. "c908".
+
+5. __Content Element on current Page__
+
+   For now only all content elements on the current page are "editable". So if you using some kind of inheritance, e.g. for your footer, this content can't be edited. Maybe I will find a smarter solution for this in the future.
+
+6. __Debug__
+
+   Check the network tab for the initial ajax call (something like `/?tx_ximatypo3frontendedit_frontendedit%5Baction%5D=contentElements&tx_ximatypo3frontendedit_frontendedit%5Bcontroller%5D=Edit&type=1723195241&cHash=...` with the information about the editable content elements and the according dropdown menus.
+
+
+</details>
 
 ## License
 

@@ -8,15 +8,15 @@ use TYPO3\CMS\Beuser\Domain\Model\BackendUser as User;
 
 class BackendUser extends User
 {
-    protected bool $hide = false;
+    protected bool $disable = false;
 
-    public function isHide(): bool
+    public function isDisable(): bool
     {
-        return $this->hide;
+        return $this->disable;
     }
 
-    public function setHide(bool $hide): void
+    public function setDisable(bool $disable): void
     {
-        $this->hide = $hide;
+        $this->disable = $disable;
     }
 }

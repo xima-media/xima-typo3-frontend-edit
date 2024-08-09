@@ -3,10 +3,10 @@
 	<file source-language="en" datatype="plaintext" original="messages">
 		<header/>
 		<body>
-			<trans-unit id="be_users.tx_ximatypo3frontendedit_hide">
-				<source>Hide frontend edit</source>
+			<trans-unit id="be_users.tx_ximatypo3frontendedit_disable">
+				<source>Disable frontend edit</source>
 			</trans-unit>
-			<trans-unit id="be_users.tx_ximatypo3frontendedit_hide.description">
+			<trans-unit id="be_users.tx_ximatypo3frontendedit_disable.description">
 				<source>Disable the edit options within the frontend</source>
 			</trans-unit>
 		</body>

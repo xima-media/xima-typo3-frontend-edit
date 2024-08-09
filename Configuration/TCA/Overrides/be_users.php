@@ -7,10 +7,10 @@ defined('TYPO3') or die();
 
 call_user_func(function () {
     $temporaryColumns = [
-        'tx_ximatypo3frontendedit_hide' => [
+        'tx_ximatypo3frontendedit_disable' => [
             'exclude' => 1,
-            'label' => 'LLL:EXT:' . Configuration::EXT_KEY . '/Resources/Private/Language/locallang_db.xlf:be_users.tx_ximatypo3frontendedit_hide',
-            'description' => 'LLL:EXT:' . Configuration::EXT_KEY . '/Resources/Private/Language/locallang_db.xlf:be_users.tx_ximatypo3frontendedit_hide.description',
+            'label' => 'LLL:EXT:' . Configuration::EXT_KEY . '/Resources/Private/Language/locallang_db.xlf:be_users.tx_ximatypo3frontendedit_disable',
+            'description' => 'LLL:EXT:' . Configuration::EXT_KEY . '/Resources/Private/Language/locallang_db.xlf:be_users.tx_ximatypo3frontendedit_disable.description',
             'config' => [
                 'type' => 'check',
                 'renderType' => 'checkboxToggle',

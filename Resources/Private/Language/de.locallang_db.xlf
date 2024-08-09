@@ -3,11 +3,11 @@
 	<file source-language="en" datatype="plaintext" original="messages">
 		<header/>
 		<body>
-			<trans-unit id="be_users.tx_ximatypo3frontendedit_hide">
+			<trans-unit id="be_users.tx_ximatypo3frontendedit_disable">
 				<source />
 				<target>Frontend Bearbeitung deaktivieren</target>
 			</trans-unit>
-			<trans-unit id="be_users.tx_ximatypo3frontendedit_hide.description">
+			<trans-unit id="be_users.tx_ximatypo3frontendedit_disable.description">
 				<source />
 				<target>Die Option zur schnellen Bearbeitung von Inhaltselementen im Frontend deaktivieren.</target>
 			</trans-unit>

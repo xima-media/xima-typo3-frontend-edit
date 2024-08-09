@@ -6,8 +6,8 @@ return [
     BackendUser::class => [
         'tableName' => 'be_users',
         'properties' => [
-            'hide' => [
-                'fieldName' => 'tx_ximatypo3frontendedit_hide',
+            'disable' => [
+                'fieldName' => 'tx_ximatypo3frontendedit_disable',
             ],
         ],
     ],
