@@ -29,12 +29,12 @@ final class MenuGenerator
         $this->configuration = $setup['plugin.']['tx_ximatypo3frontendedit.'];
     }
 
-    public function getDropdown(int $pid, string $returnUrl, int $languageUid): array|bool
+    public function getDropdown(int $pid, string $returnUrl, int $languageUid): array
     {
         $ignoredPids = $this->configuration['settings.']['ignorePids'] ? explode(',', $this->configuration['settings.']['ignorePids']) : [];
         foreach ($ignoredPids as $ignoredPid) {
             if ($this->isSubpageOf($pid, $ignoredPid)) {
-                return false;
+                return [];
             }
         }
 
@@ -44,6 +44,10 @@ final class MenuGenerator
             Bootstrap::initializeBackendAuthentication();
             $backendUser->initializeUserSessionManager();
             $backendUser = $GLOBALS['BE_USER'];
+        }
+
+        if ($backendUser->user['tx_ximatypo3frontendedit_hide']) {
+            return [];
         }
 
         $ignoredCTypes = $this->configuration['settings.']['ignoreCTypes'] ? explode(',', $this->configuration['settings.']['ignoreCTypes']) : [];
