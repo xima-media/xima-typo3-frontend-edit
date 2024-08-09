@@ -7,7 +7,7 @@ namespace Xima\XimaTypo3FrontendEdit\Enumerations;
 enum ButtonType: string
 {
     case Divider = 'divider';
-    case Header = 'header';
+    case Info = 'info';
     case Link = 'link';
     case Menu = 'menu';
 }

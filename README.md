@@ -40,6 +40,7 @@ plugin.tx_ximatypo3frontendedit {
     ignorePids =
     ignoreCTypes =
     ignoreListTypes =
+    ignoreUids =
   }
 }
 ```
@@ -55,7 +56,60 @@ On page load a script calls an ajax endpoint, to fetch information about all edi
 
 ## Extend
 
-ToDo
+Use the `FrontendEditDropdownModifyEvent` to modify the edit menu to your needs. You can add, remove or modify buttons for specific content elements.
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Vendor\Package\EventListener;
+
+use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Core\Imaging\IconFactory;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
+use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
+use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+
+class ModifyFrontendEditListener
+{
+    public function __construct(protected readonly IconFactory $iconFactory)
+    {
+    }
+
+    public function __invoke(FrontendEditDropdownModifyEvent $event): void
+    {
+        $contentElement = $event->getContentElement();
+        $menuButton = $event->getMenuButton();
+
+        // Add a custom button for your plugin to e.g. edit the referenced entity
+        if ($contentElement['CType'] === 'list' && $contentElement['list_type'] === 'custom_plugin_name') {
+            $menuButton->appendAfterChild(new Button(
+                'Edit entity',
+                ButtonType::Link,
+                GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                    'record_edit',
+                    [
+                        'edit' => [
+                            'custom_entity' => [
+                                $contentElement['custom_entity_uid'] => 'edit',
+                            ],
+                        ],
+                        'returnUrl' => $event->getReturnUrl(),
+                    ],
+                )->__toString(),
+                $this->iconFactory->getIcon('content-idea', 'small')
+            ), 'edit_page', 'edit_custom_entity');
+        }
+
+        // Remove existing buttons
+        $menuButton->removeChild('div_action');
+
+        $event->setMenuButton($menuButton);
+    }
+}
+```
 
 ## License
 

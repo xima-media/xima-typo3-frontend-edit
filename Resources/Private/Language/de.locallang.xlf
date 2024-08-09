@@ -15,7 +15,7 @@
 				<source />
 				<target>Plugin bearbeiten</target>
 			</trans-unit>
-			<trans-unit id="edit_pages">
+			<trans-unit id="edit_page">
 				<source />
 				<target>Seite bearbeiten</target>
 			</trans-unit>

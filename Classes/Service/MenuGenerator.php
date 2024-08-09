@@ -52,11 +52,16 @@ final class MenuGenerator
 
         $ignoredCTypes = $this->configuration['settings.']['ignoreCTypes'] ? explode(',', $this->configuration['settings.']['ignoreCTypes']) : [];
         $ignoredListTypes = $this->configuration['settings.']['ignoreListTypes'] ? explode(',', $this->configuration['settings.']['ignoreListTypes']) : [];
+        $ignoredUids = $this->configuration['settings.']['ignoredUids'] ? explode(',', $this->configuration['settings.']['ignoredUids']) : [];
 
         $result = [];
         foreach ($this->fetchContentElements($pid, $languageUid) as $contentElement) {
             // ToDo: is this sufficient?
             if (!$backendUser->recordEditAccessInternals('tt_content', $contentElement['uid'])) {
+                continue;
+            }
+
+            if (in_array($contentElement['uid'], $ignoredUids, true)) {
                 continue;
             }
 
@@ -69,6 +74,7 @@ final class MenuGenerator
             }
 
             $contentElementConfig = $this->getContentElementConfig($contentElement['CType'], $contentElement['list_type']);
+            $returnUrlAnchor = $returnUrl . '#c' . $contentElement['uid'];
 
             $menuButton = new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_menu',
@@ -76,23 +82,23 @@ final class MenuGenerator
                 icon: $this->iconFactory->getIcon('actions-open', 'small')
             );
 
-            $menuButton->addChild(new Button(
+            $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_info',
                 ButtonType::Divider
-            ));
+            ), 'div_info');
 
-            $menuButton->addChild(new Button(
+            $menuButton->appendChild(new Button(
                 $GLOBALS['LANG']->sL($contentElementConfig['label']) . '<p><small><strong>[' . $contentElement['uid'] . ']</strong> ' . ($contentElement['header'] ? (strlen($contentElement['header']) > 30 ? substr($contentElement['header'], 0, 30) . '...' : $contentElement['header']) : '') . '</small></p>',
-                ButtonType::Header,
+                ButtonType::Info,
                 icon: $this->iconFactory->getIcon($contentElementConfig['icon'], 'small')
-            ));
+            ), 'header');
 
-            $menuButton->addChild(new Button(
+            $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_edit',
                 ButtonType::Divider
-            ));
+            ), 'div_edit');
 
-            $menuButton->addChild(new Button(
+            $menuButton->appendChild(new Button(
                 $contentElement['CType'] === 'list' ? 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_plugin' : 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_content_element',
                 ButtonType::Link,
                 GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
@@ -103,31 +109,31 @@ final class MenuGenerator
                                 $contentElement['uid'] => 'edit',
                             ],
                         ],
-                        'returnUrl' => $returnUrl . '#c' . $contentElement['uid'],
+                        'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
                 $this->iconFactory->getIcon($contentElement['CType'] === 'list' ? 'content-plugin' : 'content-textpic', 'small')
-            ));
+            ), 'edit');
 
-            $menuButton->addChild(new Button(
-                'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_pages',
+            $menuButton->appendChild(new Button(
+                'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_page',
                 ButtonType::Link,
                 GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
                     'web_layout',
                     [
                         'id' => $pid,
-                        'returnUrl' => $returnUrl . '#c' . $contentElement['uid'],
+                        'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
                 $this->iconFactory->getIcon('apps-pagetree-page-default', 'small')
-            ));
+            ), 'edit_page');
 
-            $menuButton->addChild(new Button(
+            $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_action',
                 ButtonType::Divider
-            ));
+            ), 'div_action');
 
-            $menuButton->addChild(new Button(
+            $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:hide',
                 ButtonType::Link,
                 GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
@@ -140,13 +146,13 @@ final class MenuGenerator
                                 ],
                             ],
                         ],
-                        'returnUrl' => $returnUrl . '#c' . $contentElement['uid'],
+                        'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
                 $this->iconFactory->getIcon('actions-toggle-on', 'small')
-            ));
+            ), 'hide');
 
-            $menuButton->addChild(new Button(
+            $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:info',
                 ButtonType::Link,
                 GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
@@ -154,32 +160,31 @@ final class MenuGenerator
                     [
                         'uid' => $contentElement['uid'],
                         'table' => 'tt_content',
-                        'returnUrl' => $returnUrl . '#c' . $contentElement['uid'],
+                        'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
                 $this->iconFactory->getIcon('actions-info', 'small')
-            ));
+            ), 'info');
 
-            $menuButton->addChild(new Button(
+            $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:history',
                 ButtonType::Link,
                 GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
                     'record_history',
                     [
                         'element' => 'tt_content:' . $contentElement['uid'],
-                        'returnUrl' => $returnUrl . '#c' . $contentElement['uid'],
+                        'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
                 $this->iconFactory->getIcon('actions-history', 'small')
-            ));
+            ), 'history');
 
+            $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
             $result[$contentElement['uid']] = [
                 'element' => $contentElement,
                 'menu' => $menuButton,
             ];
         }
-
-        $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($result));
 
         foreach ($result as $contentElement) {
             $result[$contentElement['element']['uid']]['menu'] = $contentElement['menu']->render();

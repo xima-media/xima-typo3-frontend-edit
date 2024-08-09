@@ -80,9 +80,22 @@ class Button
         $this->children = $children;
     }
 
-    public function addChild(Button $button): void
+    public function appendChild(Button $button, string|int $key): void
     {
-        $this->children[] = $button;
+        $this->children[$key] = $button;
+    }
+
+    public function appendAfterChild(Button $button, string|int $appendAfterKey, string|int $key): void
+    {
+        $offset = array_search($appendAfterKey, array_keys($this->children)) + 1;
+        $this->children = array_slice($this->children, 0, $offset, true) +
+            [$key => $button] +
+            array_slice($this->children, $offset, null, true);
+    }
+
+    public function removeChild(string|int $key): void
+    {
+        unset($this->children[$key]);
     }
 
     public function render(): array

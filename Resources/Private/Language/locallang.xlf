@@ -12,7 +12,7 @@
 			<trans-unit id="edit_plugin">
 				<source>Edit plugin</source>
 			</trans-unit>
-			<trans-unit id="edit_pages">
+			<trans-unit id="edit_page">
 				<source>Edit page</source>
 			</trans-unit>
 			<trans-unit id="history">
