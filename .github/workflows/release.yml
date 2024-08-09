@@ -1,0 +1,13 @@
+name: Release
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  ter-publish:
+    uses: maikschneider/reusable-workflows/.github/workflows/release.yml@main
+    secrets:
+      typo3-api-token: ${{ secrets.TYPO3_API_TOKEN }}
+    with:
+      typo3-extension-key: 'xima_typo3_frontend_edit'
