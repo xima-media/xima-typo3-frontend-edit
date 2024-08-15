@@ -64,8 +64,8 @@ class DataViewHelper extends AbstractViewHelper
             'class',
             'string',
             'Additional class for the hidden input element',
-             false,
-             ''
+            false,
+            ''
         );
     }
 

@@ -290,7 +290,8 @@ final class MenuGenerator
         return false;
     }
 
-    private function shortenString(string $string, int $maxLength = 30): string {
-        return (strlen($string) > $maxLength ? substr($string, 0, $maxLength) . '…' : $string);
+    private function shortenString(string $string, int $maxLength = 30): string
+    {
+        return strlen($string) > $maxLength ? substr($string, 0, $maxLength) . '…' : $string;
     }
 }
