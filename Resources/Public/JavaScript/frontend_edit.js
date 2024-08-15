@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const baseUrl = scriptTag.dataset.baseUrl;
     const action = scriptTag.dataset.frontendEditAction;
 
-    let dataItems = [];
+    let dataItems = {};
 
     document.querySelectorAll('.xima-typo3-frontend-edit--data').forEach(function (element) {
       const data = element.value;
