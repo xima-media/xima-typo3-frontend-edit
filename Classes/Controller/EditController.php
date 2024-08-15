@@ -26,11 +26,13 @@ final class EditController extends ActionController
         $returnUrl = $this->request->getHeaderLine('Referer');
         $languageUid = $this->request->getQueryParams()['language_uid'] ?? 0;
 
+        $data = json_decode($this->request->getBody()->getContents(), true);
+
         if (!$this->checkBackendUserPageAccess((int)$pid)) {
             return new JsonResponse([]);
         }
 
-        return new JsonResponse($this->menuGenerator->getDropdown((int)$pid, $returnUrl, (int)$languageUid));
+        return new JsonResponse($this->menuGenerator->getDropdown((int)$pid, $returnUrl, (int)$languageUid, $data));
     }
 
     private function checkBackendUserPageAccess(int $pid): bool

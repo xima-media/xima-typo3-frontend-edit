@@ -29,7 +29,7 @@ final class MenuGenerator
         $this->configuration = $setup['plugin.']['tx_ximatypo3frontendedit.'];
     }
 
-    public function getDropdown(int $pid, string $returnUrl, int $languageUid): array
+    public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = []): array
     {
         $ignoredPids = $this->configuration['settings.']['ignorePids'] ? explode(',', $this->configuration['settings.']['ignorePids']) : [];
         foreach ($ignoredPids as $ignoredPid) {
@@ -82,17 +82,23 @@ final class MenuGenerator
                 icon: $this->iconFactory->getIcon('actions-open', 'small')
             );
 
+            /*
+             * Info
+             */
             $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_info',
                 ButtonType::Divider
             ), 'div_info');
 
             $menuButton->appendChild(new Button(
-                $GLOBALS['LANG']->sL($contentElementConfig['label']) . '<p><small><strong>[' . $contentElement['uid'] . ']</strong> ' . ($contentElement['header'] ? (strlen($contentElement['header']) > 30 ? substr($contentElement['header'], 0, 30) . '...' : $contentElement['header']) : '') . '</small></p>',
+                $GLOBALS['LANG']->sL($contentElementConfig['label']) . '<p><small><strong>[' . $contentElement['uid'] . ']</strong> ' . ($contentElement['header'] ? $this->shortenString($contentElement['header']) : '') . '</small></p>',
                 ButtonType::Info,
                 icon: $this->iconFactory->getIcon($contentElementConfig['icon'], 'small')
             ), 'header');
 
+            /*
+             * Edit
+             */
             $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_edit',
                 ButtonType::Divider
@@ -130,6 +136,9 @@ final class MenuGenerator
                 $this->iconFactory->getIcon('apps-pagetree-page-default', 'small')
             ), 'edit_page');
 
+            /*
+             * Action
+             */
             $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_action',
                 ButtonType::Divider
@@ -181,6 +190,52 @@ final class MenuGenerator
                 $this->iconFactory->getIcon('actions-history', 'small')
             ), 'history');
 
+            /*
+             * Data
+             */
+            if (array_key_exists($contentElement['uid'], $data) && !empty($data[$contentElement['uid']])) {
+                $menuButton->appendChild(new Button(
+                    'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_data',
+                    ButtonType::Divider
+                ), 'div_data');
+
+                foreach ($data[$contentElement['uid']] as $key => $dataEntry) {
+                    if (!$dataEntry['label'] || !(($dataEntry['table'] && $dataEntry['uid']) || ($dataEntry['url']))) {
+                        continue;
+                    }
+
+                    if ($dataEntry['table'] && $dataEntry['uid']) {
+                        if (!$backendUser->recordEditAccessInternals($dataEntry['table'], $dataEntry['uid'])) {
+                            continue;
+                        }
+                    }
+
+                    $url = $dataEntry['url'] ?: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                        'record_edit',
+                        [
+                            'edit' => [
+                                $dataEntry['table'] => [
+                                    $dataEntry['uid'] => 'edit',
+                                ],
+                                'language' => $languageUid,
+                            ],
+                            'returnUrl' => $returnUrlAnchor,
+                        ],
+                    )->__toString();
+                    $icon = $dataEntry['icon'] ? $this->iconFactory->getIcon($dataEntry['icon'], 'small') : $this->iconFactory->getIcon($contentElementConfig['icon'], 'small');
+
+                    $menuButton->appendChild(new Button(
+                        $this->shortenString($dataEntry['label']),
+                        ButtonType::Link,
+                        $url,
+                        $icon
+                    ), 'data_' . $key);
+                }
+            }
+
+            /*
+             * Event
+             */
             $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
             $result[$contentElement['uid']] = [
                 'element' => $contentElement,
@@ -225,7 +280,7 @@ final class MenuGenerator
 
     private function isSubpageOf(int $subPageId, int $parentPageId): bool
     {
-        $rootLine = $rootLineUtility = GeneralUtility::makeInstance(RootlineUtility::class, $subPageId)->get();
+        $rootLine = GeneralUtility::makeInstance(RootlineUtility::class, $subPageId)->get();
         foreach ($rootLine as $page) {
             if ((int)$page['uid'] === (int)$parentPageId) {
                 return true;
@@ -233,5 +288,10 @@ final class MenuGenerator
         }
 
         return false;
+    }
+
+    private function shortenString(string $string, int $maxLength = 30): string
+    {
+        return strlen($string) > $maxLength ? substr($string, 0, $maxLength) . '…' : $string;
     }
 }

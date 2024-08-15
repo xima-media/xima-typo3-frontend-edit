@@ -6,11 +6,34 @@ document.addEventListener('DOMContentLoaded', function () {
     const baseUrl = scriptTag.dataset.baseUrl;
     const action = scriptTag.dataset.frontendEditAction;
 
+    let dataItems = {};
+
+    document.querySelectorAll('.xima-typo3-frontend-edit--data').forEach(function (element) {
+      const data = element.value;
+      let closestElement = element;
+      while (closestElement && !closestElement.id.match(/c\d+/)) {
+        closestElement = closestElement.parentElement;
+      }
+
+      if (closestElement) {
+        const id = closestElement.id.replace('c', '');
+        if (!(id in dataItems)) {
+          dataItems[id] = [];
+        }
+
+        dataItems[id].push(JSON.parse(data));
+      }
+    });
+
     const base = baseUrl ? baseUrl : '';
     const endpoint = `${base}/${action}`.replace(/([^:]\/)\/+/g, "$1");
 
     try {
-      const response = await fetch(endpoint, { cache: 'no-cache' });
+      const response = await fetch(endpoint, {
+        cache: 'no-cache',
+        method: 'POST',
+        body: JSON.stringify(dataItems),
+      });
       if (!response.ok) return;
 
       const jsonResponse = await response.json();

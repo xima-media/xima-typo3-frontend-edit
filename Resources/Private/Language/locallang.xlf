@@ -33,6 +33,9 @@
 			<trans-unit id="div_action">
 				<source>Action</source>
 			</trans-unit>
+			<trans-unit id="div_data">
+				<source>Data</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

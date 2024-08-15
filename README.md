@@ -83,6 +83,13 @@ The rendered dropdown menu links easily to the corresponding edit views in the T
 
 ## Extend
 
+Two opportunities exists to extend the dropdown menu with custom entries:
+
+1. Use an event to modify the menu directly
+2. Use an viewhelper to extend the menu with *data* entries
+
+### Event
+
 Use the `FrontendEditDropdownModifyEvent` to modify the edit menu to your needs. You can add, remove or modify buttons for specific content elements. See the example below:
 
 ```php
@@ -101,7 +108,7 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 
 class ModifyFrontendEditListener
 {
-    public function __construct(protected readonly IconFactory $iconFactory)
+    public function __construct(protected readonly IconFactory $iconFactory, protected readonly UriBuilder $uriBuilder)
     {
     }
 
@@ -110,12 +117,13 @@ class ModifyFrontendEditListener
         $contentElement = $event->getContentElement();
         $menuButton = $event->getMenuButton();
 
+        // Example 1
         // Append a custom button (after the existing edit_page button) for your plugin to e.g. edit the referenced entity
         if ($contentElement['CType'] === 'list' && $contentElement['list_type'] === 'custom_plugin_name') {
             $menuButton->appendAfterChild(new Button(
                 'Edit entity',
                 ButtonType::Link,
-                GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                $this->uriBuilder->buildUriFromRoute(
                     'record_edit',
                     [
                         'edit' => [
@@ -130,6 +138,7 @@ class ModifyFrontendEditListener
             ), 'edit_page', 'edit_custom_entity');
         }
 
+        // Example 2
         // Remove existing buttons
         $menuButton->removeChild('div_action');
 
@@ -137,6 +146,28 @@ class ModifyFrontendEditListener
     }
 }
 ```
+
+### Data Attributes
+
+Additionally, there is an option to extend your fluid template to provide data for extra dropdown menu entries, e.g. edit links to all news entries within a list plugin.
+
+```html
+<div class="news-item">
+    ...
+    <xtfe:data label="{news.title}" uid="{news.uid}" table="tx_news_domain_model_news" icon="content-news" />
+</div>
+```
+
+This generates a hidden input element with the provided data (only if the frontend edit is enabled). Within the parent content element (e.g. the whole list plugin), a new "data" section will show up on the dropdown menu to list all edit links.
+
+![Data](./Documentation/Images/data.png)
+
+See the [DataViewHelper](Classes/ViewHelpers/DataViewHelper.php) for more information. Keep in mind, that this only works if the parent content element has a c-id and  offer one of the following data combinations:
+
+1. Edit record link (provide `uid` and `table` of the desired record, the link to the TYPO3 backend will be generated automatically)
+2. Custom edit url (provide a custom `url`)
+
+> Keep in mind, that this option will add additional html elements to your dom, which can causes style issues.
 
 ## FAQ
 
