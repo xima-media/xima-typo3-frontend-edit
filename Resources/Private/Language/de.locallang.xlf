@@ -43,6 +43,10 @@
 				<source />
 				<target>Aktionen</target>
 			</trans-unit>
+			<trans-unit id="div_data">
+				<source />
+				<target>Daten</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
