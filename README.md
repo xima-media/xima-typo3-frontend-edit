@@ -159,6 +159,7 @@ See the [DataViewHelper](Classes/ViewHelpers/DataViewHelper.php) for more inform
 1. Edit record link (provide `uid` and `table` of the desired record, the link to the TYPO3 backend will be generated automatically)
 2. Custom edit url (provide a custom `url`)
 
+> Keep in mind, that this option will add additional html elements to your dom, which can causes style issues.
 
 ## FAQ
 
