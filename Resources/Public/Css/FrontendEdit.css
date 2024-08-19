@@ -36,6 +36,7 @@
     z-index: 1000;
     direction: ltr;
     background: transparent;
+    font-family: 'Helvetica Neue', Helvetica, Arial, Verdana, sans-serif;
 }
 
 .xima-typo3-frontend-edit--dropdown-menu-inner {
