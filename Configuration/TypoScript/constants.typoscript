@@ -6,5 +6,7 @@ plugin.tx_ximatypo3frontendedit {
     ignoreCTypes =
     # cat=xima_typo3_frontend_edit/settings/p; type=string; label=Ignore plugin types from frontend edit
     ignoreListTypes =
+    # cat=xima_typo3_frontend_edit/settings/p; type=string; label=Ignore specific uid of content elements from frontend edit
+    ignoredUids =
   }
 }

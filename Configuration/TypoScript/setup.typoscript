@@ -22,6 +22,7 @@ plugin.tx_ximatypo3frontendedit {
     ignorePids = {$plugin.tx_ximatypo3frontendedit.settings.ignorePids}
     ignoreCTypes = {$plugin.tx_ximatypo3frontendedit.settings.ignoreCTypes}
     ignoreListTypes = {$plugin.tx_ximatypo3frontendedit.settings.ignoreListTypes}
+    ignoredUids = {$plugin.tx_ximatypo3frontendedit.settings.ignoredUids}
   }
 }
 
