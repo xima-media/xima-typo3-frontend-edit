@@ -4,6 +4,8 @@
 
 .xima-typo3-frontend-edit--edit-button {
     position: absolute;
+    align-content: center;
+    justify-content: center;
     display: none;
     width: 30px;
     height: 30px;
@@ -14,7 +16,6 @@
     cursor: pointer;
     z-index: 1000;
     opacity: 0.5;
-    line-height: 10px;
     padding: 0;
     margin: 0;
 }

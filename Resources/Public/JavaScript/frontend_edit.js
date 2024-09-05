@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', function () {
           let rect = element.getBoundingClientRect();
           editButton.style.top = `${rect.top + document.documentElement.scrollTop + 10}px`;
           editButton.style.left = `${rect.right - 40}px`;
-          editButton.style.display = 'block';
+          editButton.style.display = 'grid';
           dropdownMenu.style.top = `${rect.top + document.documentElement.scrollTop + 40}px`;
           dropdownMenu.style.right = `${document.documentElement.clientWidth - rect.right +5}px`;
           element.classList.add('xima-typo3-frontend-edit--edit-container');
