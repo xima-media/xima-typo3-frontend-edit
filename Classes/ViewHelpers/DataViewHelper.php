@@ -78,6 +78,10 @@ class DataViewHelper extends AbstractViewHelper
             return '';
         }
 
+        if (empty($arguments['uid']) && empty($arguments['url'])) {
+            return '';
+        }
+
         $dataAttributes = [];
         $class = '';
 
