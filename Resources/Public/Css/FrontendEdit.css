@@ -72,6 +72,8 @@
 .xima-typo3-frontend-edit--dropdown-menu-inner p {
     margin-top: 10px;
     margin-bottom: 0;
+    font-size: 14px;
+    line-height: 1;
 }
 
 .xima-typo3-frontend-edit--dropdown-menu-inner div.xima-typo3-frontend-edit--divider {
