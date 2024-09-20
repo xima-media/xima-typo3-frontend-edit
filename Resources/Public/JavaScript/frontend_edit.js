@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const scriptTag = document.querySelector('script[src*="frontend_edit.js"]');
     if (!scriptTag) return;
 
-    const baseUrl = scriptTag.dataset.baseUrl;
     const action = scriptTag.dataset.frontendEditAction;
 
     let dataItems = {};
@@ -25,8 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    const base = baseUrl ? baseUrl : '';
-    const endpoint = `${base}/${action}`.replace(/([^:]\/)\/+/g, "$1");
+    const endpoint = `/${action}`.replace(/([^:]\/)\/+/g, "$1");
 
     try {
       const response = await fetch(endpoint, {

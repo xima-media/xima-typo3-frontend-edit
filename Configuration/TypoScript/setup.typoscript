@@ -6,12 +6,6 @@
   lib.frontendEditAction = FLUIDTEMPLATE
   lib.frontendEditAction {
       file = EXT:xima_typo3_frontend_edit/Resources/Private/Templates/FrontendEdit.html
-      variables {
-        baseUrl = TEXT
-        baseUrl {
-            data = site:base
-        }
-      }
     }
 
     page.1722340766 =< lib.frontendEditAction
