@@ -30,7 +30,9 @@ document.addEventListener('DOMContentLoaded', function () {
       const response = await fetch(endpoint, {
         cache: 'no-cache',
         method: 'POST',
-        contentType: 'application/json',
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(dataItems),
       });
       if (!response.ok) return;
