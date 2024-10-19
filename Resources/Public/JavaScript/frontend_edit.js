@@ -1,10 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
   const getContentElements = async () => {
-    const scriptTag = document.querySelector('script[src*="frontend_edit.js"]');
-    if (!scriptTag) return;
-
-    const action = scriptTag.dataset.frontendEditAction;
-
     let dataItems = {};
 
     document.querySelectorAll('.xima-typo3-frontend-edit--data').forEach(function (element) {
@@ -24,10 +19,11 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    const endpoint = `${action}`.replace(/([^:]\/)\/+/g, "$1");
+    const url = new URL(window.location.href);
+    url.searchParams.set('type', '1729341864');
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch(url.toString(), {
         cache: 'no-cache',
         method: 'POST',
         headers: {

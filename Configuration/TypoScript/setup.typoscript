@@ -1,16 +1,3 @@
-[isFrontendEditEnabled()]
-  page.includeCSS {
-    customFrontendEdit = EXT:xima_typo3_frontend_edit/Resources/Public/Css/FrontendEdit.css
-  }
-
-  lib.frontendEditAction = FLUIDTEMPLATE
-  lib.frontendEditAction {
-      file = EXT:xima_typo3_frontend_edit/Resources/Private/Templates/FrontendEdit.html
-    }
-
-    page.1722340766 =< lib.frontendEditAction
-[GLOBAL]
-
 plugin.tx_ximatypo3frontendedit {
   settings {
     ignorePids = {$plugin.tx_ximatypo3frontendedit.settings.ignorePids}
@@ -20,23 +7,10 @@ plugin.tx_ximatypo3frontendedit {
   }
 }
 
-tx_ximatypo3frontendedit_ajaxFrontendEdit = PAGE
-tx_ximatypo3frontendedit_ajaxFrontendEdit {
-    typeNum = 1723195241
-    config {
-        disableAllHeaderCode = 1
-        additionalHeaders.10.header = Content-type:application/json
-        xhtml_cleaning = 0
-        admPanel = 0
-        debug = 0
-        no_cache = 1
-    }
-    10 = USER
-    10 {
-        userFunc = TYPO3\CMS\Extbase\Core\Bootstrap->run
-        extensionName = XimaTypo3FrontendEdit
-        pluginName = FrontendEdit
-        vendorName = Xima
-        controller = Edit
-    }
+tx_ximatypo3frontendedit_editinformationen = PAGE
+tx_ximatypo3frontendedit_editinformationen {
+  typeNum = 1729341864
+  config {
+    contentType = application/json
+  }
 }

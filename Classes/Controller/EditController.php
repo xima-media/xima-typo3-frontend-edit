@@ -4,53 +4,30 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Controller;
 
-use Psr\Http\Message\ResponseInterface;
 use TYPO3\CMS\Backend\Attribute\AsController;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
-use TYPO3\CMS\Core\Core\Bootstrap;
-use TYPO3\CMS\Core\Http\JsonResponse;
-use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Core\Core\RequestId;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
-use Xima\XimaTypo3FrontendEdit\Service\MenuGenerator;
+use TYPO3\CMS\Fluid\View\StandaloneView;
+use Xima\XimaTypo3FrontendEdit\Configuration;
+use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
 #[AsController]
 final class EditController extends ActionController
 {
-    public function __construct(protected readonly MenuGenerator $menuGenerator)
+    public function __construct(private readonly RequestId $requestId)
     {
     }
 
-    public function contentElementsAction(): ResponseInterface
+    public function render(): string
     {
-        $pid = $GLOBALS['TSFE']->id;
-        $returnUrl = $this->request->getHeaderLine('Referer');
-        $languageUid = $this->request->getQueryParams()['language_uid'] ?? 0;
+        $view = GeneralUtility::makeInstance(StandaloneView::class);
+        $templateNameAndPath = 'EXT:' . Configuration::EXT_KEY . '/Resources/Private/Templates/FrontendEdit.html';
+        $view->setTemplatePathAndFilename(GeneralUtility::getFileAbsFileName($templateNameAndPath));
+        $view->setPartialRootPaths(['EXT:' . Configuration::EXT_KEY . '/Resources/Private/Partials']);
+        $view->setLayoutRootPaths(['EXT:' . Configuration::EXT_KEY . '/Resources/Private/Layouts']);
 
-        $data = json_decode($this->request->getBody()->getContents(), true) ?? [];
-
-        if (!$this->checkBackendUserPageAccess((int)$pid)) {
-            return new JsonResponse([]);
-        }
-
-        return new JsonResponse($this->menuGenerator->getDropdown((int)$pid, $returnUrl, (int)$languageUid, $data));
-    }
-
-    private function checkBackendUserPageAccess(int $pid): bool
-    {
-        /* @var $backendUser \TYPO3\CMS\Core\Authentication\BackendUserAuthentication */
-        $backendUser = $GLOBALS['BE_USER'];
-        if ($backendUser->user === null) {
-            Bootstrap::initializeBackendAuthentication();
-            $backendUser->initializeUserSessionManager();
-            $backendUser = $GLOBALS['BE_USER'];
-        }
-
-        if (!BackendUtility::readPageAccess(
-            $pid,
-            $backendUser->getPagePermsClause(Permission::PAGE_SHOW)
-        )) {
-            return false;
-        }
-        return true;
+        $view->assign('resources', ResourceUtility::getResources(['nonce' => $this->requestId->nonce]));
+        return $view->render();
     }
 }
