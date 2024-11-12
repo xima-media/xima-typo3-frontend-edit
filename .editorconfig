@@ -48,6 +48,6 @@ indent_style = tab
 [.htaccess]
 indent_style = tab
 
-# Markdown files
-[*.md]
-max_line_length = 80
+# phpstan.neon
+[*.neon]
+indent_style = tab

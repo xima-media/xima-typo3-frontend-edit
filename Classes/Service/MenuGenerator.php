@@ -83,8 +83,8 @@ final class MenuGenerator
             );
 
             /*
-             * Info
-             */
+            * Info
+            */
             $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_info',
                 ButtonType::Divider
@@ -97,8 +97,8 @@ final class MenuGenerator
             ), 'header');
 
             /*
-             * Edit
-             */
+            * Edit
+            */
             $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_edit',
                 ButtonType::Divider
@@ -137,8 +137,8 @@ final class MenuGenerator
             ), 'edit_page');
 
             /*
-             * Action
-             */
+            * Action
+            */
             $menuButton->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_action',
                 ButtonType::Divider
@@ -191,8 +191,8 @@ final class MenuGenerator
             ), 'history');
 
             /*
-             * Data
-             */
+            * Data
+            */
             if (array_key_exists($contentElement['uid'], $data) && !empty($data[$contentElement['uid']])) {
                 $menuButton->appendChild(new Button(
                     'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_data',
@@ -234,8 +234,8 @@ final class MenuGenerator
             }
 
             /*
-             * Event
-             */
+            * Event
+            */
             $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
             $result[$contentElement['uid']] = [
                 'element' => $contentElement,

@@ -1,28 +1,28 @@
 <?php
 /*
- * This file is part of the TYPO3 CMS project.
- *
- * It is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, either version 2
- * of the License, or any later version.
- *
- * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
- *
- * The TYPO3 project - inspiring people to share!
- */
+* This file is part of the TYPO3 CMS project.
+*
+* It is free software; you can redistribute it and/or modify it under
+* the terms of the GNU General Public License, either version 2
+* of the License, or any later version.
+*
+* For the full copyright and license information, please read the
+* LICENSE.txt file that was distributed with this source code.
+*
+* The TYPO3 project - inspiring people to share!
+*/
 /**
- * This file represents the configuration for Code Sniffing PSR-2-related
- * automatic checks of coding guidelines
- * Install @fabpot's great php-cs-fixer tool via
- *  $ composer global require friendsofphp/php-cs-fixer
- * And then simply run
- *  $ ./bin/php-cs-fixer fix --config ./Build/php-cs-fixer.php
- * inside the TYPO3 directory. Warning: This may take up to 10 minutes.
- * For more information read:
- *     https://www.php-fig.org/psr/psr-2/
- *     https://cs.sensiolabs.org
- */
+* This file represents the configuration for Code Sniffing PSR-2-related
+* automatic checks of coding guidelines
+* Install @fabpot's great php-cs-fixer tool via
+*  $ composer global require friendsofphp/php-cs-fixer
+* And then simply run
+*  $ ./bin/php-cs-fixer fix --config ./Build/php-cs-fixer.php
+* inside the TYPO3 directory. Warning: This may take up to 10 minutes.
+* For more information read:
+*     https://www.php-fig.org/psr/psr-2/
+*     https://cs.sensiolabs.org
+*/
 if (PHP_SAPI !== 'cli') {
     die('This script supports command line usage only. Please check your command.');
 }

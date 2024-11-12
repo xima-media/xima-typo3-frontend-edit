@@ -35,16 +35,16 @@ class Button
     }
 
     /**
-     * @return \Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType
-     */
+    * @return \Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType
+    */
     public function getType(): ButtonType
     {
         return $this->type;
     }
 
     /**
-     * @param \Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType $type
-     */
+    * @param \Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType $type
+    */
     public function setType(ButtonType $type): void
     {
         $this->type = $type;

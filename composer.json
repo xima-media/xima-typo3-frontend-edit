@@ -1,10 +1,10 @@
 {
 	"name": "xima/xima-typo3-frontend-edit",
 	"description": "This extension provides an edit button for editors within frontend content elements.",
-	"type": "typo3-cms-extension",
 	"license": [
 		"GPL-2.0-or-later"
 	],
+	"type": "typo3-cms-extension",
 	"authors": [
 		{
 			"name": "Konrad Michalik",
@@ -14,11 +14,11 @@
 	],
 	"require": {
 		"php": "^8.1",
+		"typo3/cms-backend": "^12.0 || ^13.0",
+		"typo3/cms-beuser": "^12.0 || ^13.0",
 		"typo3/cms-core": "^12.0 || ^13.0",
 		"typo3/cms-fluid": "^12.0 || ^13.0",
-		"typo3/cms-frontend": "^12.0 || ^13.0",
-		"typo3/cms-backend": "^12.0 || ^13.0",
-		"typo3/cms-beuser": "^12.0 || ^13.0"
+		"typo3/cms-frontend": "^12.0 || ^13.0"
 	},
 	"require-dev": {
 		"armin/editorconfig-cli": "^2.0",
@@ -39,22 +39,22 @@
 			"Xima\\XimaTypo3FrontendEdit\\": "Classes/"
 		}
 	},
-	"extra": {
-		"typo3/cms": {
-			"cms-package-dir": "{$vendor-dir}/typo3/cms",
-			"extension-key": "xima_typo3_frontend_edit",
-			"web-dir": "public"
-		}
-	},
 	"config": {
-		"lock": false,
-		"sort-packages": true,
 		"allow-plugins": {
 			"ergebnis/composer-normalize": true,
 			"helhum/dotenv-connector": true,
 			"php-http/discovery": true,
 			"typo3/class-alias-loader": true,
 			"typo3/cms-composer-installers": true
+		},
+		"lock": false,
+		"sort-packages": true
+	},
+	"extra": {
+		"typo3/cms": {
+			"cms-package-dir": "{$vendor-dir}/typo3/cms",
+			"extension-key": "xima_typo3_frontend_edit",
+			"web-dir": "public"
 		}
 	},
 	"scripts": {
