@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\ViewHelpers;
 
-use TYPO3Fluid\Fluid\Core\Rendering\RenderingContextInterface;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
-use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
 
 /**
  * This ViewHelper generates an hidden input element which holds data values for the frontend edit dropdown menu.
