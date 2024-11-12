@@ -173,7 +173,7 @@ See the [DataViewHelper](Classes/ViewHelpers/DataViewHelper.php) for more inform
 
 ### Custom Styling
 
-The dropdown was styled to not disturb the frontend layout. You can easily adjust the styling by providing an additional css file within your `ext_localconf.php`:
+The dropdown was styled to not disturb the frontend layout. You can easily adjust the styling by providing an additional css or js file within your `ext_localconf.php`:
 
 ```php
 $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['xima_typo3_frontend_edit']['registerAdditionalFrontendResources'][] = 'EXT:custom_extension:/Resources/Public/Css/Custom.css';
