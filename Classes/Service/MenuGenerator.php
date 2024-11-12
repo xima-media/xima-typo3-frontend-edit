@@ -22,7 +22,7 @@ final class MenuGenerator
 
     public function __construct(protected readonly IconFactory $iconFactory, protected readonly EventDispatcher $eventDispatcher)
     {
-        $setup = $GLOBALS['TSFE']->tmpl->setup;
+        $setup = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray();
         if (!isset($setup['plugin.']['tx_ximatypo3frontendedit.'])) {
             return;
         }

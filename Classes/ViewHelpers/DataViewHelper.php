@@ -25,8 +25,6 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\Traits\CompileWithRenderStatic;
  */
 class DataViewHelper extends AbstractViewHelper
 {
-    use CompileWithRenderStatic;
-
     /**
      * @var bool
      */
@@ -69,23 +67,17 @@ class DataViewHelper extends AbstractViewHelper
         );
     }
 
-    public static function renderStatic(
-        array $arguments,
-        \Closure $renderChildrenClosure,
-        RenderingContextInterface $renderingContext
-    ) {
+    public function render()
+    {
         if (!$GLOBALS['BE_USER'] || $GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable']) {
             return '';
         }
-
-        if (empty($arguments['uid']) && empty($arguments['url'])) {
+        if (empty($this->arguments['uid']) && empty($this->arguments['url'])) {
             return '';
         }
-
         $dataAttributes = [];
         $class = '';
-
-        foreach ($arguments as $key => $value) {
+        foreach ($this->arguments as $key => $value) {
             if ($key === 'class') {
                 $class = $value;
             } else {
