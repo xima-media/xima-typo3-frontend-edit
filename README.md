@@ -86,7 +86,9 @@ The rendered dropdown menu links easily to the corresponding edit views in the T
 Two opportunities exists to extend the dropdown menu with custom entries:
 
 1. Use an event to modify the menu directly
-2. Use an viewhelper to extend the menu with *data* entries
+2. Use a viewhelper to extend the menu with *data* entries
+
+Additionally you can provide a custom css file to adjust the styling.
 
 ### Event
 
@@ -169,6 +171,14 @@ See the [DataViewHelper](Classes/ViewHelpers/DataViewHelper.php) for more inform
 
 > Keep in mind, that this option will add additional html elements to your dom, which can causes style issues.
 
+### Custom Styling
+
+The dropdown was styled to not disturb the frontend layout. You can easily adjust the styling by providing an additional css file within your `ext_localconf.php`:
+
+```php
+$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['xima_typo3_frontend_edit']['registerAdditionalFrontendResources'][] = 'EXT:custom_extension:/Resources/Public/Css/Custom.css';
+```
+
 ## FAQ
 
 <details>
@@ -200,7 +210,7 @@ For now only all content elements on the current page are "editable". So if you 
 
 6. __Debug__
 
-Check the network tab for the initial ajax call (something like `/?tx_ximatypo3frontendedit_frontendedit%5Baction%5D=contentElements&tx_ximatypo3frontendedit_frontendedit%5Bcontroller%5D=Edit&type=1723195241&cHash=...` with the information about the editable content elements and the according dropdown menus.
+Check the network tab for the initial ajax call (something like `/?type=1729341864` with the information about the editable content elements and the according dropdown menus.
 
 
 </details>

@@ -12,13 +12,10 @@ class ResourceUtility
 {
     public static function getResources(array $attributes = []): array
     {
-        $jsFileLocation = 'EXT:' . Configuration::EXT_KEY . '/Resources/Public/JavaScript/frontend_edit.js';
-        $cssFileLocation = 'EXT:' . Configuration::EXT_KEY . '/Resources/Public/Css/FrontendEdit.css';
-
-        return [
-            'css' => self::getCssTag($cssFileLocation, $attributes),
-            'js' => self::getJsTag($jsFileLocation, $attributes),
-        ];
+        return array_merge([
+            'css' => self::getCssTag('EXT:' . Configuration::EXT_KEY . '/Resources/Public/Css/FrontendEdit.css', $attributes),
+            'js' => self::getJsTag('EXT:' . Configuration::EXT_KEY . '/Resources/Public/JavaScript/frontend_edit.js', $attributes),
+        ], $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalFrontendResources'] ?? []);
     }
 
     protected static function getCssTag(string $cssFileLocation, array $attributes): string
