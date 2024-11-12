@@ -293,7 +293,8 @@ final class MenuGenerator
         return strlen($string) > $maxLength ? substr($string, 0, $maxLength) . '…' : $string;
     }
 
-    private function getSettings(): void {
+    private function getSettings(): void
+    {
         $request = $GLOBALS['TYPO3_REQUEST'];
         try {
             $fullTypoScript = $request->getAttribute('frontend.typoscript')->getSetupArray();
