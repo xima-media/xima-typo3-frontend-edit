@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service;
 
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Context\TypoScriptAspect;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -22,16 +24,12 @@ final class MenuGenerator
 
     public function __construct(protected readonly IconFactory $iconFactory, protected readonly EventDispatcher $eventDispatcher)
     {
-        $setup = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.typoscript')->getSetupArray();
-        if (!isset($setup['plugin.']['tx_ximatypo3frontendedit.'])) {
-            return;
-        }
-        $this->configuration = $setup['plugin.']['tx_ximatypo3frontendedit.'];
+        $this->getSettings();
     }
 
     public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = []): array
     {
-        $ignoredPids = $this->configuration['settings.']['ignorePids'] ? explode(',', $this->configuration['settings.']['ignorePids']) : [];
+        $ignoredPids = $this->configuration['ignorePids'] ? explode(',', $this->configuration['ignorePids']) : [];
         foreach ($ignoredPids as $ignoredPid) {
             if ($this->isSubpageOf($pid, (int)$ignoredPid)) {
                 return [];
@@ -50,9 +48,9 @@ final class MenuGenerator
             return [];
         }
 
-        $ignoredCTypes = $this->configuration['settings.']['ignoreCTypes'] ? explode(',', $this->configuration['settings.']['ignoreCTypes']) : [];
-        $ignoredListTypes = $this->configuration['settings.']['ignoreListTypes'] ? explode(',', $this->configuration['settings.']['ignoreListTypes']) : [];
-        $ignoredUids = $this->configuration['settings.']['ignoredUids'] ? explode(',', $this->configuration['settings.']['ignoredUids']) : [];
+        $ignoredCTypes = $this->configuration['ignoreCTypes'] ? explode(',', $this->configuration['ignoreCTypes']) : [];
+        $ignoredListTypes = $this->configuration['ignoreListTypes'] ? explode(',', $this->configuration['ignoreListTypes']) : [];
+        $ignoredUids = $this->configuration['ignoredUids'] ? explode(',', $this->configuration['ignoredUids']) : [];
 
         $result = [];
         foreach ($this->fetchContentElements($pid, $languageUid) as $contentElement) {
@@ -293,5 +291,25 @@ final class MenuGenerator
     private function shortenString(string $string, int $maxLength = 30): string
     {
         return strlen($string) > $maxLength ? substr($string, 0, $maxLength) . '…' : $string;
+    }
+
+    private function getSettings(): void {
+        $request = $GLOBALS['TYPO3_REQUEST'];
+        try {
+            $fullTypoScript = $request->getAttribute('frontend.typoscript')->getSetupArray();
+        } catch (\Exception $e) {
+            // An exception is thrown, when TypoScript setup array is not available. This is usually the case,
+            // when the current page request is cached. Therefore, the TSFE TypoScript parsing is forced here.
+            // Set a TypoScriptAspect which forces template parsing
+            GeneralUtility::makeInstance(Context::class)
+                ->setAspect('typoscript', GeneralUtility::makeInstance(TypoScriptAspect::class, true));
+            // Call TSFE getFromCache, which re-processes TypoScript respecting $forcedTemplateParsing property
+            // from TypoScriptAspect
+            $tsfe = $request->getAttribute('frontend.controller');
+            $requestWithFullTypoScript = $tsfe->getFromCache($request);
+            $fullTypoScript = $requestWithFullTypoScript->getAttribute('frontend.typoscript')->getSetupArray();
+        }
+        $settings = $fullTypoScript['plugin.']['tx_ximatypo3frontendedit.']['settings.'] ?? [];
+        $this->configuration = GeneralUtility::removeDotsFromTS($settings);
     }
 }
