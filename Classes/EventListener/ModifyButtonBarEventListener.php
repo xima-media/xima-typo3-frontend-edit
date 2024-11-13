@@ -28,7 +28,6 @@ final class ModifyButtonBarEventListener
                 ->setIcon($iconFactory->getIcon('actions-document-save-close', Icon::SIZE_SMALL))
                 ->setShowLabelText(true);
             $buttons[ButtonBar::BUTTON_POSITION_LEFT][2][] = $saveCloseButton;
-
         }
         $event->setButtons($buttons);
     }
