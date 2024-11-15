@@ -16,8 +16,8 @@ final class ModifyButtonBarEventListener
 {
     protected array $configuration;
     public function __construct(
-        private readonly ExtensionConfiguration $extensionConfiguration)
-    {
+        private readonly ExtensionConfiguration $extensionConfiguration
+    ) {
         $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
     }
 
