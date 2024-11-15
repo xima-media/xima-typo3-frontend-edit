@@ -47,12 +47,12 @@ Include the static TypoScript template "Frontend edit" or directly import it in 
 Adjust the constants to restrict the usage of the frontend edit:
 ``` typoscript
 plugin.tx_ximatypo3frontendedit {
-settings {
-    ignorePids =
-    ignoreCTypes =
-    ignoreListTypes =
-    ignoreUids =
-}
+    settings {
+        ignorePids =
+        ignoreCTypes =
+        ignoreListTypes =
+        ignoreUids =
+    }
 }
 ```
 
@@ -80,6 +80,8 @@ The rendered dropdown menu links easily to the corresponding edit views in the T
 
 
 ![Screencast](./Documentation/Images/screencast.gif)
+
+For an easy edit workflow a "save and close" button is added to the edit form, which redirects the user directly back to the frontend. Disable this function within the extension settings, if you don't want this behaviour.
 
 ## Extend
 
@@ -195,7 +197,7 @@ There may be a number of reasons for this:
     Are you currently logged into the TYPO3 backend? Otherwise the frontend edit will not working.
 2. __Backend user permission__
 
-Does your user have all permissions to edit the page as well as the content elements?
+    Does your user have all permissions to edit the page as well as the content elements?
 3. __TypoScript__
 
     Is the TypoScript template "Frontend edit" included in your sitepackage? Do you have declared the constants to restrict the usage of the frontend edit?
@@ -206,11 +208,11 @@ Does your user have all permissions to edit the page as well as the content elem
 
 5. __Content Element on current Page__
 
-For now only all content elements on the current page are "editable". So if you using some kind of inheritance, e.g. for your footer, this content can't be edited. Maybe I will find a smarter solution for this in the future.
+    For now only all content elements on the current page are "editable". So if you using some kind of inheritance, e.g. for your footer, this content can't be edited. Maybe I will find a smarter solution for this in the future.
 
 6. __Debug__
 
-Check the network tab for the initial ajax call (something like `/?type=1729341864` with the information about the editable content elements and the according dropdown menus.
+    Check the network tab for the initial ajax call (something like `/?type=1729341864` with the information about the editable content elements and the according dropdown menus.
 
 
 </details>

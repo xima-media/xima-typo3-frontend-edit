@@ -5,15 +5,28 @@ namespace Xima\XimaTypo3FrontendEdit\EventListener;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Template\Components\Buttons\InputButton;
 use TYPO3\CMS\Backend\Template\Components\ModifyButtonBarEvent;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Xima\XimaTypo3FrontendEdit\Configuration;
 
 final class ModifyButtonBarEventListener
 {
+    protected array $configuration;
+    public function __construct(
+        private readonly ExtensionConfiguration $extensionConfiguration)
+    {
+        $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
+    }
+
     public function __invoke(ModifyButtonBarEvent $event): void
     {
+        if (!$this->configuration['enableSaveCloseButton']) {
+            return;
+        }
+
         $buttons = $event->getButtons();
         $buttonBar = $event->getButtonBar();
         $saveButton = $buttons[ButtonBar::BUTTON_POSITION_LEFT][2][0] ?? null;

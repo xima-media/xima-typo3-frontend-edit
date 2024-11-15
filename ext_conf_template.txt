@@ -1,0 +1,2 @@
+# cat=basic//100; type=boolean; label=Enable the save and close button within edit forms
+enableSaveAndCloseButton = 1
