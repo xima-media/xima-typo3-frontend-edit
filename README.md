@@ -151,6 +151,23 @@ class ModifyFrontendEditListener
 }
 ```
 
+Don't forget to register your event listener via PHP attributes (TYPO3 >= 13):
+
+```php
+#[AsEventListener(
+    identifier: 'ext-some-extension/modify-frontend-edit-listener',
+)]
+```
+
+or register the event listener in your `Services.yaml`:
+
+```yaml
+Vendor\Package\EventListener\ModifyFrontendEditListener:
+  tags:
+      - name: event.listener
+        identifier: 'ext-some-extension/modify-frontend-edit-listener'
+```
+
 ### Data Attributes
 
 Additionally, there is an option to extend your fluid template to provide data for extra dropdown menu entries, e.g. edit links to all news entries within a list plugin.
