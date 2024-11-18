@@ -88,8 +88,9 @@ final class MenuGenerator
                 ButtonType::Divider
             ), 'div_info');
 
+            $additionalUid = $GLOBALS['BE_USER']->isAdmin() ? ' <code>[' . $contentElement['uid'] . ']</code>' : '';
             $menuButton->appendChild(new Button(
-                $GLOBALS['LANG']->sL($contentElementConfig['label']) . '<p><small><strong>[' . $contentElement['uid'] . ']</strong> ' . ($contentElement['header'] ? $this->shortenString($contentElement['header']) : '') . '</small></p>',
+                $GLOBALS['LANG']->sL($contentElementConfig['label']) . '<p><small>' . ($contentElement['header'] ? $this->shortenString($contentElement['header']) : '') . $additionalUid . '</small></p>',
                 ButtonType::Info,
                 icon: $this->iconFactory->getIcon($contentElementConfig['icon'], 'small')
             ), 'header');
