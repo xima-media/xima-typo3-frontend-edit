@@ -23,7 +23,7 @@ final class ModifyButtonBarEventListener
 
     public function __invoke(ModifyButtonBarEvent $event): void
     {
-        if (!$this->configuration['enableSaveCloseButton']) {
+        if (!array_key_exists('enableSaveAndCloseButton', $this->configuration) && !$this->configuration['enableSaveAndCloseButton']) {
             return;
         }
 
