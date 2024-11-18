@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
             actionElement = document.createElement('div');
           }
 
+          actionElement.classList.add(actionName);
           actionElement.innerHTML = `${action.icon ?? ''} <span>${action.label}</span>`;
           dropdownMenuInner.appendChild(actionElement);
         }
