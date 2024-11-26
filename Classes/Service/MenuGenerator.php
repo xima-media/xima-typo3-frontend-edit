@@ -29,7 +29,7 @@ final class MenuGenerator
 
     public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = []): array
     {
-        $ignoredPids = $this->configuration['ignorePids'] ? explode(',', $this->configuration['ignorePids']) : [];
+        $ignoredPids = array_key_exists('ignorePids', $this->configuration) ? explode(',', $this->configuration['ignorePids']) : [];
         foreach ($ignoredPids as $ignoredPid) {
             if ($this->isSubpageOf($pid, (int)$ignoredPid)) {
                 return [];
@@ -48,9 +48,9 @@ final class MenuGenerator
             return [];
         }
 
-        $ignoredCTypes = $this->configuration['ignoreCTypes'] ? explode(',', $this->configuration['ignoreCTypes']) : [];
-        $ignoredListTypes = $this->configuration['ignoreListTypes'] ? explode(',', $this->configuration['ignoreListTypes']) : [];
-        $ignoredUids = $this->configuration['ignoredUids'] ? explode(',', $this->configuration['ignoredUids']) : [];
+        $ignoredCTypes = array_key_exists('ignoreCTypes', $this->configuration) ? explode(',', $this->configuration['ignoreCTypes']) : [];
+        $ignoredListTypes = array_key_exists('ignoreListTypes', $this->configuration) ? explode(',', $this->configuration['ignoreListTypes']) : [];
+        $ignoredUids = array_key_exists('ignoredUids', $this->configuration) ? explode(',', $this->configuration['ignoredUids']) : [];
 
         $result = [];
         foreach ($this->fetchContentElements($pid, $languageUid) as $contentElement) {
