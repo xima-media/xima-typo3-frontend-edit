@@ -44,7 +44,7 @@ class EditInformationMiddleware implements MiddlewareInterface
                 return new JsonResponse([]);
             }
 
-            return new JsonResponse($this->menuGenerator->getDropdown((int)$pid, $returnUrl, (int)$languageUid, $data));
+            return new JsonResponse(mb_convert_encoding($this->menuGenerator->getDropdown((int)$pid, $returnUrl, (int)$languageUid, $data), 'UTF-8'));
         }
 
         return $response;
