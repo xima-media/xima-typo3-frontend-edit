@@ -40,10 +40,10 @@ document.addEventListener('DOMContentLoaded', function () {
         let element = document.querySelector(`#c${uid}`);
         if (!element) {
           // check for translated element
-          if (contentElement.element.l18n_parent) {
-            element = document.querySelector(`#c${contentElement.element.l18n_parent}`);
+          if (contentElement.element.l10n_source) {
+            element = document.querySelector(`#c${contentElement.element.l10n_source}`);
             if (element) {
-              uid = contentElement.element.l18n_parent;
+              uid = contentElement.element.l10n_source;
             } else {
               continue;
             }

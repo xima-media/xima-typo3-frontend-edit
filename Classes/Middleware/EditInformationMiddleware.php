@@ -36,7 +36,7 @@ class EditInformationMiddleware implements MiddlewareInterface
         ) {
             $pid = $request->getAttribute('routing')->getPageId();
             $returnUrl = $request->getHeaderLine('Referer');
-            $languageUid = $request->getQueryParams()['language_uid'] ?? 0;
+            $languageUid = $request->getAttribute('language')->getLanguageId() ?? 0;
 
             $data = json_decode($request->getBody()->getContents(), true) ?? [];
 
