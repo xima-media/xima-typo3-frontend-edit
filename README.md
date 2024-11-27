@@ -90,7 +90,7 @@ Two opportunities exists to extend the dropdown menu with custom entries:
 1. Use an event to modify the menu directly
 2. Use a viewhelper to extend the menu with *data* entries
 
-Additionally you can provide a custom css file to adjust the styling.
+Additionally, you can provide a custom css file to adjust the styling.
 
 ### Event
 
@@ -139,7 +139,10 @@ class ModifyFrontendEditListener
                     ],
                 )->__toString(),
                 $this->iconFactory->getIcon('content-idea', 'small')
-            ), 'edit_page', 'edit_custom_entity');
+            ), 
+            'edit_page', 
+            'edit_custom_entity'
+            );
         }
 
         // Example 2
@@ -192,7 +195,7 @@ See the [DataViewHelper](Classes/ViewHelpers/DataViewHelper.php) for more inform
 
 ### Custom Styling
 
-The dropdown was styled to not disturb the frontend layout. You can easily adjust the styling by providing an additional css or js file within your `ext_localconf.php`:
+The dropdown was styled to not disturb the frontend layout. You can easily adjust the styling by providing an additional css or js file within your `ext_localconf.php` which will be loaded together with the frontend edit resources:
 
 ```php
 $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS']['xima_typo3_frontend_edit']['registerAdditionalFrontendResources'][] = 'EXT:custom_extension/Resources/Public/Css/Custom.css';
@@ -225,7 +228,7 @@ There may be a number of reasons for this:
 
 5. __Content Element on current Page__
 
-    For now only all content elements on the current page are "editable". So if you using some kind of inheritance, e.g. for your footer, this content can't be edited. Maybe I will find a smarter solution for this in the future.
+    For now only all content elements on the current page are "editable". So if you're using some kind of inheritance, e.g. for your footer, this content can't be edited. Maybe I will find a smarter solution for this in the future.
 
 6. __Debug__
 
