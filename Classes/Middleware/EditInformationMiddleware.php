@@ -16,6 +16,7 @@ use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\MenuGenerator;
+use Xima\XimaTypo3FrontendEdit\Utility\UrlUtility;
 
 class EditInformationMiddleware implements MiddlewareInterface
 {
@@ -35,8 +36,8 @@ class EditInformationMiddleware implements MiddlewareInterface
             && $params['type'] === Configuration::TYPE
         ) {
             $pid = $request->getAttribute('routing')->getPageId();
-            $returnUrl = $request->getHeaderLine('Referer');
-            $languageUid = $request->getAttribute('language')->getLanguageId() ?? 0;
+            $languageUid = $request->getAttribute('language')->getLanguageId();
+            $returnUrl = $request->getHeaderLine('Referer') !== '' ? $request->getHeaderLine('Referer') : UrlUtility::getUrl($pid, $languageUid);
 
             $data = json_decode($request->getBody()->getContents(), true) ?? [];
 
@@ -44,7 +45,17 @@ class EditInformationMiddleware implements MiddlewareInterface
                 return new JsonResponse([]);
             }
 
-            return new JsonResponse(mb_convert_encoding($this->menuGenerator->getDropdown((int)$pid, $returnUrl, (int)$languageUid, $data), 'UTF-8'));
+            return new JsonResponse(
+                mb_convert_encoding(
+                    $this->menuGenerator->getDropdown(
+                        (int)$pid,
+                        $returnUrl,
+                        (int)$languageUid,
+                        $data
+                    ),
+                    'UTF-8'
+                )
+            );
         }
 
         return $response;
