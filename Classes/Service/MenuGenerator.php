@@ -44,7 +44,7 @@ final class MenuGenerator
             $backendUser = $GLOBALS['BE_USER'];
         }
 
-        if ($backendUser->user['tx_ximatypo3frontendedit_disable']) {
+        if (array_key_exists('tx_ximatypo3frontendedit_disable', $backendUser->user) && $backendUser->user['tx_ximatypo3frontendedit_disable']) {
             return [];
         }
 

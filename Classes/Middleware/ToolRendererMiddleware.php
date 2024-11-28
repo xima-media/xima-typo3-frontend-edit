@@ -24,7 +24,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
         if (
             $GLOBALS['TSFE'] instanceof TypoScriptFrontendController
             && $GLOBALS['BE_USER']
-            && !$GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable']
+            && (!array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) || !$GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])
         ) {
             $body = $response->getBody();
             $body->rewind();

@@ -7,8 +7,8 @@ namespace Xima\XimaTypo3FrontendEdit\ViewHelpers;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 /**
-* This ViewHelper generates an hidden input element which holds data values for the frontend edit dropdown menu.
-* You need either provide a uid and a table for the corresponding edit link or an external url.
+* This ViewHelper generates a hidden input element which holds data values for the frontend edit dropdown menu.
+* You need either provide an uid and a table for the corresponding edit link or an external url.
 * The output will only be rendered if the frontend edit is enabled.
 *
 * Usages:
@@ -67,7 +67,7 @@ class DataViewHelper extends AbstractViewHelper
 
     public function render()
     {
-        if (!$GLOBALS['BE_USER'] || $GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable']) {
+        if (!$GLOBALS['BE_USER'] || (array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) && $GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])) {
             return '';
         }
         if (empty($this->arguments['uid']) && empty($this->arguments['url'])) {
