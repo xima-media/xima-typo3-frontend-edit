@@ -237,6 +237,16 @@ There may be a number of reasons for this:
 
 </details>
 
+<details>
+<summary>
+Wrong return url
+</summary>
+
+*After closing the edit form will I redirected to the wrong frontend location, e.g. to the root page*
+
+This could be caused by a strict referer header in your request. If the return url could not be determined correctly, you can force the url generation by pid and language in the extension setting: `forceReturnUrlGeneration`.
+</details>
+
 ## License
 
 This project is licensed

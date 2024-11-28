@@ -1,2 +1,4 @@
 # cat=basic//100; type=boolean; label=Enable the save and close button within edit forms
 enableSaveAndCloseButton = 1
+# cat=basic//101; type=boolean; label=Enable this option to ignore the referer header for the return url and force the url generation
+forceReturnUrlGeneration = 0

@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Core\Http\NullResponse;
@@ -20,8 +21,11 @@ use Xima\XimaTypo3FrontendEdit\Utility\UrlUtility;
 
 class EditInformationMiddleware implements MiddlewareInterface
 {
-    public function __construct(protected readonly MenuGenerator $menuGenerator)
+    protected array $configuration;
+
+    public function __construct(protected readonly MenuGenerator $menuGenerator, private readonly ExtensionConfiguration $extensionConfiguration)
     {
+        $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -37,7 +41,7 @@ class EditInformationMiddleware implements MiddlewareInterface
         ) {
             $pid = $request->getAttribute('routing')->getPageId();
             $languageUid = $request->getAttribute('language')->getLanguageId();
-            $returnUrl = $request->getHeaderLine('Referer') !== '' ? $request->getHeaderLine('Referer') : UrlUtility::getUrl($pid, $languageUid);
+            $returnUrl = ($request->getHeaderLine('Referer') === '' || (array_key_exists('forceReturnUrlGeneration', $this->configuration) && $this->configuration['forceReturnUrlGeneration'])) ? UrlUtility::getUrl($pid, $languageUid) : $request->getHeaderLine('Referer');
 
             $data = json_decode($request->getBody()->getContents(), true) ?? [];
 
