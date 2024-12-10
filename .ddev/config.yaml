@@ -35,7 +35,7 @@ corepack_enable: false
 hooks:
   post-start:
     - exec: composer install --ignore-platform-reqs --no-scripts
-    - exec: if [ ! -f /var/www/html/config/system/settings.php ]; then vendor/bin/typo3 install:setup --force; fi
+    - exec: if [ ! -f /var/www/html/config/system/settings.php ]; then vendor/bin/typo3 install:setup --force && vendor/bin/typo3 configuration:set SYS/trustedHostsPattern ".*"; fi
 
 # Key features of DDEV's config.yaml:
 
