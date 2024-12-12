@@ -13,15 +13,19 @@ use Xima\XimaTypo3FrontendEdit\Utility\ResourceRenderer;
 
 class ToolRendererMiddleware implements MiddlewareInterface
 {
-    public function __construct(protected readonly ResourceRenderer $resourceRenderer)
+    public function __construct(protected ResourceRenderer $resourceRenderer)
     {
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
+        $typoScriptConfig = $request->getAttribute('frontend.typoscript')->getConfigArray();
+
         if (
-            $GLOBALS['BE_USER']
+            array_key_exists('tx_ximatypo3frontendedit_enable', $typoScriptConfig)
+            && $typoScriptConfig['tx_ximatypo3frontendedit_enable']
+            && $GLOBALS['BE_USER']
             && (!array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) || !$GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])
         ) {
             $body = $response->getBody();
