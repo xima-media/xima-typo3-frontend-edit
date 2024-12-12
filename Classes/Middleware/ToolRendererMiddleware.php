@@ -9,12 +9,11 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Http\Stream;
-use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
-use Xima\XimaTypo3FrontendEdit\Controller\EditController;
+use Xima\XimaTypo3FrontendEdit\Utility\ResourceRenderer;
 
 class ToolRendererMiddleware implements MiddlewareInterface
 {
-    public function __construct(protected readonly EditController $editController)
+    public function __construct(protected readonly ResourceRenderer $resourceRenderer)
     {
     }
 
@@ -22,8 +21,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
     {
         $response = $handler->handle($request);
         if (
-            $GLOBALS['TSFE'] instanceof TypoScriptFrontendController
-            && $GLOBALS['BE_USER']
+            $GLOBALS['BE_USER']
             && (!array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) || !$GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])
         ) {
 
@@ -32,7 +30,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
             $contents = $response->getBody()->getContents();
             $content = str_ireplace(
                 '</body>',
-                $this->editController->render() . '</body>',
+                $this->resourceRenderer->render() . '</body>',
                 $contents
             );
             $body = new Stream('php://temp', 'rw');

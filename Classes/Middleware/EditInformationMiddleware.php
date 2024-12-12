@@ -12,9 +12,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Http\JsonResponse;
-use TYPO3\CMS\Core\Http\NullResponse;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
-use TYPO3\CMS\Frontend\Controller\TypoScriptFrontendController;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\MenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Utility\UrlUtility;
@@ -25,7 +23,6 @@ class EditInformationMiddleware implements MiddlewareInterface
 
     public function __construct(protected readonly MenuGenerator $menuGenerator, private readonly ExtensionConfiguration $extensionConfiguration)
     {
-        $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
     }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -33,12 +30,10 @@ class EditInformationMiddleware implements MiddlewareInterface
         $response = $handler->handle($request);
         $params = $request->getQueryParams();
 
-        if (
-            !($response instanceof NullResponse)
-            && $GLOBALS['TSFE'] instanceof TypoScriptFrontendController
-            && isset($params['type'])
-            && $params['type'] === Configuration::TYPE
-        ) {
+        if (isset($params['type'])&& $params['type'] === Configuration::TYPE)
+        {
+            $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
+
             $pid = $request->getAttribute('routing')->getPageId();
             $languageUid = $request->getAttribute('language')->getLanguageId();
             $returnUrl = ($request->getHeaderLine('Referer') === '' || (array_key_exists('forceReturnUrlGeneration', $this->configuration) && $this->configuration['forceReturnUrlGeneration'])) ? UrlUtility::getUrl($pid, $languageUid) : $request->getHeaderLine('Referer');
