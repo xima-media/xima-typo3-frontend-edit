@@ -20,15 +20,12 @@ class ToolRendererMiddleware implements MiddlewareInterface
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
+        $response = $handler->handle($request);
         if (
             $GLOBALS['TSFE'] instanceof TypoScriptFrontendController
             && $GLOBALS['BE_USER']
             && (!array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) || !$GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])
         ) {
-            // Using an ugly workaround here for accessing full typoscript on cached pages
-            // @see https://forge.typo3.org/issues/99417
-            $request->getAttribute('frontend.controller')->config['INTincScript'][] = [];
-            $response = $handler->handle($request);
 
             $body = $response->getBody();
             $body->rewind();
@@ -41,8 +38,6 @@ class ToolRendererMiddleware implements MiddlewareInterface
             $body = new Stream('php://temp', 'rw');
             $body->write($content);
             $response = $response->withBody($body);
-        } else {
-            $response = $handler->handle($request);
         }
         return $response;
     }
