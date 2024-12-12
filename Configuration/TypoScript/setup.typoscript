@@ -15,3 +15,6 @@ tx_ximatypo3frontendedit_editinformationen {
     no_cache = 1
   }
 }
+
+# This config is set to control the ToolRendererMiddleware depending on whether the typoscript is included on the current site or not.
+config.tx_ximatypo3frontendedit_enable = 1
