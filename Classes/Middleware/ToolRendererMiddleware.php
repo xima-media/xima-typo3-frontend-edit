@@ -24,7 +24,6 @@ class ToolRendererMiddleware implements MiddlewareInterface
             $GLOBALS['BE_USER']
             && (!array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) || !$GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])
         ) {
-
             $body = $response->getBody();
             $body->rewind();
             $contents = $response->getBody()->getContents();

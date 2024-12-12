@@ -30,8 +30,7 @@ class EditInformationMiddleware implements MiddlewareInterface
         $response = $handler->handle($request);
         $params = $request->getQueryParams();
 
-        if (isset($params['type'])&& $params['type'] === Configuration::TYPE)
-        {
+        if (isset($params['type'])&& $params['type'] === Configuration::TYPE) {
             $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
 
             $pid = $request->getAttribute('routing')->getPageId();
