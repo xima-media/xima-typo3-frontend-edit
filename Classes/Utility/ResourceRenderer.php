@@ -2,18 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Xima\XimaTypo3FrontendEdit\Controller;
+namespace Xima\XimaTypo3FrontendEdit\Utility;
 
-use TYPO3\CMS\Backend\Attribute\AsController;
 use TYPO3\CMS\Core\Core\RequestId;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Mvc\Controller\ActionController;
 use TYPO3\CMS\Fluid\View\StandaloneView;
 use Xima\XimaTypo3FrontendEdit\Configuration;
-use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
-#[AsController]
-final class EditController extends ActionController
+class ResourceRenderer
 {
     public function __construct(private readonly RequestId $requestId)
     {

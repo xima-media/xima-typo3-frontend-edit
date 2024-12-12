@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service;
 
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Context\TypoScriptAspect;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Database\Connection;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -24,11 +22,12 @@ final class MenuGenerator
 
     public function __construct(protected readonly IconFactory $iconFactory, protected readonly EventDispatcher $eventDispatcher)
     {
-        $this->getSettings();
     }
 
     public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = []): array
     {
+        $this->getSettings();
+
         $ignoredPids = array_key_exists('ignorePids', $this->configuration) ? explode(',', $this->configuration['ignorePids']) : [];
         foreach ($ignoredPids as $ignoredPid) {
             if ($this->isSubpageOf($pid, (int)$ignoredPid)) {
@@ -297,20 +296,7 @@ final class MenuGenerator
     private function getSettings(): void
     {
         $request = $GLOBALS['TYPO3_REQUEST'];
-        try {
-            $fullTypoScript = $request->getAttribute('frontend.typoscript')->getSetupArray();
-        } catch (\Exception $e) {
-            // An exception is thrown, when TypoScript setup array is not available. This is usually the case,
-            // when the current page request is cached. Therefore, the TSFE TypoScript parsing is forced here.
-            // Set a TypoScriptAspect which forces template parsing
-            GeneralUtility::makeInstance(Context::class)
-                ->setAspect('typoscript', GeneralUtility::makeInstance(TypoScriptAspect::class, true));
-            // Call TSFE getFromCache, which re-processes TypoScript respecting $forcedTemplateParsing property
-            // from TypoScriptAspect
-            $tsfe = $request->getAttribute('frontend.controller');
-            $requestWithFullTypoScript = $tsfe->getFromCache($request);
-            $fullTypoScript = $requestWithFullTypoScript->getAttribute('frontend.typoscript')->getSetupArray();
-        }
+        $fullTypoScript = $request->getAttribute('frontend.typoscript')->getSetupArray();
         $settings = $fullTypoScript['plugin.']['tx_ximatypo3frontendedit.']['settings.'] ?? [];
         $this->configuration = GeneralUtility::removeDotsFromTS($settings);
     }
