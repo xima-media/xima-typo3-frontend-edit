@@ -45,6 +45,7 @@ Include the static TypoScript template "Frontend edit" or directly import it in 
 ```
 
 Adjust the constants to restrict the usage of the frontend edit:
+
 ``` typoscript
 plugin.tx_ximatypo3frontendedit {
     settings {
@@ -52,6 +53,18 @@ plugin.tx_ximatypo3frontendedit {
         ignoreCTypes =
         ignoreListTypes =
         ignoreUids =
+
+        defaultMenuStructure {
+            div_info = 
+            header = 
+            div_edit = 
+            edit = 
+            edit_page = 
+            div_action = 
+            hide = 
+            info = 
+            history = 
+        }
     }
 }
 ```

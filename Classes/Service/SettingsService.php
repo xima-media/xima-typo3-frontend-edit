@@ -34,6 +34,17 @@ final class SettingsService
         return array_key_exists('ignoredUids', $configuration) ? explode(',', $configuration['ignoredUids']) : [];
     }
 
+    public function checkDefaultMenuStructure(string $identifier): bool
+    {
+        $configuration = $this->getConfiguration();
+
+        if (!array_key_exists('defaultMenuStructure', $configuration)) {
+            return true;
+        }
+
+        return array_key_exists($identifier, $configuration['defaultMenuStructure']) && $configuration['defaultMenuStructure'][$identifier];
+    }
+
     private function getConfiguration(): array
     {
         if (!empty($this->configuration)) {

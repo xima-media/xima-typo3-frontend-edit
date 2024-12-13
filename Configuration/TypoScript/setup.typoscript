@@ -4,6 +4,18 @@ plugin.tx_ximatypo3frontendedit {
     ignoreCTypes = {$plugin.tx_ximatypo3frontendedit.settings.ignoreCTypes}
     ignoreListTypes = {$plugin.tx_ximatypo3frontendedit.settings.ignoreListTypes}
     ignoredUids = {$plugin.tx_ximatypo3frontendedit.settings.ignoredUids}
+
+    defaultMenuStructure {
+      div_info = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.div_info}
+      header = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.header}
+      div_edit = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.div_edit}
+      edit = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.edit}
+      edit_page = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.edit_page}
+      div_action = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.div_action}
+      hide = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.hide}
+      info = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.info}
+      history = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.history}
+    }
   }
 }
 
