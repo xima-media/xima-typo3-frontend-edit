@@ -1,55 +1,52 @@
 name: xima-typo3-frontend-edit
 type: typo3
 docroot: public
-php_version: "8.2"
+php_version: "8.1"
 webserver_type: apache-fpm
-router_http_port: "80"
-router_https_port: "443"
 xdebug_enabled: false
-additional_hostnames: [ ]
-additional_fqdns: [ ]
+additional_hostnames: []
+additional_fqdns: []
 database:
-  type: mariadb
-  version: "10.4"
-webimage_extra_packages: [ libxml2-utils ]
+    type: mariadb
+    version: "10.4"
+hooks:
+    post-start:
+        - exec: composer install --ignore-platform-reqs --no-scripts
+        - exec: if [ ! -f /var/www/html/config/system/settings.php ]; then vendor/bin/typo3 install:setup --force && vendor/bin/typo3 configuration:set SYS/trustedHostsPattern ".*"; fi
+webimage_extra_packages: [libxml2-utils]
 use_dns_when_possible: true
 composer_version: "2"
 web_environment:
-  - TYPO3_CONTEXT=Development/Local
-  - TYPO3_INSTALL_DB_DRIVER=mysqli
-  - TYPO3_INSTALL_DB_USER=db
-  - TYPO3_INSTALL_DB_PASSWORD=db
-  - TYPO3_INSTALL_DB_HOST=db
-  - TYPO3_INSTALL_DB_PORT=3306
-  - TYPO3_INSTALL_DB_UNIX_SOCKET=
-  - TYPO3_INSTALL_DB_USE_EXISTING=1
-  - TYPO3_INSTALL_DB_DBNAME=db
-  - TYPO3_INSTALL_ADMIN_USER=admin
-  - TYPO3_INSTALL_ADMIN_PASSWORD=Password1!
-  - TYPO3_INSTALL_SITE_NAME=Frontend Edit
-  - TYPO3_INSTALL_SITE_SETUP_TYPE=no
-  - TYPO3_INSTALL_SITE_BASE_URL=
-  - TYPO3_INSTALL_WEB_SERVER_CONFIG=apache
+    - TYPO3_CONTEXT=Development/Local
+    - TYPO3_INSTALL_DB_DRIVER=mysqli
+    - TYPO3_INSTALL_DB_USER=db
+    - TYPO3_INSTALL_DB_PASSWORD=db
+    - TYPO3_INSTALL_DB_HOST=db
+    - TYPO3_INSTALL_DB_PORT=3306
+    - TYPO3_INSTALL_DB_UNIX_SOCKET=
+    - TYPO3_INSTALL_DB_USE_EXISTING=1
+    - TYPO3_INSTALL_DB_DBNAME=db
+    - TYPO3_INSTALL_ADMIN_USER=admin
+    - TYPO3_INSTALL_ADMIN_PASSWORD=Password1!
+    - TYPO3_INSTALL_SITE_NAME=Frontend Edit
+    - TYPO3_INSTALL_SITE_SETUP_TYPE=no
+    - TYPO3_INSTALL_SITE_BASE_URL=
+    - TYPO3_INSTALL_WEB_SERVER_CONFIG=apache
 nodejs_version: "16"
 corepack_enable: false
-hooks:
-  post-start:
-    - exec: composer install --ignore-platform-reqs --no-scripts
-    - exec: if [ ! -f /var/www/html/config/system/settings.php ]; then vendor/bin/typo3 install:setup --force && vendor/bin/typo3 configuration:set SYS/trustedHostsPattern ".*"; fi
 
 # Key features of DDEV's config.yaml:
 
 # name: <projectname> # Name of the project, automatically provides
 #   http://projectname.ddev.site and https://projectname.ddev.site
 
-# type: <projecttype>  # backdrop, craftcms, django4, drupal, drupal6, drupal7, laravel, magento, magento2, php, python, shopware6, silverstripe, typo3, wordpress
+# type: <projecttype>  # backdrop, cakephp, craftcms, drupal, drupal6, drupal7, drupal8, drupal9, drupal10, drupal11, laravel, magento, magento2, php, shopware6, silverstripe, symfony, typo3, wordpress
 # See https://ddev.readthedocs.io/en/stable/users/quickstart/ for more
 # information on the different project types
-# "drupal" covers recent Drupal 8+
 
 # docroot: <relative_path> # Relative path to the directory containing index.php.
 
-# php_version: "8.2"  # PHP version to use, "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2", "8.3", "8.4"
+# php_version: "8.3"  # PHP version to use, "5.6" through "8.4"
 
 # You can explicitly specify the webimage but this
 # is not recommended, as the images are often closely tied to DDEV's' behavior,
@@ -62,7 +59,7 @@ hooks:
 #   version: <version> # database version, like "10.11" or "8.0"
 #   MariaDB versions can be 5.5-10.8, 10.11, and 11.4.
 #   MySQL versions can be 5.5-8.0.
-#   PostgreSQL versions can be 9-16.
+#   PostgreSQL versions can be 9-17.
 
 # router_http_port: <port>  # Port to be used for http (defaults to global configuration, usually 80)
 # router_https_port: <port> # Port for https (defaults to global configuration, usually 443)
@@ -77,9 +74,11 @@ hooks:
 # "ddev xhprof" to enable Xhprof and "ddev xhprof off" to disable it work better,
 # as leaving Xhprof enabled all the time is a big performance hit.
 
-# webserver_type: nginx-fpm, apache-fpm, or nginx-gunicorn
+# webserver_type: nginx-fpm or apache-fpm
 
 # timezone: Europe/Berlin
+# If timezone is unset, DDEV will attempt to derive it from the host system timezone
+# using the $TZ environment variable or the /etc/localtime symlink.
 # This is the timezone used in the containers and by PHP;
 # it can be set to any valid timezone,
 # see https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
@@ -99,9 +98,9 @@ hooks:
 #   - preview
 #   - snapshot
 # Alternatively, an explicit Composer version may be specified, for example "2.2.18".
-# To reinstall Composer after the image was built, run "ddev debug refresh".
+# To reinstall Composer after the image was built, run "ddev debug rebuild".
 
-# nodejs_version: "20"
+# nodejs_version: "22"
 # change from the default system Node.js version to any other version.
 # See https://ddev.readthedocs.io/en/stable/users/configuration/config/#nodejs_version for more information
 # and https://www.npmjs.com/package/n#specifying-nodejs-versions for the full documentation,
@@ -227,8 +226,8 @@ hooks:
 
 # You can inject environment variables into the web container with:
 # web_environment:
-# - SOMEENV=somevalue
-# - SOMEOTHERENV=someothervalue
+#     - SOMEENV=somevalue
+#     - SOMEOTHERENV=someothervalue
 
 # no_project_mount: false
 # (Experimental) If true, DDEV will not mount the project into the web container;
