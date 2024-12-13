@@ -20,15 +20,13 @@ final class MenuGenerator
 {
     protected array $configuration = [];
 
-    public function __construct(protected readonly IconFactory $iconFactory, protected readonly EventDispatcher $eventDispatcher)
+    public function __construct(protected readonly IconFactory $iconFactory, protected readonly EventDispatcher $eventDispatcher, protected readonly SettingsService $settingsService)
     {
     }
 
     public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = []): array
     {
-        $this->getSettings();
-
-        $ignoredPids = array_key_exists('ignorePids', $this->configuration) ? explode(',', $this->configuration['ignorePids']) : [];
+        $ignoredPids = $this->settingsService->getIgnoredPids();
         foreach ($ignoredPids as $ignoredPid) {
             if ($this->isSubpageOf($pid, (int)$ignoredPid)) {
                 return [];
@@ -47,9 +45,9 @@ final class MenuGenerator
             return [];
         }
 
-        $ignoredCTypes = array_key_exists('ignoreCTypes', $this->configuration) ? explode(',', $this->configuration['ignoreCTypes']) : [];
-        $ignoredListTypes = array_key_exists('ignoreListTypes', $this->configuration) ? explode(',', $this->configuration['ignoreListTypes']) : [];
-        $ignoredUids = array_key_exists('ignoredUids', $this->configuration) ? explode(',', $this->configuration['ignoredUids']) : [];
+        $ignoredCTypes = $this->settingsService->getIgnoredCTypes();
+        $ignoredListTypes = $this->settingsService->getIgnoredListTypes();
+        $ignoredUids = $this->settingsService->getIgnoredUids();
 
         $result = [];
         foreach ($this->fetchContentElements($pid, $languageUid) as $contentElement) {
@@ -291,13 +289,5 @@ final class MenuGenerator
     private function shortenString(string $string, int $maxLength = 30): string
     {
         return strlen($string) > $maxLength ? substr($string, 0, $maxLength) . '…' : $string;
-    }
-
-    private function getSettings(): void
-    {
-        $request = $GLOBALS['TYPO3_REQUEST'];
-        $fullTypoScript = $request->getAttribute('frontend.typoscript')->getSetupArray();
-        $settings = $fullTypoScript['plugin.']['tx_ximatypo3frontendedit.']['settings.'] ?? [];
-        $this->configuration = GeneralUtility::removeDotsFromTS($settings);
     }
 }
