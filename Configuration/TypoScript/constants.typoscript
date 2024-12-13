@@ -24,6 +24,8 @@ plugin.tx_ximatypo3frontendedit {
       div_action = 1
       # cat=xima_typo3_frontend_edit/defaultMenuStructure/p; type=boolean; label=Show the hide button
       hide = 1
+      # cat=xima_typo3_frontend_edit/defaultMenuStructure/p; type=boolean; label=Show the move button
+      move = 1
       # cat=xima_typo3_frontend_edit/defaultMenuStructure/p; type=boolean; label=Show the info button
       info = 1
       # cat=xima_typo3_frontend_edit/defaultMenuStructure/p; type=boolean; label=Show the history button

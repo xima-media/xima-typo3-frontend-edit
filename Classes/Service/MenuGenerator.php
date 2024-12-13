@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service;
 
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
-use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
@@ -83,16 +82,22 @@ final class MenuGenerator
             $this->processNewButton($menuButton, 'div_info', ButtonType::Divider);
 
             $additionalUid = $GLOBALS['BE_USER']->isAdmin() ? ' <code>[' . $contentElement['uid'] . ']</code>' : '';
-            $this->processNewButton($menuButton, 'header', ButtonType::Info,
+            $this->processNewButton(
+                $menuButton,
+                'header',
+                ButtonType::Info,
                 label: $GLOBALS['LANG']->sL($contentElementConfig['label']) . '<p><small>' . ($contentElement['header'] ? ContentUtility::shortenString($contentElement['header']) : '') . $additionalUid . '</small></p>',
-                icon: $this->iconFactory->getIcon($contentElementConfig['icon'], 'small')
+                icon: $contentElementConfig['icon']
             );
 
             /*
             * Edit
             */
             $this->processNewButton($menuButton, 'div_edit', ButtonType::Divider);
-            $this->processNewButton($menuButton, 'edit', ButtonType::Link,
+            $this->processNewButton(
+                $menuButton,
+                'edit',
+                ButtonType::Link,
                 label: $contentElement['CType'] === 'list' ? 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_plugin' : 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_content_element',
                 url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
                     'record_edit',
@@ -106,9 +111,12 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
-                icon: $this->iconFactory->getIcon($contentElement['CType'] === 'list' ? 'content-plugin' : 'content-textpic', 'small')
+                icon: $contentElement['CType'] === 'list' ? 'content-plugin' : 'content-textpic'
             );
-            $this->processNewButton($menuButton, 'edit_page', ButtonType::Link,
+            $this->processNewButton(
+                $menuButton,
+                'edit_page',
+                ButtonType::Link,
                 url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
                     'web_layout',
                     [
@@ -117,14 +125,17 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
-                icon: $this->iconFactory->getIcon('apps-pagetree-page-default', 'small')
+                icon: 'apps-pagetree-page-default'
             );
 
             /*
             * Action
             */
             $this->processNewButton($menuButton, 'div_action', ButtonType::Divider);
-            $this->processNewButton($menuButton, 'hide', ButtonType::Link,
+            $this->processNewButton(
+                $menuButton,
+                'hide',
+                ButtonType::Link,
                 url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
                     'tce_db',
                     [
@@ -138,9 +149,12 @@ final class MenuGenerator
                         'redirect' => $returnUrlAnchor,
                     ],
                 )->__toString(),
-                icon: $this->iconFactory->getIcon('actions-toggle-on', 'small')
+                icon: 'actions-toggle-on'
             );
-            $this->processNewButton($menuButton, 'info', ButtonType::Link,
+            $this->processNewButton(
+                $menuButton,
+                'info',
+                ButtonType::Link,
                 url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
                     'show_item',
                     [
@@ -149,9 +163,25 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
-                icon: $this->iconFactory->getIcon('actions-info', 'small')
+                icon: 'actions-info'
             );
-            $this->processNewButton($menuButton, 'history', ButtonType::Link,
+            $this->processNewButton(
+                $menuButton,
+                'move',
+                ButtonType::Link,
+                url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                    'move_element',
+                    [
+                        'uid' => $contentElement['uid'],
+                        'returnUrl' => $returnUrlAnchor,
+                    ],
+                )->__toString(),
+                icon: 'actions-move'
+            );
+            $this->processNewButton(
+                $menuButton,
+                'history',
+                ButtonType::Link,
                 url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
                     'record_history',
                     [
@@ -159,7 +189,7 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
-                icon: $this->iconFactory->getIcon('actions-history', 'small')
+                icon: 'actions-history'
             );
 
             /*
@@ -183,7 +213,8 @@ final class MenuGenerator
         return $result;
     }
 
-    private function processNewButton(Button &$button, string $identifier, ButtonType $type, ?string $label = null, ?string $url = null, ?Icon $icon = null): void {
+    private function processNewButton(Button &$button, string $identifier, ButtonType $type, ?string $label = null, ?string $url = null, ?string $icon = null): void
+    {
         if (!$this->settingsService->checkDefaultMenuStructure($identifier)) {
             return;
         }
@@ -192,12 +223,12 @@ final class MenuGenerator
             $label ?: "LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:$identifier",
             $type,
             $url,
-            $icon
+            $icon ? $this->iconFactory->getIcon($icon, 'small') : null
         ), $identifier);
     }
 
-    private function handleAdditionalData(Button &$button, array $contentElement, array $contentElementConfig, array $data, BackendUserAuthentication $backendUser, int $languageUid, string $returnUrlAnchor): void{
-
+    private function handleAdditionalData(Button &$button, array $contentElement, array $contentElementConfig, array $data, BackendUserAuthentication $backendUser, int $languageUid, string $returnUrlAnchor): void
+    {
         if (array_key_exists($contentElement['uid'], $data) && !empty($data[$contentElement['uid']])) {
             $button->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_data',

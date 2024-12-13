@@ -62,6 +62,7 @@ plugin.tx_ximatypo3frontendedit {
             edit_page = 
             div_action = 
             hide = 
+            move =
             info = 
             history = 
         }

@@ -24,6 +24,9 @@
 			<trans-unit id="hide">
 				<source>Hide</source>
 			</trans-unit>
+			<trans-unit id="move">
+				<source>Move</source>
+			</trans-unit>
 			<trans-unit id="div_info">
 				<source>Info</source>
 			</trans-unit>

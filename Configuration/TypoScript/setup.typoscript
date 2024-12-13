@@ -13,6 +13,7 @@ plugin.tx_ximatypo3frontendedit {
       edit_page = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.edit_page}
       div_action = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.div_action}
       hide = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.hide}
+      move = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.move}
       info = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.info}
       history = {$plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.history}
     }
