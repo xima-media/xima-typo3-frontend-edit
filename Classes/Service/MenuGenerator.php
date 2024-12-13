@@ -109,8 +109,9 @@ final class MenuGenerator
                             'language' => $languageUid,
                         ],
                         'returnUrl' => $returnUrlAnchor,
-                    ],
-                )->__toString(),
+                    ]
+                )->__toString()
+                . '&tx_ximatypo3frontendedit', // add custom parameter to identify the request and render the save and close button in the edit form
                 icon: $contentElement['CType'] === 'list' ? 'content-plugin' : 'content-textpic'
             );
             $this->processNewButton(

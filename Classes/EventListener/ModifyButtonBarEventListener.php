@@ -27,6 +27,10 @@ final class ModifyButtonBarEventListener
             return;
         }
 
+        if (!array_key_exists('tx_ximatypo3frontendedit', $GLOBALS['TYPO3_REQUEST']->getQueryParams())) {
+            return;
+        }
+
         $buttons = $event->getButtons();
         $buttonBar = $event->getButtonBar();
         $saveButton = $buttons[ButtonBar::BUTTON_POSITION_LEFT][2][0] ?? null;
