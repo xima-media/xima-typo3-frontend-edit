@@ -1,0 +1,14 @@
+#!/bin/bash
+
+## Description: Install TYPO3 instance.
+## Usage: install
+## Example: "ddev install 12"
+
+TYPO3=${1}
+
+if [ -f ".ddev/commands/web/.install-$TYPO3" ]; then
+    sh .ddev/commands/web/.install-$TYPO3
+else
+    echo "Error: version $TYPO3 not support."
+    exit 1
+fi

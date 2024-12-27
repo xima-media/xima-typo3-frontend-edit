@@ -1,0 +1,16 @@
+#!/bin/bash
+
+## Description: Install TYPO3 12 integration instance.
+## Usage: install
+## Example: "ddev install 12"
+
+set +x
+set -e
+
+. .ddev/commands/web/.utils.sh
+
+restoreComposerFiles
+composer install --no-progress --no-interaction
+
+vendor/bin/typo3 database:updateschema
+vendor/bin/typo3 cache:flush
