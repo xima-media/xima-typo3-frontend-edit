@@ -174,6 +174,7 @@ final class MenuGenerator
                     'move_element',
                     [
                         'uid' => $contentElement['uid'],
+                        'expandPage' => $pid,
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
