@@ -29,8 +29,3 @@ services:
             - TYPO3_SETUP_ADMIN_PASSWORD=Password1!
             - TYPO3_PROJECT_NAME=EXT:xima-typo3-frontend-edit Dev Environment
             - TYPO3_SERVER_TYPE=apache
-        volumes:
-            - type: bind
-              source: ../
-              target: /var/www/html/xima_typo3_frontend_edit
-              consistency: cached

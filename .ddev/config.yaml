@@ -13,17 +13,14 @@ additional_hostnames:
 additional_fqdns: []
 database:
   type: mariadb
-  version: "10.4"
+  version: "10.6"
 webimage_extra_packages: [libxml2-utils]
 use_dns_when_possible: true
-composer_version: "2"
-nodejs_version: "16"
 corepack_enable: false
-performance_mode: "none"
 hooks:
   post-start:
-    - exec: mkdir -p /var/www/html/.test/ && cp /var/www/html/.ddev/templates/* /var/www/html/.test/
     - exec: composer install --ignore-platform-reqs --no-scripts
+    - exec: mkdir -p /var/www/html/.test/ && cp /var/www/html/.ddev/templates/* /var/www/html/.test/
 
 
 # Key features of DDEV's config.yaml:
