@@ -261,6 +261,14 @@ Wrong return url
 This could be caused by a strict referer header in your request. If the return url could not be determined correctly, you can force the url generation by pid and language in the extension setting: `forceReturnUrlGeneration`.
 </details>
 
+## Development
+
+Use the following ddev command to easily install all support TYPO3 versions for locale development.
+
+```bash
+ddev install all
+```
+
 ## License
 
 This project is licensed
