@@ -263,11 +263,10 @@ This could be caused by a strict referer header in your request. If the return u
 
 ## Development
 
-Use the following ddev commands to easily switch the local TYPO3 versions.
+Use the following ddev command to easily install all support TYPO3 versions for locale development.
 
 ```bash
-ddev install 12
-ddev install 13
+ddev install all
 ```
 
 ## License
