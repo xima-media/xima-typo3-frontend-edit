@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 
 final class SettingsService
 {
@@ -51,7 +52,13 @@ final class SettingsService
             return $this->configuration;
         }
         $request = $GLOBALS['TYPO3_REQUEST'];
-        $fullTypoScript = $request->getAttribute('frontend.typoscript')->getSetupArray();
+
+        if (version_compare(VersionNumberUtility::getCurrentTypo3Version(), '12.0.0', '<')) {
+            $fullTypoScript = $GLOBALS['TSFE']->tmpl->setup;
+        } else {
+            $fullTypoScript = $request->getAttribute('frontend.typoscript')->getSetupArray();
+        }
+
         $settings = $fullTypoScript['plugin.']['tx_ximatypo3frontendedit.']['settings.'] ?? [];
         $this->configuration = GeneralUtility::removeDotsFromTS($settings);
 

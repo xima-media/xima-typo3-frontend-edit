@@ -8,6 +8,7 @@ use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
+use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
@@ -73,7 +74,7 @@ final class MenuGenerator
             $menuButton = new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_menu',
                 ButtonType::Menu,
-                icon: $this->iconFactory->getIcon('actions-open', 'small')
+                icon: $this->iconFactory->getIcon('actions-open', Icon::SIZE_SMALL)
             );
 
             /*
@@ -224,7 +225,7 @@ final class MenuGenerator
             $label ?: "LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:$identifier",
             $type,
             $url,
-            $icon ? $this->iconFactory->getIcon($icon, 'small') : null
+            $icon ? $this->iconFactory->getIcon($icon, Icon::SIZE_SMALL) : null
         ), $identifier);
     }
 
@@ -259,7 +260,7 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString();
-                $icon = $dataEntry['icon'] ? $this->iconFactory->getIcon($dataEntry['icon'], 'small') : $this->iconFactory->getIcon($contentElementConfig['icon'], 'small');
+                $icon = $dataEntry['icon'] ? $this->iconFactory->getIcon($dataEntry['icon'], Icon::SIZE_SMALL) : $this->iconFactory->getIcon($contentElementConfig['icon'], Icon::SIZE_SMALL);
 
                 $button->appendChild(new Button(
                     ContentUtility::shortenString($dataEntry['label']),
