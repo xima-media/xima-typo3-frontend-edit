@@ -176,6 +176,7 @@ final class MenuGenerator
                     [
                         'uid' => $contentElement['uid'],
                         'table' => 'tt_content',
+                        'expandPage' => $pid,
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
