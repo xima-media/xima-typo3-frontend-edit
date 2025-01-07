@@ -16,7 +16,7 @@ cd /var/www/html/.test/$VERSION
 export DATABASE="database_$VERSION"
 mysql -h db -u root -p"root" -e "CREATE DATABASE $DATABASE;"
 
-vendor/bin/typo3 setup -n --dbname=$DATABASE --password=$TYPO3_DB_PASSWORD --create-site="https://${VERSION}.extension-key.ddev.site" --admin-user-password=$TYPO3_SETUP_ADMIN_PASSWORD
+vendor/bin/typo3 setup -n --dbname=$DATABASE --password=$TYPO3_DB_PASSWORD --create-site="https://${VERSION}.xima-typo3-frontend-edit.ddev.site" --admin-user-password=$TYPO3_SETUP_ADMIN_PASSWORD
 
 vendor/bin/typo3 configuration:set 'BE/debug' 1
 vendor/bin/typo3 configuration:set 'FE/debug' 1
