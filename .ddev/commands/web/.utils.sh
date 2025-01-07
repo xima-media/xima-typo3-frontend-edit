@@ -54,14 +54,78 @@ function check_typo3_version() {
     return 0
 }
 
-intro_typo3() {
-    local TYPO3=$1
+function intro_typo3() {
+    local version=$1
     message magenta "-------------------------------------------------"
-    message magenta "| \t\t\tTYPO3\t\t\t|"
+    message magenta "|\t\t\t\t\t\t|"
+    message magenta "| \t\t     TYPO3 $version     \t\t|"
+    message magenta "|\t\t\t\t\t\t|"
     message magenta "-------------------------------------------------"
-    message magenta "| \t\t\t$TYPO3\t\t\t|"
-    message magenta "-------------------------------------------------"
-    message magenta ""
+}
+
+function install_start() {
+    local version=$1
+    rm -rf /var/www/html/.test/$version/*
+    setup_environment $version
+    create_symlinks_main_extension
+    setup_composer
+}
+
+function setup_environment() {
+    local version=$1
+    BASE_PATH="/var/www/html/.test/$version"
+    rm -rf "$BASE_PATH"
+    mkdir -p "$BASE_PATH/src/$EXTENSION_KEY"
+    chmod 775 -R $BASE_PATH
+    export DATABASE="database_$version"
+    export BASE_PATH
+    export VERSION="$version"
+    export TYPO3_BIN="$BASE_PATH/vendor/bin/typo3"
+    mysql -uroot -proot -e "DROP DATABASE IF EXISTS $DATABASE"
+}
+
+function create_symlinks_main_extension() {
+    local exclusions=(".*" "Documentation" "Documentation-GENERATED-temp" "var")
+    for item in ./*; do
+        local base_name=$(basename "$item")
+        for exclusion in "${exclusions[@]}"; do
+            if [[ $base_name == "$exclusion" ]]; then
+                continue 2
+            fi
+        done
+        ln -sr "$item" "$BASE_PATH/src/$EXTENSION_KEY/$base_name"
+    done
+}
+
+function setup_composer() {
+    composer init --name="xima/typo3-$VERSION" --description="TYPO3 $VERSION" --no-interaction --working-dir "$BASE_PATH"
+    composer config extra.typo3/cms.web-dir public --working-dir "$BASE_PATH"
+    composer config repositories.src path 'src/*' --working-dir "$BASE_PATH"
+    composer config --no-interaction allow-plugins.typo3/cms-composer-installers true --working-dir "$BASE_PATH"
+    composer config --no-interaction allow-plugins.typo3/class-alias-loader true --working-dir "$BASE_PATH"
+}
+
+function setup_typo3() {
+    cd $BASE_PATH
+    export TYPO3_INSTALL_DB_DBNAME=$DATABASE
+    $TYPO3_BIN configuration:set 'BE/debug' 1
+    $TYPO3_BIN configuration:set 'FE/debug' 1
+    $TYPO3_BIN configuration:set 'SYS/devIPmask' '*'
+    $TYPO3_BIN configuration:set 'SYS/displayErrors' 1
+    $TYPO3_BIN configuration:set 'SYS/trustedHostsPattern' '.*.*'
+    $TYPO3_BIN configuration:set 'MAIL/transport' 'smtp'
+    $TYPO3_BIN configuration:set 'MAIL/transport_smtp_server' 'localhost:1025'
+    $TYPO3_BIN configuration:set 'GFX/processor' 'ImageMagick'
+    $TYPO3_BIN configuration:set 'GFX/processor_path' '/usr/bin/'
+}
+
+function update_typo3() {
+    $TYPO3_BIN database:updateschema
+    $TYPO3_BIN cache:flush
+}
+
+function add_typoscript_set() {
+    mysql -uroot -proot $DATABASE -e 'UPDATE sys_template SET include_static_file = CONCAT(include_static_file, ",EXT:xima_typo3_frontend_edit/Configuration/TypoScript") WHERE uid = 1;'
 }
 
 message() {

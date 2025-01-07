@@ -1,34 +1,23 @@
 #!/bin/bash
 
+. .ddev/commands/web/.utils.sh
+
 VERSION=13
 
 rm -rf /var/www/html/.test/$VERSION/*
-mkdir -p /var/www/html/.test/$VERSION/
-echo "{}" > /var/www/html/.test/$VERSION/composer.json
-composer config extra.typo3/cms.web-dir public -d /var/www/html/.test/$VERSION
-composer config repositories.$EXTENSION_KEY path ../../$EXTENSION_KEY -d /var/www/html/.test/$VERSION
-composer config --no-plugins allow-plugins.typo3/cms-composer-installers true -d /var/www/html/.test/$VERSION
-composer config --no-plugins allow-plugins.typo3/class-alias-loader true -d /var/www/html/.test/$VERSION
-composer req t3/cms:'^13' $PACKAGE_NAME:'*@dev' --no-progress -n -d /var/www/html/.test/$VERSION
+intro_typo3 $VERSION
+install_start $VERSION
 
-cd /var/www/html/.test/$VERSION
+composer req typo3/cms-base-distribution:'^13.4' helhum/typo3-console:'^8.2.1' $PACKAGE_NAME:'*@dev' \
+    --no-progress -n -d /var/www/html/.test/$VERSION
 
-export DATABASE="database_$VERSION"
+cd $BASE_PATH
+TYPO3_INSTALL_DB_DBNAME=$DATABASE
 mysql -h db -u root -p"root" -e "CREATE DATABASE $DATABASE;"
-
-vendor/bin/typo3 setup -n --dbname=$DATABASE --password=$TYPO3_DB_PASSWORD --create-site="https://${VERSION}.xima-typo3-frontend-edit.ddev.site" --admin-user-password=$TYPO3_SETUP_ADMIN_PASSWORD
-
-vendor/bin/typo3 configuration:set 'BE/debug' 1
-vendor/bin/typo3 configuration:set 'FE/debug' 1
-vendor/bin/typo3 configuration:set 'SYS/devIPmask' '*'
-vendor/bin/typo3 configuration:set 'SYS/displayErrors' 1
-vendor/bin/typo3 configuration:set 'SYS/trustedHostsPattern' '.*.*'
-vendor/bin/typo3 configuration:set 'MAIL/transport' 'smtp'
-vendor/bin/typo3 configuration:set 'MAIL/transport_smtp_server' 'localhost:1025'
-vendor/bin/typo3 configuration:set 'MAIL/defaultMailFromAddress' 'admin@example.com'
-vendor/bin/typo3 configuration:set 'GFX/processor' 'ImageMagick'
-vendor/bin/typo3 configuration:set 'GFX/processor_path' '/usr/bin/'
+$TYPO3_BIN  setup -n --dbname=$DATABASE --password=$TYPO3_DB_PASSWORD --create-site="https://${VERSION}.xima-typo3-frontend-edit.ddev.site" --admin-user-password=$TYPO3_SETUP_ADMIN_PASSWORD
+setup_typo3
 
 sed -i "/'deprecations'/,/^[[:space:]]*'disabled' => true,/s/'disabled' => true,/'disabled' => false,/" /var/www/html/.test/$VERSION/config/system/settings.php
 
-vendor/bin/typo3 cache:flush
+add_typoscript_set
+update_typo3
