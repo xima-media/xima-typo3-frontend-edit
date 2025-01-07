@@ -175,6 +175,7 @@ final class MenuGenerator
                     'move_element',
                     [
                         'uid' => $contentElement['uid'],
+                        'table' => 'tt_content',
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
