@@ -1,39 +1,27 @@
 name: xima-typo3-frontend-edit
-type: typo3
-docroot: public
+type: php
+docroot: .test
 php_version: "8.2"
 webserver_type: apache-fpm
+router_http_port: "80"
+router_https_port: "443"
 xdebug_enabled: false
-additional_hostnames: []
+additional_hostnames:
+  - 11.xima-typo3-frontend-edit
+  - 12.xima-typo3-frontend-edit
+  - 13.xima-typo3-frontend-edit
 additional_fqdns: []
 database:
-    type: mariadb
-    version: "10.4"
-hooks:
-    post-start:
-        - exec: composer install --ignore-platform-reqs --no-scripts
-        - exec: if [ ! -f /var/www/html/config/system/settings.php ]; then vendor/bin/typo3 install:setup --force && vendor/bin/typo3 configuration:set SYS/trustedHostsPattern ".*"; fi
+  type: mariadb
+  version: "10.4"
 webimage_extra_packages: [libxml2-utils]
 use_dns_when_possible: true
 composer_version: "2"
-web_environment:
-    - TYPO3_CONTEXT=Development/Local
-    - TYPO3_INSTALL_DB_DRIVER=mysqli
-    - TYPO3_INSTALL_DB_USER=db
-    - TYPO3_INSTALL_DB_PASSWORD=db
-    - TYPO3_INSTALL_DB_HOST=db
-    - TYPO3_INSTALL_DB_PORT=3306
-    - TYPO3_INSTALL_DB_UNIX_SOCKET=
-    - TYPO3_INSTALL_DB_USE_EXISTING=1
-    - TYPO3_INSTALL_DB_DBNAME=db
-    - TYPO3_INSTALL_ADMIN_USER=admin
-    - TYPO3_INSTALL_ADMIN_PASSWORD=Password1!
-    - TYPO3_INSTALL_SITE_NAME=Frontend Edit
-    - TYPO3_INSTALL_SITE_SETUP_TYPE=no
-    - TYPO3_INSTALL_SITE_BASE_URL=
-    - TYPO3_INSTALL_WEB_SERVER_CONFIG=apache
 nodejs_version: "16"
 corepack_enable: false
+hooks:
+  post-start:
+    - exec: mkdir -p /var/www/html/.test/ && cp /var/www/html/.ddev/templates/* /var/www/html/.test/
 
 # Key features of DDEV's config.yaml:
 

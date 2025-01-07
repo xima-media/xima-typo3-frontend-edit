@@ -85,17 +85,17 @@
 		],
 		"php:fixer": "php vendor/bin/php-cs-fixer --config=php-cs-fixer.php fix",
 		"php:fixer:check": "php vendor/bin/php-cs-fixer --config=php-cs-fixer.php fix --dry-run --format=checkstyle > php-cs-fixer.xml || true",
-		"php:lint": "find *.php . -name '*.php' ! -path './vendor/*'  ! -path './var/*' ! -path '*node_modules/*' -print0 | xargs -0 -n 1 -P 4 php -l",
-		"php:lint:check": "find *.php . -name '*.php' ! -path './vendor/*'  ! -path './var/*' ! -path '*node_modules/*' -print0 | xargs -0 -n 1 -P 4 php -l",
+		"php:lint": "find *.php . -name '*.php' ! -path './vendor/*'  ! -path './var/*' ! -path '*node_modules/*' ! -path './xima_typo3_frontend_edit/*' ! -path './.test/*' -print0 | xargs -0 -n 1 -P 4 php -l",
+		"php:lint:check": "find *.php . -name '*.php' ! -path './vendor/*'  ! -path './var/*' ! -path '*node_modules/*' ! -path './xima_typo3_frontend_edit/*' ! -path './.test/*' -print0 | xargs -0 -n 1 -P 4 php -l",
 		"php:rector": "rector",
 		"php:rector:check": "rector --dry-run",
 		"php:stan": "php vendor/bin/phpstan --generate-baseline=phpstan-baseline.neon --allow-empty-baseline --memory-limit=2G",
 		"php:stan:check": "phpstan --no-progress --error-format=checkstyle > phpstan.xml || true",
 		"typoscript:lint": "typoscript-lint",
 		"typoscript:lint:check": "typoscript-lint --fail-on-warnings",
-		"xml:lint": "find . -name '*.xlf' ! -path './vendor/*' ! -path './var/*' | xargs -r xmllint --schema vendor/symfony/translation/Resources/schemas/xliff-core-1.2-transitional.xsd --noout",
-		"xml:lint:check": "find ./ -name '*.xlf' ! -path './vendor/*' ! -path './var/*' | xargs -r xmllint --schema vendor/symfony/translation/Resources/schemas/xliff-core-1.2-transitional.xsd --noout",
-		"yaml:lint": "find ./ ! -path './vendor/*' ! -path '*/node_modules/*' \\( -name '*.yaml' -o -name '*.yml' \\) | xargs -r yaml-lint",
-		"yaml:lint:check": "find ./ ! -path './vendor/*' ! -path '*/node_modules/*' \\( -name '*.yaml' -o -name '*.yml' \\) | xargs -r yaml-lint"
+		"xml:lint": "find . -name '*.xlf' ! -path './vendor/*' ! -path './var/*' ! -path './.test/*' ! -path './xima_typo3_frontend_edit/*' | xargs -r xmllint --schema vendor/symfony/translation/Resources/schemas/xliff-core-1.2-transitional.xsd --noout",
+		"xml:lint:check": "find ./ -name '*.xlf' ! -path './vendor/*' ! -path './var/*' ! -path './.test/*' ! -path './xima_typo3_frontend_edit/*' | xargs -r xmllint --schema vendor/symfony/translation/Resources/schemas/xliff-core-1.2-transitional.xsd --noout",
+		"yaml:lint": "find ./ ! -path './vendor/*' ! -path '*/node_modules/*' ! -path './.test/*' ! -path './xima_typo3_frontend_edit/*' \\( -name '*.yaml' -o -name '*.yml' \\) | xargs -r yaml-lint",
+		"yaml:lint:check": "find ./ ! -path './vendor/*' ! -path '*/node_modules/*' ! -path './.test/*' ! -path './xima_typo3_frontend_edit/*' \\( -name '*.yaml' -o -name '*.yml' \\) | xargs -r yaml-lint"
 	}
 }

@@ -1,0 +1,87 @@
+#!/bin/bash
+
+## Description: Setup test instance.
+## Usage: setup
+## Example: "ddev setup" or "ddev setup reset"
+
+set +x
+set -e
+
+. .ddev/commands/web/.utils.sh
+
+if [ "$1" == "reset" ]; then
+    message blue "reset setup"
+    message yellow "remove Configuration/TCA/Overrides/sys_category.php"
+    rm -f Configuration/TCA/Overrides/sys_category.php
+    message yellow "remove Configuration/TCA/Overrides/tt_content.php"
+    rm -f Configuration/TCA/Overrides/tt_content.php
+
+    message yellow "registerAdditionalRecordTables removed from ext_localconf.php"
+    sed -i "/\$GLOBALS\['TYPO3_CONF_VARS'\]\['EXTENSIONS'\]\[Configuration::EXT_KEY\]\['registerAdditionalRecordTables'\] = \['sys_category', 'tt_content'\];/d" ext_localconf.php
+
+    message yellow "remove sys_category table from ext_tables.sql"
+    sed -i "/CREATE TABLE sys_category/,/);/d" ext_tables.sql
+    message yellow "remove tt_content table from ext_tables.sql"
+    sed -i "/CREATE TABLE tt_content/,/);/d" ext_tables.sql
+
+    vendor/bin/typo3 database:updateschema
+    vendor/bin/typo3 cache:flush
+    message green "done"
+    exit 0
+fi
+
+# sys_category.php override
+cat <<EOF >Configuration/TCA/Overrides/sys_category.php
+<?php
+
+defined('TYPO3') or die('Access denied.');
+
+call_user_func(function () {
+    \Xima\XimaTypo3ContentPlanner\Utility\ExtensionUtility::addContentPlannerTabToTCA('sys_category');
+});
+EOF
+message blue "Configuration/TCA/Overrides/sys_category.php created"
+
+# tt_content.php override
+cat <<EOF >Configuration/TCA/Overrides/tt_content.php
+<?php
+
+defined('TYPO3') or die('Access denied.');
+
+call_user_func(function () {
+    \Xima\XimaTypo3ContentPlanner\Utility\ExtensionUtility::addContentPlannerTabToTCA('tt_content');
+});
+EOF
+message blue "Configuration/TCA/Overrides/tt_content.php override created"
+
+message blue "registerAdditionalRecordTables added to ext_localconf.php"
+grep -qxF "\$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalRecordTables'] = ['sys_category', 'tt_content'];" ext_localconf.php || echo "\$GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalRecordTables'] = ['sys_category', 'tt_content'];" >> ext_localconf.php
+
+
+
+if ! grep -q "CREATE TABLE sys_category" "ext_tables.sql"; then
+    table_definition_sys_category="CREATE TABLE sys_category
+    (
+        tx_ximatypo3contentplanner_status   int(11) DEFAULT NULL,
+        tx_ximatypo3contentplanner_assignee int(11) DEFAULT NULL,
+        tx_ximatypo3contentplanner_comments int(11) unsigned default '0' not null,
+    );"
+    echo "$table_definition_sys_category" >> ext_tables.sql
+    message blue "extend sys_category table"
+fi
+
+if ! grep -q "CREATE TABLE tt_content" "ext_tables.sql"; then
+    table_definition_tt_content="CREATE TABLE tt_content
+    (
+        tx_ximatypo3contentplanner_status   int(11) DEFAULT NULL,
+        tx_ximatypo3contentplanner_assignee int(11) DEFAULT NULL,
+        tx_ximatypo3contentplanner_comments int(11) unsigned default '0' not null,
+    );"
+    echo "$table_definition_tt_content" >> ext_tables.sql
+    message blue "extend tt_content table"
+fi
+
+vendor/bin/typo3 database:updateschema
+vendor/bin/typo3 cache:flush
+
+message green "done"
