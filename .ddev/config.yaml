@@ -19,9 +19,12 @@ use_dns_when_possible: true
 composer_version: "2"
 nodejs_version: "16"
 corepack_enable: false
+performance_mode: "none"
 hooks:
   post-start:
     - exec: mkdir -p /var/www/html/.test/ && cp /var/www/html/.ddev/templates/* /var/www/html/.test/
+    - exec: composer install --ignore-platform-reqs --no-scripts
+
 
 # Key features of DDEV's config.yaml:
 
