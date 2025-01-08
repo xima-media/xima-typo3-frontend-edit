@@ -44,16 +44,22 @@ Include the static TypoScript template "Frontend edit" or directly import it in 
 @import 'EXT:xima_typo3_frontend_edit/Configuration/TypoScript/setup.typoscript'
 ```
 
-Adjust the constants to restrict the usage of the frontend edit:
+> TYPO3 13: Include the Frontend Edit (`xima/xima-typo3-frontend-edit`) site set. 
+
+### Adjustments
+
+Adjust the typoscript constants to restrict the usage of the frontend edit:
 
 ``` typoscript
 plugin.tx_ximatypo3frontendedit {
     settings {
+        # Ignore content elements by several criteria
         ignorePids =
         ignoreCTypes =
         ignoreListTypes =
         ignoreUids =
 
+        # Adjust the default menu structure by setting an entry to "0" to disable it
         defaultMenuStructure {
             div_info = 
             header = 
@@ -69,6 +75,8 @@ plugin.tx_ximatypo3frontendedit {
     }
 }
 ```
+
+### User settings
 
 Backend user can easily disable the whole frontend edit functionality within their user settings.
 
@@ -263,10 +271,10 @@ This could be caused by a strict referer header in your request. If the return u
 
 ## Development
 
-Use the following ddev command to easily install all support TYPO3 versions for locale development.
+Use the following ddev command to easily install all supported TYPO3 versions for locale development.
 
 ```bash
-ddev install all
+$ ddev install all
 ```
 
 ## License

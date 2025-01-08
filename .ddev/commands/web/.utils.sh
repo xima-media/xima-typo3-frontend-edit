@@ -75,7 +75,7 @@ function setup_environment() {
     local version=$1
     BASE_PATH="/var/www/html/.test/$version"
     rm -rf "$BASE_PATH"
-    mkdir -p "$BASE_PATH/src/$EXTENSION_KEY"
+    mkdir -p "$BASE_PATH/packages/$EXTENSION_KEY"
     chmod 775 -R $BASE_PATH
     export DATABASE="database_$version"
     export BASE_PATH
@@ -93,14 +93,14 @@ function create_symlinks_main_extension() {
                 continue 2
             fi
         done
-        ln -sr "$item" "$BASE_PATH/src/$EXTENSION_KEY/$base_name"
+        ln -sr "$item" "$BASE_PATH/packages/$EXTENSION_KEY/$base_name"
     done
 }
 
 function setup_composer() {
     composer init --name="xima/typo3-$VERSION" --description="TYPO3 $VERSION" --no-interaction --working-dir "$BASE_PATH"
     composer config extra.typo3/cms.web-dir public --working-dir "$BASE_PATH"
-    composer config repositories.src path 'src/*' --working-dir "$BASE_PATH"
+    composer config repositories.packages path 'packages/*' --working-dir "$BASE_PATH"
     composer config --no-interaction allow-plugins.typo3/cms-composer-installers true --working-dir "$BASE_PATH"
     composer config --no-interaction allow-plugins.typo3/class-alias-loader true --working-dir "$BASE_PATH"
 }
@@ -126,6 +126,20 @@ function update_typo3() {
 
 function add_typoscript_set() {
     mysql -uroot -proot $DATABASE -e 'UPDATE sys_template SET include_static_file = CONCAT(include_static_file, ",EXT:xima_typo3_frontend_edit/Configuration/TypoScript") WHERE uid = 1;'
+}
+
+function add_site_set() {
+  yaml_file="$BASE_PATH/config/sites/main/config.yaml"
+
+  lines_to_add="dependencies:
+    - typo3/fluid-styled-content
+    - typo3/fluid-styled-content-css
+    - xima/xima-typo3-frontend-edit"
+
+  if ! grep -q "xima/xima-typo3-frontend-edit" "$yaml_file"; then
+    echo "$lines_to_add" >> "$yaml_file"
+  fi
+  mysql -uroot -proot $DATABASE -e 'UPDATE sys_template SET clear = 0 WHERE uid = 1;'
 }
 
 message() {

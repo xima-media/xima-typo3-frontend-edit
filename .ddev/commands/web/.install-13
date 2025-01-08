@@ -19,5 +19,5 @@ setup_typo3
 
 sed -i "/'deprecations'/,/^[[:space:]]*'disabled' => true,/s/'disabled' => true,/'disabled' => false,/" /var/www/html/.test/$VERSION/config/system/settings.php
 
-add_typoscript_set
+add_site_set
 update_typo3
