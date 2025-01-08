@@ -2,8 +2,12 @@
     outline: 1px dashed gray;
 }
 
-.xima-typo3-frontend-edit--edit-button {
+.xima-typo3-frontend-edit--wrapper {
     position: absolute;
+}
+
+.xima-typo3-frontend-edit--edit-button {
+    position: relative;
     align-content: center;
     justify-content: center;
     display: none;
@@ -33,6 +37,7 @@
 .xima-typo3-frontend-edit--dropdown-menu {
     position: absolute;
     display: none;
+    right: 0;
     margin: 0;
     min-width: 120px;
     z-index: 1000;
