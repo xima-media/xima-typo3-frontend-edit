@@ -87,11 +87,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         editButton.addEventListener('click', function (event) {
           event.preventDefault();
-          dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+          dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'visible' : 'block';
         });
 
-        document.body.appendChild(editButton);
-        document.body.appendChild(dropdownMenu);
+
+        let wrapperElement = document.createElement('div');
+        wrapperElement.className = 'xima-typo3-frontend-edit--wrapper';
+        wrapperElement.appendChild(editButton);
+        wrapperElement.appendChild(dropdownMenu);
+        document.body.appendChild(wrapperElement);
 
         element.addEventListener('mouseover', function () {
           let rect = element.getBoundingClientRect();
@@ -102,13 +106,20 @@ document.addEventListener('DOMContentLoaded', function () {
           if (rect.height < 50) {
             defaultEditButtonMargin = (rect.height - defaultEditButtonHeight) / 2;
           }
-          let defaultDropdownMenuMargin = defaultEditButtonMargin + defaultEditButtonHeight;
 
-          editButton.style.top = `${rect.top + document.documentElement.scrollTop + defaultEditButtonMargin}px`;
-          editButton.style.left = `${rect.right - 40}px`;
+          // if the dropdown menu is too close to the bottom of the page, move it to the top
+          // currently it's not possible to fetch the height of the dropdown menu before it's visible once, so we have to use a fixed value
+          if (document.documentElement.clientHeight - rect.top - rect.height < 500) {
+            dropdownMenu.style.bottom = `19px`;
+          } else {
+            dropdownMenu.style.top = `${defaultEditButtonMargin + 30}px`;
+          }
+
+          wrapperElement.style.top = `${rect.top + document.documentElement.scrollTop}px`;
+          wrapperElement.style.left = `${rect.right - 30}px`;
+          editButton.style.top = `${defaultEditButtonMargin}px`;
+          editButton.style.left = `-10px`;
           editButton.style.display = 'flex';
-          dropdownMenu.style.right = `${document.documentElement.clientWidth - rect.right +5}px`;
-          dropdownMenu.style.top = `${rect.top + document.documentElement.scrollTop + defaultDropdownMenuMargin}px`;
           element.classList.add('xima-typo3-frontend-edit--edit-container');
         });
 
