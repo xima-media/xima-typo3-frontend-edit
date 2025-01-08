@@ -95,11 +95,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
         element.addEventListener('mouseover', function () {
           let rect = element.getBoundingClientRect();
-          editButton.style.top = `${rect.top + document.documentElement.scrollTop + 10}px`;
+
+          let defaultEditButtonMargin = 10;
+          let defaultEditButtonHeight = 30;
+          // if the element is too small, adjust the position of the edit button
+          if (rect.height < 50) {
+            defaultEditButtonMargin = (rect.height - defaultEditButtonHeight) / 2;
+          }
+          let defaultDropdownMenuMargin = defaultEditButtonMargin + defaultEditButtonHeight;
+
+          editButton.style.top = `${rect.top + document.documentElement.scrollTop + defaultEditButtonMargin}px`;
           editButton.style.left = `${rect.right - 40}px`;
           editButton.style.display = 'flex';
-          dropdownMenu.style.top = `${rect.top + document.documentElement.scrollTop + 40}px`;
           dropdownMenu.style.right = `${document.documentElement.clientWidth - rect.right +5}px`;
+          dropdownMenu.style.top = `${rect.top + document.documentElement.scrollTop + defaultDropdownMenuMargin}px`;
           element.classList.add('xima-typo3-frontend-edit--edit-container');
         });
 
