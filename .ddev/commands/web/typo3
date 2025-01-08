@@ -1,17 +1,19 @@
 #!/bin/bash
 
-## Description: [ExtDev] Flush cache for all available TYPO3 integration instances.
-## Usage: cc
-## Example: "ddev cc"
+## Description: [ExtDev] Exec TYPO3 command for all available TYPO3 integration instances.
+## Usage: typo3
+## Example: "ddev typo3 cache:flush" or "ddev typo3 database:schemaupdate"
 
 . .ddev/commands/web/.utils.sh
+
+command=$1
 
 mapfile -t versions < <(get_supported_typo3_versions)
 for version in "${versions[@]}"; do
     TYPO3_PATH=".test/${version}/vendor/bin/typo3"
     if [ -f "$TYPO3_PATH" ]; then
-        message green "Cache flush TYPO3 v${version}..."
-        /usr/bin/php $TYPO3_PATH cache:flush
+        message magenta "[TYPO3 v${version}] ${command}"
+        /usr/bin/php $TYPO3_PATH $command
     else
         message red "TYPO3 binary not found for version ${version}"
     fi
