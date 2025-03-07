@@ -22,11 +22,6 @@ indent_style = tab
 [package.json]
 indent_size = 2
 
-# ReST files
-[{*.rst,*.rst.txt}]
-indent_size = 4
-max_line_length = 80
-
 # SQL files
 [*.sql]
 indent_style = tab
