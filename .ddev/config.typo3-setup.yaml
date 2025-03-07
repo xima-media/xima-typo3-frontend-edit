@@ -1,0 +1,9 @@
+type: php
+docroot: .Build
+additional_hostnames:
+  - 11.xima-typo3-frontend-edit
+  - 12.xima-typo3-frontend-edit
+  - 13.xima-typo3-frontend-edit
+hooks:
+   post-start:
+    - exec: mkdir -p /var/www/html/.Build/ && cp /var/www/html/.ddev/.typo3-setup/templates/* /var/www/html/.Build/

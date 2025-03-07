@@ -1,4 +1,9 @@
 <?php
+
+#ddev-generated
+# If you want to take over this file and customize it, remove the line above
+# and ddev will respect it and won't overwrite the file.
+
 $extensionKey = getenv('EXTENSION_NAME');
 $typo3AdminUser = getenv('TYPO3_INSTALL_ADMIN_USER');
 $typo3AdminPassword = getenv('TYPO3_INSTALL_ADMIN_PASSWORD');
@@ -11,7 +16,7 @@ if (file_exists($composerJsonPath)) {
     $composerData = json_decode($composerJsonContent, true);
     $description = $composerData['description'];
 } else {
-    $description = 'composer.json file not found.';
+    $description = 'composer.json file not found. =(';
 }
 ?>
 <!DOCTYPE html>
@@ -23,6 +28,12 @@ if (file_exists($composerJsonPath)) {
             rel="stylesheet"
             href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
     >
+    <style>
+        .flex {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
 </head>
 <body>
 <header class="container">
@@ -36,15 +47,53 @@ if (file_exists($composerJsonPath)) {
     <p>Run <code>ddev install all</code> to install all TYPO3 instances below:</p>
     <?php
     foreach ($supportedVersions as $version) {
-        $directoryPath = "/var/www/html/.test/" . $version;
+        $directoryPath = "/var/www/html/.Build/" . $version;
         if (is_dir($directoryPath)) {
-            echo "<article><kbd>{$version}</kbd> <a target='_blank' href='https://{$version}.{$extensionKey}.ddev.site/typo3/?u={$typo3AdminUser}&p={$typo3AdminPassword}'>https://{$version}.{$extensionKey}.ddev.site/typo3</a></article>";
+            echo "<article class='flex'><kbd>{$version}</kbd><div><strong>Frontend</strong><br/><strong>Backend</strong></div><div><a target='_blank' href='https://{$version}.{$extensionKey}.ddev.site'>https://{$version}.{$extensionKey}.ddev.site</a><br/><a target='_blank' href='https://{$version}.{$extensionKey}.ddev.site/typo3/?u={$typo3AdminUser}&p={$typo3AdminPassword}'>https://{$version}.{$extensionKey}.ddev.site/typo3</a></div></article>";
         } else {
             echo "<article>Version {$version} is not installed. Run <code>ddev install {$version}</code> to install.</article>";
         }
     }
     ?>
     <h2>Additional information</h2>
+    <h4>DDEV commands</h4>
+    <?php
+    // Directories to scan for DDEV commands
+    $directories = [
+        '/var/www/html/.ddev/commands/web',
+        '/var/www/html/.ddev/commands/host'
+    ];
+
+    foreach ($directories as $directory) {
+        foreach (new DirectoryIterator($directory) as $fileInfo) {
+            $filePath = $fileInfo->getPathname();
+            $fileName = $fileInfo->getFilename();
+
+            if ($fileName[0] === '.' || $fileInfo->isDir()) {
+                continue;
+            }
+
+            $fileContent = file($filePath);
+            if (strpos($fileContent[0], '#!/bin/bash') === 0) {
+                $description = '';
+                $usage = '';
+                $example = '';
+
+                foreach ($fileContent as $line) {
+                    if (strpos($line, '## Description:') === 0) {
+                        $description = trim(str_replace('## Description:', '', $line));
+                    } elseif (strpos($line, '## Usage:') === 0) {
+                        $usage = trim(str_replace('## Usage:', '', $line));
+                    } elseif (strpos($line, '## Example:') === 0) {
+                        $example = trim(str_replace('## Example:', '', $line));
+                    }
+                }
+
+                echo "<article><code>ddev $usage</code><br/>$description<br/> <em>Example: $example</em></article>";
+            }
+        }
+    }
+    ?>
     <details open>
         <summary><h4>TYPO3 Backend Credentials</h4></summary>
         <ul>
@@ -52,38 +101,6 @@ if (file_exists($composerJsonPath)) {
             <li>Password: <code><?php echo($typo3AdminPassword); ?></code></li>
         </ul>
     </details>
-    <h4>DDEV commands</h4>
-    <?php
-    $directory = '/var/www/html/.ddev/commands/web';
-
-    foreach (new DirectoryIterator($directory) as $fileInfo) {
-        $filePath = $fileInfo->getPathname();
-        $fileName = $fileInfo->getFilename();
-
-        if ($fileName[0] === '.' || $fileInfo->isDir()) {
-            continue;
-        }
-
-        $fileContent = file($filePath);
-        if (strpos($fileContent[0], '#!/bin/bash') === 0) {
-            $description = '';
-            $usage = '';
-            $example = '';
-
-            foreach ($fileContent as $line) {
-                if (strpos($line, '## Description:') === 0) {
-                    $description = trim(str_replace('## Description:', '', $line));
-                } elseif (strpos($line, '## Usage:') === 0) {
-                    $usage = trim(str_replace('## Usage:', '', $line));
-                } elseif (strpos($line, '## Example:') === 0) {
-                    $example = trim(str_replace('## Example:', '', $line));
-                }
-            }
-
-            echo "<article><code>ddev $usage</code><br/>$description<br/> <em>Example: $example</em></article>";
-        }
-    }
-    ?>
 </main>
 
 </body>
