@@ -4,23 +4,23 @@
   "license": "GPL-2.0-or-later",
   "type": "typo3-cms-extension",
   "authors": [
-    {
-      "name": "#ddev-generated",
-      "email": "x@y.com"
-    }
+	{
+	  "name": "#ddev-generated",
+	  "email": "x@y.com"
+	}
   ],
   "require": {},
   "suggest": {},
   "conflict": {},
   "extra": {
-    "typo3/cms": {
-      "extension-key": "sitepackage"
-    }
+	"typo3/cms": {
+	  "extension-key": "sitepackage"
+	}
   },
   "version": "1.0.0",
   "autoload": {
-    "psr-4": {
-      "Test\\Sitepackage\\": "Classes/"
-    }
+	"psr-4": {
+	  "Test\\Sitepackage\\": "Classes/"
+	}
   }
 }
