@@ -71,6 +71,14 @@
 		],
 		"composer:normalize": "@composer normalize --no-check-lock",
 		"composer:normalize:check": "@composer normalize --no-check-lock --dry-run",
+		"docs": [
+			"@docs:cleanup",
+			"@docs:build",
+			"@docs:open"
+		],
+		"docs:build": "docker compose run --rm docs",
+		"docs:cleanup": "rm -rf .Build/docs",
+		"docs:open": "open .Build/docs/Index.html",
 		"editorconfig:lint": "ec --strict --fix --git-only -n",
 		"editorconfig:lint:check": "ec --strict --git-only -n",
 		"fix": [
