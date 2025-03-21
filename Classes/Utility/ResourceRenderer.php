@@ -11,10 +11,6 @@ use Xima\XimaTypo3FrontendEdit\Configuration;
 
 class ResourceRenderer
 {
-    public function __construct(private readonly RequestId $requestId)
-    {
-    }
-
     public function render(): string
     {
         $view = GeneralUtility::makeInstance(StandaloneView::class);
@@ -23,7 +19,12 @@ class ResourceRenderer
         $view->setPartialRootPaths(['EXT:' . Configuration::EXT_KEY . '/Resources/Private/Partials']);
         $view->setLayoutRootPaths(['EXT:' . Configuration::EXT_KEY . '/Resources/Private/Layouts']);
 
-        $view->assign('resources', ResourceUtility::getResources(['nonce' => $this->requestId->nonce]));
+        $view->assign('resources', ResourceUtility::getResources(['nonce' => $this->resolveNonceValue()]));
         return $view->render();
+    }
+
+    private function resolveNonceValue(): string
+    {
+        return GeneralUtility::makeInstance(RequestId::class)->nonce ? GeneralUtility::makeInstance(RequestId::class)->nonce->consume() : '';
     }
 }
