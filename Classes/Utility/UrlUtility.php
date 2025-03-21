@@ -6,26 +6,23 @@ namespace Xima\XimaTypo3FrontendEdit\Utility;
 
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer;
-use TYPO3\CMS\Frontend\Typolink\LinkFactory;
 
 class UrlUtility
 {
     /**
     * @throws \TYPO3\CMS\Frontend\Typolink\UnableToLinkException
     */
-    public static function getUrl(int $pageId, ?int $langugageUid = null, bool $forceAbsoluteUrl = true): string
+    public static function getUrl(int $pageId, ?int $languageUid = 0, bool $forceAbsoluteUrl = true): string
     {
-        $linkFactory = GeneralUtility::makeInstance(LinkFactory::class);
+        /** @var ContentObjectRenderer $contentObjectRenderer */
         $contentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
+
         $typolinkConfiguration = [
             'parameter' => $pageId,
-            'language' => $langugageUid ?? 0,
+            'language' => $languageUid,
+            'forceAbsoluteUrl' => $forceAbsoluteUrl,
         ];
 
-        if ($forceAbsoluteUrl) {
-            $typolinkConfiguration['forceAbsoluteUrl'] = true;
-        }
-
-        return $linkFactory->create('', $typolinkConfiguration, $contentObjectRenderer)->getUrl();
+        return $contentObjectRenderer->typoLink_URL($typolinkConfiguration);
     }
 }
