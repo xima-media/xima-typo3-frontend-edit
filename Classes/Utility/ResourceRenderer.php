@@ -25,6 +25,6 @@ class ResourceRenderer
 
     private function resolveNonceValue(): string
     {
-        return GeneralUtility::makeInstance(RequestId::class)->nonce ? GeneralUtility::makeInstance(RequestId::class)->nonce->consume() : '';
+        return property_exists(RequestId::class, 'nonce') ? GeneralUtility::makeInstance(RequestId::class)->nonce->consume() : '';
     }
 }
