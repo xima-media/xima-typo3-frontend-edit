@@ -1,0 +1,29 @@
+#!/bin/bash
+
+## #ddev-generated
+## Description: Exec command for all TYPO3 instances.
+## Usage: all
+## Example: "ddev all composer du -o" or "ddev all typo3 cache:flush"
+
+. .ddev/.typo3-setup/scripts/utils.sh
+
+command=$@
+mapfile -t versions < <(get_supported_typo3_versions)
+
+for version in "${versions[@]}"; do
+    TYPO3_PATH="/var/www/html/.test/${version}"
+    if [ -d "$TYPO3_PATH" ]; then
+        if [[ $command == typo3* ]]; then
+            if [[ $version == 11 ]]; then
+                tempCommand="/usr/bin/php vendor/bin/typo3cms${command:5}"
+            else
+                tempCommand="/usr/bin/php vendor/bin/${command}"
+            fi
+        fi
+        cd $TYPO3_PATH
+        message magenta "[TYPO3 v${version}] ${tempCommand}"
+        $tempCommand
+    else
+        message red "TYPO3 instance not found for version ${version}"
+    fi
+done

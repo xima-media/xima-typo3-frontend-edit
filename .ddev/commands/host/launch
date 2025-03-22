@@ -1,0 +1,61 @@
+#!/bin/bash
+
+## #ddev-generated
+## Description: Open a browser with the launch site or a specific TYPO3 version.
+## Usage: launch
+## Example: "ddev launch" or "ddev launch 13" or "ddev launch 13 /typo3"
+
+. .ddev/.typo3-setup/scripts/.utils.sh
+
+if [ "${DDEV_PROJECT_STATUS}" != "running" ] && [ -z "$no_recursion" ]; then
+    message yellow "Project ${DDEV_PROJECT} is not running, starting it"
+    ddev start
+    start_exit_code=$?
+    if [ $start_exit_code -ne 0 ]; then
+        exit $start_exit_code
+    fi
+    no_recursion=true ddev "$(basename "$0")" "$@"
+    exit $?
+fi
+
+VERSION=$1
+shift
+
+if [ -z "$VERSION" ]; then
+    FULLURL=${DDEV_PRIMARY_URL}
+else
+    HOSTNAMES=$(printenv DDEV_HOSTNAME)
+
+    IFS=',' read -ra ADDR <<< "$HOSTNAMES"
+    for i in "${ADDR[@]}"; do
+        if [[ $i == ${VERSION}.* ]]; then
+            FULLURL="https://$i"
+            break
+        fi
+    done
+
+    if [ -z "$FULLURL" ]; then
+        message red "No matching URL found for version ${VERSION}"
+        exit 1
+    fi
+
+    if [ -n "${1:-}" ]; then
+        FULLURL="${FULLURL%/}/${1#/}"
+    fi
+fi
+
+case $OSTYPE in
+  linux-gnu)
+    if [[ ! -z "${GITPOD_INSTANCE_ID}" ]]; then
+        gp preview ${FULLURL}
+    else
+        xdg-open ${FULLURL}
+    fi
+    ;;
+  "darwin"*)
+    open ${FULLURL}
+    ;;
+  "win*"* | "msys"*)
+    start ${FULLURL}
+    ;;
+esac
