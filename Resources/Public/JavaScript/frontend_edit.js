@@ -99,6 +99,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         element.addEventListener('mouseover', function () {
           let rect = element.getBoundingClientRect();
+          let rectInPageContext = {
+            top: rect.top + document.documentElement.scrollTop,
+            left: rect.left + document.documentElement.scrollLeft,
+            width: rect.width,
+            height: rect.height
+          };
+
 
           let defaultEditButtonMargin = 10;
           let defaultEditButtonHeight = 30;
@@ -109,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
           // if the dropdown menu is too close to the bottom of the page, move it to the top
           // currently it's not possible to fetch the height of the dropdown menu before it's visible once, so we have to use a fixed value
-          if (document.documentElement.clientHeight - rect.top - rect.height < 500) {
+          if (document.documentElement.scrollHeight - rectInPageContext.top - rect.height < 500 && rect.height < 700) {
             dropdownMenu.style.bottom = `19px`;
           } else {
             dropdownMenu.style.top = `${defaultEditButtonMargin + 30}px`;
