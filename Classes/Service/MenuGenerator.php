@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service;
 
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
@@ -231,22 +232,39 @@ final class MenuGenerator
         ), $identifier);
     }
 
-    private function handleAdditionalData(Button &$button, array $contentElement, array $contentElementConfig, array $data, BackendUserAuthentication $backendUser, int $languageUid, string $returnUrlAnchor): void
+    private function handleAdditionalData(Button $button, array $contentElement, array $contentElementConfig, array $data, BackendUserAuthentication $backendUser, int $languageUid, string $returnUrlAnchor): void
     {
-        if (array_key_exists($contentElement['uid'], $data) && !empty($data[$contentElement['uid']])) {
+        if ((array_key_exists($contentElement['uid'], $data) && ($uid = $contentElement['uid']) && !empty($data[$uid])) ||
+            (array_key_exists('l10n_source', $contentElement) && array_key_exists($contentElement['l10n_source'], $data) &&  ($uid = $contentElement['l10n_source'])&& !empty($data[$uid]))
+        ) {
             $button->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_data',
                 ButtonType::Divider
             ), 'div_data');
 
-            foreach ($data[$contentElement['uid']] as $key => $dataEntry) {
+            foreach ($data[$uid] as $key => $dataEntry) {
                 if (!$dataEntry['label'] || !(($dataEntry['table'] && $dataEntry['uid']) || ($dataEntry['url']))) {
                     continue;
                 }
 
+                $recordUid = null;
                 if ($dataEntry['table'] && $dataEntry['uid']) {
                     if (!$backendUser->recordEditAccessInternals($dataEntry['table'], $dataEntry['uid'])) {
                         continue;
+                    }
+                    $recordUid = $dataEntry['uid'];
+
+                    /*
+                    * Check if the record is translated and if so, get the translation
+                    */
+                    $record = BackendUtility::getRecord($dataEntry['table'], $recordUid);
+                    if ($record && array_key_exists('sys_language_uid', $record) && $record['sys_language_uid'] !== $languageUid) {
+                        $record = ContentUtility::getTranslatedRecord($dataEntry['table'], $recordUid, $languageUid);
+                        if ($record) {
+                            $recordUid = $record['uid'];
+                        } else {
+                            continue;
+                        }
                     }
                 }
 
@@ -255,7 +273,7 @@ final class MenuGenerator
                     [
                         'edit' => [
                             $dataEntry['table'] => [
-                                $dataEntry['uid'] => 'edit',
+                                $recordUid => 'edit',
                             ],
                             'language' => $languageUid,
                         ],
