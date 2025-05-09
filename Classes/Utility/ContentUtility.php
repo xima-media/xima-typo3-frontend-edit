@@ -28,6 +28,19 @@ class ContentUtility
             ->executeQuery()->fetchAllAssociative();
     }
 
+    public static function getTranslatedRecord(string $table, int $parendUid, int $languageUid): array|bool
+    {
+        $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable($table);
+
+        return $queryBuilder
+            ->select('*')
+            ->from($table)
+            ->where(
+                $queryBuilder->expr()->eq('l10n_parent', $queryBuilder->createNamedParameter($parendUid, Connection::PARAM_INT)),
+                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT)),
+            )
+            ->executeQuery()->fetchAssociative();
+    }
     public static function getContentElementConfig(string $cType, string $listType): array|bool
     {
         $tca = $cType === 'list' ? $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] : $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'];
