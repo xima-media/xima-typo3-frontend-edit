@@ -12,20 +12,33 @@ use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 
 class ContentUtility
 {
-    public static function fetchContentElements(int $pid, int $languageUid): array
+    public static function fetchContentElements(int $pid, int $languageUid, bool $includeMultilingualContent = true): array
     {
         $queryBuilder = GeneralUtility::makeInstance(ConnectionPool::class)->getQueryBuilderForTable('tt_content');
 
-        return $queryBuilder
+        $query = $queryBuilder
             ->select('*')
             ->from('tt_content')
             ->where(
                 $queryBuilder->expr()->eq('hidden', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
                 $queryBuilder->expr()->eq('deleted', $queryBuilder->createNamedParameter(0, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)),
-                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT)),
-            )
-            ->executeQuery()->fetchAllAssociative();
+                $queryBuilder->expr()->eq('pid', $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT))
+            );
+
+        if ($includeMultilingualContent) {
+            $query->andWhere(
+                $queryBuilder->expr()->orX(
+                    $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter(-1, Connection::PARAM_INT)),
+                    $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT))
+                )
+            );
+        } else {
+            $query->andWhere(
+                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT))
+            );
+        }
+
+        return $query->executeQuery()->fetchAllAssociative();
     }
 
     public static function getTranslatedRecord(string $table, int $parendUid, int $languageUid): array|bool
