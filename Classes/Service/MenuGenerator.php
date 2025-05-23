@@ -25,7 +25,7 @@ final class MenuGenerator
     {
     }
 
-    public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = []): array
+    public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = [], bool $linkTargetBlank = false): array
     {
         $ignoredPids = $this->settingsService->getIgnoredPids();
         foreach ($ignoredPids as $ignoredPid) {
@@ -114,7 +114,8 @@ final class MenuGenerator
                     ]
                 )->__toString()
                 . '&tx_ximatypo3frontendedit', // add custom parameter to identify the request and render the save and close button in the edit form
-                icon: $contentElement['CType'] === 'list' ? 'content-plugin' : 'content-textpic'
+                icon: $contentElement['CType'] === 'list' ? 'content-plugin' : 'content-textpic',
+                linkTargetBlank: $linkTargetBlank
             );
             $this->processNewButton(
                 $menuButton,
@@ -128,7 +129,8 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
-                icon: 'apps-pagetree-page-default'
+                icon: 'apps-pagetree-page-default',
+                linkTargetBlank: $linkTargetBlank
             );
 
             /*
@@ -166,7 +168,8 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
-                icon: 'actions-info'
+                icon: 'actions-info',
+                linkTargetBlank: $linkTargetBlank
             );
             $this->processNewButton(
                 $menuButton,
@@ -181,7 +184,8 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
-                icon: 'actions-move'
+                icon: 'actions-move',
+                linkTargetBlank: $linkTargetBlank
             );
             $this->processNewButton(
                 $menuButton,
@@ -194,7 +198,8 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString(),
-                icon: 'actions-history'
+                icon: 'actions-history',
+                linkTargetBlank: $linkTargetBlank
             );
 
             /*
@@ -218,7 +223,7 @@ final class MenuGenerator
         return $result;
     }
 
-    private function processNewButton(Button &$button, string $identifier, ButtonType $type, ?string $label = null, ?string $url = null, ?string $icon = null): void
+    private function processNewButton(Button &$button, string $identifier, ButtonType $type, ?string $label = null, ?string $url = null, ?string $icon = null, bool $linkTargetBlank = false): void
     {
         if (!$this->settingsService->checkDefaultMenuStructure($identifier)) {
             return;
@@ -228,7 +233,8 @@ final class MenuGenerator
             $label ?: "LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:$identifier",
             $type,
             $url,
-            $icon ? $this->iconFactory->getIcon($icon, Icon::SIZE_SMALL) : null
+            $icon ? $this->iconFactory->getIcon($icon, Icon::SIZE_SMALL) : null,
+            $linkTargetBlank
         ), $identifier);
     }
 

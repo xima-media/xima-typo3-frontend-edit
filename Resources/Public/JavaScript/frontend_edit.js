@@ -87,7 +87,10 @@ document.addEventListener('DOMContentLoaded', function () {
     for (let actionName in contentElement.menu.children) {
       const action = contentElement.menu.children[actionName];
       const actionElement = document.createElement(action.type === 'link' ? 'a' : 'div');
-      if (action.type === 'link') actionElement.href = action.url;
+      if (action.type === 'link') {
+        actionElement.href = action.url;
+        if (action.targetBlank) actionElement.target = '_blank';
+      }
       if (action.type === 'divider') actionElement.className = 'xima-typo3-frontend-edit--divider';
 
       actionElement.classList.add(actionName);
