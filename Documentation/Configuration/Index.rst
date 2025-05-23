@@ -16,4 +16,5 @@ Learn what configuration options are available on the following pages:
     :maxdepth: 3
 
     TypoScript
+    ExtensionConfiguration
     UserSettings
