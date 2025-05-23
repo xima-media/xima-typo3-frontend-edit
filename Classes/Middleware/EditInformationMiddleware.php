@@ -49,8 +49,7 @@ class EditInformationMiddleware implements MiddlewareInterface
                         (int)$pid,
                         $returnUrl,
                         (int)$languageUid,
-                        $data,
-                        array_key_exists('linkTargetBlank', $this->configuration) && $this->configuration['linkTargetBlank']
+                        $data
                     ),
                     'UTF-8'
                 )
