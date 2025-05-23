@@ -1,6 +1,8 @@
-# cat=basic//100; type=boolean; label=Enable the save and close button within edit forms
+# cat=basic//100; type=boolean; label=Save and Close: Enable this option to render a save and close button in the header of edit forms
 enableSaveAndCloseButton = 1
-# cat=basic//101; type=boolean; label=Enable this option to ignore the referer header for the return url and force the url generation
+# cat=basic//101; type=boolean; label=Return URL generation: Enable this option to ignore the referer header for the return url and force the url generation
 forceReturnUrlGeneration = 0
-# cat=basic//102; type=boolean; label=Enable the target blank option for all links to open in a new tab
+# cat=basic//102; type=boolean; label=Target blank: Enable the target blank option for all dropdown links to open in a new tab
 linkTargetBlank = 0
+# cat=basic//103; type=boolean; label=Simple mode: This mode will disable the menu dropdown and use the edit icon button directly as edit link instead
+simpleMode = 0
