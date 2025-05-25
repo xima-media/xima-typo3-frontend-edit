@@ -97,7 +97,8 @@ final class MenuGenerator
                             'returnUrl' => $returnUrlAnchor,
                         ]
                     )->__toString(),
-                    icon: $this->iconFactory->getIcon('actions-open', Icon::SIZE_SMALL)
+                    icon: $this->iconFactory->getIcon('actions-open', Icon::SIZE_SMALL),
+                    targetBlank: array_key_exists('linkTargetBlank', $this->configuration) && $this->configuration['linkTargetBlank']
                 );
             } else {
                 $menuButton = new Button(
