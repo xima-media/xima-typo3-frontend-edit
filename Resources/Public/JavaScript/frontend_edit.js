@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
     editButton.title = contentElement.menu.label;
     editButton.innerHTML = contentElement.menu.icon;
     editButton.setAttribute('data-cid', uid);
-    if (contentElement.menu.type === 'link') {
+    if (contentElement.menu?.type === 'link' && contentElement.menu?.url) {
       editButton.href = contentElement.menu.url;
       if (contentElement.menu.targetBlank) editButton.target = '_blank';
     }
