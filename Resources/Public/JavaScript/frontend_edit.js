@@ -61,11 +61,15 @@ document.addEventListener('DOMContentLoaded', function () {
   * @returns {HTMLButtonElement} - The created edit button.
   */
   const createEditButton = (uid, contentElement) => {
-    const editButton = document.createElement('button');
+    const editButton = contentElement.menu.url ? document.createElement('a') : document.createElement('button');
     editButton.className = 'xima-typo3-frontend-edit--edit-button';
     editButton.title = contentElement.menu.label;
     editButton.innerHTML = contentElement.menu.icon;
     editButton.setAttribute('data-cid', uid);
+    if (contentElement.menu?.type === 'link' && contentElement.menu?.url) {
+      editButton.href = contentElement.menu.url;
+      if (contentElement.menu.targetBlank) editButton.target = '_blank';
+    }
     return editButton;
   };
 
@@ -87,7 +91,10 @@ document.addEventListener('DOMContentLoaded', function () {
     for (let actionName in contentElement.menu.children) {
       const action = contentElement.menu.children[actionName];
       const actionElement = document.createElement(action.type === 'link' ? 'a' : 'div');
-      if (action.type === 'link') actionElement.href = action.url;
+      if (action.type === 'link') {
+        actionElement.href = action.url;
+        if (action.targetBlank) actionElement.target = '_blank';
+      }
       if (action.type === 'divider') actionElement.className = 'xima-typo3-frontend-edit--divider';
 
       actionElement.classList.add(actionName);
@@ -197,18 +204,23 @@ document.addEventListener('DOMContentLoaded', function () {
         uid = contentElement.element.l10n_source;
       }
 
+      const simpleMode = contentElement.menu.url;
       const editButton = createEditButton(uid, contentElement);
+
       const dropdownMenu = createDropdownMenu(uid, contentElement);
 
       editButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'visible' : 'block';
+        if (!simpleMode) {
+          event.preventDefault();
+          dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'visible' : 'block';
+        }
       });
+
 
       const wrapperElement = document.createElement('div');
       wrapperElement.className = 'xima-typo3-frontend-edit--wrapper';
       wrapperElement.appendChild(editButton);
-      wrapperElement.appendChild(dropdownMenu);
+      if (!simpleMode) wrapperElement.appendChild(dropdownMenu);
       document.body.appendChild(wrapperElement);
 
       setupHoverEvents(element, wrapperElement, editButton, dropdownMenu);

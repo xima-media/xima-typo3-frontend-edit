@@ -7,11 +7,13 @@ namespace Xima\XimaTypo3FrontendEdit\Service;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
@@ -21,8 +23,13 @@ final class MenuGenerator
 {
     protected array $configuration = [];
 
-    public function __construct(protected readonly IconFactory $iconFactory, protected readonly EventDispatcher $eventDispatcher, protected readonly SettingsService $settingsService)
-    {
+    public function __construct(
+        protected readonly IconFactory $iconFactory,
+        protected readonly EventDispatcher $eventDispatcher,
+        protected readonly SettingsService $settingsService,
+        protected readonly ExtensionConfiguration $extensionConfiguration
+    ) {
+        $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
     }
 
     public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = []): array
@@ -72,136 +79,158 @@ final class MenuGenerator
             $contentElementConfig = ContentUtility::getContentElementConfig($contentElement['CType'], $contentElement['list_type']);
             $returnUrlAnchor = $returnUrl . '#c' . $contentElement['uid'];
 
-            $menuButton = new Button(
-                'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_menu',
-                ButtonType::Menu,
-                icon: $this->iconFactory->getIcon('actions-open', Icon::SIZE_SMALL)
-            );
+            $simpleMode = (array_key_exists('simpleMode', $this->configuration) && $this->configuration['simpleMode']) || $this->settingsService->checkSimpleModeMenuStructure();
 
-            /*
-            * Info
-            */
-            $this->processNewButton($menuButton, 'div_info', ButtonType::Divider);
-
-            $additionalUid = $GLOBALS['BE_USER']->isAdmin() ? ' <code>[' . $contentElement['uid'] . ']</code>' : '';
-            $this->processNewButton(
-                $menuButton,
-                'header',
-                ButtonType::Info,
-                label: $GLOBALS['LANG']->sL($contentElementConfig['label']) . '<p><small>' . ($contentElement['header'] ? ContentUtility::shortenString($contentElement['header']) : '') . $additionalUid . '</small></p>',
-                icon: $contentElementConfig['icon']
-            );
-
-            /*
-            * Edit
-            */
-            $this->processNewButton($menuButton, 'div_edit', ButtonType::Divider);
-            $this->processNewButton(
-                $menuButton,
-                'edit',
-                ButtonType::Link,
-                label: $contentElement['CType'] === 'list' ? 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_plugin' : 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_content_element',
-                url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
-                    'record_edit',
-                    [
-                        'edit' => [
-                            'tt_content' => [
-                                $contentElement['uid'] => 'edit',
+            if ($simpleMode) {
+                $menuButton = new Button(
+                    'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_menu',
+                    ButtonType::Link,
+                    url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                        'record_edit',
+                        [
+                            'edit' => [
+                                'tt_content' => [
+                                    $contentElement['uid'] => 'edit',
+                                ],
+                                'language' => $languageUid,
                             ],
-                            'language' => $languageUid,
-                        ],
-                        'returnUrl' => $returnUrlAnchor,
-                    ]
-                )->__toString()
-                . '&tx_ximatypo3frontendedit', // add custom parameter to identify the request and render the save and close button in the edit form
-                icon: $contentElement['CType'] === 'list' ? 'content-plugin' : 'content-textpic'
-            );
-            $this->processNewButton(
-                $menuButton,
-                'edit_page',
-                ButtonType::Link,
-                url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
-                    'web_layout',
-                    [
-                        'id' => $pid,
-                        'language' => $languageUid,
-                        'returnUrl' => $returnUrlAnchor,
-                    ],
-                )->__toString(),
-                icon: 'apps-pagetree-page-default'
-            );
+                            'returnUrl' => $returnUrlAnchor,
+                        ]
+                    )->__toString(),
+                    icon: $this->iconFactory->getIcon('actions-open', Icon::SIZE_SMALL),
+                    targetBlank: array_key_exists('linkTargetBlank', $this->configuration) && $this->configuration['linkTargetBlank']
+                );
+            } else {
+                $menuButton = new Button(
+                    'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_menu',
+                    ButtonType::Menu,
+                    icon: $this->iconFactory->getIcon('actions-open', Icon::SIZE_SMALL)
+                );
 
-            /*
-            * Action
-            */
-            $this->processNewButton($menuButton, 'div_action', ButtonType::Divider);
-            $this->processNewButton(
-                $menuButton,
-                'hide',
-                ButtonType::Link,
-                url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
-                    'tce_db',
-                    [
-                        'data' => [
-                            'tt_content' => [
-                                $contentElement['uid'] => [
-                                    'hidden' => 1,
+                /*
+                * Info
+                */
+                $this->processNewButton($menuButton, 'div_info', ButtonType::Divider);
+
+                $additionalUid = $GLOBALS['BE_USER']->isAdmin() ? ' <code>[' . $contentElement['uid'] . ']</code>' : '';
+                $this->processNewButton(
+                    $menuButton,
+                    'header',
+                    ButtonType::Info,
+                    label: $GLOBALS['LANG']->sL($contentElementConfig['label']) . '<p><small>' . ($contentElement['header'] ? ContentUtility::shortenString($contentElement['header']) : '') . $additionalUid . '</small></p>',
+                    icon: $contentElementConfig['icon']
+                );
+
+                /*
+                * Edit
+                */
+                $this->processNewButton($menuButton, 'div_edit', ButtonType::Divider);
+                $this->processNewButton(
+                    $menuButton,
+                    'edit',
+                    ButtonType::Link,
+                    label: $contentElement['CType'] === 'list' ? 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_plugin' : 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_content_element',
+                    url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                        'record_edit',
+                        [
+                            'edit' => [
+                                'tt_content' => [
+                                    $contentElement['uid'] => 'edit',
+                                ],
+                                'language' => $languageUid,
+                            ],
+                            'returnUrl' => $returnUrlAnchor,
+                        ]
+                    )->__toString()
+                    . '&tx_ximatypo3frontendedit', // add custom parameter to identify the request and render the save and close button in the edit form
+                    icon: $contentElement['CType'] === 'list' ? 'content-plugin' : 'content-textpic'
+                );
+                $this->processNewButton(
+                    $menuButton,
+                    'edit_page',
+                    ButtonType::Link,
+                    url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                        'web_layout',
+                        [
+                            'id' => $pid,
+                            'language' => $languageUid,
+                            'returnUrl' => $returnUrlAnchor,
+                        ],
+                    )->__toString(),
+                    icon: 'apps-pagetree-page-default'
+                );
+
+                /*
+                * Action
+                */
+                $this->processNewButton($menuButton, 'div_action', ButtonType::Divider);
+                $this->processNewButton(
+                    $menuButton,
+                    'hide',
+                    ButtonType::Link,
+                    url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                        'tce_db',
+                        [
+                            'data' => [
+                                'tt_content' => [
+                                    $contentElement['uid'] => [
+                                        'hidden' => 1,
+                                    ],
                                 ],
                             ],
+                            'redirect' => $returnUrlAnchor,
                         ],
-                        'redirect' => $returnUrlAnchor,
-                    ],
-                )->__toString(),
-                icon: 'actions-toggle-on'
-            );
-            $this->processNewButton(
-                $menuButton,
-                'info',
-                ButtonType::Link,
-                url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
-                    'show_item',
-                    [
-                        'uid' => $contentElement['uid'],
-                        'table' => 'tt_content',
-                        'returnUrl' => $returnUrlAnchor,
-                    ],
-                )->__toString(),
-                icon: 'actions-info'
-            );
-            $this->processNewButton(
-                $menuButton,
-                'move',
-                ButtonType::Link,
-                url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
-                    'move_element',
-                    [
-                        'uid' => $contentElement['uid'],
-                        'table' => 'tt_content',
-                        'expandPage' => $pid,
-                        'returnUrl' => $returnUrlAnchor,
-                    ],
-                )->__toString(),
-                icon: 'actions-move'
-            );
-            $this->processNewButton(
-                $menuButton,
-                'history',
-                ButtonType::Link,
-                url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
-                    'record_history',
-                    [
-                        'element' => 'tt_content:' . $contentElement['uid'],
-                        'returnUrl' => $returnUrlAnchor,
-                    ],
-                )->__toString(),
-                icon: 'actions-history'
-            );
+                    )->__toString(),
+                    icon: 'actions-toggle-on'
+                );
+                $this->processNewButton(
+                    $menuButton,
+                    'info',
+                    ButtonType::Link,
+                    url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                        'show_item',
+                        [
+                            'uid' => $contentElement['uid'],
+                            'table' => 'tt_content',
+                            'returnUrl' => $returnUrlAnchor,
+                        ],
+                    )->__toString(),
+                    icon: 'actions-info'
+                );
+                $this->processNewButton(
+                    $menuButton,
+                    'move',
+                    ButtonType::Link,
+                    url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                        'move_element',
+                        [
+                            'uid' => $contentElement['uid'],
+                            'table' => 'tt_content',
+                            'expandPage' => $pid,
+                            'returnUrl' => $returnUrlAnchor,
+                        ],
+                    )->__toString(),
+                    icon: 'actions-move'
+                );
+                $this->processNewButton(
+                    $menuButton,
+                    'history',
+                    ButtonType::Link,
+                    url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                        'record_history',
+                        [
+                            'element' => 'tt_content:' . $contentElement['uid'],
+                            'returnUrl' => $returnUrlAnchor,
+                        ],
+                    )->__toString(),
+                    icon: 'actions-history'
+                );
 
-            /*
-            * Data
-            */
-            $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $backendUser, $languageUid, $returnUrlAnchor);
-
+                /*
+                * Data
+                */
+                $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $backendUser, $languageUid, $returnUrlAnchor);
+            }
             /*
             * Event
             */
@@ -228,14 +257,15 @@ final class MenuGenerator
             $label ?: "LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:$identifier",
             $type,
             $url,
-            $icon ? $this->iconFactory->getIcon($icon, Icon::SIZE_SMALL) : null
+            $icon ? $this->iconFactory->getIcon($icon, Icon::SIZE_SMALL) : null,
+            array_key_exists('linkTargetBlank', $this->configuration) && $this->configuration['linkTargetBlank']
         ), $identifier);
     }
 
     private function handleAdditionalData(Button $button, array $contentElement, array $contentElementConfig, array $data, BackendUserAuthentication $backendUser, int $languageUid, string $returnUrlAnchor): void
     {
         if ((array_key_exists($contentElement['uid'], $data) && ($uid = $contentElement['uid']) && !empty($data[$uid])) ||
-            (array_key_exists('l10n_source', $contentElement) && array_key_exists($contentElement['l10n_source'], $data) &&  ($uid = $contentElement['l10n_source'])&& !empty($data[$uid]))
+            (array_key_exists('l10n_source', $contentElement) && array_key_exists($contentElement['l10n_source'], $data) && ($uid = $contentElement['l10n_source']) && !empty($data[$uid]))
         ) {
             $button->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_data',

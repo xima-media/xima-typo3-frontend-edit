@@ -49,6 +49,32 @@ final class SettingsService
         return array_key_exists($identifier, $configuration['defaultMenuStructure']) && $configuration['defaultMenuStructure'][$identifier];
     }
 
+    public function checkSimpleModeMenuStructure(): bool
+    {
+        $configuration = $this->getConfiguration();
+
+        if (!array_key_exists('defaultMenuStructure', $configuration)) {
+            return false;
+        }
+
+        $menuStructure = $configuration['defaultMenuStructure'];
+
+        if (!is_array($menuStructure) || empty($menuStructure)) {
+            return false;
+        }
+
+        foreach ($menuStructure as $key => $value) {
+            if ($key === 'edit' && (int)$value !== 1) {
+                return false;
+            }
+            if ($key !== 'edit' && (int)$value !== 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private function getConfiguration(): array
     {
         if (!empty($this->configuration)) {
