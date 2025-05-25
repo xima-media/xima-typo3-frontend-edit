@@ -51,15 +51,20 @@ final class SettingsService
         $configuration = $this->getConfiguration();
 
         if (!array_key_exists('defaultMenuStructure', $configuration)) {
-            return true;
+            return false;
         }
 
         $menuStructure = $configuration['defaultMenuStructure'];
+
+        if (!is_array($menuStructure) || empty($menuStructure)) {
+            return false;
+        }
+
         foreach ($menuStructure as $key => $value) {
-            if ($key === 'edit' && $value !== 1) {
+            if ($key === 'edit' && (int)$value !== 1) {
                 return false;
             }
-            if ($key !== 'edit' && $value !== 0) {
+            if ($key !== 'edit' && (int)$value !== 0) {
                 return false;
             }
         }
