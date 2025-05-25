@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
   /**
-  * Finds the closest parent element with an ID matching the pattern "c\d+".
-  * @param {HTMLElement} element - The starting element.
-  * @returns {HTMLElement|null} - The closest matching element or null if not found.
-  */
+   * Finds the closest parent element with an ID matching the pattern "c\d+".
+   * @param {HTMLElement} element - The starting element.
+   * @returns {HTMLElement|null} - The closest matching element or null if not found.
+   */
   const getClosestElementWithId = (element) => {
     while (element && !element.id.match(/c\d+/)) {
       element = element.parentElement;
@@ -12,10 +12,10 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Collects data items from elements with the class "xima-typo3-frontend-edit--data".
-  * Groups the data by the closest element's ID.
-  * @returns {Object} - A dictionary of data items grouped by ID.
-  */
+   * Collects data items from elements with the class "xima-typo3-frontend-edit--data".
+   * Groups the data by the closest element's ID.
+   * @returns {Object} - A dictionary of data items grouped by ID.
+   */
   const collectDataItems = () => {
     const dataItems = {};
     document.querySelectorAll('.xima-typo3-frontend-edit--data').forEach((element) => {
@@ -34,11 +34,11 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Sends a POST request to fetch content elements based on the provided data items.
-  * @param {Object} dataItems - The data items to send in the request body.
-  * @returns {Promise<Object>} - The JSON response from the server.
-  * @throws {Error} - If the request fails.
-  */
+   * Sends a POST request to fetch content elements based on the provided data items.
+   * @param {Object} dataItems - The data items to send in the request body.
+   * @returns {Promise<Object>} - The JSON response from the server.
+   * @throws {Error} - If the request fails.
+   */
   const fetchContentElements = async (dataItems) => {
     const url = new URL(window.location.href);
     url.searchParams.set('type', '1729341864');
@@ -55,11 +55,11 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Creates an edit button for a content element.
-  * @param {string} uid - The unique ID of the content element.
-  * @param {Object} contentElement - The content element data.
-  * @returns {HTMLButtonElement} - The created edit button.
-  */
+   * Creates an edit button for a content element.
+   * @param {string} uid - The unique ID of the content element.
+   * @param {Object} contentElement - The content element data.
+   * @returns {HTMLButtonElement} - The created edit button.
+   */
   const createEditButton = (uid, contentElement) => {
     const editButton = contentElement.menu.url ? document.createElement('a') : document.createElement('button');
     editButton.className = 'xima-typo3-frontend-edit--edit-button';
@@ -74,11 +74,11 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Creates a dropdown menu for a content element.
-  * @param {string} uid - The unique ID of the content element.
-  * @param {Object} contentElement - The content element data.
-  * @returns {HTMLDivElement} - The created dropdown menu.
-  */
+   * Creates a dropdown menu for a content element.
+   * @param {string} uid - The unique ID of the content element.
+   * @param {Object} contentElement - The content element data.
+   * @returns {HTMLDivElement} - The created dropdown menu.
+   */
   const createDropdownMenu = (uid, contentElement) => {
     const dropdownMenu = document.createElement('div');
     dropdownMenu.className = 'xima-typo3-frontend-edit--dropdown-menu';
@@ -106,12 +106,12 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Positions the edit button and dropdown menu relative to the target element.
-  * @param {HTMLElement} element - The target element.
-  * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
-  * @param {HTMLElement} editButton - The edit button.
-  * @param {HTMLElement} dropdownMenu - The dropdown menu.
-  */
+   * Positions the edit button and dropdown menu relative to the target element.
+   * @param {HTMLElement} element - The target element.
+   * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
+   * @param {HTMLElement} editButton - The edit button.
+   * @param {HTMLElement} dropdownMenu - The dropdown menu.
+   */
   const positionElements = (element, wrapperElement, editButton, dropdownMenu) => {
     const rect = element.getBoundingClientRect();
     const rectInPageContext = {
@@ -146,12 +146,12 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Sets up hover events for the target element, edit button, and dropdown menu.
-  * @param {HTMLElement} element - The target element.
-  * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
-  * @param {HTMLElement} editButton - The edit button.
-  * @param {HTMLElement} dropdownMenu - The dropdown menu.
-  */
+   * Sets up hover events for the target element, edit button, and dropdown menu.
+   * @param {HTMLElement} element - The target element.
+   * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
+   * @param {HTMLElement} editButton - The edit button.
+   * @param {HTMLElement} dropdownMenu - The dropdown menu.
+   */
   const setupHoverEvents = (element, wrapperElement, editButton, dropdownMenu) => {
     element.addEventListener('mouseover', () => {
       positionElements(element, wrapperElement, editButton, dropdownMenu);
@@ -167,8 +167,8 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Sets up events for dropdown menus to handle mouse leave and click outside.
-  */
+   * Sets up events for dropdown menus to handle mouse leave and click outside.
+   */
   const setupDropdownMenuEvents = () => {
     document.querySelectorAll('.xima-typo3-frontend-edit--dropdown-menu').forEach((menu) => {
       menu.addEventListener('mouseleave', (event) => {
@@ -190,9 +190,9 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Renders content elements by creating edit buttons and dropdown menus for each.
-  * @param {Object} jsonResponse - The JSON response containing content element data.
-  */
+   * Renders content elements by creating edit buttons and dropdown menus for each.
+   * @param {Object} jsonResponse - The JSON response containing content element data.
+   */
   const renderContentElements = (jsonResponse) => {
     for (let uid in jsonResponse) {
       const contentElement = jsonResponse[uid];
@@ -210,8 +210,10 @@ document.addEventListener('DOMContentLoaded', function () {
       const dropdownMenu = createDropdownMenu(uid, contentElement);
 
       editButton.addEventListener('click', (event) => {
-        if (!simpleMode) event.preventDefault();
-        dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'visible' : 'block';
+        if (!simpleMode) {
+          event.preventDefault();
+          dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'visible' : 'block';
+        }
       });
 
 
@@ -226,9 +228,9 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Main function to collect data, fetch content elements, and render them.
-  * Handles errors during the process.
-  */
+   * Main function to collect data, fetch content elements, and render them.
+   * Handles errors during the process.
+   */
   const getContentElements = async () => {
     try {
       const dataItems = collectDataItems();
