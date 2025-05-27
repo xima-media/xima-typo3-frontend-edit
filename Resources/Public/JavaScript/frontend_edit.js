@@ -200,9 +200,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (contentElement.element.l10n_source) {
         element = document.querySelector(`#c${contentElement.element.l10n_source}`);
-        if (!element) continue;
         uid = contentElement.element.l10n_source;
       }
+
+      if (!element) continue;
 
       const simpleMode = contentElement.menu.url;
       const editButton = createEditButton(uid, contentElement);
