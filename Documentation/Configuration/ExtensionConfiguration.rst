@@ -42,3 +42,11 @@ The extension currently provides the following configuration options:
     :Default: 0
 
     This mode will disable the menu dropdown and use the edit icon button directly as edit link instead
+
+..  _extconf-useRedirect:
+
+..  confval:: Redirect
+    :type: boolean
+    :Default: 0
+
+    Use the redirect option to redirect the edit links, so the full TYPO3 backend is loaded instead of only the edit form
