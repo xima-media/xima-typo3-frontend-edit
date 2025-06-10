@@ -200,7 +200,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (contentElement.element.l10n_source) {
         element = document.querySelector(`#c${contentElement.element.l10n_source}`);
-        uid = contentElement.element.l10n_source;
+        if (element) {
+          uid = contentElement.element.l10n_source;
+        }
       }
 
       if (!element) continue;
