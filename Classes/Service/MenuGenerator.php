@@ -18,6 +18,7 @@ use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Utility\ContentUtility;
+use Xima\XimaTypo3FrontendEdit\Utility\UrlUtility;
 
 final class MenuGenerator
 {
@@ -130,7 +131,7 @@ final class MenuGenerator
                     'edit',
                     ButtonType::Link,
                     label: $contentElement['CType'] === 'list' ? 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_plugin' : 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_content_element',
-                    url: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                    url: UrlUtility::buildUrl(
                         'record_edit',
                         [
                             'edit' => [
@@ -141,8 +142,7 @@ final class MenuGenerator
                             ],
                             'returnUrl' => $returnUrlAnchor,
                         ]
-                    )->__toString()
-                    . '&tx_ximatypo3frontendedit', // add custom parameter to identify the request and render the save and close button in the edit form
+                    ) . '&tx_ximatypo3frontendedit', // add custom parameter to identify the request and render the save and close button in the edit form
                     icon: $contentElement['CType'] === 'list' ? 'content-plugin' : 'content-textpic'
                 );
                 $this->processNewButton(

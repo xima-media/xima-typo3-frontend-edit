@@ -44,3 +44,10 @@ After closing the edit form will I redirected to the wrong frontend location, e.
 =======================================
 
 This could be caused by a strict referer header in your request. If the return url could not be determined correctly, you can force the url generation by pid and language in the extension setting: :code:`forceReturnUrlGeneration`.
+
+.. rst-class:: panel panel-default
+
+I can't change the language within a content element.
+=======================================
+
+This is a TYPO3 backend limitation. The reduced edit form frame does not support the language switch. Use the :ref:`redirect <extconf-useRedirect>` configuration in the extension settings to open the edit form within the full TYPO3 backend context, which supports the language switch.

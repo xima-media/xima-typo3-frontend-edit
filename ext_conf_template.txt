@@ -6,3 +6,5 @@ forceReturnUrlGeneration = 0
 linkTargetBlank = 0
 # cat=basic//103; type=boolean; label=Simple mode: This mode will disable the menu dropdown and use the edit icon button directly as edit link instead
 simpleMode = 0
+# cat=basic//104; type=boolean; label=Redirect: Use the redirect option to redirect the edit links, so the full TYPO3 backend is loaded instead of only the edit form
+useRedirect = 0
