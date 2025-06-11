@@ -7,6 +7,8 @@
 [![Latest Stable Version](https://typo3-badges.dev/badge/xima_typo3_frontend_edit/version/shields.svg)](https://extensions.typo3.org/extension/xima_typo3_frontend_edit)
 [![Supported TYPO3 versions](https://typo3-badges.dev/badge/xima_typo3_frontend_edit/typo3/shields.svg)](https://extensions.typo3.org/extension/xima_typo3_frontend_edit)
 [![License](https://poser.pugx.org/xima/xima-typo3-frontend-edit/license)](LICENSE.md)
+[![last commit](https://img.shields.io/github/last-commit/xima-media/xima-typo3-frontend-edit)](https://github.com/xima-media/xima-typo3-frontend-edit/commits)
+
 
 </div>
 
