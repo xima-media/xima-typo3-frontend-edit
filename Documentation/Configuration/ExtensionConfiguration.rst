@@ -50,3 +50,7 @@ The extension currently provides the following configuration options:
     :Default: 0
 
     Use the redirect option to redirect the edit links, so the full TYPO3 backend is loaded instead of only the edit form
+
+    ..  warning::
+        This option is useful if you want to use the full TYPO3 backend, e.g. language switch or modal popups for for inline group type.
+        But keep in mind, that with this option the return to the frontend using the "close" button will not work anymore.
