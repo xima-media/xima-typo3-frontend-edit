@@ -14,11 +14,16 @@
 	],
 	"require": {
 		"php": "^8.1",
+		"ext-mbstring": "*",
+		"psr/http-message": "^1.0 || ^2.0",
+		"psr/http-server-handler": "^1.0",
+		"psr/http-server-middleware": "^1.0",
 		"typo3/cms-backend": "^11.0 || ^12.0 || ^13.0",
 		"typo3/cms-beuser": "^11.0 || ^12.0 || ^13.0",
 		"typo3/cms-core": "^11.0 || ^12.0 || ^13.0",
 		"typo3/cms-fluid": "^11.0 || ^12.0 || ^13.0",
-		"typo3/cms-frontend": "^11.0 || ^12.0 || ^13.0"
+		"typo3/cms-frontend": "^11.0 || ^12.0 || ^13.0",
+		"typo3fluid/fluid": "^4.2"
 	},
 	"require-dev": {
 		"armin/editorconfig-cli": "^2.0",
@@ -29,6 +34,7 @@
 		"helmich/typo3-typoscript-lint": "^3.2",
 		"roave/security-advisories": "dev-latest",
 		"saschaegerer/phpstan-typo3": "^1.10",
+		"shipmonk/composer-dependency-analyser": "^1.8",
 		"ssch/typo3-rector": "^2.10",
 		"symfony/translation": "^6.3 || ^7.0",
 		"typo3/cms-base-distribution": "^11.0 || ^12.0 || ^13.0",
@@ -60,6 +66,7 @@
 	"scripts": {
 		"check": [
 			"@composer:normalize:check",
+			"@@composer:dependencies:check",
 			"@editorconfig:lint:check",
 			"@php:lint:check",
 			"@yaml:lint:check",
@@ -69,6 +76,7 @@
 			"@php:rector:check",
 			"@php:fixer:check"
 		],
+		"composer:dependencies:check": "composer-dependency-analyser",
 		"composer:normalize": "@composer normalize --no-check-lock",
 		"composer:normalize:check": "@composer normalize --no-check-lock --dry-run",
 		"docs": [
