@@ -66,7 +66,7 @@
 	"scripts": {
 		"check": [
 			"@composer:normalize:check",
-			"@@composer:dependencies:check",
+			"@composer:dependencies:check",
 			"@editorconfig:lint:check",
 			"@php:lint:check",
 			"@yaml:lint:check",
