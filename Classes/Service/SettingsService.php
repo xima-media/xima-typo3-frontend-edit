@@ -6,7 +6,6 @@ namespace Xima\XimaTypo3FrontendEdit\Service;
 
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Context\TypoScriptAspect;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 
@@ -104,7 +103,7 @@ final class SettingsService
         // Ensure, TSFE setup is loaded for cached pages
         if ($GLOBALS['TSFE']->tmpl === null || ($GLOBALS['TSFE']->tmpl && empty($GLOBALS['TSFE']->tmpl->setup))) {
             GeneralUtility::makeInstance(Context::class)
-                ->setAspect('typoscript', GeneralUtility::makeInstance(TypoScriptAspect::class, true));
+                ->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
             $GLOBALS['TSFE']->getConfigArray();
         }
         return $GLOBALS['TSFE']->tmpl->setup;
@@ -118,9 +117,15 @@ final class SettingsService
             // An exception is thrown, when TypoScript setup array is not available. This is usually the case,
             // when the current page request is cached. Therefore, the TSFE TypoScript parsing is forced here.
 
+            // ToDo: This workaround is not working for TYPO3 v13
+            // @see https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/13.0/Breaking-102583-RemovedContextAspectTyposcript.html#breaking-102583-1701510037
+            if (class_exists(\TYPO3\CMS\Core\Context\TypoScriptAspect::class)) {
+                return [];
+            }
+
             // Set a TypoScriptAspect which forces template parsing
             GeneralUtility::makeInstance(Context::class)
-                ->setAspect('typoscript', GeneralUtility::makeInstance(TypoScriptAspect::class, true));
+                ->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
             $tsfe = $request->getAttribute('frontend.controller');
             $requestWithFullTypoScript = $tsfe->getFromCache($request);
 
