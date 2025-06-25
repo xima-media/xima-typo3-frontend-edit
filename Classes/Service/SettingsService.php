@@ -13,7 +13,7 @@ use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 final class SettingsService
 {
     protected array $configuration = [];
-    public function __construct(private \TYPO3\CMS\Core\Context\Context $context)
+    public function __construct(private Context $context)
     {
     }
 
