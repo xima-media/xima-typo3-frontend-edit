@@ -12,6 +12,9 @@ use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 final class SettingsService
 {
     protected array $configuration = [];
+    public function __construct(private Context $context)
+    {
+    }
 
     public function getIgnoredPids(): array
     {
@@ -102,7 +105,7 @@ final class SettingsService
     {
         // Ensure, TSFE setup is loaded for cached pages
         if ($GLOBALS['TSFE']->tmpl === null || ($GLOBALS['TSFE']->tmpl && empty($GLOBALS['TSFE']->tmpl->setup))) {
-            GeneralUtility::makeInstance(Context::class)
+            $this->context
                 ->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
             $GLOBALS['TSFE']->getConfigArray();
         }
@@ -124,7 +127,7 @@ final class SettingsService
             }
 
             // Set a TypoScriptAspect which forces template parsing
-            GeneralUtility::makeInstance(Context::class)
+            $this->context
                 ->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
             $tsfe = $request->getAttribute('frontend.controller');
             $requestWithFullTypoScript = $tsfe->getFromCache($request);
