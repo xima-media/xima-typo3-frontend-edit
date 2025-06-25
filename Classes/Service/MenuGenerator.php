@@ -61,7 +61,7 @@ final class MenuGenerator
         $result = [];
         foreach (ContentUtility::fetchContentElements($pid, $languageUid) as $contentElement) {
             // ToDo: is this sufficient?
-            if (!$backendUser->recordEditAccessInternals('tt_content', $contentElement['uid'])) {
+            if (!$backendUser->recordEditAccessInternals('tt_content', $contentElement)) {
                 continue;
             }
 
@@ -279,7 +279,7 @@ final class MenuGenerator
 
                 $recordUid = null;
                 if ($dataEntry['table'] && $dataEntry['uid']) {
-                    if (!$backendUser->recordEditAccessInternals($dataEntry['table'], $dataEntry['uid'])) {
+                    if (!$backendUser->recordEditAccessInternals($dataEntry['table'], $dataEntry)) {
                         continue;
                     }
                     $recordUid = $dataEntry['uid'];
