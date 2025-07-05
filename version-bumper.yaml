@@ -1,0 +1,5 @@
+presets:
+  - name: typo3-extension
+
+releaseOptions:
+  commitMessage: 'release: version {%version%}'

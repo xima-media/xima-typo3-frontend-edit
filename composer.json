@@ -28,6 +28,7 @@
 	"require-dev": {
 		"armin/editorconfig-cli": "^2.0",
 		"bk2k/bootstrap-package": "^15.0",
+		"eliashaeussler/version-bumper": "^2.4",
 		"ergebnis/composer-normalize": "^2.44",
 		"friendsofphp/php-cs-fixer": "^3.52",
 		"helhum/typo3-console": "^8.1",
@@ -47,6 +48,7 @@
 	},
 	"config": {
 		"allow-plugins": {
+			"eliashaeussler/version-bumper": true,
 			"ergebnis/composer-normalize": true,
 			"helhum/dotenv-connector": true,
 			"php-http/discovery": true,
