@@ -198,10 +198,13 @@ document.addEventListener('DOMContentLoaded', function () {
       const contentElement = jsonResponse[uid];
       let element = document.querySelector(`#c${uid}`);
 
+      // Check if the element is a localization source
       if (contentElement.element.l10n_source) {
-        element = document.querySelector(`#c${contentElement.element.l10n_source}`);
-        if (element) {
+        console.log(contentElement);
+        let l10nElement = document.querySelector(`#c${contentElement.element.l10n_source}`);
+        if (l10nElement) {
           uid = contentElement.element.l10n_source;
+          element = l10nElement;
         }
       }
 
