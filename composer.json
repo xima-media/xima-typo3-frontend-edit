@@ -33,6 +33,7 @@
 		"friendsofphp/php-cs-fixer": "^3.52",
 		"helhum/typo3-console": "^8.1",
 		"helmich/typo3-typoscript-lint": "^3.2",
+		"move-elevator/composer-translation-validator": "^0.4.0",
 		"roave/security-advisories": "dev-latest",
 		"saschaegerer/phpstan-typo3": "^1.10",
 		"shipmonk/composer-dependency-analyser": "^1.8",
@@ -51,6 +52,7 @@
 			"eliashaeussler/version-bumper": true,
 			"ergebnis/composer-normalize": true,
 			"helhum/dotenv-connector": true,
+			"move-elevator/composer-translation-validator": true,
 			"php-http/discovery": true,
 			"typo3/class-alias-loader": true,
 			"typo3/cms-composer-installers": true
@@ -70,6 +72,7 @@
 			"@composer:normalize:check",
 			"@composer:dependencies:check",
 			"@editorconfig:lint:check",
+			"@language:lint:check",
 			"@php:lint:check",
 			"@yaml:lint:check",
 			"@xml:lint:check",
@@ -94,6 +97,7 @@
 		"fix": [
 			"@composer:normalize",
 			"@editorconfig:lint",
+			"@language:lint",
 			"@php:fixer",
 			"@yaml:lint",
 			"@xml:lint",
@@ -101,6 +105,8 @@
 			"@php:stan",
 			"@php:rector"
 		],
+		"language:lint": "@composer validate-translations ./Resources/Private/Language -v",
+		"language:lint:check": "@composer validate-translations ./Resources/Private/Language",
 		"php:fixer": "php vendor/bin/php-cs-fixer --config=php-cs-fixer.php fix",
 		"php:fixer:check": "php vendor/bin/php-cs-fixer --config=php-cs-fixer.php fix --dry-run --format=checkstyle > php-cs-fixer.xml || true",
 		"php:lint": "find *.php . -name '*.php' ! -path './vendor/*'  ! -path './var/*' ! -path '*node_modules/*'  ! -path './.Build/*' ! -path './public/*' -print0 | xargs -0 -n 1 -P 4 php -l",
