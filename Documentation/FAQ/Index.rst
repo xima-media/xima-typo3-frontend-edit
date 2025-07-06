@@ -51,3 +51,14 @@ I can't change the language within a content element.
 =======================================
 
 This is a TYPO3 backend limitation. The reduced edit form frame does not support the language switch. Use the :ref:`redirect <extconf-useRedirect>` configuration in the extension settings to open the edit form within the full TYPO3 backend context, which supports the language switch.
+
+.. rst-class:: panel panel-default
+
+The edit button is not displayed for a different (sub)domain.
+=======================================
+
+The frontend edit needs an active backend user session to work. If you are using a different (sub)domain, the session cookie is only valid for the TYPO3 backend domain and is not available for the frontend edit.
+
+You can have a look at the `cookieDomain` setting to set a more flexible domain configuration. This allows the session cookie to be shared between different (sub)domains, enabling the frontend edit functionality to work across different domains.
+
+See https://docs.typo3.org/m/typo3/reference-coreapi/13.4/en-us/Configuration/Typo3ConfVars/SYS.html#confval-globals-typo3-conf-vars-sys-cookiedomain
