@@ -107,8 +107,8 @@ final class SettingsService
     {
         // Ensure, TSFE setup is loaded for cached pages
         if ($GLOBALS['TSFE']->tmpl === null || ($GLOBALS['TSFE']->tmpl && $GLOBALS['TSFE']->tmpl->setup === [])) {
-            $this->context
-                ->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true)); // @phpstan-ignore-line
+            /* @phpstan-ignore-next-line */
+            $this->context->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
             $GLOBALS['TSFE']->getConfigArray();
         }
         return $GLOBALS['TSFE']->tmpl->setup;
@@ -129,8 +129,8 @@ final class SettingsService
             }
 
             // Set a TypoScriptAspect which forces template parsing
-            $this->context
-                ->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true)); // @phpstan-ignore-line
+            /* @phpstan-ignore-next-line */
+            $this->context->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
             $tsfe = $request->getAttribute('frontend.controller');
             $requestWithFullTypoScript = $tsfe->getFromCache($request); // @phpstan-ignore-line
 
