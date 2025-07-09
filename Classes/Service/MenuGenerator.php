@@ -18,6 +18,7 @@ use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Utility\ContentUtility;
+use Xima\XimaTypo3FrontendEdit\Utility\IconUtility;
 use Xima\XimaTypo3FrontendEdit\Utility\UrlUtility;
 
 final class MenuGenerator
@@ -98,14 +99,14 @@ final class MenuGenerator
                             'returnUrl' => $returnUrlAnchor,
                         ]
                     )->__toString(),
-                    icon: $this->iconFactory->getIcon('actions-open', Icon::SIZE_SMALL),
+                    icon: $this->iconFactory->getIcon('actions-open', IconUtility::getDefaultIconSize()),
                     targetBlank: array_key_exists('linkTargetBlank', $this->configuration) && $this->configuration['linkTargetBlank']
                 );
             } else {
                 $menuButton = new Button(
                     'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_menu',
                     ButtonType::Menu,
-                    icon: $this->iconFactory->getIcon('actions-open', Icon::SIZE_SMALL)
+                    icon: $this->iconFactory->getIcon('actions-open', IconUtility::getDefaultIconSize())
                 );
 
                 /*
@@ -257,7 +258,7 @@ final class MenuGenerator
             $label ?: "LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:$identifier",
             $type,
             $url,
-            $icon ? $this->iconFactory->getIcon($icon, Icon::SIZE_SMALL) : null,
+            $icon ? $this->iconFactory->getIcon($icon, IconUtility::getDefaultIconSize()) : null,
             array_key_exists('linkTargetBlank', $this->configuration) && $this->configuration['linkTargetBlank']
         ), $identifier);
     }
@@ -310,7 +311,7 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString();
-                $icon = $dataEntry['icon'] ? $this->iconFactory->getIcon($dataEntry['icon'], Icon::SIZE_SMALL) : $this->iconFactory->getIcon($contentElementConfig['icon'], Icon::SIZE_SMALL);
+                $icon = $dataEntry['icon'] ? $this->iconFactory->getIcon($dataEntry['icon'], IconUtility::getDefaultIconSize()) : $this->iconFactory->getIcon($contentElementConfig['icon'], IconUtility::getDefaultIconSize());
 
                 $button->appendChild(new Button(
                     ContentUtility::shortenString($dataEntry['label']),

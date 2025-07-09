@@ -13,9 +13,6 @@ use Xima\XimaTypo3FrontendEdit\Utility\ResourceRenderer;
 
 class ToolRendererMiddleware implements MiddlewareInterface
 {
-    public function __construct(protected ResourceRenderer $resourceRenderer)
-    {
-    }
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -33,7 +30,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
             $contents = $response->getBody()->getContents();
             $content = str_ireplace(
                 '</body>',
-                $this->resourceRenderer->render() . '</body>',
+                ResourceRenderer::render() . '</body>',
                 $contents
             );
             $body = new Stream('php://temp', 'rw');

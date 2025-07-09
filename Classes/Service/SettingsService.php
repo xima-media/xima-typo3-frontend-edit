@@ -79,14 +79,16 @@ final class SettingsService
 
     private function getConfiguration(): array
     {
-        if (!empty($this->configuration)) {
+        if ($this->configuration !== []) {
             return $this->configuration;
         }
 
         if (version_compare(VersionNumberUtility::getCurrentTypo3Version(), '12.0.0', '<')) {
             $fullTypoScript = $this->getTypoScriptSetupArrayV11();
-        } else {
+        } elseif (version_compare(VersionNumberUtility::getCurrentTypo3Version(), '13.0.0', '<')) {
             $fullTypoScript = $this->getTypoScriptSetupArrayV12($GLOBALS['TYPO3_REQUEST']);
+        } else {
+            $fullTypoScript = $this->getTypoScriptSetupArrayV13($GLOBALS['TYPO3_REQUEST']);
         }
 
         $settings = $fullTypoScript['plugin.']['tx_ximatypo3frontendedit.']['settings.'] ?? [];
@@ -106,7 +108,7 @@ final class SettingsService
         // Ensure, TSFE setup is loaded for cached pages
         if ($GLOBALS['TSFE']->tmpl === null || ($GLOBALS['TSFE']->tmpl && empty($GLOBALS['TSFE']->tmpl->setup))) {
             $this->context
-                ->setAspect('typoscript', GeneralUtility::makeInstance(TypoScriptAspect::class, true)); // @phpstan-ignore-line
+                ->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true)); // @phpstan-ignore-line
             $GLOBALS['TSFE']->getConfigArray();
         }
         return $GLOBALS['TSFE']->tmpl->setup;
@@ -116,7 +118,7 @@ final class SettingsService
     {
         try {
             $fullTypoScript = $request->getAttribute('frontend.typoscript')->getSetupArray();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // An exception is thrown, when TypoScript setup array is not available. This is usually the case,
             // when the current page request is cached. Therefore, the TSFE TypoScript parsing is forced here.
 
@@ -128,7 +130,7 @@ final class SettingsService
 
             // Set a TypoScriptAspect which forces template parsing
             $this->context
-                ->setAspect('typoscript', GeneralUtility::makeInstance(TypoScriptAspect::class, true)); // @phpstan-ignore-line
+                ->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true)); // @phpstan-ignore-line
             $tsfe = $request->getAttribute('frontend.controller');
             $requestWithFullTypoScript = $tsfe->getFromCache($request);
 
@@ -137,5 +139,17 @@ final class SettingsService
             $fullTypoScript = $requestWithFullTypoScript->getAttribute('frontend.typoscript')->getSetupArray();
         }
         return $fullTypoScript;
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @return array
+     */
+    private function getTypoScriptSetupArrayV13(ServerRequestInterface $request): array {
+        try {
+            return $request->getAttribute('frontend.typoscript')->getSetupArray();
+        } catch (\Exception) {
+            return [];
+        }
     }
 }

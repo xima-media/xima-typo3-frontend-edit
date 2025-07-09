@@ -37,7 +37,7 @@ class Button
     }
 
     /**
-    * @return \Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType
+    * @return ButtonType
     */
     public function getType(): ButtonType
     {
@@ -45,7 +45,7 @@ class Button
     }
 
     /**
-    * @param \Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType $type
+    * @param ButtonType $type
     */
     public function setType(ButtonType $type): void
     {
@@ -99,7 +99,7 @@ class Button
 
     public function appendAfterChild(Button $button, string|int $appendAfterKey, string|int $key): void
     {
-        $offset = array_search($appendAfterKey, array_keys($this->children)) + 1;
+        $offset = array_search($appendAfterKey, array_keys($this->children), true) + 1;
         $this->children = array_slice($this->children, 0, $offset, true) +
             [$key => $button] +
             array_slice($this->children, $offset, null, true);
@@ -117,17 +117,17 @@ class Button
             'type' => $this->type->value,
         ];
 
-        if ($this->url) {
+        if ($this->url !== null && $this->url !== '') {
             $result['url'] = $this->url;
             $result['targetBlank'] = $this->targetBlank;
         }
 
-        if ($this->icon) {
+        if ($this->icon instanceof Icon) {
             $result['icon'] = $this->icon->getAlternativeMarkup('inline');
         }
 
-        if (!empty($this->children)) {
-            $result['children'] = array_map(fn (Button $button) => $button->render(), $this->children);
+        if ($this->children !== []) {
+            $result['children'] = array_map(static fn (Button $button) => $button->render(), $this->children);
         }
 
         return $result;
