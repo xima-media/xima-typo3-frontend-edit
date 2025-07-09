@@ -6,13 +6,13 @@ use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Template\Components\Buttons\InputButton;
 use TYPO3\CMS\Backend\Template\Components\ModifyButtonBarEvent;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
+use Xima\XimaTypo3FrontendEdit\Utility\IconUtility;
 
 final class ModifyButtonBarEventListener
 {
@@ -44,7 +44,7 @@ final class ModifyButtonBarEventListener
                 ->setValue('1')
                 ->setForm($saveButton->getForm())
                 ->setTitle($this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:rm.saveCloseDoc'))
-                ->setIcon($iconFactory->getIcon('actions-document-save-close', Icon::SIZE_SMALL))
+                ->setIcon($iconFactory->getIcon('actions-document-save-close', IconUtility::getDefaultIconSize()))
                 ->setShowLabelText(true);
 
             $typo3Version = GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();

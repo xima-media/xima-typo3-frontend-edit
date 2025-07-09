@@ -39,16 +39,16 @@ class EditInformationMiddleware implements MiddlewareInterface
 
             $data = json_decode($request->getBody()->getContents(), true) ?? [];
 
-            if (!$this->checkBackendUserPageAccess((int)$pid)) {
+            if (!$this->checkBackendUserPageAccess($pid)) {
                 return new JsonResponse([]);
             }
 
             return new JsonResponse(
                 mb_convert_encoding(
                     $this->menuGenerator->getDropdown(
-                        (int)$pid,
+                        $pid,
                         $returnUrl,
-                        (int)$languageUid,
+                        $languageUid,
                         $data
                     ),
                     'UTF-8'

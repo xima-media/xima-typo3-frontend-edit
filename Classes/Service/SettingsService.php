@@ -61,7 +61,7 @@ final class SettingsService
 
         $menuStructure = $configuration['defaultMenuStructure'];
 
-        if (!is_array($menuStructure) || empty($menuStructure)) {
+        if (!is_array($menuStructure) || $menuStructure === []) {
             return false;
         }
 
@@ -79,14 +79,16 @@ final class SettingsService
 
     private function getConfiguration(): array
     {
-        if (!empty($this->configuration)) {
+        if ($this->configuration !== []) {
             return $this->configuration;
         }
 
         if (version_compare(VersionNumberUtility::getCurrentTypo3Version(), '12.0.0', '<')) {
             $fullTypoScript = $this->getTypoScriptSetupArrayV11();
-        } else {
+        } elseif (version_compare(VersionNumberUtility::getCurrentTypo3Version(), '13.0.0', '<')) {
             $fullTypoScript = $this->getTypoScriptSetupArrayV12($GLOBALS['TYPO3_REQUEST']);
+        } else {
+            $fullTypoScript = $this->getTypoScriptSetupArrayV13($GLOBALS['TYPO3_REQUEST']);
         }
 
         $settings = $fullTypoScript['plugin.']['tx_ximatypo3frontendedit.']['settings.'] ?? [];
@@ -104,9 +106,9 @@ final class SettingsService
     private function getTypoScriptSetupArrayV11(): array
     {
         // Ensure, TSFE setup is loaded for cached pages
-        if ($GLOBALS['TSFE']->tmpl === null || ($GLOBALS['TSFE']->tmpl && empty($GLOBALS['TSFE']->tmpl->setup))) {
-            $this->context
-                ->setAspect('typoscript', GeneralUtility::makeInstance(TypoScriptAspect::class, true)); // @phpstan-ignore-line
+        if ($GLOBALS['TSFE']->tmpl === null || ($GLOBALS['TSFE']->tmpl && $GLOBALS['TSFE']->tmpl->setup === [])) {
+            /* @phpstan-ignore-next-line */
+            $this->context->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
             $GLOBALS['TSFE']->getConfigArray();
         }
         return $GLOBALS['TSFE']->tmpl->setup;
@@ -116,26 +118,39 @@ final class SettingsService
     {
         try {
             $fullTypoScript = $request->getAttribute('frontend.typoscript')->getSetupArray();
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             // An exception is thrown, when TypoScript setup array is not available. This is usually the case,
             // when the current page request is cached. Therefore, the TSFE TypoScript parsing is forced here.
 
             // ToDo: This workaround is not working for TYPO3 v13
             // @see https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/13.0/Breaking-102583-RemovedContextAspectTyposcript.html#breaking-102583-1701510037
-            if (class_exists(\TYPO3\CMS\Core\Context\TypoScriptAspect::class)) {
+            if (!class_exists(\TYPO3\CMS\Core\Context\TypoScriptAspect::class)) {
                 return [];
             }
 
             // Set a TypoScriptAspect which forces template parsing
-            $this->context
-                ->setAspect('typoscript', GeneralUtility::makeInstance(TypoScriptAspect::class, true)); // @phpstan-ignore-line
+            /* @phpstan-ignore-next-line */
+            $this->context->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
             $tsfe = $request->getAttribute('frontend.controller');
-            $requestWithFullTypoScript = $tsfe->getFromCache($request);
+            $requestWithFullTypoScript = $tsfe->getFromCache($request); // @phpstan-ignore-line
 
             // Call TSFE getFromCache, which re-processes TypoScript respecting $forcedTemplateParsing property
             // from TypoScriptAspect
             $fullTypoScript = $requestWithFullTypoScript->getAttribute('frontend.typoscript')->getSetupArray();
         }
         return $fullTypoScript;
+    }
+
+    /**
+    * @param ServerRequestInterface $request
+    * @return array
+    */
+    private function getTypoScriptSetupArrayV13(ServerRequestInterface $request): array
+    {
+        try {
+            return $request->getAttribute('frontend.typoscript')->getSetupArray();
+        } catch (\Exception) {
+            return [];
+        }
     }
 }
