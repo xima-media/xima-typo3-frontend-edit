@@ -10,7 +10,6 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
-use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
@@ -43,7 +42,7 @@ final class MenuGenerator
             }
         }
 
-        /* @var $backendUser \TYPO3\CMS\Core\Authentication\BackendUserAuthentication */
+        /* @var $backendUser BackendUserAuthentication */
         $backendUser = $GLOBALS['BE_USER'];
         if ($backendUser->user === null) {
             Bootstrap::initializeBackendAuthentication();
@@ -81,7 +80,7 @@ final class MenuGenerator
             $contentElementConfig = ContentUtility::getContentElementConfig($contentElement['CType'], $contentElement['list_type']);
             $returnUrlAnchor = $returnUrl . '#c' . $contentElement['uid'];
 
-            $simpleMode = (array_key_exists('simpleMode', $this->configuration) && $this->configuration['simpleMode']) || $this->settingsService->checkSimpleModeMenuStructure();
+            $simpleMode = (array_key_exists('simpleMode', $this->configuration) && (bool)$this->configuration['simpleMode']) || $this->settingsService->checkSimpleModeMenuStructure();
 
             if ($simpleMode) {
                 $menuButton = new Button(
@@ -100,7 +99,7 @@ final class MenuGenerator
                         ]
                     )->__toString(),
                     icon: $this->iconFactory->getIcon('actions-open', IconUtility::getDefaultIconSize()),
-                    targetBlank: array_key_exists('linkTargetBlank', $this->configuration) && $this->configuration['linkTargetBlank']
+                    targetBlank: array_key_exists('linkTargetBlank', $this->configuration) && (bool)$this->configuration['linkTargetBlank']
                 );
             } else {
                 $menuButton = new Button(
@@ -119,7 +118,7 @@ final class MenuGenerator
                     $menuButton,
                     'header',
                     ButtonType::Info,
-                    label: $GLOBALS['LANG']->sL($contentElementConfig['label']) . '<p><small>' . ($contentElement['header'] ? ContentUtility::shortenString($contentElement['header']) : '') . $additionalUid . '</small></p>',
+                    label: $GLOBALS['LANG']->sL($contentElementConfig['label']) . '<p><small>' . ($contentElement['header'] !== null ? ContentUtility::shortenString($contentElement['header']) : '') . $additionalUid . '</small></p>',
                     icon: $contentElementConfig['icon']
                 );
 
@@ -255,31 +254,39 @@ final class MenuGenerator
         }
 
         $button->appendChild(new Button(
-            $label ?: "LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:$identifier",
+            $label !== null ? $label : "LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:$identifier",
             $type,
             $url,
-            $icon ? $this->iconFactory->getIcon($icon, IconUtility::getDefaultIconSize()) : null,
+            $icon !== null ? $this->iconFactory->getIcon($icon, IconUtility::getDefaultIconSize()) : null,
             array_key_exists('linkTargetBlank', $this->configuration) && $this->configuration['linkTargetBlank']
         ), $identifier);
     }
 
     private function handleAdditionalData(Button $button, array $contentElement, array $contentElementConfig, array $data, BackendUserAuthentication $backendUser, int $languageUid, string $returnUrlAnchor): void
     {
-        if ((array_key_exists($contentElement['uid'], $data) && ($uid = $contentElement['uid']) && !empty($data[$uid])) ||
-            (array_key_exists('l10n_source', $contentElement) && array_key_exists($contentElement['l10n_source'], $data) && ($uid = $contentElement['l10n_source']) && !empty($data[$uid]))
+        $uid = null;
+        if (
+            (array_key_exists($contentElement['uid'], $data) && $data[$contentElement['uid']] !== []) ||
+            (
+                array_key_exists('l10n_source', $contentElement)
+                && array_key_exists($contentElement['l10n_source'], $data)
+                && $data[$contentElement['l10n_source']] !== []
+                && ($uid = $contentElement['l10n_source']) !== 0
+            )
         ) {
+            $uid = $uid ?? $contentElement['uid'];
             $button->appendChild(new Button(
                 'LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_data',
                 ButtonType::Divider
             ), 'div_data');
 
             foreach ($data[$uid] as $key => $dataEntry) {
-                if (!$dataEntry['label'] || !(($dataEntry['table'] && $dataEntry['uid']) || ($dataEntry['url']))) {
+                if (!$dataEntry['label'] || !(($dataEntry['table'] !== null && $dataEntry['uid'] !== null) || ($dataEntry['url'] !== null))) {
                     continue;
                 }
 
                 $recordUid = null;
-                if ($dataEntry['table'] && $dataEntry['uid']) {
+                if ($dataEntry['table'] !== null && $dataEntry['uid'] !== null) {
                     if (!$backendUser->recordEditAccessInternals($dataEntry['table'], $dataEntry)) {
                         continue;
                     }
@@ -289,7 +296,7 @@ final class MenuGenerator
                     * Check if the record is translated and if so, get the translation
                     */
                     $record = BackendUtility::getRecord($dataEntry['table'], $recordUid);
-                    if ($record && array_key_exists('sys_language_uid', $record) && $record['sys_language_uid'] !== $languageUid) {
+                    if ($record !== null && array_key_exists('sys_language_uid', $record) && $record['sys_language_uid'] !== $languageUid) {
                         $record = ContentUtility::getTranslatedRecord($dataEntry['table'], $recordUid, $languageUid);
                         if ($record) {
                             $recordUid = $record['uid'];
@@ -299,7 +306,7 @@ final class MenuGenerator
                     }
                 }
 
-                $url = $dataEntry['url'] ?: GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
+                $url = $dataEntry['url'] !== null ? $dataEntry['url'] : GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute(
                     'record_edit',
                     [
                         'edit' => [
@@ -311,7 +318,7 @@ final class MenuGenerator
                         'returnUrl' => $returnUrlAnchor,
                     ],
                 )->__toString();
-                $icon = $dataEntry['icon'] ? $this->iconFactory->getIcon($dataEntry['icon'], IconUtility::getDefaultIconSize()) : $this->iconFactory->getIcon($contentElementConfig['icon'], IconUtility::getDefaultIconSize());
+                $icon = $dataEntry['icon'] !== null ? $this->iconFactory->getIcon($dataEntry['icon'], IconUtility::getDefaultIconSize()) : $this->iconFactory->getIcon($contentElementConfig['icon'], IconUtility::getDefaultIconSize());
 
                 $button->appendChild(new Button(
                     ContentUtility::shortenString($dataEntry['label']),

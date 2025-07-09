@@ -11,10 +11,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 class IconUtility
 {
     /**
-     * ToDo: Version switch be removed in TYPO3 13
-     *
-     * @return string|IconSize
-     */
+    * ToDo: Version switch be removed in TYPO3 13
+    *
+    * @return string|IconSize
+    */
     public static function getDefaultIconSize(): string|\TYPO3\CMS\Core\Imaging\IconSize
     {
         $typo3Version = GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();

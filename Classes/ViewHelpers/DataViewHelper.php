@@ -65,12 +65,12 @@ class DataViewHelper extends AbstractViewHelper
         );
     }
 
-    public function render()
+    public function render(): string
     {
-        if (!$GLOBALS['BE_USER'] || (array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) && $GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])) {
+        if ($GLOBALS['BE_USER'] === null || (array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) && $GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])) {
             return '';
         }
-        if (empty($this->arguments['uid']) && empty($this->arguments['url'])) {
+        if ($this->arguments['uid'] === null && $this->arguments['url'] === null) {
             return '';
         }
         $dataAttributes = [];

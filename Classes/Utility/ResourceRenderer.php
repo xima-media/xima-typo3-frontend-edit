@@ -14,8 +14,8 @@ use Xima\XimaTypo3FrontendEdit\Configuration;
 class ResourceRenderer
 {
     /**
-     * @param array<string, mixed> $values
-     */
+    * @param array<string, mixed> $values
+    */
     public static function render(string $template = 'FrontendEdit.html', array $values = [], ?ServerRequestInterface $request = null): string
     {
         $typo3Version = GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
@@ -30,8 +30,8 @@ class ResourceRenderer
     }
 
     /**
-     * @param array<string, mixed> $values
-     */
+    * @param array<string, mixed> $values
+    */
     private static function renderView12(string $template, array $values): string
     {
         /** @var \TYPO3\CMS\Fluid\View\StandaloneView $view */
@@ -51,8 +51,8 @@ class ResourceRenderer
     }
 
     /**
-     * @param array<string, mixed> $values
-     */
+    * @param array<string, mixed> $values
+    */
     private static function renderView13(string $template, array $values, ?ServerRequestInterface $request = null): string
     {
         $viewFactoryData = new \TYPO3\CMS\Core\View\ViewFactoryData(

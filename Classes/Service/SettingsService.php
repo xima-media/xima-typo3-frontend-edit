@@ -61,7 +61,7 @@ final class SettingsService
 
         $menuStructure = $configuration['defaultMenuStructure'];
 
-        if (!is_array($menuStructure) || empty($menuStructure)) {
+        if (!is_array($menuStructure) || $menuStructure === []) {
             return false;
         }
 
@@ -106,7 +106,7 @@ final class SettingsService
     private function getTypoScriptSetupArrayV11(): array
     {
         // Ensure, TSFE setup is loaded for cached pages
-        if ($GLOBALS['TSFE']->tmpl === null || ($GLOBALS['TSFE']->tmpl && empty($GLOBALS['TSFE']->tmpl->setup))) {
+        if ($GLOBALS['TSFE']->tmpl === null || ($GLOBALS['TSFE']->tmpl && $GLOBALS['TSFE']->tmpl->setup === [])) {
             $this->context
                 ->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true)); // @phpstan-ignore-line
             $GLOBALS['TSFE']->getConfigArray();
@@ -124,7 +124,7 @@ final class SettingsService
 
             // ToDo: This workaround is not working for TYPO3 v13
             // @see https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/13.0/Breaking-102583-RemovedContextAspectTyposcript.html#breaking-102583-1701510037
-            if (class_exists(\TYPO3\CMS\Core\Context\TypoScriptAspect::class)) {
+            if (!class_exists(\TYPO3\CMS\Core\Context\TypoScriptAspect::class)) {
                 return [];
             }
 
@@ -132,7 +132,7 @@ final class SettingsService
             $this->context
                 ->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true)); // @phpstan-ignore-line
             $tsfe = $request->getAttribute('frontend.controller');
-            $requestWithFullTypoScript = $tsfe->getFromCache($request);
+            $requestWithFullTypoScript = $tsfe->getFromCache($request); // @phpstan-ignore-line
 
             // Call TSFE getFromCache, which re-processes TypoScript respecting $forcedTemplateParsing property
             // from TypoScriptAspect
@@ -142,10 +142,11 @@ final class SettingsService
     }
 
     /**
-     * @param ServerRequestInterface $request
-     * @return array
-     */
-    private function getTypoScriptSetupArrayV13(ServerRequestInterface $request): array {
+    * @param ServerRequestInterface $request
+    * @return array
+    */
+    private function getTypoScriptSetupArrayV13(ServerRequestInterface $request): array
+    {
         try {
             return $request->getAttribute('frontend.typoscript')->getSetupArray();
         } catch (\Exception) {

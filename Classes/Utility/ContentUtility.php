@@ -76,7 +76,7 @@ class ContentUtility
     {
         $rootLine = GeneralUtility::makeInstance(RootlineUtility::class, $subPageId)->get();
         foreach ($rootLine as $page) {
-            if ((int)$page['uid'] === (int)$parentPageId) {
+            if ($page['uid'] === $parentPageId) {
                 return true;
             }
         }

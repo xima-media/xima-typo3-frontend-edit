@@ -34,7 +34,7 @@ class UrlUtility
     {
         $useRedirect = false;
         $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class);
-        if (isset($extensionConfiguration->get(Configuration::EXT_KEY)['useRedirect']) && $extensionConfiguration->get(Configuration::EXT_KEY)['useRedirect']) {
+        if (isset($extensionConfiguration->get(Configuration::EXT_KEY)['useRedirect']) && $extensionConfiguration->get(Configuration::EXT_KEY)['useRedirect'] === true) {
             $useRedirect = true;
         }
 
