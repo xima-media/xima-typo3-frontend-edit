@@ -33,7 +33,7 @@
 		"friendsofphp/php-cs-fixer": "^3.52",
 		"helhum/typo3-console": "^8.1",
 		"helmich/typo3-typoscript-lint": "^3.2",
-		"move-elevator/composer-translation-validator": "^0.4.0",
+		"move-elevator/composer-translation-validator": "^0.5.0",
 		"roave/security-advisories": "dev-latest",
 		"saschaegerer/phpstan-typo3": "^1.10",
 		"shipmonk/composer-dependency-analyser": "^1.8",
