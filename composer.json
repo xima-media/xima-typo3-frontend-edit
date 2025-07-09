@@ -84,7 +84,7 @@
 			"@php:rector:check",
 			"@php:fixer:check"
 		],
-		"composer:dependencies:check": "composer-dependency-analyser",
+		"composer:dependencies:check": "composer-dependency-analyser --ignore-unknown-classes",
 		"composer:normalize": "@composer normalize --no-check-lock",
 		"composer:normalize:check": "@composer normalize --no-check-lock --dry-run",
 		"docs": [
