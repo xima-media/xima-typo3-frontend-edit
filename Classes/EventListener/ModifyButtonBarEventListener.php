@@ -12,13 +12,14 @@ use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
-use Xima\XimaTypo3FrontendEdit\Utility\IconUtility;
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
 
 final class ModifyButtonBarEventListener
 {
     protected array $configuration;
     public function __construct(
-        private readonly ExtensionConfiguration $extensionConfiguration
+        private readonly ExtensionConfiguration $extensionConfiguration,
+        private readonly VersionCompatibilityService $versionCompatibilityService
     ) {
         $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
     }
@@ -44,7 +45,7 @@ final class ModifyButtonBarEventListener
                 ->setValue('1')
                 ->setForm($saveButton->getForm())
                 ->setTitle($this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:rm.saveCloseDoc'))
-                ->setIcon($iconFactory->getIcon('actions-document-save-close', IconUtility::getDefaultIconSize()))
+                ->setIcon($iconFactory->getIcon('actions-document-save-close', $this->versionCompatibilityService->getDefaultIconSize()))
                 ->setShowLabelText(true);
 
             $typo3Version = GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();

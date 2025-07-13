@@ -2,37 +2,53 @@
 
 declare(strict_types=1);
 
-namespace Xima\XimaTypo3FrontendEdit\Utility;
+namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Core\RequestId;
-use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
+use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
-class ResourceRenderer
+final class ResourceRendererService
 {
+    public function __construct(
+        private readonly VersionCompatibilityService $versionCompatibilityService
+    ) {
+    }
+
     /**
     * @param array<string, mixed> $values
+    * @throws Exception
     */
-    public static function render(string $template = 'FrontendEdit.html', array $values = [], ?ServerRequestInterface $request = null): string
+    public function render(string $template = 'FrontendEdit.html', array $values = [], ?ServerRequestInterface $request = null): string
     {
-        $typo3Version = GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
+        try {
+            $nonceValue = $this->resolveNonceValue();
+            $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
+            $values = [...$values, 'resources' => $resources];
 
-        $values = [...$values, 'resources' => ResourceUtility::getResources(['nonce' => self::resolveNonceValue()])];
+            if ($this->versionCompatibilityService->isVersion13OrHigher()) {
+                return $this->renderView13($template, $values, $request);
+            }
 
-        if ($typo3Version >= 13) {
-            return self::renderView13($template, $values, $request);
+            return $this->renderView12($template, $values);
+        } catch (\Throwable $exception) {
+            throw new Exception(
+                'Failed to render template "' . $template . '": ' . $exception->getMessage(),
+                1640000001,
+                $exception
+            );
         }
-
-        return self::renderView12($template, $values);
     }
 
     /**
     * @param array<string, mixed> $values
     */
-    private static function renderView12(string $template, array $values): string
+    private function renderView12(string $template, array $values): string
     {
         /** @var \TYPO3\CMS\Fluid\View\StandaloneView $view */
         $view = GeneralUtility::makeInstance(\TYPO3\CMS\Fluid\View\StandaloneView::class); // @phpstan-ignore classConstant.deprecatedClass
@@ -53,7 +69,7 @@ class ResourceRenderer
     /**
     * @param array<string, mixed> $values
     */
-    private static function renderView13(string $template, array $values, ?ServerRequestInterface $request = null): string
+    private function renderView13(string $template, array $values, ?ServerRequestInterface $request = null): string
     {
         $viewFactoryData = new \TYPO3\CMS\Core\View\ViewFactoryData(
             templateRootPaths: ['EXT:' . Configuration::EXT_KEY . '/Resources/Private/Templates/'],
@@ -73,8 +89,17 @@ class ResourceRenderer
         return $view->render($template);
     }
 
-    private static function resolveNonceValue(): string
+    private function resolveNonceValue(): string
     {
-        return property_exists(RequestId::class, 'nonce') ? GeneralUtility::makeInstance(RequestId::class)->nonce->consume() : '';
+        try {
+            if (property_exists(RequestId::class, 'nonce')) {
+                $requestId = GeneralUtility::makeInstance(RequestId::class);
+                return $requestId->nonce->consume();
+            }
+        } catch (\Throwable) {
+            // Silently fail and return empty string for nonce
+        }
+
+        return '';
     }
 }

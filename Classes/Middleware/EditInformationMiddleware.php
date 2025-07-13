@@ -8,22 +8,22 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Http\JsonResponse;
-use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use Xima\XimaTypo3FrontendEdit\Configuration;
-use Xima\XimaTypo3FrontendEdit\Service\MenuGenerator;
+use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
+use Xima\XimaTypo3FrontendEdit\Service\Menu\MenuGenerator;
+use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
 use Xima\XimaTypo3FrontendEdit\Utility\UrlUtility;
 
 class EditInformationMiddleware implements MiddlewareInterface
 {
-    protected array $configuration;
+    use ExtensionConfigurationTrait;
 
     public function __construct(
         protected readonly MenuGenerator $menuGenerator,
-        private readonly ExtensionConfiguration $extensionConfiguration
+        protected readonly BackendUserService $backendUserService,
+        protected readonly ExtensionConfiguration $extensionConfiguration
     ) {
     }
 
@@ -34,57 +34,46 @@ class EditInformationMiddleware implements MiddlewareInterface
         $response = $handler->handle($request);
         $params = $request->getQueryParams();
 
-        if (isset($params['type']) && $params['type'] === Configuration::TYPE) {
-            $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
-
-            $pid = $request->getAttribute('routing')->getPageId();
-            $languageUid = $request->getAttribute('language')->getLanguageId();
-            $returnUrl = (
-                $request->getHeaderLine('Referer') === '' ||
-                (
-                    array_key_exists('forceReturnUrlGeneration', $this->configuration) &&
-                    $this->configuration['forceReturnUrlGeneration']
-                )
-            ) ? UrlUtility::getUrl($pid, $languageUid) : $request->getHeaderLine('Referer');
-
-            $data = json_decode($request->getBody()->getContents(), true) ?? [];
-
-            if (!$this->checkBackendUserPageAccess($pid)) {
-                return new JsonResponse([]);
-            }
-
-            return new JsonResponse(
-                mb_convert_encoding(
-                    $this->menuGenerator->getDropdown(
-                        $pid,
-                        $returnUrl,
-                        $languageUid,
-                        $data
-                    ),
-                    'UTF-8'
-                )
-            );
+        if (!isset($params['type']) || $params['type'] !== Configuration::TYPE) {
+            return $response;
         }
 
-        return $response;
+        $pid = $request->getAttribute('routing')->getPageId();
+        $languageUid = $request->getAttribute('language')->getLanguageId();
+
+        if (!$this->backendUserService->hasPageAccess($pid)) {
+            return new JsonResponse([]);
+        }
+
+        $returnUrl = $this->getReturnUrl($request, $pid, $languageUid);
+        $data = $this->getRequestData($request);
+
+        $dropdown = $this->menuGenerator->getDropdown($pid, $returnUrl, $languageUid, $data);
+
+        return new JsonResponse(mb_convert_encoding($dropdown, 'UTF-8'));
     }
 
-    private function checkBackendUserPageAccess(int $pid): bool
+    private function getReturnUrl(ServerRequestInterface $request, int $pid, int $languageUid): string
     {
-        /* @var $backendUser \TYPO3\CMS\Core\Authentication\BackendUserAuthentication */
-        $backendUser = $GLOBALS['BE_USER'];
-        if ($backendUser->user === null) {
-            Bootstrap::initializeBackendAuthentication();
-            $backendUser->initializeUserSessionManager();
-            $backendUser = $GLOBALS['BE_USER'];
+        $referer = $request->getHeaderLine('Referer');
+
+        if ($referer === '' || $this->shouldForceReturnUrlGeneration()) {
+            return UrlUtility::getUrl($pid, $languageUid);
         }
 
-        if (!BackendUtility::readPageAccess(
-            $pid,
-            $backendUser->getPagePermsClause(Permission::PAGE_SHOW)
-        )) {
-            return false;
+        return $referer;
+    }
+
+    private function getRequestData(ServerRequestInterface $request): array
+    {
+        $body = $request->getBody()->getContents();
+
+        if ($body === '') {
+            return [];
         }
-        return true;
+
+        $decoded = json_decode($body, true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 }
