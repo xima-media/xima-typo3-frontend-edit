@@ -2,42 +2,73 @@
 
 declare(strict_types=1);
 
-namespace Xima\XimaTypo3FrontendEdit\Service;
+namespace Xima\XimaTypo3FrontendEdit\Service\Configuration;
 
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Core\Utility\VersionNumberUtility;
 
 final class SettingsService
 {
-    protected array $configuration = [];
-    public function __construct(private Context $context)
-    {
+    private array $configuration = [];
+    private array $ignoredPids = [];
+    private array $ignoredCTypes = [];
+    private array $ignoredListTypes = [];
+    private array $ignoredUids = [];
+    private ?bool $simpleModeMenuStructure = null;
+
+    public function __construct(
+        private readonly Context $context,
+        private readonly VersionCompatibilityService $versionCompatibilityService
+    ) {
     }
 
     public function getIgnoredPids(): array
     {
-        $configuration = $this->getConfiguration();
-        return array_key_exists('ignorePids', $configuration) ? explode(',', $configuration['ignorePids']) : [];
+        if ($this->ignoredPids === []) {
+            $configuration = $this->getConfiguration();
+            $this->ignoredPids = isset($configuration['ignorePids'])
+                ? array_map('trim', explode(',', $configuration['ignorePids']))
+                : [];
+        }
+
+        return $this->ignoredPids;
     }
 
     public function getIgnoredCTypes(): array
     {
-        $configuration = $this->getConfiguration();
-        return array_key_exists('ignoreCTypes', $configuration) ? explode(',', $configuration['ignoreCTypes']) : [];
+        if ($this->ignoredCTypes === []) {
+            $configuration = $this->getConfiguration();
+            $this->ignoredCTypes = isset($configuration['ignoreCTypes'])
+                ? array_map('trim', explode(',', $configuration['ignoreCTypes']))
+                : [];
+        }
+
+        return $this->ignoredCTypes;
     }
 
     public function getIgnoredListTypes(): array
     {
-        $configuration = $this->getConfiguration();
-        return array_key_exists('ignoreListTypes', $configuration) ? explode(',', $configuration['ignoreListTypes']) : [];
+        if ($this->ignoredListTypes === []) {
+            $configuration = $this->getConfiguration();
+            $this->ignoredListTypes = isset($configuration['ignoreListTypes'])
+                ? array_map('trim', explode(',', $configuration['ignoreListTypes']))
+                : [];
+        }
+
+        return $this->ignoredListTypes;
     }
 
     public function getIgnoredUids(): array
     {
-        $configuration = $this->getConfiguration();
-        return array_key_exists('ignoredUids', $configuration) ? explode(',', $configuration['ignoredUids']) : [];
+        if ($this->ignoredUids === []) {
+            $configuration = $this->getConfiguration();
+            $this->ignoredUids = isset($configuration['ignoredUids'])
+                ? array_map('trim', explode(',', $configuration['ignoredUids']))
+                : [];
+        }
+
+        return $this->ignoredUids;
     }
 
     public function checkDefaultMenuStructure(string $identifier): bool
@@ -53,9 +84,17 @@ final class SettingsService
 
     public function checkSimpleModeMenuStructure(): bool
     {
-        $configuration = $this->getConfiguration();
+        if ($this->simpleModeMenuStructure === null) {
+            $configuration = $this->getConfiguration();
+            $this->simpleModeMenuStructure = $this->calculateSimpleModeMenuStructure($configuration);
+        }
 
-        if (!array_key_exists('defaultMenuStructure', $configuration)) {
+        return $this->simpleModeMenuStructure;
+    }
+
+    private function calculateSimpleModeMenuStructure(array $configuration): bool
+    {
+        if (!isset($configuration['defaultMenuStructure'])) {
             return false;
         }
 
@@ -83,25 +122,28 @@ final class SettingsService
             return $this->configuration;
         }
 
-        if (version_compare(VersionNumberUtility::getCurrentTypo3Version(), '12.0.0', '<')) {
-            $fullTypoScript = $this->getTypoScriptSetupArrayV11();
-        } elseif (version_compare(VersionNumberUtility::getCurrentTypo3Version(), '13.0.0', '<')) {
-            $fullTypoScript = $this->getTypoScriptSetupArrayV12($GLOBALS['TYPO3_REQUEST']);
-        } else {
-            $fullTypoScript = $this->getTypoScriptSetupArrayV13($GLOBALS['TYPO3_REQUEST']);
-        }
-
+        $fullTypoScript = $this->getTypoScriptSetupArray();
         $settings = $fullTypoScript['plugin.']['tx_ximatypo3frontendedit.']['settings.'] ?? [];
         $this->configuration = GeneralUtility::removeDotsFromTS($settings);
 
         return $this->configuration;
     }
 
+    private function getTypoScriptSetupArray(): array
+    {
+        if ($this->versionCompatibilityService->isVersionBelow12()) {
+            return $this->getTypoScriptSetupArrayV11();
+        }
+        if ($this->versionCompatibilityService->isVersionBelow13()) {
+            return $this->getTypoScriptSetupArrayV12($GLOBALS['TYPO3_REQUEST']);
+        }
+
+        return $this->getTypoScriptSetupArrayV13($GLOBALS['TYPO3_REQUEST']);
+    }
+
     /**
     * These methods need to handle the case that the TypoScript setup array is not available within full cached setup.
-    * I used this workaround from https://github.com/derhansen/fe_change_pwd to ensure that the TypoScript setup is available.
-    *
-    * @return array
+    * Workaround from https://github.com/derhansen/fe_change_pwd to ensure that the TypoScript setup is available.
     */
     private function getTypoScriptSetupArrayV11(): array
     {

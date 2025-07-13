@@ -9,10 +9,15 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Http\Stream;
-use Xima\XimaTypo3FrontendEdit\Utility\ResourceRenderer;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\ResourceRendererService;
 
 class ToolRendererMiddleware implements MiddlewareInterface
 {
+    public function __construct(
+        private readonly ResourceRendererService $resourceRendererService
+    ) {
+    }
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
@@ -29,7 +34,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
             $contents = $response->getBody()->getContents();
             $content = str_ireplace(
                 '</body>',
-                ResourceRenderer::render() . '</body>',
+                $this->resourceRendererService->render(request: $request) . '</body>',
                 $contents
             );
             $body = new Stream('php://temp', 'rw');
