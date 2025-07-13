@@ -25,7 +25,9 @@
 *     https://cs.sensiolabs.org
 */
 if (PHP_SAPI !== 'cli') {
-    die('This script supports command line usage only. Please check your command.');
+    die(
+        'This script supports command line usage only. Please check your command.'
+    );
 }
 // Define in which folders to search and which folders to exclude
 // Exclude all files and directories from .gitignore
@@ -42,7 +44,9 @@ $finder = (new PhpCsFixer\Finder())
 //  - Ensure Concatenation to have at least one whitespace around
 //  - Remove trailing whitespace at the end of blank lines.
 return (new \PhpCsFixer\Config())
-    ->setParallelConfig(PhpCsFixer\Runner\Parallel\ParallelConfigFactory::detect())
+    ->setParallelConfig(
+        PhpCsFixer\Runner\Parallel\ParallelConfigFactory::detect()
+    )
     ->setRiskyAllowed(true)
     ->setRules([
         '@DoctrineAnnotation' => true,

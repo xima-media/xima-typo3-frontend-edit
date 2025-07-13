@@ -21,21 +21,31 @@ class EditInformationMiddleware implements MiddlewareInterface
 {
     protected array $configuration;
 
-    public function __construct(protected readonly MenuGenerator $menuGenerator, private readonly ExtensionConfiguration $extensionConfiguration)
-    {
+    public function __construct(
+        protected readonly MenuGenerator $menuGenerator,
+        private readonly ExtensionConfiguration $extensionConfiguration
+    ) {
     }
 
-    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
-    {
+    public function process(
+        ServerRequestInterface $request,
+        RequestHandlerInterface $handler
+    ): ResponseInterface {
         $response = $handler->handle($request);
         $params = $request->getQueryParams();
 
-        if (isset($params['type'])&& $params['type'] === Configuration::TYPE) {
+        if (isset($params['type']) && $params['type'] === Configuration::TYPE) {
             $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
 
             $pid = $request->getAttribute('routing')->getPageId();
             $languageUid = $request->getAttribute('language')->getLanguageId();
-            $returnUrl = ($request->getHeaderLine('Referer') === '' || (array_key_exists('forceReturnUrlGeneration', $this->configuration) && $this->configuration['forceReturnUrlGeneration'])) ? UrlUtility::getUrl($pid, $languageUid) : $request->getHeaderLine('Referer');
+            $returnUrl = (
+                $request->getHeaderLine('Referer') === '' ||
+                (
+                    array_key_exists('forceReturnUrlGeneration', $this->configuration) &&
+                    $this->configuration['forceReturnUrlGeneration']
+                )
+            ) ? UrlUtility::getUrl($pid, $languageUid) : $request->getHeaderLine('Referer');
 
             $data = json_decode($request->getBody()->getContents(), true) ?? [];
 

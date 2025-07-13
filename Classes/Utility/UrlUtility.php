@@ -16,10 +16,15 @@ class UrlUtility
     /**
     * @throws \TYPO3\CMS\Frontend\Typolink\UnableToLinkException
     */
-    public static function getUrl(int $pageId, ?int $languageUid = 0, bool $forceAbsoluteUrl = true): string
-    {
+    public static function getUrl(
+        int $pageId,
+        ?int $languageUid = 0,
+        bool $forceAbsoluteUrl = true
+    ): string {
         /** @var ContentObjectRenderer $contentObjectRenderer */
-        $contentObjectRenderer = GeneralUtility::makeInstance(ContentObjectRenderer::class);
+        $contentObjectRenderer = GeneralUtility::makeInstance(
+            ContentObjectRenderer::class
+        );
 
         $typolinkConfiguration = [
             'parameter' => $pageId,
@@ -34,14 +39,25 @@ class UrlUtility
     {
         $useRedirect = false;
         $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class);
-        if (isset($extensionConfiguration->get(Configuration::EXT_KEY)['useRedirect']) && $extensionConfiguration->get(Configuration::EXT_KEY)['useRedirect'] === true) {
+        if (
+            isset($extensionConfiguration->get(Configuration::EXT_KEY)['useRedirect']) &&
+            $extensionConfiguration->get(Configuration::EXT_KEY)['useRedirect'] === true
+        ) {
             $useRedirect = true;
         }
 
         if ($useRedirect) {
-            return GeneralUtility::makeInstance(UriBuilder::class)->buildUriWithRedirect('main', [], RouteRedirect::create($route, $parameters))->__toString();
+            return GeneralUtility::makeInstance(UriBuilder::class)
+                ->buildUriWithRedirect(
+                    'main',
+                    [],
+                    RouteRedirect::create($route, $parameters)
+                )
+                ->__toString();
         }
 
-        return GeneralUtility::makeInstance(UriBuilder::class)->buildUriFromRoute($route, $parameters)->__toString();
+        return GeneralUtility::makeInstance(UriBuilder::class)
+            ->buildUriFromRoute($route, $parameters)
+            ->__toString();
     }
 }

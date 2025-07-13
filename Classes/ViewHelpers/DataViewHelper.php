@@ -7,18 +7,23 @@ namespace Xima\XimaTypo3FrontendEdit\ViewHelpers;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 /**
-* This ViewHelper generates a hidden input element which holds data values for the frontend edit dropdown menu.
-* You need either provide an uid and a table for the corresponding edit link or an external url.
+* This ViewHelper generates a hidden input element which holds data values
+* for the frontend edit dropdown menu. You need either provide an uid and
+* a table for the corresponding edit link or an external url.
 * The output will only be rendered if the frontend edit is enabled.
 *
 * Usages:
 * ```html
-* <xtfe:data label="News Title" uid="12" table="tx_news_domain_model_news" icon="content-news" />
+* <xtfe:data label="News Title" uid="12" table="tx_news_domain_model_news"
+*           icon="content-news" />
 * ```
 *
 * Output:
 * ```html
-* <input type="hidden" class="xima-typo3-frontend-edit--data" value="{"label": "News Title", "uid": 12, "table": "tx_news_domain_model_news", "icon": "content-news"}" />
+* <input type="hidden" class="xima-typo3-frontend-edit--data"
+*        value="{&quot;label&quot;: &quot;News Title&quot;, &quot;uid&quot;: 12,
+*               &quot;table&quot;: &quot;tx_news_domain_model_news&quot;,
+*               &quot;icon&quot;: &quot;content-news&quot;}" />
 * ```
 */
 class DataViewHelper extends AbstractViewHelper
@@ -43,8 +48,8 @@ class DataViewHelper extends AbstractViewHelper
         );
         $this->registerArgument(
             'table',
-            'integer',
-            'Table of data entry, e.g. tx_news_domain_model_news',
+            'string',
+            'Table of data entry, e.g. tx_news_domain_model_news'
         );
         $this->registerArgument(
             'url',
@@ -67,10 +72,19 @@ class DataViewHelper extends AbstractViewHelper
 
     public function render(): string
     {
-        if ($GLOBALS['BE_USER'] === null || (array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) && $GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])) {
+        if (
+            $GLOBALS['BE_USER'] === null ||
+            (
+                array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) &&
+                $GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable']
+            )
+        ) {
             return '';
         }
-        if ($this->arguments['uid'] === null && $this->arguments['url'] === null) {
+        if (
+            $this->arguments['uid'] === null &&
+            $this->arguments['url'] === null
+        ) {
             return '';
         }
         $dataAttributes = [];
@@ -82,6 +96,10 @@ class DataViewHelper extends AbstractViewHelper
                 $dataAttributes[$key] = $value;
             }
         }
-        return sprintf('<input type="hidden" class="xima-typo3-frontend-edit--data %s" value="%s" />', $class, htmlentities(json_encode($dataAttributes), ENT_QUOTES));
+        return sprintf(
+            '<input type="hidden" class="xima-typo3-frontend-edit--data %s" value="%s" />',
+            $class,
+            htmlentities(json_encode($dataAttributes), ENT_QUOTES)
+        );
     }
 }
