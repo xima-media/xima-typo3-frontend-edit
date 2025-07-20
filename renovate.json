@@ -1,0 +1,10 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"github>jackd248/renovate-config",
+		"github>jackd248/renovate-config:typo3-extension"
+	],
+	"ignorePaths": [
+		"package-lock.json"
+	]
+}
