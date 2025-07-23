@@ -1,0 +1,5 @@
+{
+	"symbol-whitelist": [
+		"TYPO3\\CMS\\Core\\Context\\TypoScriptAspect"
+	]
+}
