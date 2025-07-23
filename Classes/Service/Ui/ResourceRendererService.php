@@ -54,7 +54,7 @@ final class ResourceRendererService
             if ($debugMode) {
                 $debugScript = sprintf(
                     '<script%s>window.FRONTEND_EDIT_DEBUG = true;</script>',
-                    $nonceValue ? ' nonce="' . $nonceValue . '"' : ''
+                    $nonceValue !== '' ? ' nonce="' . $nonceValue . '"' : ''
                 );
                 $resources['debug_config'] = $debugScript;
             }
