@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
@@ -54,7 +53,7 @@ final class MenuGenerator
             $returnUrlAnchor = $returnUrl . '#c' . $contentElement['uid'];
 
             $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig);
-            $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $backendUser, $languageUid, $returnUrlAnchor);
+            $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
             $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
             $result[$contentElement['uid']] = [
@@ -98,7 +97,6 @@ final class MenuGenerator
         array $contentElement,
         array $contentElementConfig,
         array $data,
-        BackendUserAuthentication $backendUser,
         int $languageUid,
         string $returnUrlAnchor
     ): void {

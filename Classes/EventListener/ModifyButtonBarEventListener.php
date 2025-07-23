@@ -5,6 +5,8 @@ namespace Xima\XimaTypo3FrontendEdit\EventListener;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Template\Components\Buttons\InputButton;
 use TYPO3\CMS\Backend\Template\Components\ModifyButtonBarEvent;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Information\Typo3Version;
@@ -17,6 +19,11 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService
 final class ModifyButtonBarEventListener
 {
     protected array $configuration;
+
+    /**
+    * @throws ExtensionConfigurationPathDoesNotExistException
+    * @throws ExtensionConfigurationExtensionNotConfiguredException
+    */
     public function __construct(
         private readonly ExtensionConfiguration $extensionConfiguration,
         private readonly VersionCompatibilityService $versionCompatibilityService

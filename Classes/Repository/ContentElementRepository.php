@@ -23,6 +23,7 @@ final class ContentElementRepository
     }
 
     /**
+    * @return array<int, array<string, mixed>> Array of content element records
     * @throws Exception
     */
     public function fetchContentElements(
@@ -74,7 +75,7 @@ final class ContentElementRepository
             }
 
             return $query->executeQuery()->fetchAllAssociative();
-        } catch (\Throwable $exception) {
+        } catch (\Doctrine\DBAL\Exception $exception) {
             throw new Exception(
                 'Failed to fetch content elements for page ' . $pid . ': ' . $exception->getMessage(),
                 1640000010,
@@ -83,6 +84,9 @@ final class ContentElementRepository
         }
     }
 
+    /**
+    * @throws \Doctrine\DBAL\Exception
+    */
     public function getTranslatedRecord(
         string $table,
         int $parentUid,
@@ -115,9 +119,13 @@ final class ContentElementRepository
             return $this->configCache[$cacheKey];
         }
 
+        if (!isset($GLOBALS['TCA']['tt_content']['columns'])) {
+            return false;
+        }
+
         $tca = $cType === 'list'
-            ? $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items']
-            : $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'];
+            ? $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] ?? []
+            : $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] ?? [];
 
         $valueKey = $this->versionCompatibilityService->getContentElementConfigValueKey();
 
@@ -170,15 +178,6 @@ final class ContentElementRepository
         return false;
     }
 
-    public function shortenString(string $string, int $maxLength = 30): string
-    {
-        if (mb_strlen($string) <= $maxLength) {
-            return $string;
-        }
-
-        return mb_substr($string, 0, $maxLength) . '…';
-    }
-
     public function clearCache(): void
     {
         $this->rootlineCache = [];
@@ -188,6 +187,11 @@ final class ContentElementRepository
     private function mapContentElementConfig(array $config): array
     {
         if ($this->versionCompatibilityService->isVersionBelow12()) {
+            for ($i = 0; $i <= 3; $i++) {
+                if (!isset($config[$i])) {
+                    $config[$i] = '';
+                }
+            }
             return [
                 'label' => $config[0],
                 'value' => $config[1],

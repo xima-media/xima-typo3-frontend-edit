@@ -6,19 +6,18 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
-use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\IconService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
 final class MenuButtonBuilder
 {
     public function __construct(
         private readonly IconService $iconService,
         private readonly UrlBuilderService $urlBuilderService,
-        private readonly SettingsService $settingsService,
-        private readonly ContentElementRepository $contentElementRepository
+        private readonly SettingsService $settingsService
     ) {
     }
 
@@ -67,7 +66,7 @@ final class MenuButtonBuilder
 
         $label = $GLOBALS['LANG']->sL($contentElementConfig['label']) .
             '<p><small>' .
-            ($contentElement['header'] !== null ? $this->contentElementRepository->shortenString($contentElement['header']) : '') .
+            ($contentElement['header'] !== null ? StringUtility::shortenString($contentElement['header']) : '') .
             $additionalUid .
             '</small></p>';
 

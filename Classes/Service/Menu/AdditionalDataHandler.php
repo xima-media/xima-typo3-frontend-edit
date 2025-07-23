@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
+use Doctrine\DBAL\Exception;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
@@ -12,6 +13,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\IconService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
 final class AdditionalDataHandler
 {
@@ -63,7 +65,7 @@ final class AdditionalDataHandler
 
     private function isValidDataEntry(array $dataEntry): bool
     {
-        if (!$dataEntry['label']) {
+        if ($dataEntry['label'] === null || $dataEntry['label'] === '') {
             return false;
         }
 
@@ -73,6 +75,9 @@ final class AdditionalDataHandler
         return $hasTableAndUid || $hasUrl;
     }
 
+    /**
+    * @throws Exception
+    */
     private function resolveRecordUid(array $dataEntry, int $languageUid): ?int
     {
         if ($dataEntry['table'] === null || $dataEntry['uid'] === null) {
@@ -127,7 +132,7 @@ final class AdditionalDataHandler
         $icon = $this->resolveDataIcon($dataEntry, $contentElementConfig);
 
         $dataButton = new Button(
-            $this->contentElementRepository->shortenString($dataEntry['label']),
+            StringUtility::shortenString($dataEntry['label']),
             ButtonType::Link,
             $url,
             $icon

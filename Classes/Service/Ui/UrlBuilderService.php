@@ -17,6 +17,9 @@ final class UrlBuilderService
         $this->uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
     }
 
+    /**
+    * @throws RouteNotFoundException
+    */
     public function buildEditUrl(int $uid, string $table, int $languageUid, string $returnUrl): string
     {
         return $this->uriBuilder->buildUriFromRoute(
@@ -31,6 +34,9 @@ final class UrlBuilderService
         )->__toString();
     }
 
+    /**
+    * @throws RouteNotFoundException
+    */
     public function buildPageLayoutUrl(int $pageId, int $languageUid, string $returnUrl): string
     {
         return $this->uriBuilder->buildUriFromRoute(
@@ -43,6 +49,9 @@ final class UrlBuilderService
         )->__toString();
     }
 
+    /**
+    * @throws RouteNotFoundException
+    */
     public function buildHideUrl(int $uid, string $returnUrl): string
     {
         return $this->uriBuilder->buildUriFromRoute(
@@ -58,6 +67,9 @@ final class UrlBuilderService
         )->__toString();
     }
 
+    /**
+    * @throws RouteNotFoundException
+    */
     public function buildInfoUrl(int $uid, string $table, string $returnUrl): string
     {
         return $this->uriBuilder->buildUriFromRoute(
@@ -70,6 +82,9 @@ final class UrlBuilderService
         )->__toString();
     }
 
+    /**
+    * @throws RouteNotFoundException
+    */
     public function buildMoveUrl(int $uid, string $table, int $pageId, string $returnUrl): string
     {
         return $this->uriBuilder->buildUriFromRoute(
@@ -83,6 +98,9 @@ final class UrlBuilderService
         )->__toString();
     }
 
+    /**
+    * @throws RouteNotFoundException
+    */
     public function buildHistoryUrl(int $uid, string $table, string $returnUrl): string
     {
         return $this->uriBuilder->buildUriFromRoute(

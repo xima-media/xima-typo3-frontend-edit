@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\Stream;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\ResourceRendererService;
 
@@ -18,6 +19,9 @@ class ToolRendererMiddleware implements MiddlewareInterface
     ) {
     }
 
+    /**
+    * @throws Exception
+    */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);

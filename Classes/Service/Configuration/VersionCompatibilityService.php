@@ -44,12 +44,12 @@ final class VersionCompatibilityService
 
     public function isVersionBelow12(): bool
     {
-        return version_compare($this->getCurrentVersion(), '12.0.0', '<');
+        return $this->getMajorVersion() < 12;
     }
 
     public function isVersionBelow13(): bool
     {
-        return version_compare($this->getCurrentVersion(), '13.0.0', '<');
+        return $this->getMajorVersion() < 13;
     }
 
     public function getContentElementConfigValueKey(): string

@@ -10,6 +10,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Http\JsonResponse;
+use TYPO3\CMS\Frontend\Typolink\UnableToLinkException;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\MenuGenerator;
@@ -27,6 +28,10 @@ class EditInformationMiddleware implements MiddlewareInterface
     ) {
     }
 
+    /**
+    * @throws UnableToLinkException
+    * @throws \JsonException
+    */
     public function process(
         ServerRequestInterface $request,
         RequestHandlerInterface $handler
@@ -53,6 +58,9 @@ class EditInformationMiddleware implements MiddlewareInterface
         return new JsonResponse(mb_convert_encoding($dropdown, 'UTF-8'));
     }
 
+    /**
+    * @throws UnableToLinkException
+    */
     private function getReturnUrl(ServerRequestInterface $request, int $pid, int $languageUid): string
     {
         $referer = $request->getHeaderLine('Referer');
@@ -72,7 +80,7 @@ class EditInformationMiddleware implements MiddlewareInterface
             return [];
         }
 
-        $decoded = json_decode($body, true);
+        $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
 
         return is_array($decoded) ? $decoded : [];
     }
