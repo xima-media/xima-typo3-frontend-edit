@@ -25,7 +25,7 @@ parameters:
 		- Resources
 
 	excludePaths:
-		- .Build
+		- .Build (?)
 
 	type_coverage:
 		return: 100
