@@ -1,5 +1,22 @@
 document.addEventListener('DOMContentLoaded', function () {
   /**
+  * Debug logging utility - only logs when debug mode is enabled
+  * @param {string} message - The debug message
+  * @param {*} data - Optional data to log
+  * @param {string} level - Log level (log, warn, error)
+  */
+  const debugLog = (message, data = null, level = 'log') => {
+    if (window.FRONTEND_EDIT_DEBUG) {
+      const prefix = '%c[xima-typo3-frontend-edit]%c';
+      if (data !== null) {
+        console[level](prefix, 'font-weight: bold;', 'font-weight: normal;', message, data);
+      } else {
+        console[level](prefix, 'font-weight: bold;', 'font-weight: normal;', message);
+      }
+    }
+  };
+
+  /**
   * Finds the closest parent element with an ID matching the pattern "c\d+".
   * @param {HTMLElement} element - The starting element.
   * @returns {HTMLElement|null} - The closest matching element or null if not found.
@@ -18,7 +35,11 @@ document.addEventListener('DOMContentLoaded', function () {
   */
   const collectDataItems = () => {
     const dataItems = {};
-    document.querySelectorAll('.xima-typo3-frontend-edit--data').forEach((element) => {
+    const dataElements = document.querySelectorAll('.xima-typo3-frontend-edit--data');
+
+    debugLog(`Found ${dataElements.length} custom additional data elements on page`);
+
+    dataElements.forEach((element, index) => {
       const data = element.value;
       const closestElement = getClosestElementWithId(element);
 
@@ -27,9 +48,30 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!dataItems[id]) {
           dataItems[id] = [];
         }
-        dataItems[id].push(JSON.parse(data));
+        const parsedData = JSON.parse(data);
+        dataItems[id].push(parsedData);
+
+        debugLog(`Additional data element ${index + 1}: Found content element c${id}`, {
+          elementPosition: element.getBoundingClientRect(),
+          parsedData: parsedData,
+          closestElementId: closestElement.id
+        });
+      } else {
+        debugLog(`Additional data element ${index + 1}: No matching content element found`, {
+          element: element,
+          data: data
+        });
       }
     });
+
+    if (Object.keys(dataItems).length > 0) {
+      debugLog(`Collected additional data items summary:`, {
+        totalContentElements: Object.keys(dataItems).length,
+        contentElementIds: Object.keys(dataItems),
+        dataItems: dataItems
+      });
+    }
+
     return dataItems;
   };
 
@@ -43,6 +85,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const url = new URL(window.location.href);
     url.searchParams.set('type', '1729341864');
 
+    debugLog('Sending request to backend for content element information', {
+      url: url.toString(),
+      requestData: dataItems
+    });
+
     const response = await fetch(url.toString(), {
       cache: 'no-cache',
       method: 'POST',
@@ -50,8 +97,22 @@ document.addEventListener('DOMContentLoaded', function () {
       body: JSON.stringify(dataItems),
     });
 
-    if (!response.ok) throw new Error('Failed to fetch content elements');
-    return response.json();
+    if (!response.ok) {
+      debugLog(`Backend request failed with status ${response.status}`, {
+        status: response.status,
+        statusText: response.statusText,
+        url: url.toString()
+      }, 'error');
+      throw new Error('Failed to fetch content elements');
+    }
+
+    const jsonResponse = await response.json();
+    debugLog(`Backend response received with ${Object.keys(jsonResponse).length} content element(s)`, {
+      responseData: jsonResponse,
+      contentElementCount: Object.keys(jsonResponse).length
+    });
+
+    return jsonResponse;
   };
 
   /**
@@ -194,22 +255,77 @@ document.addEventListener('DOMContentLoaded', function () {
   * @param {Object} jsonResponse - The JSON response containing content element data.
   */
   const renderContentElements = (jsonResponse) => {
+    debugLog(`Starting DOM assignment for ${Object.keys(jsonResponse).length} content element(s)`);
+
+    let successfulAssignments = 0;
+    let failedAssignments = 0;
+    let translationMappings = 0;
+
     for (let uid in jsonResponse) {
       const contentElement = jsonResponse[uid];
       let element = document.querySelector(`#c${uid}`);
+      let originalUid = uid;
+      let translationInfo = null;
 
+      // Handle translation mapping
       if (contentElement.element.l10n_source) {
-        element = document.querySelector(`#c${contentElement.element.l10n_source}`);
-        if (element) {
+        let l10nElement = document.querySelector(`#c${contentElement.element.l10n_source}`);
+        if (l10nElement) {
+          translationInfo = {
+            originalUid: uid,
+            translationSourceUid: contentElement.element.l10n_source,
+            language: contentElement.element.sys_language_uid || 'default'
+          };
           uid = contentElement.element.l10n_source;
+          element = l10nElement;
+          translationMappings++;
+
+          debugLog(`Translation mapping: c${originalUid} → c${uid}`, translationInfo);
+        } else {
+          debugLog(`Translation source element c${contentElement.element.l10n_source} not found in DOM for c${uid}`, {
+            originalUid: uid,
+            l10nSource: contentElement.element.l10n_source,
+            contentElement: contentElement.element
+          }, 'warn');
         }
       }
 
-      if (!element) continue;
+      if (!element) {
+        failedAssignments++;
+        debugLog(`DOM assignment failed: Element c${uid} not found`, {
+          originalUid: originalUid,
+          uid: uid,
+          contentElement: contentElement.element,
+          translationInfo: translationInfo
+        }, 'warn');
+        continue;
+      }
+
+      successfulAssignments++;
+      debugLog(`DOM assignment successful: c${uid}`, {
+        originalUid: originalUid,
+        element: {
+          id: element.id,
+          className: element.className,
+          tagName: element.tagName,
+          position: element.getBoundingClientRect()
+        },
+        contentElement: {
+          type: contentElement.element.CType,
+          pid: contentElement.element.pid,
+          sys_language_uid: contentElement.element.sys_language_uid,
+          l10n_source: contentElement.element.l10n_source
+        },
+        menuStructure: {
+          type: contentElement.menu.type,
+          hasChildren: Object.keys(contentElement.menu.children || {}).length,
+          isSimpleMode: !!contentElement.menu.url
+        },
+        translationInfo: translationInfo
+      });
 
       const simpleMode = contentElement.menu.url;
       const editButton = createEditButton(uid, contentElement);
-
       const dropdownMenu = createDropdownMenu(uid, contentElement);
 
       editButton.addEventListener('click', (event) => {
@@ -219,7 +335,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
 
-
       const wrapperElement = document.createElement('div');
       wrapperElement.className = 'xima-typo3-frontend-edit--wrapper';
       wrapperElement.appendChild(editButton);
@@ -227,6 +342,18 @@ document.addEventListener('DOMContentLoaded', function () {
       document.body.appendChild(wrapperElement);
 
       setupHoverEvents(element, wrapperElement, editButton, dropdownMenu);
+    }
+
+    debugLog('DOM assignment summary', {
+      totalProcessed: Object.keys(jsonResponse).length,
+      successfulAssignments: successfulAssignments,
+      failedAssignments: failedAssignments,
+      translationMappings: translationMappings,
+      assignmentRate: `${Math.round((successfulAssignments / Object.keys(jsonResponse).length) * 100)}%`
+    });
+
+    if (failedAssignments > 0) {
+      debugLog(`${failedAssignments} content elements could not be assigned to DOM elements`, null, 'warn');
     }
   };
 
@@ -236,14 +363,32 @@ document.addEventListener('DOMContentLoaded', function () {
   */
   const getContentElements = async () => {
     try {
+      const startTime = performance.now();
+
       const dataItems = collectDataItems();
       const jsonResponse = await fetchContentElements(dataItems);
       renderContentElements(jsonResponse);
       setupDropdownMenuEvents();
+
+      const endTime = performance.now();
+      debugLog(`Frontend Edit initialization completed successfully in ${Math.round(endTime - startTime)}ms`, {
+        processingTime: `${Math.round(endTime - startTime)}ms`,
+        contentElementsFound: Object.keys(dataItems).length,
+        contentElementsProcessed: Object.keys(jsonResponse).length
+      });
+
     } catch (error) {
-      console.error(error);
+      debugLog('Frontend Edit initialization failed', {
+        error: error.message,
+        stack: error.stack
+      }, 'error');
     }
   };
+
+  // Initialize when debug mode is enabled
+  if (window.FRONTEND_EDIT_DEBUG) {
+    debugLog('Debug mode enabled - detailed logging active');
+  }
 
   getContentElements();
 });

@@ -29,13 +29,15 @@ use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
 final class ResourceRendererService
 {
     public function __construct(
-        private readonly VersionCompatibilityService $versionCompatibilityService
+        private readonly VersionCompatibilityService $versionCompatibilityService,
+        private readonly SettingsService $settingsService
     ) {}
 
     /**
@@ -47,6 +49,16 @@ final class ResourceRendererService
         try {
             $nonceValue = $this->resolveNonceValue();
             $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
+
+            $debugMode = $this->settingsService->isFrontendDebugModeEnabled();
+            if ($debugMode) {
+                $debugScript = sprintf(
+                    '<script%s>window.FRONTEND_EDIT_DEBUG = true;</script>',
+                    $nonceValue ? ' nonce="' . $nonceValue . '"' : ''
+                );
+                $resources['debug_config'] = $debugScript;
+            }
+
             $values = [...$values, 'resources' => $resources];
 
             if ($this->versionCompatibilityService->isVersion13OrHigher()) {
