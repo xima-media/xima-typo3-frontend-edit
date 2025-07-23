@@ -71,4 +71,3 @@ Debug
 
     ..  warning::
         This option is only for development purposes and should not be enabled in production environments.
-
