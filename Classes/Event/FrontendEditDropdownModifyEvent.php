@@ -23,7 +23,7 @@ class FrontendEditDropdownModifyEvent
     }
 
     /**
-    * @return \Xima\XimaTypo3FrontendEdit\Template\Component\Button
+    * @return Button
     */
     public function getMenuButton(): Button
     {
@@ -31,7 +31,7 @@ class FrontendEditDropdownModifyEvent
     }
 
     /**
-    * @param \Xima\XimaTypo3FrontendEdit\Template\Component\Button $menuButton
+    * @param Button $menuButton
     */
     public function setMenuButton(Button $menuButton): void
     {

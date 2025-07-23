@@ -5,6 +5,8 @@ namespace Xima\XimaTypo3FrontendEdit\EventListener;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Template\Components\Buttons\InputButton;
 use TYPO3\CMS\Backend\Template\Components\ModifyButtonBarEvent;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationExtensionNotConfiguredException;
+use TYPO3\CMS\Core\Configuration\Exception\ExtensionConfigurationPathDoesNotExistException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Information\Typo3Version;
@@ -12,13 +14,19 @@ use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
-use Xima\XimaTypo3FrontendEdit\Utility\IconUtility;
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
 
 final class ModifyButtonBarEventListener
 {
     protected array $configuration;
+
+    /**
+    * @throws ExtensionConfigurationPathDoesNotExistException
+    * @throws ExtensionConfigurationExtensionNotConfiguredException
+    */
     public function __construct(
-        private readonly ExtensionConfiguration $extensionConfiguration
+        private readonly ExtensionConfiguration $extensionConfiguration,
+        private readonly VersionCompatibilityService $versionCompatibilityService
     ) {
         $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
     }
@@ -44,7 +52,7 @@ final class ModifyButtonBarEventListener
                 ->setValue('1')
                 ->setForm($saveButton->getForm())
                 ->setTitle($this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:rm.saveCloseDoc'))
-                ->setIcon($iconFactory->getIcon('actions-document-save-close', IconUtility::getDefaultIconSize()))
+                ->setIcon($iconFactory->getIcon('actions-document-save-close', $this->versionCompatibilityService->getDefaultIconSize()))
                 ->setShowLabelText(true);
 
             $typo3Version = GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
