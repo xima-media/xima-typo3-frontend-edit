@@ -45,8 +45,8 @@
 		"ssch/typo3-rector": "^2.10 || ^3.0",
 		"symfony/translation": "^6.3 || ^7.0",
 		"tomasvotruba/type-coverage": "^1.0 || ^2.0",
-		"typo3/cms-base-distribution": "^12.0 || ^13.4",
-		"typo3/cms-lowlevel": "^12.0 || ^13.4",
+		"typo3/cms-base-distribution": "^11.5 || ^12.4 || ^13.4",
+		"typo3/cms-lowlevel": "^11.5 || ^12.4 || ^13.4",
 		"typo3/coding-standards": "0.8.0"
 	},
 	"autoload": {
