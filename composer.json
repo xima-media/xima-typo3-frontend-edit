@@ -32,7 +32,7 @@
 		"eliashaeussler/version-bumper": "^2.4 || ^3.0",
 		"ergebnis/composer-normalize": "^2.44",
 		"friendsofphp/php-cs-fixer": "^3.52",
-		"helhum/typo3-console": "^8.1",
+		"helhum/typo3-console": "^7.0 || ^8.1",
 		"helmich/typo3-typoscript-lint": "^3.2",
 		"move-elevator/composer-translation-validator": "^1.0.0",
 		"phpstan/phpstan-deprecation-rules": "^1.0 || ^2.0",
