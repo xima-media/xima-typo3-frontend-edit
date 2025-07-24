@@ -23,6 +23,7 @@ parameters:
 		- Classes
 		- Configuration
 		- Resources
+		- Tests/Unit
 
 	excludePaths:
 		- .Build (?)

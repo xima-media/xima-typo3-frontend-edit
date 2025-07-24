@@ -24,6 +24,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service\Configuration;
 
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
@@ -108,6 +109,17 @@ final class SettingsService
         }
 
         return $this->simpleModeMenuStructure;
+    }
+
+    public function isFrontendDebugModeEnabled(): bool
+    {
+        $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class);
+        try {
+            $configuration = $extensionConfiguration->get('xima_typo3_frontend_edit');
+            return (bool)($configuration['frontendDebugMode'] ?? false);
+        } catch (\Exception) {
+            return false;
+        }
     }
 
     private function calculateSimpleModeMenuStructure(array $configuration): bool
