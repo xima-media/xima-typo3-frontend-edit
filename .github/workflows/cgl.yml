@@ -7,4 +7,3 @@ on:
 jobs:
   cgl:
     uses: jackd248/reusable-github-actions/.github/workflows/cgl.yml@main
-
