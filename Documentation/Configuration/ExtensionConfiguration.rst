@@ -11,6 +11,9 @@ Extension configuration
 
 The extension currently provides the following configuration options:
 
+Features
+=======
+
 ..  _extconf-enableSaveAndCloseButton:
 
 ..  confval:: Save and Close
@@ -54,3 +57,17 @@ The extension currently provides the following configuration options:
     ..  warning::
         This option is useful if you want to use the full TYPO3 backend, e.g. language switch or modal popups for for inline group type.
         But keep in mind, that with this option the return to the frontend using the "close" button will not work anymore.
+
+Debug
+=======
+
+..  _extconf-frontendDebugMode:
+
+..  confval:: Frontend Debug Mode
+    :type: boolean
+    :Default: 0
+
+    Enable debug logging in browser console for detailed information about content element parsing and assignment.
+
+    ..  warning::
+        This option is only for development purposes and should not be enabled in production environments.
