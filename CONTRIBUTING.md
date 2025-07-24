@@ -53,6 +53,16 @@ ddev composer sca
 ddev composer sca:php
 ```
 
+## Run tests
+
+```bash
+# All tests
+ddev composer test
+
+# All tests with code coverage
+ddev composer test:coverage
+```
+
 ## TYPO3 Setup
 
 For testing the extension, you need to set up the TYPO3 instances.
