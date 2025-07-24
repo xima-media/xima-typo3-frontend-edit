@@ -39,12 +39,12 @@ class ResourceUtilityTest extends TestCase
     public function testGetResourcesIgnoresUnsupportedFileTypesInConfiguration(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalFrontendResources'] = [
-            'unsupported.txt'
+            'unsupported.txt',
         ];
-        
+
         // We can test the configuration handling without full TYPO3 context
         $additionalResources = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalFrontendResources'];
-        
+
         self::assertCount(1, $additionalResources);
         self::assertEquals('unsupported.txt', $additionalResources[0]);
         self::assertStringEndsWith('.txt', $additionalResources[0]);
@@ -55,9 +55,9 @@ class ResourceUtilityTest extends TestCase
     public function testGetCssTagMethodExists(): void
     {
         $reflection = new \ReflectionClass(ResourceUtility::class);
-        
+
         self::assertTrue($reflection->hasMethod('getCssTag'));
-        
+
         $method = $reflection->getMethod('getCssTag');
         self::assertTrue($method->isProtected());
         self::assertTrue($method->isStatic());
@@ -66,9 +66,9 @@ class ResourceUtilityTest extends TestCase
     public function testGetJsTagMethodExists(): void
     {
         $reflection = new \ReflectionClass(ResourceUtility::class);
-        
+
         self::assertTrue($reflection->hasMethod('getJsTag'));
-        
+
         $method = $reflection->getMethod('getJsTag');
         self::assertTrue($method->isProtected());
         self::assertTrue($method->isStatic());
@@ -77,9 +77,9 @@ class ResourceUtilityTest extends TestCase
     public function testGetResourcesMethodExists(): void
     {
         $reflection = new \ReflectionClass(ResourceUtility::class);
-        
+
         self::assertTrue($reflection->hasMethod('getResources'));
-        
+
         $method = $reflection->getMethod('getResources');
         self::assertTrue($method->isPublic());
         self::assertTrue($method->isStatic());
@@ -88,7 +88,7 @@ class ResourceUtilityTest extends TestCase
     public function testResourceUtilityClassStructure(): void
     {
         $reflection = new \ReflectionClass(ResourceUtility::class);
-        
+
         self::assertFalse($reflection->isFinal());
         self::assertFalse($reflection->isAbstract());
         self::assertEquals('Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility', $reflection->getName());
@@ -98,10 +98,10 @@ class ResourceUtilityTest extends TestCase
     {
         $reflection = new \ReflectionClass(ResourceUtility::class);
         $method = $reflection->getMethod('getResources');
-        
+
         $parameters = $method->getParameters();
         self::assertCount(1, $parameters);
-        
+
         $attributesParam = $parameters[0];
         $paramType = $attributesParam->getType();
         self::assertEquals('attributes', $attributesParam->getName());
@@ -117,7 +117,7 @@ class ResourceUtilityTest extends TestCase
         $reflection = new \ReflectionClass(ResourceUtility::class);
         $method = $reflection->getMethod('getResources');
         $returnType = $method->getReturnType();
-        
+
         self::assertNotNull($returnType);
         self::assertInstanceOf(\ReflectionNamedType::class, $returnType);
         self::assertEquals('array', $returnType->getName());
@@ -127,7 +127,7 @@ class ResourceUtilityTest extends TestCase
     {
         // No additional resources configuration
         $additionalResources = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalFrontendResources'] ?? [];
-        
+
         self::assertIsArray($additionalResources);
         self::assertEmpty($additionalResources);
     }
@@ -137,7 +137,7 @@ class ResourceUtilityTest extends TestCase
         $cssFile = 'test.css';
         $jsFile = 'test.js';
         $txtFile = 'test.txt';
-        
+
         self::assertTrue(str_ends_with($cssFile, '.css'));
         self::assertTrue(str_ends_with($jsFile, '.js'));
         self::assertFalse(str_ends_with($txtFile, '.css'));

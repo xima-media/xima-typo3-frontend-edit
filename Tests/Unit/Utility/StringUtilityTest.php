@@ -32,7 +32,7 @@ class StringUtilityTest extends TestCase
     {
         $input = 'Short string';
         $result = StringUtility::shortenString($input, 30);
-        
+
         self::assertEquals($input, $result);
     }
 
@@ -40,7 +40,7 @@ class StringUtilityTest extends TestCase
     {
         $input = str_repeat('a', 30);
         $result = StringUtility::shortenString($input, 30);
-        
+
         self::assertEquals($input, $result);
     }
 
@@ -66,7 +66,7 @@ class StringUtilityTest extends TestCase
     {
         $input = 'Ä string with ümlaut characters and émojis 😀';
         $result = StringUtility::shortenString($input, 20);
-        
+
         self::assertEquals('Ä string with ümlaut…', $result);
         self::assertEquals(21, mb_strlen($result));
     }
@@ -74,7 +74,7 @@ class StringUtilityTest extends TestCase
     public function testShortenStringHandlesEmptyString(): void
     {
         $result = StringUtility::shortenString('', 10);
-        
+
         self::assertEquals('', $result);
     }
 
@@ -82,7 +82,7 @@ class StringUtilityTest extends TestCase
     {
         $input = 'Any string';
         $result = StringUtility::shortenString($input, 0);
-        
+
         self::assertEquals('…', $result);
     }
 
@@ -90,7 +90,7 @@ class StringUtilityTest extends TestCase
     {
         $input = 'Any string';
         $result = StringUtility::shortenString($input, 1);
-        
+
         self::assertEquals('A…', $result);
     }
 
@@ -98,7 +98,7 @@ class StringUtilityTest extends TestCase
     {
         $reflection = new \ReflectionClass(StringUtility::class);
         $method = $reflection->getMethod('shortenString');
-        
+
         self::assertTrue($method->isStatic());
         self::assertTrue($method->isPublic());
     }
@@ -108,16 +108,16 @@ class StringUtilityTest extends TestCase
         $reflection = new \ReflectionClass(StringUtility::class);
         $method = $reflection->getMethod('shortenString');
         $parameters = $method->getParameters();
-        
+
         self::assertCount(2, $parameters);
-        
+
         // First parameter: string
         $firstParamType = $parameters[0]->getType();
         self::assertEquals('string', $parameters[0]->getName());
         self::assertTrue($parameters[0]->hasType());
         self::assertInstanceOf(\ReflectionNamedType::class, $firstParamType);
         self::assertEquals('string', $firstParamType->getName());
-        
+
         // Second parameter: maxLength with default value 30
         $secondParamType = $parameters[1]->getType();
         self::assertEquals('maxLength', $parameters[1]->getName());

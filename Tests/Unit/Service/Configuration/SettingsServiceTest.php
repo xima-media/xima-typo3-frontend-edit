@@ -34,16 +34,16 @@ class SettingsServiceTest extends TestCase
     {
         $contextMock = $this->createMock(Context::class);
         $versionCompatibilityService = new VersionCompatibilityService();
-        
+
         $subject = new SettingsService($contextMock, $versionCompatibilityService);
-        
+
         self::assertInstanceOf(SettingsService::class, $subject);
     }
 
     public function testSettingsServiceHasRequiredMethods(): void
     {
         $reflection = new \ReflectionClass(SettingsService::class);
-        
+
         self::assertTrue($reflection->hasMethod('getIgnoredPids'));
         self::assertTrue($reflection->hasMethod('getIgnoredCTypes'));
         self::assertTrue($reflection->hasMethod('getIgnoredListTypes'));
@@ -56,7 +56,7 @@ class SettingsServiceTest extends TestCase
     public function testSettingsServiceMethodsArePublic(): void
     {
         $reflection = new \ReflectionClass(SettingsService::class);
-        
+
         self::assertTrue($reflection->getMethod('getIgnoredPids')->isPublic());
         self::assertTrue($reflection->getMethod('getIgnoredCTypes')->isPublic());
         self::assertTrue($reflection->getMethod('getIgnoredListTypes')->isPublic());
@@ -70,12 +70,12 @@ class SettingsServiceTest extends TestCase
     {
         $reflection = new \ReflectionClass(SettingsService::class);
         $constructor = $reflection->getConstructor();
-        
+
         self::assertNotNull($constructor);
-        
+
         $parameters = $constructor->getParameters();
         self::assertCount(2, $parameters);
-        
+
         self::assertEquals('context', $parameters[0]->getName());
         self::assertEquals('versionCompatibilityService', $parameters[1]->getName());
     }
@@ -89,13 +89,13 @@ class SettingsServiceTest extends TestCase
     public function testArrayMethodsReturnArrayType(): void
     {
         $reflection = new \ReflectionClass(SettingsService::class);
-        
+
         $methods = ['getIgnoredPids', 'getIgnoredCTypes', 'getIgnoredListTypes', 'getIgnoredUids'];
-        
+
         foreach ($methods as $methodName) {
             $method = $reflection->getMethod($methodName);
             $returnType = $method->getReturnType();
-            
+
             self::assertNotNull($returnType, "Method {$methodName} should have return type");
             self::assertInstanceOf(\ReflectionNamedType::class, $returnType, "Method {$methodName} should have named return type");
             self::assertEquals('array', $returnType->getName(), "Method {$methodName} should return array");
@@ -105,13 +105,13 @@ class SettingsServiceTest extends TestCase
     public function testBooleanMethodsReturnBoolType(): void
     {
         $reflection = new \ReflectionClass(SettingsService::class);
-        
+
         $methods = ['checkDefaultMenuStructure', 'checkSimpleModeMenuStructure', 'isFrontendDebugModeEnabled'];
-        
+
         foreach ($methods as $methodName) {
             $method = $reflection->getMethod($methodName);
             $returnType = $method->getReturnType();
-            
+
             self::assertNotNull($returnType, "Method {$methodName} should have return type");
             self::assertInstanceOf(\ReflectionNamedType::class, $returnType, "Method {$methodName} should have named return type");
             self::assertEquals('bool', $returnType->getName(), "Method {$methodName} should return bool");
@@ -123,9 +123,9 @@ class SettingsServiceTest extends TestCase
         $reflection = new \ReflectionClass(SettingsService::class);
         $method = $reflection->getMethod('checkDefaultMenuStructure');
         $parameters = $method->getParameters();
-        
+
         self::assertCount(1, $parameters);
-        
+
         $param = $parameters[0];
         $paramType = $param->getType();
         self::assertEquals('identifier', $param->getName());
@@ -137,12 +137,12 @@ class SettingsServiceTest extends TestCase
     public function testPrivatePropertiesExist(): void
     {
         $reflection = new \ReflectionClass(SettingsService::class);
-        
+
         $expectedProperties = ['configuration', 'ignoredPids', 'ignoredCTypes', 'ignoredListTypes', 'ignoredUids'];
-        
+
         foreach ($expectedProperties as $propertyName) {
             self::assertTrue($reflection->hasProperty($propertyName), "Property {$propertyName} should exist");
-            
+
             $property = $reflection->getProperty($propertyName);
             self::assertTrue($property->isPrivate(), "Property {$propertyName} should be private");
         }
