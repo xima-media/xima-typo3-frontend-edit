@@ -112,6 +112,8 @@
 		"sca": [
 			"@sca:php"
 		],
-		"sca:php": "phpstan analyse --memory-limit=2G"
+		"sca:php": "phpstan analyse --memory-limit=2G",
+		"test": "@test:coverage --no-coverage",
+		"test:coverage": "XDEBUG_MODE=coverage phpunit -c phpunit.xml"
 	}
 }

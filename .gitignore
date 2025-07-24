@@ -13,3 +13,4 @@ node_modules
 php-cs-fixer.xml
 phpstan.xml
 .Build/
+.phpunit.result.cache
