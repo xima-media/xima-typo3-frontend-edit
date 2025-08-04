@@ -34,6 +34,7 @@ final class ContentElementRepository
 {
     private array $rootlineCache = [];
     private array $configCache = [];
+    private ?\ArrayObject $tcaCache = null;
 
     public function __construct(
         private readonly ConnectionPool $connectionPool,
@@ -137,27 +138,13 @@ final class ContentElementRepository
             return $this->configCache[$cacheKey];
         }
 
-        if (!isset($GLOBALS['TCA']['tt_content']['columns'])) {
-            return false;
-        }
+        // Use lazy loading to avoid loading entire TCA array
+        $config = $this->getTcaConfigurationLazy($cType, $listType);
 
-        $tca = $cType === 'list'
-            ? $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] ?? []
-            : $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] ?? [];
+        // Cache the result (whether found or not)
+        $this->configCache[$cacheKey] = $config;
 
-        $valueKey = $this->versionCompatibilityService->getContentElementConfigValueKey();
-
-        foreach ($tca as $item) {
-            if (($cType === 'list' && $item[$valueKey] === $listType) ||
-                $item[$valueKey] === $cType) {
-                $config = $this->mapContentElementConfig($item);
-                $this->configCache[$cacheKey] = $config;
-                return $config;
-            }
-        }
-
-        $this->configCache[$cacheKey] = false;
-        return false;
+        return $config;
     }
 
     public function isSubpageOf(int $subPageId, int $parentPageId): bool
@@ -200,6 +187,45 @@ final class ContentElementRepository
     {
         $this->rootlineCache = [];
         $this->configCache = [];
+        $this->tcaCache = null;
+    }
+
+    private function getTcaConfigurationLazy(string $cType, string $listType): array|false
+    {
+        if ($this->tcaCache === null) {
+            $this->tcaCache = new \ArrayObject();
+        }
+
+        $tcaCacheKey = $cType === 'list' ? 'list_type' : 'CType';
+
+        if (!$this->tcaCache->offsetExists($tcaCacheKey)) {
+            if (!isset($GLOBALS['TCA']['tt_content']['columns'])) {
+                return false;
+            }
+
+            $tcaSection = match ($cType) {
+                'list' => $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] ?? [],
+                default => $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] ?? []
+            };
+
+            $this->tcaCache->offsetSet($tcaCacheKey, $tcaSection);
+        }
+
+        return $this->findConfigurationInTcaSection($this->tcaCache->offsetGet($tcaCacheKey), $cType, $listType);
+    }
+
+    private function findConfigurationInTcaSection(array $tcaItems, string $cType, string $listType): array|false
+    {
+        $valueKey = $this->versionCompatibilityService->getContentElementConfigValueKey();
+
+        foreach ($tcaItems as $item) {
+            if (($cType === 'list' && $item[$valueKey] === $listType) ||
+                ($cType !== 'list' && $item[$valueKey] === $cType)) {
+                return $this->mapContentElementConfig($item);
+            }
+        }
+
+        return false;
     }
 
     private function mapContentElementConfig(array $config): array
