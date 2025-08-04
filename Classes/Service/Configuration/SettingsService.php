@@ -30,17 +30,23 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class SettingsService
 {
+    private const MAX_CACHE_SIZE = 10;
+    private const CACHE_CLEANUP_THRESHOLD = 8;
+
     private array $configuration = [];
     private array $ignoredPids = [];
     private array $ignoredCTypes = [];
     private array $ignoredListTypes = [];
     private array $ignoredUids = [];
     private ?bool $simpleModeMenuStructure = null;
+    private \ArrayObject $typoScriptCache;
 
     public function __construct(
         private readonly Context $context,
         private readonly VersionCompatibilityService $versionCompatibilityService
-    ) {}
+    ) {
+        $this->typoScriptCache = new \ArrayObject();
+    }
 
     public function getIgnoredPids(): array
     {
@@ -161,14 +167,44 @@ final class SettingsService
 
     private function getTypoScriptSetupArray(): array
     {
-        if ($this->versionCompatibilityService->isVersionBelow12()) {
-            return $this->getTypoScriptSetupArrayV11();
-        }
-        if ($this->versionCompatibilityService->isVersionBelow13()) {
-            return $this->getTypoScriptSetupArrayV12($GLOBALS['TYPO3_REQUEST']);
+        $cacheKey = $this->generateTypoScriptCacheKey();
+
+        if ($this->typoScriptCache->offsetExists($cacheKey)) {
+            return $this->typoScriptCache->offsetGet($cacheKey);
         }
 
-        return $this->getTypoScriptSetupArrayV13($GLOBALS['TYPO3_REQUEST']);
+        $result = match (true) {
+            $this->versionCompatibilityService->isVersionBelow12() => $this->getTypoScriptSetupArrayV11(),
+            $this->versionCompatibilityService->isVersionBelow13() => $this->getTypoScriptSetupArrayV12($GLOBALS['TYPO3_REQUEST']),
+            default => $this->getTypoScriptSetupArrayV13($GLOBALS['TYPO3_REQUEST'])
+        };
+
+        $this->manageCacheSize();
+        $this->typoScriptCache->offsetSet($cacheKey, $result);
+
+        return $result;
+    }
+
+    private function generateTypoScriptCacheKey(): string
+    {
+        $languageId = $this->context->getAspect('language')->getId();
+        $pageId = $GLOBALS['TSFE']->id ?? 0;
+        $version = $this->versionCompatibilityService->isVersionBelow12() ? 'v11' :
+                  ($this->versionCompatibilityService->isVersionBelow13() ? 'v12' : 'v13');
+
+        return "typoscript:{$version}:{$pageId}:{$languageId}";
+    }
+
+    private function manageCacheSize(): void
+    {
+        if ($this->typoScriptCache->count() >= self::MAX_CACHE_SIZE) {
+            $keys = iterator_to_array($this->typoScriptCache, false);
+            $keysToRemove = array_slice(array_keys($keys), 0, self::MAX_CACHE_SIZE - self::CACHE_CLEANUP_THRESHOLD);
+
+            foreach ($keysToRemove as $key) {
+                $this->typoScriptCache->offsetUnset($key);
+            }
+        }
     }
 
     /**
