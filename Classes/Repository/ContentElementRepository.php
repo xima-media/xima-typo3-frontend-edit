@@ -216,7 +216,8 @@ final class ContentElementRepository
     {
         if ($cache->count() >= self::CACHE_CLEANUP_THRESHOLD) {
             $entries = $cache->getArrayCopy();
-            $keysToRemove = array_slice(array_keys($entries), 0, $cache->count() - self::MAX_CACHE_SIZE + 20);
+            $entriesToRemove = $cache->count() - self::MAX_CACHE_SIZE;
+            $keysToRemove = array_slice(array_keys($entries), 0, $entriesToRemove);
 
             foreach ($keysToRemove as $key) {
                 $cache->offsetUnset($key);
