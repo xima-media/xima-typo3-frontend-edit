@@ -69,7 +69,12 @@ class EditInformationMiddleware implements MiddlewareInterface
         }
 
         $returnUrl = $this->getReturnUrl($request, $pid, $languageUid);
-        $data = $this->getRequestData($request);
+
+        try {
+            $data = $this->getRequestData($request);
+        } catch (\InvalidArgumentException $e) {
+            return new JsonResponse(['error' => 'Invalid request data'], 400);
+        }
 
         $dropdown = $this->menuGenerator->getDropdown($pid, $returnUrl, $languageUid, $data);
 
@@ -90,6 +95,39 @@ class EditInformationMiddleware implements MiddlewareInterface
         return $referer;
     }
 
+    private function validateContentType(ServerRequestInterface $request): void
+    {
+        $contentType = $request->getHeaderLine('Content-Type');
+
+        if ($contentType !== '' && !str_starts_with($contentType, 'application/json')) {
+            throw new \InvalidArgumentException(
+                'Invalid Content-Type header. Expected application/json',
+                1640000021
+            );
+        }
+    }
+
+    private function validateJsonStructure(mixed $decoded): array
+    {
+        if (!is_array($decoded)) {
+            throw new \InvalidArgumentException(
+                'Invalid JSON structure. Expected object/array',
+                1640000022
+            );
+        }
+
+        foreach ($decoded as $value) {
+            if (!is_array($value) && !is_scalar($value) && $value !== null) {
+                throw new \InvalidArgumentException(
+                    'Invalid JSON value type',
+                    1640000024
+                );
+            }
+        }
+
+        return $decoded;
+    }
+
     private function getRequestData(ServerRequestInterface $request): array
     {
         $body = $request->getBody()->getContents();
@@ -98,8 +136,17 @@ class EditInformationMiddleware implements MiddlewareInterface
             return [];
         }
 
-        $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+        $this->validateContentType($request);
 
-        return is_array($decoded) ? $decoded : [];
+        try {
+            $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            return $this->validateJsonStructure($decoded);
+        } catch (\JsonException $e) {
+            throw new \InvalidArgumentException(
+                'Invalid JSON format: ' . $e->getMessage(),
+                1640000025,
+                $e
+            );
+        }
     }
 }
