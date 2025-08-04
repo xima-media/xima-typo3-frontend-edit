@@ -1,0 +1,9 @@
+name: Tests
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  tests:
+    uses: jackd248/reusable-github-actions/.github/workflows/tests.yml@main

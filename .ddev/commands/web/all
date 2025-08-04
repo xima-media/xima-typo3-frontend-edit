@@ -11,7 +11,7 @@ command=$@
 mapfile -t versions < <(get_supported_typo3_versions)
 
 for version in "${versions[@]}"; do
-    TYPO3_PATH="/var/www/html/.test/${version}"
+    TYPO3_PATH="/var/www/html/.Build/${version}"
     if [ -d "$TYPO3_PATH" ]; then
         if [[ $command == typo3* ]]; then
             if [[ $version == 11 ]]; then

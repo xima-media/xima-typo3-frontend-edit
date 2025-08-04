@@ -32,22 +32,21 @@
 		"eliashaeussler/version-bumper": "^2.4 || ^3.0",
 		"ergebnis/composer-normalize": "^2.44",
 		"friendsofphp/php-cs-fixer": "^3.52",
-		"helhum/typo3-console": "^8.1",
+		"helhum/typo3-console": "^7.0 || ^8.1",
 		"helmich/typo3-typoscript-lint": "^3.2",
-		"move-elevator/composer-translation-validator": "^1.0.0",
+		"move-elevator/composer-translation-validator": "^1.0",
 		"phpstan/phpstan-deprecation-rules": "^1.0 || ^2.0",
 		"phpstan/phpstan-phpunit": "^1.0 || ^2.0",
 		"phpstan/phpstan-strict-rules": "^1.0 || ^2.0",
 		"phpunit/phpunit": "^10.2 || ^11.0 || ^12.0",
-		"roave/security-advisories": "dev-latest",
 		"saschaegerer/phpstan-typo3": "^1.10 || ^2.0",
 		"spaze/phpstan-disallowed-calls": "^4.0",
 		"ssch/typo3-rector": "^2.10 || ^3.0",
-		"symfony/translation": "^6.3 || ^7.0",
+		"symfony/translation": "^5.0 || ^6.3 || ^7.0",
 		"tomasvotruba/type-coverage": "^1.0 || ^2.0",
-		"typo3/cms-base-distribution": "^12.0 || ^13.4",
-		"typo3/cms-lowlevel": "^12.0 || ^13.4",
-		"typo3/coding-standards": "0.8.0"
+		"typo3/cms-base-distribution": "^11.5 || ^12.4 || ^13.4",
+		"typo3/cms-lowlevel": "^11.5 || ^12.4 || ^13.4",
+		"typo3/coding-standards": "^0.7 || ^0.8"
 	},
 	"autoload": {
 		"psr-4": {
@@ -112,6 +111,8 @@
 		"sca": [
 			"@sca:php"
 		],
-		"sca:php": "phpstan analyse --memory-limit=2G"
+		"sca:php": "phpstan analyse --memory-limit=2G",
+		"test": "@test:coverage --no-coverage",
+		"test:coverage": "XDEBUG_MODE=coverage phpunit -c phpunit.xml"
 	}
 }

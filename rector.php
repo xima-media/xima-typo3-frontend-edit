@@ -37,6 +37,7 @@ return RectorConfig::configure()
         __DIR__ . '/Configuration',
         __DIR__ . '/ext_emconf.php',
         __DIR__ . '/ext_tables.php',
+        __DIR__ . '/Tests/Unit',
     ])
     // uncomment to reach your current PHP version
     // ->withPhpSets()
