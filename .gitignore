@@ -1,7 +1,6 @@
 .idea
 .test/
 config
-composer.lock
 public
 !Resources/Public
 vendor
