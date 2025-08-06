@@ -147,13 +147,10 @@ final class ContentElementRepository
             return false;
         }
 
-        $tca = $cType === 'list'
-            ? $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] ?? []
-            : $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] ?? [];
-
         $valueKey = $this->versionCompatibilityService->getContentElementConfigValueKey();
 
-        foreach ($tca as $item) {
+        // Lazy loading: iterate through TCA items using generator to avoid loading entire array
+        foreach ($this->getTcaItemsLazily($cType) as $item) {
             if (($cType === 'list' && $item[$valueKey] === $listType) ||
                 $item[$valueKey] === $cType) {
                 $config = $this->mapContentElementConfig($item);
@@ -166,6 +163,22 @@ final class ContentElementRepository
         $this->manageCacheSize($this->configCache);
         $this->configCache->offsetSet($cacheKey, false);
         return false;
+    }
+
+    /**
+     * Generator for lazy loading TCA items to reduce memory consumption
+     * @return \Generator<int, array<string, mixed>>
+     */
+    private function getTcaItemsLazily(string $cType): \Generator
+    {
+        $tcaPath = $cType === 'list'
+            ? $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] ?? []
+            : $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] ?? [];
+
+        // Yield items one by one instead of loading entire array into memory
+        foreach ($tcaPath as $item) {
+            yield $item;
+        }
     }
 
     public function isSubpageOf(int $subPageId, int $parentPageId): bool
