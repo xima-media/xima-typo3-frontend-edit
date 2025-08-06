@@ -118,7 +118,15 @@ class Button
 
     public function appendAfterChild(Button $button, string|int $appendAfterKey, string|int $key): void
     {
-        $offset = array_search($appendAfterKey, array_keys($this->children), true) + 1;
+        if (!array_key_exists($appendAfterKey, $this->children)) {
+            $this->children[$key] = $button;
+            return;
+        }
+
+        $keys = array_keys($this->children);
+        $keyPositions = array_flip($keys);
+        $offset = $keyPositions[$appendAfterKey] + 1;
+
         $this->children = array_slice($this->children, 0, $offset, true) +
             [$key => $button] +
             array_slice($this->children, $offset, null, true);
