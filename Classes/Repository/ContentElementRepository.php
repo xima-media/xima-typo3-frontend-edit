@@ -32,13 +32,19 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService
 
 final class ContentElementRepository
 {
-    private array $rootlineCache = [];
-    private array $configCache = [];
+    private const MAX_CACHE_SIZE = 100;
+    private const CACHE_CLEANUP_THRESHOLD = 80;
+
+    private \ArrayObject $rootlineCache;
+    private \ArrayObject $configCache;
 
     public function __construct(
         private readonly ConnectionPool $connectionPool,
         private readonly VersionCompatibilityService $versionCompatibilityService
-    ) {}
+    ) {
+        $this->rootlineCache = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
+        $this->configCache = new \ArrayObject([], \ArrayObject::ARRAY_AS_PROPS);
+    }
 
     /**
     * @return array<int, array<string, mixed>> Array of content element records
@@ -133,39 +139,54 @@ final class ContentElementRepository
     {
         $cacheKey = $cType . ':' . $listType;
 
-        if (isset($this->configCache[$cacheKey])) {
-            return $this->configCache[$cacheKey];
+        if ($this->configCache->offsetExists($cacheKey)) {
+            return $this->configCache->offsetGet($cacheKey);
         }
 
         if (!isset($GLOBALS['TCA']['tt_content']['columns'])) {
             return false;
         }
 
-        $tca = $cType === 'list'
-            ? $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] ?? []
-            : $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] ?? [];
-
         $valueKey = $this->versionCompatibilityService->getContentElementConfigValueKey();
 
-        foreach ($tca as $item) {
+        // Lazy loading: iterate through TCA items using generator to avoid loading entire array
+        foreach ($this->getTcaItemsLazily($cType) as $item) {
             if (($cType === 'list' && $item[$valueKey] === $listType) ||
                 $item[$valueKey] === $cType) {
                 $config = $this->mapContentElementConfig($item);
-                $this->configCache[$cacheKey] = $config;
+                $this->manageCacheSize($this->configCache);
+                $this->configCache->offsetSet($cacheKey, $config);
                 return $config;
             }
         }
 
-        $this->configCache[$cacheKey] = false;
+        $this->manageCacheSize($this->configCache);
+        $this->configCache->offsetSet($cacheKey, false);
         return false;
+    }
+
+    /**
+     * Generator for lazy loading TCA items to reduce memory consumption
+     * @return \Generator<int, array<string, mixed>>
+     */
+    private function getTcaItemsLazily(string $cType): \Generator
+    {
+        $tcaPath = $cType === 'list'
+            ? $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] ?? []
+            : $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] ?? [];
+
+        // Yield items one by one instead of loading entire array into memory
+        foreach ($tcaPath as $item) {
+            yield $item;
+        }
     }
 
     public function isSubpageOf(int $subPageId, int $parentPageId): bool
     {
         $cacheKey = $subPageId . ':' . $parentPageId;
 
-        if (isset($this->rootlineCache[$cacheKey])) {
-            return $this->rootlineCache[$cacheKey];
+        if ($this->rootlineCache->offsetExists($cacheKey)) {
+            return $this->rootlineCache->offsetGet($cacheKey);
         }
 
         try {
@@ -173,7 +194,8 @@ final class ContentElementRepository
 
             foreach ($rootLine as $page) {
                 if ($page['uid'] === $parentPageId) {
-                    $this->rootlineCache[$cacheKey] = true;
+                    $this->manageCacheSize($this->rootlineCache);
+                    $this->rootlineCache->offsetSet($cacheKey, true);
                     return true;
                 }
             }
@@ -181,7 +203,8 @@ final class ContentElementRepository
             // Page not found or other error
         }
 
-        $this->rootlineCache[$cacheKey] = false;
+        $this->manageCacheSize($this->rootlineCache);
+        $this->rootlineCache->offsetSet($cacheKey, false);
         return false;
     }
 
@@ -198,8 +221,21 @@ final class ContentElementRepository
 
     public function clearCache(): void
     {
-        $this->rootlineCache = [];
-        $this->configCache = [];
+        $this->rootlineCache->exchangeArray([]);
+        $this->configCache->exchangeArray([]);
+    }
+
+    private function manageCacheSize(\ArrayObject $cache): void
+    {
+        if ($cache->count() >= self::CACHE_CLEANUP_THRESHOLD) {
+            $entries = $cache->getArrayCopy();
+            $entriesToRemove = $cache->count() - self::MAX_CACHE_SIZE;
+            $keysToRemove = array_slice(array_keys($entries), 0, $entriesToRemove);
+
+            foreach ($keysToRemove as $key) {
+                $cache->offsetUnset($key);
+            }
+        }
     }
 
     private function mapContentElementConfig(array $config): array
