@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', function () {
        * the translated uid) and if it has a `l10n_source` property.
        * If so, we try to find the wrapper element with the original uid regarding the `l10n_source` property.
        */
-      if (element.tagName.toLowerCase() === 'a' && contentElement.element.l10n_source) {
+      if (element && element.tagName.toLowerCase() === 'a' && contentElement.element.l10n_source) {
         let l10nElement = document.querySelector(`#c${contentElement.element.l10n_source}`);
         if (l10nElement) {
           translationInfo = {
