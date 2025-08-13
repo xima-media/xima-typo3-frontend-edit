@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', function () {
   /**
-  * Debug logging utility - only logs when debug mode is enabled
-  * @param {string} message - The debug message
-  * @param {*} data - Optional data to log
-  * @param {string} level - Log level (log, warn, error)
-  */
+   * Debug logging utility - only logs when debug mode is enabled
+   * @param {string} message - The debug message
+   * @param {*} data - Optional data to log
+   * @param {string} level - Log level (log, warn, error)
+   */
   const debugLog = (message, data = null, level = 'log') => {
     if (window.FRONTEND_EDIT_DEBUG) {
       const prefix = '%c[xima-typo3-frontend-edit]%c';
@@ -17,10 +17,10 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Finds the closest parent element with an ID matching the pattern "c\d+".
-  * @param {HTMLElement} element - The starting element.
-  * @returns {HTMLElement|null} - The closest matching element or null if not found.
-  */
+   * Finds the closest parent element with an ID matching the pattern "c\d+".
+   * @param {HTMLElement} element - The starting element.
+   * @returns {HTMLElement|null} - The closest matching element or null if not found.
+   */
   const getClosestElementWithId = (element) => {
     while (element && !element.id.match(/c\d+/)) {
       element = element.parentElement;
@@ -29,10 +29,10 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Collects data items from elements with the class "xima-typo3-frontend-edit--data".
-  * Groups the data by the closest element's ID.
-  * @returns {Object} - A dictionary of data items grouped by ID.
-  */
+   * Collects data items from elements with the class "xima-typo3-frontend-edit--data".
+   * Groups the data by the closest element's ID.
+   * @returns {Object} - A dictionary of data items grouped by ID.
+   */
   const collectDataItems = () => {
     const dataItems = {};
     const dataElements = document.querySelectorAll('.xima-typo3-frontend-edit--data');
@@ -76,11 +76,11 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Sends a POST request to fetch content elements based on the provided data items.
-  * @param {Object} dataItems - The data items to send in the request body.
-  * @returns {Promise<Object>} - The JSON response from the server.
-  * @throws {Error} - If the request fails.
-  */
+   * Sends a POST request to fetch content elements based on the provided data items.
+   * @param {Object} dataItems - The data items to send in the request body.
+   * @returns {Promise<Object>} - The JSON response from the server.
+   * @throws {Error} - If the request fails.
+   */
   const fetchContentElements = async (dataItems) => {
     const url = new URL(window.location.href);
     url.searchParams.set('type', '1729341864');
@@ -116,11 +116,11 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Creates an edit button for a content element.
-  * @param {string} uid - The unique ID of the content element.
-  * @param {Object} contentElement - The content element data.
-  * @returns {HTMLButtonElement} - The created edit button.
-  */
+   * Creates an edit button for a content element.
+   * @param {string} uid - The unique ID of the content element.
+   * @param {Object} contentElement - The content element data.
+   * @returns {HTMLButtonElement} - The created edit button.
+   */
   const createEditButton = (uid, contentElement) => {
     const editButton = contentElement.menu.url ? document.createElement('a') : document.createElement('button');
     editButton.className = 'xima-typo3-frontend-edit--edit-button';
@@ -135,11 +135,11 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Creates a dropdown menu for a content element.
-  * @param {string} uid - The unique ID of the content element.
-  * @param {Object} contentElement - The content element data.
-  * @returns {HTMLDivElement} - The created dropdown menu.
-  */
+   * Creates a dropdown menu for a content element.
+   * @param {string} uid - The unique ID of the content element.
+   * @param {Object} contentElement - The content element data.
+   * @returns {HTMLDivElement} - The created dropdown menu.
+   */
   const createDropdownMenu = (uid, contentElement) => {
     const dropdownMenu = document.createElement('div');
     dropdownMenu.className = 'xima-typo3-frontend-edit--dropdown-menu';
@@ -167,12 +167,12 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Positions the edit button and dropdown menu relative to the target element.
-  * @param {HTMLElement} element - The target element.
-  * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
-  * @param {HTMLElement} editButton - The edit button.
-  * @param {HTMLElement} dropdownMenu - The dropdown menu.
-  */
+   * Positions the edit button and dropdown menu relative to the target element.
+   * @param {HTMLElement} element - The target element.
+   * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
+   * @param {HTMLElement} editButton - The edit button.
+   * @param {HTMLElement} dropdownMenu - The dropdown menu.
+   */
   const positionElements = (element, wrapperElement, editButton, dropdownMenu) => {
     const rect = element.getBoundingClientRect();
     const rectInPageContext = {
@@ -207,12 +207,12 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Sets up hover events for the target element, edit button, and dropdown menu.
-  * @param {HTMLElement} element - The target element.
-  * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
-  * @param {HTMLElement} editButton - The edit button.
-  * @param {HTMLElement} dropdownMenu - The dropdown menu.
-  */
+   * Sets up hover events for the target element, edit button, and dropdown menu.
+   * @param {HTMLElement} element - The target element.
+   * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
+   * @param {HTMLElement} editButton - The edit button.
+   * @param {HTMLElement} dropdownMenu - The dropdown menu.
+   */
   const setupHoverEvents = (element, wrapperElement, editButton, dropdownMenu) => {
     element.addEventListener('mouseover', () => {
       positionElements(element, wrapperElement, editButton, dropdownMenu);
@@ -228,8 +228,8 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Sets up events for dropdown menus to handle mouse leave and click outside.
-  */
+   * Sets up events for dropdown menus to handle mouse leave and click outside.
+   */
   const setupDropdownMenuEvents = () => {
     document.querySelectorAll('.xima-typo3-frontend-edit--dropdown-menu').forEach((menu) => {
       menu.addEventListener('mouseleave', (event) => {
@@ -251,9 +251,9 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Renders content elements by creating edit buttons and dropdown menus for each.
-  * @param {Object} jsonResponse - The JSON response containing content element data.
-  */
+   * Renders content elements by creating edit buttons and dropdown menus for each.
+   * @param {Object} jsonResponse - The JSON response containing content element data.
+   */
   const renderContentElements = (jsonResponse) => {
     debugLog(`Starting DOM assignment for ${Object.keys(jsonResponse).length} content element(s)`);
 
@@ -267,8 +267,28 @@ document.addEventListener('DOMContentLoaded', function () {
       let originalUid = uid;
       let translationInfo = null;
 
-      // Handle translation mapping
-      if (contentElement.element.l10n_source) {
+      /*
+       *
+       * Handle translation mapping
+       *
+       * This is a little bit tricky, cause the correct container detection depends on the language overlay mode, especially for extbase models:
+       * https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/ExtensionArchitecture/Extbase/Reference/Domain/Model/Localization/Index.html
+       *
+       * We assume the default fluid_styled_content rendering, where both ids (of the original and the translation) are present in the DOM.
+       *
+       *  <div id="c{data.uid}">
+       *     <f:if condition="{data._LOCALIZED_UID}">
+       *         <a id="c{data._LOCALIZED_UID}"></a>
+       *     </f:if>
+       *     ...
+       * </div>
+       *
+       * By default, the `data.uid` is the original uid, and `data._LOCALIZED_UID` is the translation uid.
+       * So when we get the translated content element, we check if the c-ID is within an a-tag (so just an anchor for
+       * the translated uid) and if it has a `l10n_source` property.
+       * If so, we try to find the wrapper element with the original uid regarding the `l10n_source` property.
+       */
+      if (element.tagName.toLowerCase() === 'a' && contentElement.element.l10n_source) {
         let l10nElement = document.querySelector(`#c${contentElement.element.l10n_source}`);
         if (l10nElement) {
           translationInfo = {
@@ -358,9 +378,9 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   /**
-  * Main function to collect data, fetch content elements, and render them.
-  * Handles errors during the process.
-  */
+   * Main function to collect data, fetch content elements, and render them.
+   * Handles errors during the process.
+   */
   const getContentElements = async () => {
     try {
       const startTime = performance.now();
