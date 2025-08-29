@@ -10,7 +10,7 @@ additional_fqdns: []
 database:
   type: mariadb
   version: "10.6"
-webimage_extra_packages: [libxml2-utils]
+webimage_extra_packages: [libxml2-utils, php8.2-pcov]
 use_dns_when_possible: true
 corepack_enable: false
 hooks:
