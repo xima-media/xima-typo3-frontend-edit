@@ -49,6 +49,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
             array_key_exists('tx_ximatypo3frontendedit_enable', $typoScriptConfig)
             && $typoScriptConfig['tx_ximatypo3frontendedit_enable']
             && $GLOBALS['BE_USER'] !== null
+            && is_array($GLOBALS['BE_USER']->user)
             && (!array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) || !$GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])
         ) {
             $body = $response->getBody();
