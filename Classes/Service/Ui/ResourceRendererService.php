@@ -33,6 +33,12 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
+/**
+ * ResourceRendererService.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 final class ResourceRendererService
 {
     public function __construct(

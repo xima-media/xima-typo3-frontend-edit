@@ -26,25 +26,11 @@ namespace Xima\XimaTypo3FrontendEdit\ViewHelpers;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 
 /**
-* This ViewHelper generates a hidden input element which holds data values
-* for the frontend edit dropdown menu. You need either provide an uid and
-* a table for the corresponding edit link or an external url.
-* The output will only be rendered if the frontend edit is enabled.
-*
-* Usages:
-* ```html
-* <xtfe:data label="News Title" uid="12" table="tx_news_domain_model_news"
-*           icon="content-news" />
-* ```
-*
-* Output:
-* ```html
-* <input type="hidden" class="xima-typo3-frontend-edit--data"
-*        value="{&quot;label&quot;: &quot;News Title&quot;, &quot;uid&quot;: 12,
-*               &quot;table&quot;: &quot;tx_news_domain_model_news&quot;,
-*               &quot;icon&quot;: &quot;content-news&quot;}" />
-* ```
-*/
+ * DataViewHelper.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class DataViewHelper extends AbstractViewHelper
 {
     /**

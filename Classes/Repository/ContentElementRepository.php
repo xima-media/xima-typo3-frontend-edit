@@ -30,6 +30,12 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\RootlineUtility;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
 
+/**
+ * ContentElementRepository.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 final class ContentElementRepository
 {
     private const MAX_CACHE_SIZE = 100;

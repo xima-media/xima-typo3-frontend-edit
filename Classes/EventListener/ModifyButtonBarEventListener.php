@@ -35,6 +35,12 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
 
+/**
+ * ModifyButtonBarEventListener.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 final class ModifyButtonBarEventListener
 {
     protected array $configuration;

@@ -25,6 +25,12 @@ namespace Xima\XimaTypo3FrontendEdit\Event;
 
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 
+/**
+ * FrontendEditDropdownModifyEvent.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class FrontendEditDropdownModifyEvent
 {
     final public const NAME = 'xima_typo3_frontend_edit.frontend_edit.dropdown.modify';

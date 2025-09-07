@@ -25,6 +25,12 @@ namespace Xima\XimaTypo3FrontendEdit\Domain\Model;
 
 use TYPO3\CMS\Beuser\Domain\Model\BackendUser as User;
 
+/**
+ * BackendUser.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class BackendUser extends User
 {
     protected bool $disable = false;

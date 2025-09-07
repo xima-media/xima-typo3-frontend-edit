@@ -27,6 +27,12 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 
+/**
+ * ContentElementFilter.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 final class ContentElementFilter
 {
     public function __construct(

@@ -27,6 +27,12 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 
+/**
+ * ResourceUtility.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class ResourceUtility
 {
     public static function getResources(array $attributes = []): array

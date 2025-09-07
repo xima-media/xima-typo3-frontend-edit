@@ -28,6 +28,12 @@ use TYPO3\CMS\Core\Context\Context;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
 
+/**
+ * SettingsServiceTest.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class SettingsServiceTest extends TestCase
 {
     public function testSettingsServiceCanBeInstantiated(): void

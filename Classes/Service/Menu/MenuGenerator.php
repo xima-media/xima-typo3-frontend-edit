@@ -33,6 +33,12 @@ use Xima\XimaTypo3FrontendEdit\Service\Content\ContentElementFilter;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
 
+/**
+ * MenuGenerator.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 final class MenuGenerator
 {
     use ExtensionConfigurationTrait;

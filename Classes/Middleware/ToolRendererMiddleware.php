@@ -31,6 +31,12 @@ use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\Stream;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\ResourceRendererService;
 
+/**
+ * ToolRendererMiddleware.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class ToolRendererMiddleware implements MiddlewareInterface
 {
     public function __construct(

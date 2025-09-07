@@ -28,6 +28,12 @@ use TYPO3\CMS\Core\Imaging\IconFactory;
 use TYPO3\CMS\Core\Imaging\IconSize;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
 
+/**
+ * IconService.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 final class IconService
 {
     private array $iconCache = [];
