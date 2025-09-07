@@ -34,6 +34,7 @@
 		"friendsofphp/php-cs-fixer": "^3.52",
 		"helhum/typo3-console": "^7.0 || ^8.1",
 		"helmich/typo3-typoscript-lint": "^3.2",
+		"konradmichalik/php-doc-block-header-fixer": "^0.2.1",
 		"move-elevator/composer-translation-validator": "^1.0",
 		"phpstan/phpstan-deprecation-rules": "^1.0 || ^2.0",
 		"phpstan/phpstan-phpunit": "^1.0 || ^2.0",

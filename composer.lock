@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ccd7ac879cd44f228e024c6158958fa6",
+    "content-hash": "1a8ff75eec391b3eb129f2cad8630764",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -7600,6 +7600,68 @@
                 "source": "https://github.com/jsonrainbow/json-schema/tree/6.5.1"
             },
             "time": "2025-08-29T10:58:11+00:00"
+        },
+        {
+            "name": "konradmichalik/php-doc-block-header-fixer",
+            "version": "0.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jackd248/php-doc-block-header-fixer.git",
+                "reference": "8082d2d1901f06874e7484f44e94b74bd914d397"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jackd248/php-doc-block-header-fixer/zipball/8082d2d1901f06874e7484f44e94b74bd914d397",
+                "reference": "8082d2d1901f06874e7484f44e94b74bd914d397",
+                "shasum": ""
+            },
+            "require": {
+                "ext-tokenizer": "*",
+                "friendsofphp/php-cs-fixer": "^3.14",
+                "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0"
+            },
+            "require-dev": {
+                "armin/editorconfig-cli": "^1.0 || ^2.0",
+                "eliashaeussler/php-cs-fixer-config": "2.3.0",
+                "eliashaeussler/rector-config": "^3.0",
+                "ergebnis/composer-normalize": "^2.44",
+                "phpstan/phpstan": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-symfony": "^2.0",
+                "phpunit/phpunit": "^10.2 || ^11.0 || ^12.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "KonradMichalik\\PhpDocBlockHeaderFixer\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Konrad Michalik",
+                    "email": "hej@konradmichalik.dev",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "This package contains a PHP-CS-Fixer rule to automatically fix the class header regarding PHP DocBlocks.",
+            "keywords": [
+                "Coding Standard",
+                "docblock",
+                "fixer",
+                "header",
+                "php",
+                "php-cs-fixer",
+                "phpdoc"
+            ],
+            "support": {
+                "issues": "https://github.com/jackd248/php-doc-block-header-fixer/issues",
+                "source": "https://github.com/jackd248/php-doc-block-header-fixer/tree/0.2.1"
+            },
+            "time": "2025-09-07T12:23:01+00:00"
         },
         {
             "name": "league/flysystem",
