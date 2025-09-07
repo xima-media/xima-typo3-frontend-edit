@@ -27,8 +27,11 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 
 /**
-* Trait for consistent extension configuration access across classes
-*/
+ * ExtensionConfigurationTrait.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 trait ExtensionConfigurationTrait
 {
     protected array $extensionConfig = [];

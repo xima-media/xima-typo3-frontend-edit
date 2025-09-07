@@ -36,6 +36,12 @@ use Xima\XimaTypo3FrontendEdit\Service\Menu\MenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
 use Xima\XimaTypo3FrontendEdit\Utility\UrlUtility;
 
+/**
+ * EditInformationMiddleware.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class EditInformationMiddleware implements MiddlewareInterface
 {
     use ExtensionConfigurationTrait;

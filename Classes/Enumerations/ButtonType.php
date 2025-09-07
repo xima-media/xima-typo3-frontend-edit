@@ -23,6 +23,12 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Enumerations;
 
+/**
+ * ButtonType.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 enum ButtonType: string
 {
     case Divider = 'divider';

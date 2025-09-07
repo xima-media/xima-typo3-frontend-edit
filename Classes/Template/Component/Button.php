@@ -26,6 +26,12 @@ namespace Xima\XimaTypo3FrontendEdit\Template\Component;
 use TYPO3\CMS\Core\Imaging\Icon;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 
+/**
+ * Button.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class Button
 {
     protected string $label;

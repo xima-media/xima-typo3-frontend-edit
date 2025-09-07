@@ -23,6 +23,12 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit;
 
+/**
+ * Configuration.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class Configuration
 {
     final public const EXT_KEY = 'xima_typo3_frontend_edit';

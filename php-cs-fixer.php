@@ -42,5 +42,17 @@ $finder = $config->getFinder()
 
 return PhpCsFixerConfig\Config::create()
     ->withConfig($config)
+    ->withRule(
+        PhpCsFixerConfig\Rules\RuleSet::fromArray(
+            KonradMichalik\PhpDocBlockHeaderFixer\Generators\DocBlockHeader::create(
+                [
+                    'author' => 'Konrad Michalik <hej@konradmichalik.dev>',
+                    'license' => 'GPL-2.0',
+                ],
+                addStructureName: true,
+            )->__toArray(),
+        ),
+    )
+    ->registerCustomFixers([new KonradMichalik\PhpDocBlockHeaderFixer\Rules\DocBlockHeaderFixer()])
     ->withRule($header)
 ;

@@ -34,6 +34,12 @@ use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
+/**
+ * AdditionalDataHandler.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 final class AdditionalDataHandler
 {
     public function __construct(

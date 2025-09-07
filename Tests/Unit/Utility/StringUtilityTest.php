@@ -26,6 +26,12 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Utility;
 use PHPUnit\Framework\TestCase;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
+/**
+ * StringUtilityTest.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class StringUtilityTest extends TestCase
 {
     public function testShortenStringReturnsOriginalStringWhenShorterThanMaxLength(): void

@@ -27,6 +27,12 @@ use PHPUnit\Framework\TestCase;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
+/**
+ * ResourceUtilityTest.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class ResourceUtilityTest extends TestCase
 {
     protected function setUp(): void

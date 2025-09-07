@@ -23,6 +23,12 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Utility;
 
+/**
+ * StringUtility.
+ *
+ * @author Konrad Michalik <hej@konradmichalik.dev>
+ * @license GPL-2.0
+ */
 class StringUtility
 {
     public static function shortenString(string $string, int $maxLength = 30): string
