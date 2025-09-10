@@ -6452,16 +6452,16 @@
         },
         {
             "name": "ergebnis/composer-normalize",
-            "version": "2.48.1",
+            "version": "2.48.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ergebnis/composer-normalize.git",
-                "reference": "40d5d91df9e6b6bf9526a11ac6a47c5bb089005c"
+                "reference": "86dc9731b8320f49e9be9ad6d8e4de9b8b0e9b8b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ergebnis/composer-normalize/zipball/40d5d91df9e6b6bf9526a11ac6a47c5bb089005c",
-                "reference": "40d5d91df9e6b6bf9526a11ac6a47c5bb089005c",
+                "url": "https://api.github.com/repos/ergebnis/composer-normalize/zipball/86dc9731b8320f49e9be9ad6d8e4de9b8b0e9b8b",
+                "reference": "86dc9731b8320f49e9be9ad6d8e4de9b8b0e9b8b",
                 "shasum": ""
             },
             "require": {
@@ -6495,7 +6495,7 @@
             "extra": {
                 "class": "Ergebnis\\Composer\\Normalize\\NormalizePlugin",
                 "branch-alias": {
-                    "dev-main": "2.44-dev"
+                    "dev-main": "2.49-dev"
                 },
                 "plugin-optional": true,
                 "composer-normalize": {
@@ -6532,20 +6532,20 @@
                 "security": "https://github.com/ergebnis/composer-normalize/blob/main/.github/SECURITY.md",
                 "source": "https://github.com/ergebnis/composer-normalize"
             },
-            "time": "2025-09-01T05:44:15+00:00"
+            "time": "2025-09-06T11:42:34+00:00"
         },
         {
             "name": "ergebnis/json",
-            "version": "1.5.0",
+            "version": "1.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ergebnis/json.git",
-                "reference": "fc4f1bdac2d54a3050dca16ef1fe16ae50993f7d"
+                "reference": "7b56d2b5d9e897e75b43e2e753075a0904c921b1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ergebnis/json/zipball/fc4f1bdac2d54a3050dca16ef1fe16ae50993f7d",
-                "reference": "fc4f1bdac2d54a3050dca16ef1fe16ae50993f7d",
+                "url": "https://api.github.com/repos/ergebnis/json/zipball/7b56d2b5d9e897e75b43e2e753075a0904c921b1",
+                "reference": "7b56d2b5d9e897e75b43e2e753075a0904c921b1",
                 "shasum": ""
             },
             "require": {
@@ -6557,21 +6557,22 @@
                 "ergebnis/data-provider": "^3.3.0",
                 "ergebnis/license": "^2.5.0",
                 "ergebnis/php-cs-fixer-config": "^6.37.0",
+                "ergebnis/phpstan-rules": "^2.11.0",
                 "ergebnis/phpunit-slow-test-detector": "^2.16.1",
                 "fakerphp/faker": "^1.24.0",
                 "infection/infection": "~0.26.6",
                 "phpstan/extension-installer": "^1.4.3",
-                "phpstan/phpstan": "^1.12.10",
-                "phpstan/phpstan-deprecation-rules": "^1.2.1",
-                "phpstan/phpstan-phpunit": "^1.4.0",
-                "phpstan/phpstan-strict-rules": "^1.6.1",
-                "phpunit/phpunit": "^9.6.18",
-                "rector/rector": "^1.2.10"
+                "phpstan/phpstan": "^2.1.22",
+                "phpstan/phpstan-deprecation-rules": "^2.0.3",
+                "phpstan/phpstan-phpunit": "^2.0.7",
+                "phpstan/phpstan-strict-rules": "^2.0.6",
+                "phpunit/phpunit": "^9.6.24",
+                "rector/rector": "^2.1.4"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "1.4-dev"
+                    "dev-main": "1.7-dev"
                 },
                 "composer-normalize": {
                     "indent-size": 2,
@@ -6604,20 +6605,20 @@
                 "security": "https://github.com/ergebnis/json/blob/main/.github/SECURITY.md",
                 "source": "https://github.com/ergebnis/json"
             },
-            "time": "2025-08-19T10:33:00+00:00"
+            "time": "2025-09-06T09:08:45+00:00"
         },
         {
             "name": "ergebnis/json-normalizer",
-            "version": "4.10.0",
+            "version": "4.10.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ergebnis/json-normalizer.git",
-                "reference": "91b9914b13937926d3b1916fc72475703ce42156"
+                "reference": "77961faf2c651c3f05977b53c6c68e8434febf62"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ergebnis/json-normalizer/zipball/91b9914b13937926d3b1916fc72475703ce42156",
-                "reference": "91b9914b13937926d3b1916fc72475703ce42156",
+                "url": "https://api.github.com/repos/ergebnis/json-normalizer/zipball/77961faf2c651c3f05977b53c6c68e8434febf62",
+                "reference": "77961faf2c651c3f05977b53c6c68e8434febf62",
                 "shasum": ""
             },
             "require": {
@@ -6652,7 +6653,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "4.8-dev"
+                    "dev-main": "4.11-dev"
                 },
                 "composer-normalize": {
                     "indent-size": 2,
@@ -6686,20 +6687,20 @@
                 "security": "https://github.com/ergebnis/json-normalizer/blob/main/.github/SECURITY.md",
                 "source": "https://github.com/ergebnis/json-normalizer"
             },
-            "time": "2025-08-19T10:29:01+00:00"
+            "time": "2025-09-06T09:18:13+00:00"
         },
         {
             "name": "ergebnis/json-pointer",
-            "version": "3.7.0",
+            "version": "3.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ergebnis/json-pointer.git",
-                "reference": "cf3301710c99b54b844426c9cc46037d264fdf70"
+                "reference": "43bef355184e9542635e35dd2705910a3df4c236"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ergebnis/json-pointer/zipball/cf3301710c99b54b844426c9cc46037d264fdf70",
-                "reference": "cf3301710c99b54b844426c9cc46037d264fdf70",
+                "url": "https://api.github.com/repos/ergebnis/json-pointer/zipball/43bef355184e9542635e35dd2705910a3df4c236",
+                "reference": "43bef355184e9542635e35dd2705910a3df4c236",
                 "shasum": ""
             },
             "require": {
@@ -6724,7 +6725,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "3.6-dev"
+                    "dev-main": "3.8-dev"
                 },
                 "composer-normalize": {
                     "indent-size": 2,
@@ -6759,20 +6760,20 @@
                 "security": "https://github.com/ergebnis/json-pointer/blob/main/.github/SECURITY.md",
                 "source": "https://github.com/ergebnis/json-pointer"
             },
-            "time": "2025-08-19T10:23:17+00:00"
+            "time": "2025-09-06T09:28:19+00:00"
         },
         {
             "name": "ergebnis/json-printer",
-            "version": "3.8.0",
+            "version": "3.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ergebnis/json-printer.git",
-                "reference": "fe48d523392ab885bf581eb57f61526dcde44fbc"
+                "reference": "211d73fc7ec6daf98568ee6ed6e6d133dee8503e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ergebnis/json-printer/zipball/fe48d523392ab885bf581eb57f61526dcde44fbc",
-                "reference": "fe48d523392ab885bf581eb57f61526dcde44fbc",
+                "url": "https://api.github.com/repos/ergebnis/json-printer/zipball/211d73fc7ec6daf98568ee6ed6e6d133dee8503e",
+                "reference": "211d73fc7ec6daf98568ee6ed6e6d133dee8503e",
                 "shasum": ""
             },
             "require": {
@@ -6799,7 +6800,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "3.7-dev"
+                    "dev-main": "3.9-dev"
                 },
                 "composer-normalize": {
                     "indent-size": 2,
@@ -6834,20 +6835,20 @@
                 "security": "https://github.com/ergebnis/json-printer/blob/main/.github/SECURITY.md",
                 "source": "https://github.com/ergebnis/json-printer"
             },
-            "time": "2025-08-19T10:18:47+00:00"
+            "time": "2025-09-06T09:59:26+00:00"
         },
         {
             "name": "ergebnis/json-schema-validator",
-            "version": "4.5.0",
+            "version": "4.5.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ergebnis/json-schema-validator.git",
-                "reference": "0c8349baba70fd2449b799bc73650985c27ed321"
+                "reference": "b739527a480a9e3651360ad351ea77e7e9019df2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ergebnis/json-schema-validator/zipball/0c8349baba70fd2449b799bc73650985c27ed321",
-                "reference": "0c8349baba70fd2449b799bc73650985c27ed321",
+                "url": "https://api.github.com/repos/ergebnis/json-schema-validator/zipball/b739527a480a9e3651360ad351ea77e7e9019df2",
+                "reference": "b739527a480a9e3651360ad351ea77e7e9019df2",
                 "shasum": ""
             },
             "require": {
@@ -6876,7 +6877,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "4.4-dev"
+                    "dev-main": "4.6-dev"
                 },
                 "composer-normalize": {
                     "indent-size": 2,
@@ -6911,7 +6912,7 @@
                 "security": "https://github.com/ergebnis/json-schema-validator/blob/main/.github/SECURITY.md",
                 "source": "https://github.com/ergebnis/json-schema-validator"
             },
-            "time": "2025-08-19T08:41:00+00:00"
+            "time": "2025-09-06T11:37:35+00:00"
         },
         {
             "name": "evenement/evenement",
@@ -7023,16 +7024,16 @@
         },
         {
             "name": "friendsofphp/php-cs-fixer",
-            "version": "v3.87.1",
+            "version": "v3.87.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer.git",
-                "reference": "2f5170365e2a422d0c5421f9c8818b2c078105f6"
+                "reference": "da5f0a7858c79b56fc0b8c36d3efcfe5f37f0992"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/2f5170365e2a422d0c5421f9c8818b2c078105f6",
-                "reference": "2f5170365e2a422d0c5421f9c8818b2c078105f6",
+                "url": "https://api.github.com/repos/PHP-CS-Fixer/PHP-CS-Fixer/zipball/da5f0a7858c79b56fc0b8c36d3efcfe5f37f0992",
+                "reference": "da5f0a7858c79b56fc0b8c36d3efcfe5f37f0992",
                 "shasum": ""
             },
             "require": {
@@ -7115,7 +7116,7 @@
             ],
             "support": {
                 "issues": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/issues",
-                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.87.1"
+                "source": "https://github.com/PHP-CS-Fixer/PHP-CS-Fixer/tree/v3.87.2"
             },
             "funding": [
                 {
@@ -7123,7 +7124,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-09-02T15:27:36+00:00"
+            "time": "2025-09-10T09:51:40+00:00"
         },
         {
             "name": "helhum/config-loader",
@@ -7528,16 +7529,16 @@
         },
         {
             "name": "justinrainbow/json-schema",
-            "version": "6.5.1",
+            "version": "6.5.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jsonrainbow/json-schema.git",
-                "reference": "b5ab21e431594897e5bb86343c01f140ba862c26"
+                "reference": "ac0d369c09653cf7af561f6d91a705bc617a87b8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jsonrainbow/json-schema/zipball/b5ab21e431594897e5bb86343c01f140ba862c26",
-                "reference": "b5ab21e431594897e5bb86343c01f140ba862c26",
+                "url": "https://api.github.com/repos/jsonrainbow/json-schema/zipball/ac0d369c09653cf7af561f6d91a705bc617a87b8",
+                "reference": "ac0d369c09653cf7af561f6d91a705bc617a87b8",
                 "shasum": ""
             },
             "require": {
@@ -7597,9 +7598,9 @@
             ],
             "support": {
                 "issues": "https://github.com/jsonrainbow/json-schema/issues",
-                "source": "https://github.com/jsonrainbow/json-schema/tree/6.5.1"
+                "source": "https://github.com/jsonrainbow/json-schema/tree/6.5.2"
             },
-            "time": "2025-08-29T10:58:11+00:00"
+            "time": "2025-09-09T09:42:27+00:00"
         },
         {
             "name": "konradmichalik/php-doc-block-header-fixer",
@@ -8499,16 +8500,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.1.22",
+            "version": "2.1.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "41600c8379eb5aee63e9413fe9e97273e25d57e4"
+                "reference": "a34502adbbd5c2366b5a97679848a5ace4f6f2f5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/41600c8379eb5aee63e9413fe9e97273e25d57e4",
-                "reference": "41600c8379eb5aee63e9413fe9e97273e25d57e4",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/a34502adbbd5c2366b5a97679848a5ace4f6f2f5",
+                "reference": "a34502adbbd5c2366b5a97679848a5ace4f6f2f5",
                 "shasum": ""
             },
             "require": {
@@ -8553,7 +8554,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-08-04T19:17:37+00:00"
+            "time": "2025-09-10T11:42:22+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -8705,16 +8706,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "12.3.6",
+            "version": "12.3.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "da2cdaff87220fa641e7652364281b736e4347e0"
+                "reference": "bbede0f5593dad37af3be6a6f8e6ae1885e8a0a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/da2cdaff87220fa641e7652364281b736e4347e0",
-                "reference": "da2cdaff87220fa641e7652364281b736e4347e0",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/bbede0f5593dad37af3be6a6f8e6ae1885e8a0a9",
+                "reference": "bbede0f5593dad37af3be6a6f8e6ae1885e8a0a9",
                 "shasum": ""
             },
             "require": {
@@ -8770,7 +8771,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/12.3.6"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/12.3.7"
             },
             "funding": [
                 {
@@ -8790,7 +8791,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-02T05:23:14+00:00"
+            "time": "2025-09-10T09:59:06+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -9670,16 +9671,16 @@
         },
         {
             "name": "rector/rector",
-            "version": "2.1.6",
+            "version": "2.1.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/rectorphp/rector.git",
-                "reference": "729aabc0ec66e700ef164e26454a1357f222a2f3"
+                "reference": "c34cc07c4698f007a20dc5c99ff820089ae413ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/rectorphp/rector/zipball/729aabc0ec66e700ef164e26454a1357f222a2f3",
-                "reference": "729aabc0ec66e700ef164e26454a1357f222a2f3",
+                "url": "https://api.github.com/repos/rectorphp/rector/zipball/c34cc07c4698f007a20dc5c99ff820089ae413ce",
+                "reference": "c34cc07c4698f007a20dc5c99ff820089ae413ce",
                 "shasum": ""
             },
             "require": {
@@ -9718,7 +9719,7 @@
             ],
             "support": {
                 "issues": "https://github.com/rectorphp/rector/issues",
-                "source": "https://github.com/rectorphp/rector/tree/2.1.6"
+                "source": "https://github.com/rectorphp/rector/tree/2.1.7"
             },
             "funding": [
                 {
@@ -9726,7 +9727,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-09-05T15:43:08+00:00"
+            "time": "2025-09-10T11:13:58+00:00"
         },
         {
             "name": "saschaegerer/phpstan-typo3",
