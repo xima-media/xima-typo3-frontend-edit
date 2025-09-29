@@ -56,7 +56,7 @@ final class MenuButtonBuilder
             'tt_content',
             $languageUid,
             $returnUrlAnchor
-        );
+        ) . '&tx_ximatypo3frontendedit';
 
         return new Button(
             'LLL:EXT:' . Configuration::EXT_KEY . '/Resources/Private/Language/locallang.xlf:edit_menu',
