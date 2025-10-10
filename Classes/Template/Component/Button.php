@@ -3,28 +3,21 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the TYPO3 CMS extension "xima_typo3_frontend_edit".
+ * This file is part of the "xima_typo3_frontend_edit" TYPO3 CMS extension.
  *
- * Copyright (C) 2024-2025 Konrad Michalik <hej@konradmichalik.dev>
+ * (c) Konrad Michalik <hej@konradmichalik.dev>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Xima\XimaTypo3FrontendEdit\Template\Component;
 
 use TYPO3\CMS\Core\Imaging\Icon;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
+
+use function array_key_exists;
+use function array_slice;
 
 /**
  * Button.
@@ -61,17 +54,11 @@ class Button
         $this->label = $label;
     }
 
-    /**
-    * @return ButtonType
-    */
     public function getType(): ButtonType
     {
         return $this->type;
     }
 
-    /**
-    * @param ButtonType $type
-    */
     public function setType(ButtonType $type): void
     {
         $this->type = $type;
@@ -117,15 +104,16 @@ class Button
         $this->children = $children;
     }
 
-    public function appendChild(Button $button, string|int $key): void
+    public function appendChild(self $button, string|int $key): void
     {
         $this->children[$key] = $button;
     }
 
-    public function appendAfterChild(Button $button, string|int $appendAfterKey, string|int $key): void
+    public function appendAfterChild(self $button, string|int $appendAfterKey, string|int $key): void
     {
         if (!array_key_exists($appendAfterKey, $this->children)) {
             $this->children[$key] = $button;
+
             return;
         }
 
@@ -150,7 +138,7 @@ class Button
             'type' => $this->type->value,
         ];
 
-        if ($this->url !== null && $this->url !== '') {
+        if (null !== $this->url && '' !== $this->url) {
             $result['url'] = $this->url;
             $result['targetBlank'] = $this->targetBlank;
         }
@@ -159,8 +147,8 @@ class Button
             $result['icon'] = $this->icon->getAlternativeMarkup('inline');
         }
 
-        if ($this->children !== []) {
-            $result['children'] = array_map(static fn(Button $button) => $button->render(), $this->children);
+        if ([] !== $this->children) {
+            $result['children'] = array_map(static fn (Button $button) => $button->render(), $this->children);
         }
 
         return $result;

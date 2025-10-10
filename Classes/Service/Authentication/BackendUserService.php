@@ -3,22 +3,12 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the TYPO3 CMS extension "xima_typo3_frontend_edit".
+ * This file is part of the "xima_typo3_frontend_edit" TYPO3 CMS extension.
  *
- * Copyright (C) 2024-2025 Konrad Michalik <hej@konradmichalik.dev>
+ * (c) Konrad Michalik <hej@konradmichalik.dev>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Authentication;
@@ -40,17 +30,17 @@ final class BackendUserService
 
     public function getBackendUser(): ?BackendUserAuthentication
     {
-        if ($this->backendUser !== null) {
+        if (null !== $this->backendUser) {
             return $this->backendUser;
         }
 
         $this->backendUser = $GLOBALS['BE_USER'] ?? null;
 
-        if ($this->backendUser === null) {
+        if (null === $this->backendUser) {
             return null;
         }
 
-        if ($this->backendUser->user === null) {
+        if (null === $this->backendUser->user) {
             $this->initializeBackendUser();
         }
 
@@ -61,13 +51,13 @@ final class BackendUserService
     {
         $backendUser = $this->getBackendUser();
 
-        if ($backendUser === null || $backendUser->user === null) {
+        if (null === $backendUser || null === $backendUser->user) {
             return false;
         }
 
-        return (bool)BackendUtility::readPageAccess(
+        return (bool) BackendUtility::readPageAccess(
             $pageId,
-            $backendUser->getPagePermsClause(Permission::PAGE_SHOW)
+            $backendUser->getPagePermsClause(Permission::PAGE_SHOW),
         );
     }
 
@@ -75,7 +65,7 @@ final class BackendUserService
     {
         $backendUser = $this->getBackendUser();
 
-        if ($backendUser === null || $backendUser->user === null) {
+        if (null === $backendUser || null === $backendUser->user) {
             return false;
         }
 
@@ -85,14 +75,15 @@ final class BackendUserService
     public function isAdmin(): bool
     {
         $backendUser = $this->getBackendUser();
-        return $backendUser !== null && $backendUser->isAdmin();
+
+        return null !== $backendUser && $backendUser->isAdmin();
     }
 
     public function isFrontendEditDisabled(): bool
     {
         $backendUser = $this->getBackendUser();
 
-        if ($backendUser === null || $backendUser->user === null) {
+        if (null === $backendUser || null === $backendUser->user) {
             return true;
         }
 
@@ -103,7 +94,7 @@ final class BackendUserService
     private function initializeBackendUser(): void
     {
         Bootstrap::initializeBackendAuthentication();
-        if ($this->backendUser !== null) {
+        if (null !== $this->backendUser) {
             $this->backendUser->initializeUserSessionManager();
         }
         $this->backendUser = $GLOBALS['BE_USER'] ?? null;

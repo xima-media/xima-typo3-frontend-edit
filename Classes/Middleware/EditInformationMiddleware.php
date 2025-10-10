@@ -3,30 +3,20 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the TYPO3 CMS extension "xima_typo3_frontend_edit".
+ * This file is part of the "xima_typo3_frontend_edit" TYPO3 CMS extension.
  *
- * Copyright (C) 2024-2025 Konrad Michalik <hej@konradmichalik.dev>
+ * (c) Konrad Michalik <hej@konradmichalik.dev>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Xima\XimaTypo3FrontendEdit\Middleware;
 
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
+use InvalidArgumentException;
+use JsonException;
+use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
+use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Frontend\Typolink\UnableToLinkException;
@@ -35,6 +25,9 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\MenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
 use Xima\XimaTypo3FrontendEdit\Utility\UrlUtility;
+
+use function is_array;
+use function is_scalar;
 
 /**
  * EditInformationMiddleware.
@@ -49,21 +42,21 @@ class EditInformationMiddleware implements MiddlewareInterface
     public function __construct(
         protected readonly MenuGenerator $menuGenerator,
         protected readonly BackendUserService $backendUserService,
-        protected readonly ExtensionConfiguration $extensionConfiguration
+        protected readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
 
     /**
-    * @throws UnableToLinkException
-    * @throws \JsonException
-    */
+     * @throws UnableToLinkException
+     * @throws JsonException
+     */
     public function process(
         ServerRequestInterface $request,
-        RequestHandlerInterface $handler
+        RequestHandlerInterface $handler,
     ): ResponseInterface {
         $response = $handler->handle($request);
         $params = $request->getQueryParams();
 
-        if (!isset($params['type']) || $params['type'] !== Configuration::TYPE) {
+        if (!isset($params['type']) || Configuration::TYPE !== $params['type']) {
             return $response;
         }
 
@@ -78,7 +71,7 @@ class EditInformationMiddleware implements MiddlewareInterface
 
         try {
             $data = $this->getRequestData($request);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return new JsonResponse(['error' => 'Invalid request data'], 400);
         }
 
@@ -88,13 +81,13 @@ class EditInformationMiddleware implements MiddlewareInterface
     }
 
     /**
-    * @throws UnableToLinkException
-    */
+     * @throws UnableToLinkException
+     */
     private function getReturnUrl(ServerRequestInterface $request, int $pid, int $languageUid): string
     {
         $referer = $request->getHeaderLine('Referer');
 
-        if ($referer === '' || $this->shouldForceReturnUrlGeneration()) {
+        if ('' === $referer || $this->shouldForceReturnUrlGeneration()) {
             return UrlUtility::getUrl($pid, $languageUid);
         }
 
@@ -105,29 +98,20 @@ class EditInformationMiddleware implements MiddlewareInterface
     {
         $contentType = $request->getHeaderLine('Content-Type');
 
-        if ($contentType !== '' && !str_starts_with($contentType, 'application/json')) {
-            throw new \InvalidArgumentException(
-                'Invalid Content-Type header. Expected application/json',
-                1640000021
-            );
+        if ('' !== $contentType && !str_starts_with($contentType, 'application/json')) {
+            throw new InvalidArgumentException('Invalid Content-Type header. Expected application/json', 1640000021);
         }
     }
 
     private function validateJsonStructure(mixed $decoded): array
     {
         if (!is_array($decoded)) {
-            throw new \InvalidArgumentException(
-                'Invalid JSON structure. Expected object/array',
-                1640000022
-            );
+            throw new InvalidArgumentException('Invalid JSON structure. Expected object/array', 1640000022);
         }
 
         foreach ($decoded as $value) {
-            if (!is_array($value) && !is_scalar($value) && $value !== null) {
-                throw new \InvalidArgumentException(
-                    'Invalid JSON value type',
-                    1640000024
-                );
+            if (!is_array($value) && !is_scalar($value) && null !== $value) {
+                throw new InvalidArgumentException('Invalid JSON value type', 1640000024);
             }
         }
 
@@ -138,21 +122,18 @@ class EditInformationMiddleware implements MiddlewareInterface
     {
         $body = $request->getBody()->getContents();
 
-        if ($body === '') {
+        if ('' === $body) {
             return [];
         }
 
         $this->validateContentType($request);
 
         try {
-            $decoded = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            $decoded = json_decode($body, true, 512, \JSON_THROW_ON_ERROR);
+
             return $this->validateJsonStructure($decoded);
-        } catch (\JsonException $e) {
-            throw new \InvalidArgumentException(
-                'Invalid JSON format: ' . $e->getMessage(),
-                1640000025,
-                $e
-            );
+        } catch (JsonException $e) {
+            throw new InvalidArgumentException('Invalid JSON format: '.$e->getMessage(), 1640000025, $e);
         }
     }
 }
