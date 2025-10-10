@@ -3,30 +3,21 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the TYPO3 CMS extension "xima_typo3_frontend_edit".
+ * This file is part of the "xima_typo3_frontend_edit" TYPO3 CMS extension.
  *
- * Copyright (C) 2024-2025 Konrad Michalik <hej@konradmichalik.dev>
+ * (c) Konrad Michalik <hej@konradmichalik.dev>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Configuration;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionNamedType;
 use TYPO3\CMS\Core\Context\Context;
-use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
-use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\{SettingsService, VersionCompatibilityService};
 
 /**
  * SettingsServiceTest.
@@ -48,7 +39,7 @@ class SettingsServiceTest extends TestCase
 
     public function testSettingsServiceHasRequiredMethods(): void
     {
-        $reflection = new \ReflectionClass(SettingsService::class);
+        $reflection = new ReflectionClass(SettingsService::class);
 
         self::assertTrue($reflection->hasMethod('getIgnoredPids'));
         self::assertTrue($reflection->hasMethod('getIgnoredCTypes'));
@@ -61,7 +52,7 @@ class SettingsServiceTest extends TestCase
 
     public function testSettingsServiceMethodsArePublic(): void
     {
-        $reflection = new \ReflectionClass(SettingsService::class);
+        $reflection = new ReflectionClass(SettingsService::class);
 
         self::assertTrue($reflection->getMethod('getIgnoredPids')->isPublic());
         self::assertTrue($reflection->getMethod('getIgnoredCTypes')->isPublic());
@@ -74,7 +65,7 @@ class SettingsServiceTest extends TestCase
 
     public function testSettingsServiceHasCorrectConstructorParameters(): void
     {
-        $reflection = new \ReflectionClass(SettingsService::class);
+        $reflection = new ReflectionClass(SettingsService::class);
         $constructor = $reflection->getConstructor();
 
         self::assertNotNull($constructor);
@@ -88,13 +79,13 @@ class SettingsServiceTest extends TestCase
 
     public function testClassIsFinal(): void
     {
-        $reflection = new \ReflectionClass(SettingsService::class);
+        $reflection = new ReflectionClass(SettingsService::class);
         self::assertTrue($reflection->isFinal());
     }
 
     public function testArrayMethodsReturnArrayType(): void
     {
-        $reflection = new \ReflectionClass(SettingsService::class);
+        $reflection = new ReflectionClass(SettingsService::class);
 
         $methods = ['getIgnoredPids', 'getIgnoredCTypes', 'getIgnoredListTypes', 'getIgnoredUids'];
 
@@ -103,14 +94,14 @@ class SettingsServiceTest extends TestCase
             $returnType = $method->getReturnType();
 
             self::assertNotNull($returnType, "Method {$methodName} should have return type");
-            self::assertInstanceOf(\ReflectionNamedType::class, $returnType, "Method {$methodName} should have named return type");
+            self::assertInstanceOf(ReflectionNamedType::class, $returnType, "Method {$methodName} should have named return type");
             self::assertEquals('array', $returnType->getName(), "Method {$methodName} should return array");
         }
     }
 
     public function testBooleanMethodsReturnBoolType(): void
     {
-        $reflection = new \ReflectionClass(SettingsService::class);
+        $reflection = new ReflectionClass(SettingsService::class);
 
         $methods = ['checkDefaultMenuStructure', 'checkSimpleModeMenuStructure', 'isFrontendDebugModeEnabled'];
 
@@ -119,14 +110,14 @@ class SettingsServiceTest extends TestCase
             $returnType = $method->getReturnType();
 
             self::assertNotNull($returnType, "Method {$methodName} should have return type");
-            self::assertInstanceOf(\ReflectionNamedType::class, $returnType, "Method {$methodName} should have named return type");
+            self::assertInstanceOf(ReflectionNamedType::class, $returnType, "Method {$methodName} should have named return type");
             self::assertEquals('bool', $returnType->getName(), "Method {$methodName} should return bool");
         }
     }
 
     public function testCheckDefaultMenuStructureHasStringParameter(): void
     {
-        $reflection = new \ReflectionClass(SettingsService::class);
+        $reflection = new ReflectionClass(SettingsService::class);
         $method = $reflection->getMethod('checkDefaultMenuStructure');
         $parameters = $method->getParameters();
 
@@ -136,13 +127,13 @@ class SettingsServiceTest extends TestCase
         $paramType = $param->getType();
         self::assertEquals('identifier', $param->getName());
         self::assertTrue($param->hasType());
-        self::assertInstanceOf(\ReflectionNamedType::class, $paramType);
+        self::assertInstanceOf(ReflectionNamedType::class, $paramType);
         self::assertEquals('string', $paramType->getName());
     }
 
     public function testPrivatePropertiesExist(): void
     {
-        $reflection = new \ReflectionClass(SettingsService::class);
+        $reflection = new ReflectionClass(SettingsService::class);
 
         $expectedProperties = ['configuration', 'ignoredPids', 'ignoredCTypes', 'ignoredListTypes', 'ignoredUids'];
 

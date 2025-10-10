@@ -3,27 +3,19 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the TYPO3 CMS extension "xima_typo3_frontend_edit".
+ * This file is part of the "xima_typo3_frontend_edit" TYPO3 CMS extension.
  *
- * Copyright (C) 2024-2025 Konrad Michalik <hej@konradmichalik.dev>
+ * (c) Konrad Michalik <hej@konradmichalik.dev>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Utility;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
+use ReflectionNamedType;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
 /**
@@ -64,7 +56,7 @@ class StringUtilityTest extends TestCase
         $input = str_repeat('a', 50);
         $result = StringUtility::shortenString($input);
 
-        self::assertEquals(str_repeat('a', 30) . '…', $result);
+        self::assertEquals(str_repeat('a', 30).'…', $result);
         self::assertEquals(31, mb_strlen($result)); // 30 chars + ellipsis
     }
 
@@ -102,7 +94,7 @@ class StringUtilityTest extends TestCase
 
     public function testStringUtilityMethodIsStatic(): void
     {
-        $reflection = new \ReflectionClass(StringUtility::class);
+        $reflection = new ReflectionClass(StringUtility::class);
         $method = $reflection->getMethod('shortenString');
 
         self::assertTrue($method->isStatic());
@@ -111,7 +103,7 @@ class StringUtilityTest extends TestCase
 
     public function testStringUtilityMethodParameters(): void
     {
-        $reflection = new \ReflectionClass(StringUtility::class);
+        $reflection = new ReflectionClass(StringUtility::class);
         $method = $reflection->getMethod('shortenString');
         $parameters = $method->getParameters();
 
@@ -121,14 +113,14 @@ class StringUtilityTest extends TestCase
         $firstParamType = $parameters[0]->getType();
         self::assertEquals('string', $parameters[0]->getName());
         self::assertTrue($parameters[0]->hasType());
-        self::assertInstanceOf(\ReflectionNamedType::class, $firstParamType);
+        self::assertInstanceOf(ReflectionNamedType::class, $firstParamType);
         self::assertEquals('string', $firstParamType->getName());
 
         // Second parameter: maxLength with default value 30
         $secondParamType = $parameters[1]->getType();
         self::assertEquals('maxLength', $parameters[1]->getName());
         self::assertTrue($parameters[1]->hasType());
-        self::assertInstanceOf(\ReflectionNamedType::class, $secondParamType);
+        self::assertInstanceOf(ReflectionNamedType::class, $secondParamType);
         self::assertEquals('int', $secondParamType->getName());
         self::assertTrue($parameters[1]->isDefaultValueAvailable());
         self::assertEquals(30, $parameters[1]->getDefaultValue());

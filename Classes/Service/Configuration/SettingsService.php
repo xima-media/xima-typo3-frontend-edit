@@ -3,30 +3,26 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the TYPO3 CMS extension "xima_typo3_frontend_edit".
+ * This file is part of the "xima_typo3_frontend_edit" TYPO3 CMS extension.
  *
- * Copyright (C) 2024-2025 Konrad Michalik <hej@konradmichalik.dev>
+ * (c) Konrad Michalik <hej@konradmichalik.dev>
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 2 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Configuration;
 
+use ArrayObject;
+use Exception;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Context\Context;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+
+use function array_key_exists;
+use function array_slice;
+use function is_array;
 
 /**
  * SettingsService.
@@ -45,18 +41,18 @@ final class SettingsService
     private array $ignoredListTypes = [];
     private array $ignoredUids = [];
     private ?bool $simpleModeMenuStructure = null;
-    private \ArrayObject $typoScriptCache;
+    private ArrayObject $typoScriptCache;
 
     public function __construct(
         private readonly Context $context,
-        private readonly VersionCompatibilityService $versionCompatibilityService
+        private readonly VersionCompatibilityService $versionCompatibilityService,
     ) {
-        $this->typoScriptCache = new \ArrayObject();
+        $this->typoScriptCache = new ArrayObject();
     }
 
     public function getIgnoredPids(): array
     {
-        if ($this->ignoredPids === []) {
+        if ([] === $this->ignoredPids) {
             $configuration = $this->getConfiguration();
             $this->ignoredPids = isset($configuration['ignorePids'])
                 ? array_map('trim', explode(',', $configuration['ignorePids']))
@@ -68,7 +64,7 @@ final class SettingsService
 
     public function getIgnoredCTypes(): array
     {
-        if ($this->ignoredCTypes === []) {
+        if ([] === $this->ignoredCTypes) {
             $configuration = $this->getConfiguration();
             $this->ignoredCTypes = isset($configuration['ignoreCTypes'])
                 ? array_map('trim', explode(',', $configuration['ignoreCTypes']))
@@ -80,7 +76,7 @@ final class SettingsService
 
     public function getIgnoredListTypes(): array
     {
-        if ($this->ignoredListTypes === []) {
+        if ([] === $this->ignoredListTypes) {
             $configuration = $this->getConfiguration();
             $this->ignoredListTypes = isset($configuration['ignoreListTypes'])
                 ? array_map('trim', explode(',', $configuration['ignoreListTypes']))
@@ -92,7 +88,7 @@ final class SettingsService
 
     public function getIgnoredUids(): array
     {
-        if ($this->ignoredUids === []) {
+        if ([] === $this->ignoredUids) {
             $configuration = $this->getConfiguration();
             $this->ignoredUids = isset($configuration['ignoredUids'])
                 ? array_map('trim', explode(',', $configuration['ignoredUids']))
@@ -115,7 +111,7 @@ final class SettingsService
 
     public function checkSimpleModeMenuStructure(): bool
     {
-        if ($this->simpleModeMenuStructure === null) {
+        if (null === $this->simpleModeMenuStructure) {
             $configuration = $this->getConfiguration();
             $this->simpleModeMenuStructure = $this->calculateSimpleModeMenuStructure($configuration);
         }
@@ -128,8 +124,9 @@ final class SettingsService
         $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class);
         try {
             $configuration = $extensionConfiguration->get('xima_typo3_frontend_edit');
-            return (bool)($configuration['frontendDebugMode'] ?? false);
-        } catch (\Exception) {
+
+            return (bool) ($configuration['frontendDebugMode'] ?? false);
+        } catch (Exception) {
             return false;
         }
     }
@@ -142,15 +139,15 @@ final class SettingsService
 
         $menuStructure = $configuration['defaultMenuStructure'];
 
-        if (!is_array($menuStructure) || $menuStructure === []) {
+        if (!is_array($menuStructure) || [] === $menuStructure) {
             return false;
         }
 
         foreach ($menuStructure as $key => $value) {
-            if ($key === 'edit' && (int)$value !== 1) {
+            if ('edit' === $key && 1 !== (int) $value) {
                 return false;
             }
-            if ($key !== 'edit' && (int)$value !== 0) {
+            if ('edit' !== $key && 0 !== (int) $value) {
                 return false;
             }
         }
@@ -160,7 +157,7 @@ final class SettingsService
 
     private function getConfiguration(): array
     {
-        if ($this->configuration !== []) {
+        if ([] !== $this->configuration) {
             return $this->configuration;
         }
 
@@ -182,7 +179,7 @@ final class SettingsService
         $result = match (true) {
             $this->versionCompatibilityService->isVersionBelow12() => $this->getTypoScriptSetupArrayV11(),
             $this->versionCompatibilityService->isVersionBelow13() => $this->getTypoScriptSetupArrayV12($GLOBALS['TYPO3_REQUEST']),
-            default => $this->getTypoScriptSetupArrayV13($GLOBALS['TYPO3_REQUEST'])
+            default => $this->getTypoScriptSetupArrayV13($GLOBALS['TYPO3_REQUEST']),
         };
 
         $this->manageCacheSize();
@@ -214,17 +211,18 @@ final class SettingsService
     }
 
     /**
-    * These methods need to handle the case that the TypoScript setup array is not available within full cached setup.
-    * Workaround from https://github.com/derhansen/fe_change_pwd to ensure that the TypoScript setup is available.
-    */
+     * These methods need to handle the case that the TypoScript setup array is not available within full cached setup.
+     * Workaround from https://github.com/derhansen/fe_change_pwd to ensure that the TypoScript setup is available.
+     */
     private function getTypoScriptSetupArrayV11(): array
     {
         // Ensure, TSFE setup is loaded for cached pages
-        if ($GLOBALS['TSFE']->tmpl === null || ($GLOBALS['TSFE']->tmpl && $GLOBALS['TSFE']->tmpl->setup === [])) {
+        if (null === $GLOBALS['TSFE']->tmpl || ($GLOBALS['TSFE']->tmpl && [] === $GLOBALS['TSFE']->tmpl->setup)) {
             /* @phpstan-ignore-next-line */
             $this->context->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
             $GLOBALS['TSFE']->getConfigArray();
         }
+
         return $GLOBALS['TSFE']->tmpl->setup;
     }
 
@@ -232,7 +230,7 @@ final class SettingsService
     {
         try {
             $fullTypoScript = $request->getAttribute('frontend.typoscript')->getSetupArray();
-        } catch (\Exception) {
+        } catch (Exception) {
             // An exception is thrown, when TypoScript setup array is not available. This is usually the case,
             // when the current page request is cached. Therefore, the TSFE TypoScript parsing is forced here.
 
@@ -252,18 +250,15 @@ final class SettingsService
             // from TypoScriptAspect
             $fullTypoScript = $requestWithFullTypoScript->getAttribute('frontend.typoscript')->getSetupArray();
         }
+
         return $fullTypoScript;
     }
 
-    /**
-    * @param ServerRequestInterface $request
-    * @return array
-    */
     private function getTypoScriptSetupArrayV13(ServerRequestInterface $request): array
     {
         try {
             return $request->getAttribute('frontend.typoscript')->getSetupArray();
-        } catch (\Exception) {
+        } catch (Exception) {
             return [];
         }
     }
