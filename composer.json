@@ -67,6 +67,9 @@
 		"sort-packages": true
 	},
 	"extra": {
+		"konradmichalik/php-cs-fixer-preset": {
+			"copyright": 2024
+		},
 		"typo3/cms": {
 			"cms-package-dir": "{$vendor-dir}/typo3/cms",
 			"extension-key": "xima_typo3_frontend_edit",
