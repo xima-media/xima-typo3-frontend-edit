@@ -98,7 +98,7 @@ class DataViewHelper extends AbstractViewHelper
         return sprintf(
             '<input type="hidden" class="xima-typo3-frontend-edit--data %s" value="%s" />',
             $class,
-            htmlentities(json_encode($dataAttributes), \ENT_QUOTES),
+            htmlentities(false !== json_encode($dataAttributes) ? json_encode($dataAttributes) : '', \ENT_QUOTES),
         );
     }
 }

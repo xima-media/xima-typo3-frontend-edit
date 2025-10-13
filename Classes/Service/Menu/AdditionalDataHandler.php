@@ -24,6 +24,7 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
 use function array_key_exists;
+use function is_array;
 
 /**
  * AdditionalDataHandler.
@@ -40,6 +41,10 @@ final class AdditionalDataHandler
         private readonly ContentElementRepository $contentElementRepository,
     ) {}
 
+    /**
+     * @param array<int, array<string, mixed>> $dataEntries
+     * @param array<string, mixed>             $contentElementConfig
+     */
     public function handleData(
         Button $button,
         array $dataEntries,
@@ -78,6 +83,9 @@ final class AdditionalDataHandler
         );
     }
 
+    /**
+     * @param array<string, mixed> $dataEntry
+     */
     private function isValidDataEntry(array $dataEntry): bool
     {
         if (null === $dataEntry['label'] || '' === $dataEntry['label']) {
@@ -91,6 +99,8 @@ final class AdditionalDataHandler
     }
 
     /**
+     * @param array<string, mixed> $dataEntry
+     *
      * @throws Exception
      */
     private function resolveRecordUid(array $dataEntry, int $languageUid): ?int
@@ -118,7 +128,7 @@ final class AdditionalDataHandler
                 $languageUid,
             );
 
-            if ($translatedRecord) {
+            if (is_array($translatedRecord)) {
                 return $translatedRecord['uid'];
             }
 
@@ -128,12 +138,19 @@ final class AdditionalDataHandler
         return $recordUid;
     }
 
+    /**
+     * @param array<string, mixed> $record
+     */
     private function needsTranslation(array $record, int $languageUid): bool
     {
         return array_key_exists('sys_language_uid', $record)
             && $record['sys_language_uid'] !== $languageUid;
     }
 
+    /**
+     * @param array<string, mixed> $dataEntry
+     * @param array<string, mixed> $contentElementConfig
+     */
     private function addDataButton(
         Button $button,
         array $dataEntry,
@@ -141,7 +158,7 @@ final class AdditionalDataHandler
         array $contentElementConfig,
         int $languageUid,
         string $returnUrlAnchor,
-        string $key,
+        string|int $key,
     ): void {
         $url = $this->buildDataUrl($dataEntry, $recordUid, $languageUid, $returnUrlAnchor);
         $icon = $this->resolveDataIcon($dataEntry, $contentElementConfig);
@@ -156,6 +173,9 @@ final class AdditionalDataHandler
         $button->appendChild($dataButton, 'data_'.$key);
     }
 
+    /**
+     * @param array<string, mixed> $dataEntry
+     */
     private function buildDataUrl(array $dataEntry, int $recordUid, int $languageUid, string $returnUrlAnchor): string
     {
         if (null !== $dataEntry['url']) {
@@ -170,6 +190,10 @@ final class AdditionalDataHandler
         );
     }
 
+    /**
+     * @param array<string, mixed> $dataEntry
+     * @param array<string, mixed> $contentElementConfig
+     */
     private function resolveDataIcon(array $dataEntry, array $contentElementConfig): \TYPO3\CMS\Core\Imaging\Icon
     {
         if (null !== $dataEntry['icon']) {

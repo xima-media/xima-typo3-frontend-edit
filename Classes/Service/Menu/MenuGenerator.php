@@ -15,6 +15,7 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
+use TYPO3\CMS\Core\Exception;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
@@ -46,6 +47,13 @@ final class MenuGenerator
         protected readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
 
+    /**
+     * @param array<int, mixed> $data
+     *
+     * @return array<mixed>
+     *
+     * @throws Exception
+     */
     public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = []): array
     {
         if ($this->contentElementFilter->isPageIgnored($pid)) {
@@ -68,6 +76,10 @@ final class MenuGenerator
             );
             $returnUrlAnchor = $returnUrl.'#c'.$contentElement['uid'];
 
+            if (false === $contentElementConfig) {
+                continue;
+            }
+
             $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig);
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
@@ -81,6 +93,10 @@ final class MenuGenerator
         return $this->renderMenuButtons($result);
     }
 
+    /**
+     * @param array<string, mixed> $contentElement
+     * @param array<string, mixed> $contentElementConfig
+     */
     private function createMenuButton(
         array $contentElement,
         int $languageUid,
@@ -108,6 +124,11 @@ final class MenuGenerator
         return $menuButton;
     }
 
+    /**
+     * @param array<string, mixed> $contentElement
+     * @param array<string, mixed> $contentElementConfig
+     * @param array<int, mixed>    $data
+     */
     private function handleAdditionalData(
         Button $button,
         array $contentElement,
@@ -124,11 +145,15 @@ final class MenuGenerator
         $this->additionalDataHandler->handleData($button, $data[$uid], $contentElementConfig, $languageUid, $returnUrlAnchor);
     }
 
+    /**
+     * @param array<string, mixed> $contentElement
+     * @param array<int, mixed>    $data
+     */
     private function resolveDataUid(array $contentElement, array $data): ?int
     {
         // Check if data exists for current content element
         if (array_key_exists($contentElement['uid'], $data) && [] !== $data[$contentElement['uid']]) {
-            return $contentElement['uid'];
+            return (int) $contentElement['uid'];
         }
 
         // Check if data exists for l10n_source (translation parent)
@@ -136,12 +161,17 @@ final class MenuGenerator
             && array_key_exists($contentElement['l10n_source'], $data)
             && [] !== $data[$contentElement['l10n_source']]
             && 0 !== $contentElement['l10n_source']) {
-            return $contentElement['l10n_source'];
+            return (int) $contentElement['l10n_source'];
         }
 
         return null;
     }
 
+    /**
+     * @param array<mixed> $result
+     *
+     * @return array<mixed>
+     */
     private function renderMenuButtons(array $result): array
     {
         foreach ($result as $uid => $contentElement) {

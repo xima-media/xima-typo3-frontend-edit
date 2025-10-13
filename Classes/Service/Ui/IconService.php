@@ -24,6 +24,9 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService
  */
 final class IconService
 {
+    /**
+     * @var array<string, Icon>
+     */
     private array $iconCache = [];
 
     public function __construct(

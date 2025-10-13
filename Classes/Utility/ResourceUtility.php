@@ -26,6 +26,11 @@ use function sprintf;
  */
 class ResourceUtility
 {
+    /**
+     * @param array<string, string> $attributes
+     *
+     * @return array<string, string>
+     */
     public static function getResources(array $attributes = []): array
     {
         $additionalResources = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalFrontendResources'] ?? [];
@@ -45,6 +50,9 @@ class ResourceUtility
         ], $additionalResources);
     }
 
+    /**
+     * @param array<string, string> $attributes
+     */
     protected static function getCssTag(string $cssFileLocation, array $attributes): string
     {
         return sprintf(
@@ -58,6 +66,9 @@ class ResourceUtility
         );
     }
 
+    /**
+     * @param array<string, string> $attributes
+     */
     protected static function getJsTag(string $jsFileLocation, array $attributes): string
     {
         return sprintf(

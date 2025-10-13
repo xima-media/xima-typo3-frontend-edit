@@ -33,7 +33,14 @@ final class ContentElementRepository
     private const MAX_CACHE_SIZE = 100;
     private const CACHE_CLEANUP_THRESHOLD = 80;
 
+    /**
+     * @var ArrayObject<string, bool>
+     */
     private ArrayObject $rootlineCache;
+
+    /**
+     * @var ArrayObject<string, array<string, mixed>|false>
+     */
     private ArrayObject $configCache;
 
     public function __construct(
@@ -104,6 +111,8 @@ final class ContentElementRepository
     }
 
     /**
+     * @return array<string, mixed>|false
+     *
      * @throws \Doctrine\DBAL\Exception
      */
     public function getTranslatedRecord(
@@ -130,12 +139,17 @@ final class ContentElementRepository
             ->fetchAssociative();
     }
 
+    /**
+     * @return array<string, mixed>|false
+     */
     public function getContentElementConfig(string $cType, string $listType): array|false
     {
         $cacheKey = $cType.':'.$listType;
 
         if ($this->configCache->offsetExists($cacheKey)) {
-            return $this->configCache->offsetGet($cacheKey);
+            $cached = $this->configCache->offsetGet($cacheKey);
+
+            return (false !== $cached && null !== $cached) ? $cached : false;
         }
 
         if (!isset($GLOBALS['TCA']['tt_content']['columns'])) {
@@ -167,7 +181,7 @@ final class ContentElementRepository
         $cacheKey = $subPageId.':'.$parentPageId;
 
         if ($this->rootlineCache->offsetExists($cacheKey)) {
-            return $this->rootlineCache->offsetGet($cacheKey);
+            return (bool) $this->rootlineCache->offsetGet($cacheKey);
         }
 
         try {
@@ -191,6 +205,9 @@ final class ContentElementRepository
         return false;
     }
 
+    /**
+     * @param array<int, mixed> $parentPageIds
+     */
     public function isSubpageOfAny(int $subPageId, array $parentPageIds): bool
     {
         foreach ($parentPageIds as $parentPageId) {
@@ -225,6 +242,9 @@ final class ContentElementRepository
         }
     }
 
+    /**
+     * @param ArrayObject<string, mixed> $cache
+     */
     private function manageCacheSize(ArrayObject $cache): void
     {
         if ($cache->count() >= self::CACHE_CLEANUP_THRESHOLD) {
@@ -238,6 +258,11 @@ final class ContentElementRepository
         }
     }
 
+    /**
+     * @param array<string, mixed> $config
+     *
+     * @return array<string, mixed>
+     */
     private function mapContentElementConfig(array $config): array
     {
         if ($this->versionCompatibilityService->isVersionBelow12()) {

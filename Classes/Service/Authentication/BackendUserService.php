@@ -61,6 +61,9 @@ final class BackendUserService
         );
     }
 
+    /**
+     * @param array<string, mixed> $record
+     */
     public function hasRecordEditAccess(string $table, array $record): bool
     {
         $backendUser = $this->getBackendUser();

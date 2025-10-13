@@ -35,6 +35,7 @@ use function array_key_exists;
  */
 final class ModifyButtonBarEventListener
 {
+    /** @var array<string, mixed> */
     protected array $configuration;
 
     /**
@@ -50,7 +51,7 @@ final class ModifyButtonBarEventListener
 
     public function __invoke(ModifyButtonBarEvent $event): void
     {
-        if (!array_key_exists('enableSaveAndCloseButton', $this->configuration) && !$this->configuration['enableSaveAndCloseButton']) {
+        if (!array_key_exists('enableSaveAndCloseButton', $this->configuration) || !(bool) $this->configuration['enableSaveAndCloseButton']) {
             return;
         }
 
