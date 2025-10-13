@@ -1,23 +1,9 @@
 includes:
-	- vendor/saschaegerer/phpstan-typo3/extension.neon
-	- vendor/phpstan/phpstan-strict-rules/rules.neon
-	- vendor/phpstan/phpstan-deprecation-rules/rules.neon
-	- vendor/spaze/phpstan-disallowed-calls/extension.neon
-	- vendor/spaze/phpstan-disallowed-calls/disallowed-dangerous-calls.neon
-	- vendor/spaze/phpstan-disallowed-calls/disallowed-execution-calls.neon
-	- vendor/spaze/phpstan-disallowed-calls/disallowed-insecure-calls.neon
-	- vendor/spaze/phpstan-disallowed-calls/disallowed-loose-calls.neon
-	- vendor/tomasvotruba/type-coverage/config/extension.neon
+	- %rootDir%/../../konradmichalik/phpstan-typo3-preset/phpstan.neon.dist
 	- phpstan-baseline.neon
 
 parameters:
-	parallel:
-		maximumNumberOfProcesses: 5
-
 	level: 5
-
-	bootstrapFiles:
-		- vendor/autoload.php
 
 	paths:
 		- Classes
@@ -29,34 +15,4 @@ parameters:
 		- .Build (?)
 
 	type_coverage:
-		return: 100
-		param: 95
-		property: 95
 		constant: 0 # TODO: Set to 100, when PHP 8.3 is minimum requirement
-
-	disallowedFunctionCalls:
-		-
-			function:
-				- 'var_dump()'
-				- 'xdebug_break()'
-				- 'debug()'
-			message: 'Use logging instead or remove if it was for debugging purposes.'
-		-
-			function: 'header()'
-			message: 'Use PSR-7 API instead'
-
-	disallowedStaticCalls:
-		-
-			method:
-				- 'TYPO3\CMS\Extbase\Utility\DebuggerUtility::var_dump()'
-				- 'TYPO3\CMS\Core\Utility\DebugUtility::debug()'
-			message: 'Use logging instead or remove if it was for debugging purposes.'
-
-	disallowedSuperglobals:
-		-
-			superglobal:
-				- '$_GET'
-				- '$_POST'
-				- '$_FILES'
-				- '$_SERVER'
-			message: 'Use PSR-7 API instead'

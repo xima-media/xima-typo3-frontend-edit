@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a62ddb8515dff06d27bf9dce43573196",
+    "content-hash": "9f9737b33abab01c0a8ab56ee01a8418",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -7674,6 +7674,60 @@
             "time": "2025-10-13T11:06:47+00:00"
         },
         {
+            "name": "konradmichalik/phpstan-typo3-preset",
+            "version": "0.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jackd248/phpstan-typo3-preset.git",
+                "reference": "31b9683748356a9304871cb76c81d2d4a271b1ca"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jackd248/phpstan-typo3-preset/zipball/31b9683748356a9304871cb76c81d2d4a271b1ca",
+                "reference": "31b9683748356a9304871cb76c81d2d4a271b1ca",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
+                "phpstan/phpstan": "^1.9 || ^2.0",
+                "phpstan/phpstan-deprecation-rules": "^1.1 || ^2.0",
+                "phpstan/phpstan-strict-rules": "^1.4 || ^2.0",
+                "saschaegerer/phpstan-typo3": "^1.10 || ^2.0",
+                "spaze/phpstan-disallowed-calls": "^4.0",
+                "tomasvotruba/cognitive-complexity": "0.2.3 || 1.0.0",
+                "tomasvotruba/type-coverage": "^1.0 || ^2.0"
+            },
+            "require-dev": {
+                "armin/editorconfig-cli": "^1.0 || ^2.0",
+                "ergebnis/composer-normalize": "^2.44"
+            },
+            "type": "library",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "extension.neon"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Konrad Michalik",
+                    "email": "hej@konradmichalik.dev",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "TYPO3 preset configuration for PHPStan",
+            "support": {
+                "issues": "https://github.com/jackd248/phpstan-typo3-preset/issues",
+                "source": "https://github.com/jackd248/phpstan-typo3-preset/tree/0.1.2"
+            },
+            "time": "2025-10-13T08:00:14+00:00"
+        },
+        {
             "name": "league/flysystem",
             "version": "3.30.0",
             "source": {
@@ -11527,6 +11581,58 @@
                 }
             ],
             "time": "2024-03-03T12:36:25+00:00"
+        },
+        {
+            "name": "tomasvotruba/cognitive-complexity",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/TomasVotruba/cognitive-complexity.git",
+                "reference": "974586fbc31b448ec04cf7877767bbb775671c3f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/TomasVotruba/cognitive-complexity/zipball/974586fbc31b448ec04cf7877767bbb775671c3f",
+                "reference": "974586fbc31b448ec04cf7877767bbb775671c3f",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4 || ^8.0",
+                "phpstan/phpstan": "^2"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "config/extension.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "TomasVotruba\\CognitiveComplexity\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PHPStan rules to measure cognitive complexity of your classes and methods",
+            "support": {
+                "issues": "https://github.com/TomasVotruba/cognitive-complexity/issues",
+                "source": "https://github.com/TomasVotruba/cognitive-complexity/tree/1.0.0"
+            },
+            "funding": [
+                {
+                    "url": "https://www.paypal.me/rectorphp",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/tomasvotruba",
+                    "type": "github"
+                }
+            ],
+            "time": "2024-12-13T10:28:54+00:00"
         },
         {
             "name": "tomasvotruba/type-coverage",
