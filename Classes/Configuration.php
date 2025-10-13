@@ -17,7 +17,7 @@ namespace Xima\XimaTypo3FrontendEdit;
  * Configuration.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
- * @license GPL-2.0
+ * @license GPL-2.0-or-later
  */
 class Configuration
 {

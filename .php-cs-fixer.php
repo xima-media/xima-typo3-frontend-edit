@@ -27,13 +27,7 @@ return Config::create()
     )
     ->withRule(
         Set::fromArray(
-            DocBlockHeader::create(
-                [
-                    'author' => 'Konrad Michalik <hej@konradmichalik.dev>',
-                    'license' => 'GPL-2.0',
-                ],
-                addStructureName: true,
-            )->__toArray(),
+            DocBlockHeader::fromComposer()->__toArray(),
         ),
     )
     ->withFinder(static fn (Finder $finder) => $finder->in(__DIR__))

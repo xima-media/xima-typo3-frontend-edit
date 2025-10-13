@@ -19,7 +19,7 @@ use TYPO3\CMS\Beuser\Domain\Model\BackendUser as User;
  * BackendUser.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
- * @license GPL-2.0
+ * @license GPL-2.0-or-later
  */
 class BackendUser extends User
 {

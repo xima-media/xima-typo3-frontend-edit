@@ -20,7 +20,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService
  * IconService.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
- * @license GPL-2.0
+ * @license GPL-2.0-or-later
  */
 final class IconService
 {

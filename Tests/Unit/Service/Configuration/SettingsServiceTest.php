@@ -23,7 +23,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\{SettingsService, VersionCo
  * SettingsServiceTest.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
- * @license GPL-2.0
+ * @license GPL-2.0-or-later
  */
 class SettingsServiceTest extends TestCase
 {

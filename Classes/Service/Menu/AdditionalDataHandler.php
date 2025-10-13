@@ -29,7 +29,7 @@ use function array_key_exists;
  * AdditionalDataHandler.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
- * @license GPL-2.0
+ * @license GPL-2.0-or-later
  */
 final class AdditionalDataHandler
 {

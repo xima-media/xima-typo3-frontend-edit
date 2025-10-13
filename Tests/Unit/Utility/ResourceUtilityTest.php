@@ -23,7 +23,7 @@ use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
  * ResourceUtilityTest.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
- * @license GPL-2.0
+ * @license GPL-2.0-or-later
  */
 class ResourceUtilityTest extends TestCase
 {

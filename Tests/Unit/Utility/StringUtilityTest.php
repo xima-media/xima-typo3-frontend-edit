@@ -22,7 +22,7 @@ use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
  * StringUtilityTest.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
- * @license GPL-2.0
+ * @license GPL-2.0-or-later
  */
 class StringUtilityTest extends TestCase
 {

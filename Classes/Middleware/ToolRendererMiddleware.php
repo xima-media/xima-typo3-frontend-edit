@@ -26,7 +26,7 @@ use function is_array;
  * ToolRendererMiddleware.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
- * @license GPL-2.0
+ * @license GPL-2.0-or-later
  */
 class ToolRendererMiddleware implements MiddlewareInterface
 {

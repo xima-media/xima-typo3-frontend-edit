@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5cbea93d29f808a52709d12d6718f436",
+    "content-hash": "a62ddb8515dff06d27bf9dce43573196",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -7613,16 +7613,16 @@
         },
         {
             "name": "konradmichalik/php-doc-block-header-fixer",
-            "version": "0.2.2",
+            "version": "0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jackd248/php-doc-block-header-fixer.git",
-                "reference": "0ca857cb3bd5ca85fdd3849896fed89157bf6ad1"
+                "reference": "6d11ce60f1e6ddfaf20b7c0d1f31a3a8cff25650"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jackd248/php-doc-block-header-fixer/zipball/0ca857cb3bd5ca85fdd3849896fed89157bf6ad1",
-                "reference": "0ca857cb3bd5ca85fdd3849896fed89157bf6ad1",
+                "url": "https://api.github.com/repos/jackd248/php-doc-block-header-fixer/zipball/6d11ce60f1e6ddfaf20b7c0d1f31a3a8cff25650",
+                "reference": "6d11ce60f1e6ddfaf20b7c0d1f31a3a8cff25650",
                 "shasum": ""
             },
             "require": {
@@ -7632,9 +7632,9 @@
             },
             "require-dev": {
                 "armin/editorconfig-cli": "^1.0 || ^2.0",
-                "eliashaeussler/php-cs-fixer-config": "2.3.0",
                 "eliashaeussler/rector-config": "^3.0",
                 "ergebnis/composer-normalize": "^2.44",
+                "konradmichalik/php-cs-fixer-preset": "^0.1.0",
                 "phpstan/phpstan": "^2.0",
                 "phpstan/phpstan-phpunit": "^2.0",
                 "phpstan/phpstan-symfony": "^2.0",
@@ -7669,9 +7669,9 @@
             ],
             "support": {
                 "issues": "https://github.com/jackd248/php-doc-block-header-fixer/issues",
-                "source": "https://github.com/jackd248/php-doc-block-header-fixer/tree/0.2.2"
+                "source": "https://github.com/jackd248/php-doc-block-header-fixer/tree/0.3.0"
             },
-            "time": "2025-10-01T13:24:36+00:00"
+            "time": "2025-10-13T11:06:47+00:00"
         },
         {
             "name": "league/flysystem",

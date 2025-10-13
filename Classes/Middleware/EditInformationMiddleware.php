@@ -33,7 +33,7 @@ use function is_scalar;
  * EditInformationMiddleware.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
- * @license GPL-2.0
+ * @license GPL-2.0-or-later
  */
 class EditInformationMiddleware implements MiddlewareInterface
 {
