@@ -130,6 +130,11 @@ final class UrlBuilderService
     /**
      * @throws RouteNotFoundException
      */
+    /**
+     * @param array<string, mixed> $parameters
+     *
+     * @throws RouteNotFoundException
+     */
     public function buildRoute(string $route, array $parameters = []): string
     {
         return $this->uriBuilder->buildUriFromRoute($route, $parameters)->__toString();

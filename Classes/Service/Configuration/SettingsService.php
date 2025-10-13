@@ -35,12 +35,36 @@ final class SettingsService
     private const MAX_CACHE_SIZE = 10;
     private const CACHE_CLEANUP_THRESHOLD = 8;
 
+    /**
+     * @var array<string, mixed>
+     */
     private array $configuration = [];
+
+    /**
+     * @var array<int, string>
+     */
     private array $ignoredPids = [];
+
+    /**
+     * @var array<int, string>
+     */
     private array $ignoredCTypes = [];
+
+    /**
+     * @var array<int, string>
+     */
     private array $ignoredListTypes = [];
+
+    /**
+     * @var array<int, int>
+     */
     private array $ignoredUids = [];
+
     private ?bool $simpleModeMenuStructure = null;
+
+    /**
+     * @var ArrayObject<string, array<string, mixed>>
+     */
     private ArrayObject $typoScriptCache;
 
     public function __construct(
@@ -50,6 +74,9 @@ final class SettingsService
         $this->typoScriptCache = new ArrayObject();
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function getIgnoredPids(): array
     {
         if ([] === $this->ignoredPids) {
@@ -62,6 +89,9 @@ final class SettingsService
         return $this->ignoredPids;
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function getIgnoredCTypes(): array
     {
         if ([] === $this->ignoredCTypes) {
@@ -74,6 +104,9 @@ final class SettingsService
         return $this->ignoredCTypes;
     }
 
+    /**
+     * @return array<int, string>
+     */
     public function getIgnoredListTypes(): array
     {
         if ([] === $this->ignoredListTypes) {
@@ -86,12 +119,15 @@ final class SettingsService
         return $this->ignoredListTypes;
     }
 
+    /**
+     * @return array<int, int>
+     */
     public function getIgnoredUids(): array
     {
         if ([] === $this->ignoredUids) {
             $configuration = $this->getConfiguration();
             $this->ignoredUids = isset($configuration['ignoredUids'])
-                ? array_map('trim', explode(',', $configuration['ignoredUids']))
+                ? array_map('intval', array_map('trim', explode(',', $configuration['ignoredUids'])))
                 : [];
         }
 
@@ -106,7 +142,7 @@ final class SettingsService
             return true;
         }
 
-        return array_key_exists($identifier, $configuration['defaultMenuStructure']) && $configuration['defaultMenuStructure'][$identifier];
+        return array_key_exists($identifier, $configuration['defaultMenuStructure']) && (bool) $configuration['defaultMenuStructure'][$identifier];
     }
 
     public function checkSimpleModeMenuStructure(): bool
@@ -131,6 +167,9 @@ final class SettingsService
         }
     }
 
+    /**
+     * @param array<string, mixed> $configuration
+     */
     private function calculateSimpleModeMenuStructure(array $configuration): bool
     {
         if (!isset($configuration['defaultMenuStructure'])) {
@@ -155,6 +194,9 @@ final class SettingsService
         return true;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getConfiguration(): array
     {
         if ([] !== $this->configuration) {
@@ -168,6 +210,9 @@ final class SettingsService
         return $this->configuration;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getTypoScriptSetupArray(): array
     {
         $cacheKey = $this->generateTypoScriptCacheKey();
@@ -201,8 +246,8 @@ final class SettingsService
     private function manageCacheSize(): void
     {
         if ($this->typoScriptCache->count() >= self::MAX_CACHE_SIZE) {
-            $keys = iterator_to_array($this->typoScriptCache, false);
-            $keysToRemove = array_slice(array_keys($keys), 0, self::MAX_CACHE_SIZE - self::CACHE_CLEANUP_THRESHOLD);
+            $keys = array_keys(iterator_to_array($this->typoScriptCache, true));
+            $keysToRemove = array_slice($keys, 0, self::MAX_CACHE_SIZE - self::CACHE_CLEANUP_THRESHOLD);
 
             foreach ($keysToRemove as $key) {
                 $this->typoScriptCache->offsetUnset($key);
@@ -213,6 +258,9 @@ final class SettingsService
     /**
      * These methods need to handle the case that the TypoScript setup array is not available within full cached setup.
      * Workaround from https://github.com/derhansen/fe_change_pwd to ensure that the TypoScript setup is available.
+     */
+    /**
+     * @return array<string, mixed>
      */
     private function getTypoScriptSetupArrayV11(): array
     {
@@ -226,6 +274,9 @@ final class SettingsService
         return $GLOBALS['TSFE']->tmpl->setup;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getTypoScriptSetupArrayV12(ServerRequestInterface $request): array
     {
         try {
@@ -254,6 +305,9 @@ final class SettingsService
         return $fullTypoScript;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getTypoScriptSetupArrayV13(ServerRequestInterface $request): array
     {
         try {

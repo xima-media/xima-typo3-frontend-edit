@@ -103,6 +103,9 @@ class EditInformationMiddleware implements MiddlewareInterface
         }
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function validateJsonStructure(mixed $decoded): array
     {
         if (!is_array($decoded)) {
@@ -118,6 +121,9 @@ class EditInformationMiddleware implements MiddlewareInterface
         return $decoded;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function getRequestData(ServerRequestInterface $request): array
     {
         $body = $request->getBody()->getContents();

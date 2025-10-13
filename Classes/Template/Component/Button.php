@@ -31,6 +31,9 @@ class Button
     protected ButtonType $type;
     protected ?string $url;
     protected ?Icon $icon;
+    /**
+     * @var array<string|int, Button>
+     */
     protected array $children;
     protected bool $targetBlank = false;
 
@@ -94,11 +97,17 @@ class Button
         $this->targetBlank = $targetBlank;
     }
 
+    /**
+     * @return array<string|int, Button>
+     */
     public function getChildren(): array
     {
         return $this->children;
     }
 
+    /**
+     * @param array<string|int, Button> $children
+     */
     public function setChildren(array $children): void
     {
         $this->children = $children;
@@ -131,6 +140,9 @@ class Button
         unset($this->children[$key]);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function render(): array
     {
         $result = [

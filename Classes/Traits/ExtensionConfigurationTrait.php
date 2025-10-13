@@ -26,9 +26,13 @@ use function array_key_exists;
  */
 trait ExtensionConfigurationTrait
 {
+    /** @var array<string, mixed> */
     protected array $extensionConfig = [];
     protected readonly ExtensionConfiguration $extensionConfiguration;
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getExtensionConfiguration(): array
     {
         if ([] === $this->extensionConfig) {

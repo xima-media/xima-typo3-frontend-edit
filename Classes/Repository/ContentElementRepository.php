@@ -33,7 +33,14 @@ final class ContentElementRepository
     private const MAX_CACHE_SIZE = 100;
     private const CACHE_CLEANUP_THRESHOLD = 80;
 
+    /**
+     * @var ArrayObject<string, bool>
+     */
     private ArrayObject $rootlineCache;
+
+    /**
+     * @var ArrayObject<string, array<string, mixed>|false>
+     */
     private ArrayObject $configCache;
 
     public function __construct(
@@ -106,6 +113,11 @@ final class ContentElementRepository
     /**
      * @throws \Doctrine\DBAL\Exception
      */
+    /**
+     * @return array<string, mixed>|false
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function getTranslatedRecord(
         string $table,
         int $parentUid,
@@ -130,6 +142,9 @@ final class ContentElementRepository
             ->fetchAssociative();
     }
 
+    /**
+     * @return array<string, mixed>|false
+     */
     public function getContentElementConfig(string $cType, string $listType): array|false
     {
         $cacheKey = $cType.':'.$listType;
@@ -191,6 +206,9 @@ final class ContentElementRepository
         return false;
     }
 
+    /**
+     * @param array<int, mixed> $parentPageIds
+     */
     public function isSubpageOfAny(int $subPageId, array $parentPageIds): bool
     {
         foreach ($parentPageIds as $parentPageId) {
@@ -225,6 +243,9 @@ final class ContentElementRepository
         }
     }
 
+    /**
+     * @param ArrayObject<string, mixed> $cache
+     */
     private function manageCacheSize(ArrayObject $cache): void
     {
         if ($cache->count() >= self::CACHE_CLEANUP_THRESHOLD) {
@@ -238,6 +259,11 @@ final class ContentElementRepository
         }
     }
 
+    /**
+     * @param array<string, mixed> $config
+     *
+     * @return array<string, mixed>
+     */
     private function mapContentElementConfig(array $config): array
     {
         if ($this->versionCompatibilityService->isVersionBelow12()) {

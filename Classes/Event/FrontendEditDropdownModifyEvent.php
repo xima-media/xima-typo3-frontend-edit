@@ -26,11 +26,15 @@ class FrontendEditDropdownModifyEvent
     final public const NAME = 'xima_typo3_frontend_edit.frontend_edit.dropdown.modify';
 
     public function __construct(
+        /** @var array<string, mixed> */
         protected array $contentElement,
         protected Button $menuButton,
         protected string $returnUrl,
     ) {}
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getContentElement(): array
     {
         return $this->contentElement;

@@ -15,6 +15,7 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
+use TYPO3\CMS\Core\Exception;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
@@ -46,6 +47,13 @@ final class MenuGenerator
         protected readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
 
+    /**
+     * @param array<int, mixed> $data
+     *
+     * @return array<mixed>
+     *
+     * @throws Exception
+     */
     public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = []): array
     {
         if ($this->contentElementFilter->isPageIgnored($pid)) {
@@ -81,6 +89,10 @@ final class MenuGenerator
         return $this->renderMenuButtons($result);
     }
 
+    /**
+     * @param array<string, mixed> $contentElement
+     * @param array<string, mixed> $contentElementConfig
+     */
     private function createMenuButton(
         array $contentElement,
         int $languageUid,
@@ -108,6 +120,11 @@ final class MenuGenerator
         return $menuButton;
     }
 
+    /**
+     * @param array<string, mixed> $contentElement
+     * @param array<string, mixed> $contentElementConfig
+     * @param array<int, mixed>    $data
+     */
     private function handleAdditionalData(
         Button $button,
         array $contentElement,
@@ -124,6 +141,10 @@ final class MenuGenerator
         $this->additionalDataHandler->handleData($button, $data[$uid], $contentElementConfig, $languageUid, $returnUrlAnchor);
     }
 
+    /**
+     * @param array<string, mixed> $contentElement
+     * @param array<int, mixed>    $data
+     */
     private function resolveDataUid(array $contentElement, array $data): ?int
     {
         // Check if data exists for current content element
@@ -142,6 +163,11 @@ final class MenuGenerator
         return null;
     }
 
+    /**
+     * @param array<mixed> $result
+     *
+     * @return array<mixed>
+     */
     private function renderMenuButtons(array $result): array
     {
         foreach ($result as $uid => $contentElement) {

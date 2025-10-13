@@ -34,6 +34,9 @@ final class MenuButtonBuilder
         private readonly SettingsService $settingsService,
     ) {}
 
+    /**
+     * @param array<string, mixed> $contentElement
+     */
     public function createSimpleEditButton(
         array $contentElement,
         int $languageUid,
@@ -65,6 +68,10 @@ final class MenuButtonBuilder
         );
     }
 
+    /**
+     * @param array<string, mixed> $contentElement
+     * @param array<string, mixed> $contentElementConfig
+     */
     public function addInfoSection(Button $menuButton, array $contentElement, array $contentElementConfig): void
     {
         if (!$this->settingsService->checkDefaultMenuStructure('div_info')) {
@@ -92,6 +99,9 @@ final class MenuButtonBuilder
         );
     }
 
+    /**
+     * @param array<string, mixed> $contentElement
+     */
     public function addEditSection(
         Button $menuButton,
         array $contentElement,
@@ -126,6 +136,9 @@ final class MenuButtonBuilder
         $this->addButton($menuButton, 'edit_page', ButtonType::Link, url: $pageUrl, icon: 'apps-pagetree-page-default');
     }
 
+    /**
+     * @param array<string, mixed> $contentElement
+     */
     public function addActionSection(
         Button $menuButton,
         array $contentElement,

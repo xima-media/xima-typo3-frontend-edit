@@ -32,6 +32,11 @@ final class ContentElementFilter
         private readonly ContentElementRepository $contentElementRepository,
     ) {}
 
+    /**
+     * @param array<int, array<string, mixed>> $contentElements
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public function filterContentElements(array $contentElements, BackendUserAuthentication $backendUser): array
     {
         $ignoredCTypes = $this->settingsService->getIgnoredCTypes();
@@ -58,6 +63,12 @@ final class ContentElementFilter
         return $this->contentElementRepository->isSubpageOfAny($pid, $ignoredPids);
     }
 
+    /**
+     * @param array<string, mixed> $contentElement
+     * @param array<int, string>   $ignoredCTypes
+     * @param array<int, string>   $ignoredListTypes
+     * @param array<int, int>      $ignoredUids
+     */
     private function shouldIncludeElement(
         array $contentElement,
         BackendUserAuthentication $backendUser,
