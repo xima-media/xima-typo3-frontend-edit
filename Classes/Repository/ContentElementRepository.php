@@ -150,7 +150,9 @@ final class ContentElementRepository
         $cacheKey = $cType.':'.$listType;
 
         if ($this->configCache->offsetExists($cacheKey)) {
-            return $this->configCache->offsetGet($cacheKey);
+            $cached = $this->configCache->offsetGet($cacheKey);
+
+            return (false !== $cached && null !== $cached) ? $cached : false;
         }
 
         if (!isset($GLOBALS['TCA']['tt_content']['columns'])) {
@@ -182,7 +184,7 @@ final class ContentElementRepository
         $cacheKey = $subPageId.':'.$parentPageId;
 
         if ($this->rootlineCache->offsetExists($cacheKey)) {
-            return $this->rootlineCache->offsetGet($cacheKey);
+            return (bool) $this->rootlineCache->offsetGet($cacheKey);
         }
 
         try {
