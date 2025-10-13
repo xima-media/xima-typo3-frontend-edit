@@ -60,8 +60,10 @@ class EditInformationMiddleware implements MiddlewareInterface
             return $response;
         }
 
-        $pid = $request->getAttribute('routing')->getPageId();
-        $languageUid = $request->getAttribute('language')->getLanguageId();
+        $routing = $request->getAttribute('routing');
+        $pid = $routing instanceof \TYPO3\CMS\Core\Routing\PageArguments ? $routing->getPageId() : 0;
+        $language = $request->getAttribute('language');
+        $languageUid = $language instanceof \TYPO3\CMS\Core\Site\Entity\SiteLanguage ? $language->getLanguageId() : 0;
 
         if (!$this->backendUserService->hasPageAccess($pid)) {
             return new JsonResponse([]);

@@ -24,6 +24,7 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
 use function array_key_exists;
+use function is_array;
 
 /**
  * AdditionalDataHandler.
@@ -130,7 +131,7 @@ final class AdditionalDataHandler
                 $languageUid,
             );
 
-            if ($translatedRecord) {
+            if (is_array($translatedRecord)) {
                 return $translatedRecord['uid'];
             }
 

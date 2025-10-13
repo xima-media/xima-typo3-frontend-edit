@@ -76,6 +76,10 @@ final class MenuGenerator
             );
             $returnUrlAnchor = $returnUrl.'#c'.$contentElement['uid'];
 
+            if (false === $contentElementConfig) {
+                continue;
+            }
+
             $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig);
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
@@ -149,7 +153,7 @@ final class MenuGenerator
     {
         // Check if data exists for current content element
         if (array_key_exists($contentElement['uid'], $data) && [] !== $data[$contentElement['uid']]) {
-            return $contentElement['uid'];
+            return (int) $contentElement['uid'];
         }
 
         // Check if data exists for l10n_source (translation parent)
@@ -157,7 +161,7 @@ final class MenuGenerator
             && array_key_exists($contentElement['l10n_source'], $data)
             && [] !== $data[$contentElement['l10n_source']]
             && 0 !== $contentElement['l10n_source']) {
-            return $contentElement['l10n_source'];
+            return (int) $contentElement['l10n_source'];
         }
 
         return null;
