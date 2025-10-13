@@ -111,9 +111,6 @@ final class ContentElementRepository
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
-     */
-    /**
      * @return array<string, mixed>|false
      *
      * @throws \Doctrine\DBAL\Exception

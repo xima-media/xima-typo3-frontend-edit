@@ -99,9 +99,6 @@ final class AdditionalDataHandler
     }
 
     /**
-     * @throws Exception
-     */
-    /**
      * @param array<string, mixed> $dataEntry
      *
      * @throws Exception
