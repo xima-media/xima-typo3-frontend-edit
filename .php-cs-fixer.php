@@ -30,5 +30,9 @@ return Config::create()
             DocBlockHeader::fromComposer()->__toArray(),
         ),
     )
-    ->withFinder(static fn (Finder $finder) => $finder->in(__DIR__))
+    ->withFinder(
+        static fn (Finder $finder) => $finder
+            ->in(__DIR__)
+            ->notPath(['ext_emconf.php']),
+    )
 ;
