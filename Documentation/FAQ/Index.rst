@@ -6,7 +6,7 @@
 FAQ
 ===
 
-.. contents:: Inhaltsverzeichnis
+.. contents:: Table of contents
   :local:
   :depth: 2
 
