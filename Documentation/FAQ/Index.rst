@@ -65,7 +65,7 @@ See https://docs.typo3.org/m/typo3/reference-coreapi/13.4/en-us/Configuration/Ty
 
 .. rst-class:: panel panel-default
 
-The edit button is not displayed with `DCE <https://extensions.typo3.org/extension/dce>`__. content elements.
+The edit button is not displayed with `DCE <https://extensions.typo3.org/extension/dce>`__ content elements.
 =======================================
 
 DCE content elements do not provide the required "c-id" (Content Element ID) in their default templates. You need to customize the DCE templates to include the "c-id" in the HTML output.
