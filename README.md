@@ -50,6 +50,12 @@ Download the zip file from [TYPO3 extension repository (TER)](https://extensions
 Please have a look at the
 [official extension documentation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Index.html).
 
+
+> [!NOTE]
+> Facing trouble or issues? You may find help in the following sections:
+> - [How it works](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/HowItWorks/Index.html)
+> - [FAQ](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/FAQ/Index.html)
+
 ## 🧑‍💻 Contributing
 
 Please have a look at [`CONTRIBUTING.md`](CONTRIBUTING.md).
