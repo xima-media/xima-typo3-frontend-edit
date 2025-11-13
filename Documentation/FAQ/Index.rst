@@ -6,6 +6,10 @@
 FAQ
 ===
 
+.. contents:: Table of contents
+  :local:
+  :depth: 2
+
 .. rst-class:: panel panel-default
 
 Why is the frontend edit menu not displayed on my page / for my content element?
@@ -62,3 +66,59 @@ The frontend edit needs an active backend user session to work. If you are using
 You can have a look at the `cookieDomain` setting to set a more flexible domain configuration. This allows the session cookie to be shared between different (sub)domains, enabling the frontend edit functionality to work across different domains.
 
 See https://docs.typo3.org/m/typo3/reference-coreapi/13.4/en-us/Configuration/Typo3ConfVars/SYS.html#confval-globals-typo3-conf-vars-sys-cookiedomain
+
+.. rst-class:: panel panel-default
+
+The edit button is not displayed with `DCE <https://extensions.typo3.org/extension/dce>`__ extension content elements.
+=======================================
+
+Dynamic content elements do not provide the required "c-id" (Content Element ID) in their default templates. You need to customize the `DCE templates <https://docs.typo3.org/p/t3/dce/main/en-us/UsersManual/Template.html>`__ to include the "c-id" in the HTML output.
+
+..  code-block:: html
+    :caption: DCE Template
+
+    <div class="dce" id="c{contentObject.uid}">
+        Your template goes here...
+    </div>
+
+..  note::
+    Styling problems may occur with nested content elements.
+
+.. rst-class:: panel panel-default
+
+The edit button is not displayed with `container <https://extensions.typo3.org/extension/container/>`__ extension content elements.
+=======================================
+
+Container content elements do not provide the required "c-id" (Content Element ID) in their default templates. You need to customize the `container templates <https://github.com/b13/container?tab=readme-ov-file#template>`__ to include the "c-id" in the HTML output.
+
+..  code-block:: html
+    :caption: Container Template
+
+    <div id="c{data.uid}">
+       <f:for each="{children_200}" as="record">
+           {record.header} <br>
+           <f:format.raw>
+               {record.renderedContent}
+           </f:format.raw>
+       </f:for>
+    </div>
+
+
+Alternatively, you can also use `fluid_styled_content <https://docs.typo3.org/c/typo3/cms-fluid-styled-content/main/en-us/Introduction/Index.html>`__ in the templates:
+
+..  code-block:: html
+    :caption: Container Template
+
+    <f:layout name="Default" />
+
+    <f:section name="Main">
+      <f:for each="{children_200}" as="record">
+          {record.header} <br>
+          <f:format.raw>
+              {record.renderedContent}
+          </f:format.raw>
+      </f:for>
+    </f:section>
+
+..  note::
+    Styling problems may occur with nested content elements.
