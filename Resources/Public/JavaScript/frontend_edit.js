@@ -126,7 +126,10 @@ document.addEventListener('DOMContentLoaded', function () {
     editButton.className = 'xima-typo3-frontend-edit--edit-button';
     editButton.title = contentElement.menu.label;
     editButton.innerHTML = contentElement.menu.icon;
-    editButton.setAttribute('data-cid', uid);
+
+    editButton.dataset.cid = contentElement.element.uid;
+    editButton.dataset.ctype = contentElement.element.CType;
+
     if (contentElement.menu?.type === 'link' && contentElement.menu?.url) {
       editButton.href = contentElement.menu.url;
       if (contentElement.menu.targetBlank) editButton.target = '_blank';
@@ -357,6 +360,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const wrapperElement = document.createElement('div');
       wrapperElement.className = 'xima-typo3-frontend-edit--wrapper';
+
+      wrapperElement.dataset.cid = contentElement.element.uid;
+      wrapperElement.dataset.ctype = contentElement.element.CType;
+
       wrapperElement.appendChild(editButton);
       if (!simpleMode) wrapperElement.appendChild(dropdownMenu);
       document.body.appendChild(wrapperElement);
