@@ -215,11 +215,15 @@ document.addEventListener('DOMContentLoaded', function () {
    * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
    * @param {HTMLElement} editButton - The edit button.
    * @param {HTMLElement} dropdownMenu - The dropdown menu.
+   * @param {Object} contentElement - The content element data.
    */
-  const setupHoverEvents = (element, wrapperElement, editButton, dropdownMenu) => {
+  const setupHoverEvents = (element, wrapperElement, editButton, dropdownMenu, contentElement) => {
     element.addEventListener('mouseover', () => {
       positionElements(element, wrapperElement, editButton, dropdownMenu);
       element.classList.add('xima-typo3-frontend-edit--edit-container');
+
+      element.dataset.cid = contentElement.element.uid;
+      element.dataset.ctype = contentElement.element.CType;
     });
 
     element.addEventListener('mouseout', (event) => {
@@ -227,6 +231,9 @@ document.addEventListener('DOMContentLoaded', function () {
       editButton.style.display = 'none';
       dropdownMenu.style.display = 'none';
       element.classList.remove('xima-typo3-frontend-edit--edit-container');
+
+      delete element.dataset.cid;
+      delete element.dataset.ctype;
     });
   };
 
@@ -368,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (!simpleMode) wrapperElement.appendChild(dropdownMenu);
       document.body.appendChild(wrapperElement);
 
-      setupHoverEvents(element, wrapperElement, editButton, dropdownMenu);
+      setupHoverEvents(element, wrapperElement, editButton, dropdownMenu, contentElement);
     }
 
     debugLog('DOM assignment summary', {
