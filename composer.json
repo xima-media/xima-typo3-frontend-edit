@@ -65,6 +65,17 @@
 			"typo3/class-alias-loader": true,
 			"typo3/cms-composer-installers": true
 		},
+		"audit": {
+			"ignore": {
+				"PKSA-2ssc-6m7w-s9xh": "Not relevant, for testing purpose",
+				"PKSA-3gg2-48j5-46ky": "Not relevant, for testing purpose",
+				"PKSA-6d7x-2gs8-wr59": "Not relevant, for testing purpose",
+				"PKSA-b5m3-ttcx-cz18": "Not relevant, for testing purpose",
+				"PKSA-ns26-fz7n-2jm8": "Not relevant, for testing purpose",
+				"PKSA-pz1k-khnw-3j7j": "Not relevant, for testing purpose",
+				"PKSA-q3vc-nbpk-d1gk": "Not relevant, for testing purpose"
+			}
+		},
 		"sort-packages": true
 	},
 	"extra": {
