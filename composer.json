@@ -1,133 +1,133 @@
 {
-    "name": "xima/xima-typo3-frontend-edit",
-    "description": "This extension provides an edit button for editors within frontend content elements.",
-    "license": [
-        "GPL-2.0-or-later"
-    ],
-    "type": "typo3-cms-extension",
-    "authors": [
-        {
-            "name": "Konrad Michalik",
-            "email": "hej@konradmichalik.dev",
-            "role": "Maintainer"
-        }
-    ],
-    "require": {
-        "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
-        "ext-mbstring": "*",
-        "doctrine/dbal": "^2.13.8 || ^3.9 || ^4.2",
-        "psr/http-message": "^1.0 || ^2.0",
-        "psr/http-server-handler": "^1.0",
-        "psr/http-server-middleware": "^1.0",
-        "typo3/cms-backend": "^11.0 || ^12.0 || ^13.0",
-        "typo3/cms-beuser": "^11.0 || ^12.0 || ^13.0",
-        "typo3/cms-core": "^11.0 || ^12.0 || ^13.0",
-        "typo3/cms-fluid": "^11.0 || ^12.0 || ^13.0",
-        "typo3/cms-frontend": "^11.0 || ^12.0 || ^13.0",
-        "typo3fluid/fluid": "^2.7 || ^4.2"
-    },
-    "require-dev": {
-        "armin/editorconfig-cli": "^2.0",
-        "eliashaeussler/version-bumper": "^2.4 || ^3.0",
-        "ergebnis/composer-normalize": "^2.44",
-        "friendsofphp/php-cs-fixer": "^3.52",
-        "helhum/typo3-console": "^7.0 || ^8.1",
-        "helmich/typo3-typoscript-lint": "^3.2",
-        "konradmichalik/php-cs-fixer-preset": "^0.1.0",
-        "konradmichalik/php-doc-block-header-fixer": "^0.3.0",
-        "konradmichalik/phpstan-typo3-preset": "^0.1.2",
-        "move-elevator/composer-translation-validator": "^1.0",
-        "phpstan/phpstan-deprecation-rules": "^1.0 || ^2.0",
-        "phpstan/phpstan-phpunit": "^1.0 || ^2.0",
-        "phpstan/phpstan-strict-rules": "^1.0 || ^2.0",
-        "phpunit/phpunit": "^10.2 || ^11.0 || ^12.0",
-        "saschaegerer/phpstan-typo3": "^1.10 || ^2.0",
-        "spaze/phpstan-disallowed-calls": "^4.0",
-        "ssch/typo3-rector": "^2.10 || ^3.0",
-        "symfony/translation": "^5.0 || ^6.3 || ^7.0",
-        "tomasvotruba/type-coverage": "^1.0 || ^2.0",
-        "typo3/cms-base-distribution": "^11.5 || ^12.4 || ^13.4",
-        "typo3/cms-lowlevel": "^11.5 || ^12.4 || ^13.4",
-        "typo3/coding-standards": "^0.7 || ^0.8"
-    },
-    "autoload": {
-        "psr-4": {
-            "Xima\\XimaTypo3FrontendEdit\\": "Classes/"
-        }
-    },
-    "config": {
-        "allow-plugins": {
-            "eliashaeussler/version-bumper": true,
-            "ergebnis/composer-normalize": true,
-            "helhum/dotenv-connector": true,
-            "move-elevator/composer-translation-validator": true,
-            "php-http/discovery": true,
-            "typo3/class-alias-loader": true,
-            "typo3/cms-composer-installers": true
-        },
-        "audit": {
-            "ignore": {
-                "PKSA-pz1k-khnw-3j7j": "Not relevant, for testing purpose",
-                "PKSA-ns26-fz7n-2jm8": "Not relevant, for testing purpose",
-                "PKSA-q3vc-nbpk-d1gk": "Not relevant, for testing purpose",
-                "PKSA-2ssc-6m7w-s9xh": "Not relevant, for testing purpose",
-                "PKSA-b5m3-ttcx-cz18": "Not relevant, for testing purpose",
-                "PKSA-6d7x-2gs8-wr59": "Not relevant, for testing purpose",
-                "PKSA-3gg2-48j5-46ky": "Not relevant, for testing purpose"
-            }
-        },
-        "sort-packages": true
-    },
-    "extra": {
-        "konradmichalik/php-cs-fixer-preset": {
-            "copyright": 2024
-        },
-        "typo3/cms": {
-            "cms-package-dir": "{$vendor-dir}/typo3/cms",
-            "extension-key": "xima_typo3_frontend_edit",
-            "web-dir": "public"
-        }
-    },
-    "scripts": {
-        "docs": [
-            "@docs:cleanup",
-            "@docs:build",
-            "@docs:open"
-        ],
-        "docs:build": "docker compose run --rm docs",
-        "docs:cleanup": "rm -rf .Build/docs",
-        "docs:open": "open .Build/docs/Index.html",
-        "fix": [
-            "@fix:composer",
-            "@fix:editorconfig",
-            "@fix:php"
-        ],
-        "fix:composer": "@composer normalize",
-        "fix:editorconfig": "@lint:editorconfig --fix",
-        "fix:php": "php vendor/bin/php-cs-fixer --config=.php-cs-fixer.php fix",
-        "lint": [
-            "@lint:composer",
-            "@lint:editorconfig",
-            "@lint:language",
-            "@lint:php",
-            "@lint:typoscript",
-            "@lint:yaml"
-        ],
-        "lint:composer": "@fix:composer --dry-run",
-        "lint:editorconfig": "ec --git-only",
-        "lint:language": "@composer validate-translations ./Resources/Private/Language",
-        "lint:php": "@fix:php --dry-run",
-        "lint:typoscript": "typoscript-lint --fail-on-warnings",
-        "lint:yaml": "find ./ ! -path './vendor/*' ! -path '*/node_modules/*' ! -path './.Build/*' ! -path './xima_typo3_content_planner/*' \\( -name '*.yaml' -o -name '*.yml' \\) | xargs -r yaml-lint",
-        "migration": [
-            "@migration:rector"
-        ],
-        "migration:rector": "rector process -c rector.php",
-        "sca": [
-            "@sca:php"
-        ],
-        "sca:php": "phpstan analyse --memory-limit=2G",
-        "test": "@test:coverage --no-coverage",
-        "test:coverage": "phpunit -c phpunit.xml"
-    }
+	"name": "xima/xima-typo3-frontend-edit",
+	"description": "This extension provides an edit button for editors within frontend content elements.",
+	"license": [
+		"GPL-2.0-or-later"
+	],
+	"type": "typo3-cms-extension",
+	"authors": [
+		{
+			"name": "Konrad Michalik",
+			"email": "hej@konradmichalik.dev",
+			"role": "Maintainer"
+		}
+	],
+	"require": {
+		"php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
+		"ext-mbstring": "*",
+		"doctrine/dbal": "^2.13.8 || ^3.9 || ^4.2",
+		"psr/http-message": "^1.0 || ^2.0",
+		"psr/http-server-handler": "^1.0",
+		"psr/http-server-middleware": "^1.0",
+		"typo3/cms-backend": "^11.0 || ^12.0 || ^13.0",
+		"typo3/cms-beuser": "^11.0 || ^12.0 || ^13.0",
+		"typo3/cms-core": "^11.0 || ^12.0 || ^13.0",
+		"typo3/cms-fluid": "^11.0 || ^12.0 || ^13.0",
+		"typo3/cms-frontend": "^11.0 || ^12.0 || ^13.0",
+		"typo3fluid/fluid": "^2.7 || ^4.2"
+	},
+	"require-dev": {
+		"armin/editorconfig-cli": "^2.0",
+		"eliashaeussler/version-bumper": "^2.4 || ^3.0",
+		"ergebnis/composer-normalize": "^2.44",
+		"friendsofphp/php-cs-fixer": "^3.52",
+		"helhum/typo3-console": "^7.0 || ^8.1",
+		"helmich/typo3-typoscript-lint": "^3.2",
+		"konradmichalik/php-cs-fixer-preset": "^0.1.0",
+		"konradmichalik/php-doc-block-header-fixer": "^0.3.0",
+		"konradmichalik/phpstan-typo3-preset": "^0.1.2",
+		"move-elevator/composer-translation-validator": "^1.0",
+		"phpstan/phpstan-deprecation-rules": "^1.0 || ^2.0",
+		"phpstan/phpstan-phpunit": "^1.0 || ^2.0",
+		"phpstan/phpstan-strict-rules": "^1.0 || ^2.0",
+		"phpunit/phpunit": "^10.2 || ^11.0 || ^12.0",
+		"saschaegerer/phpstan-typo3": "^1.10 || ^2.0",
+		"spaze/phpstan-disallowed-calls": "^4.0",
+		"ssch/typo3-rector": "^2.10 || ^3.0",
+		"symfony/translation": "^5.0 || ^6.3 || ^7.0",
+		"tomasvotruba/type-coverage": "^1.0 || ^2.0",
+		"typo3/cms-base-distribution": "^11.5 || ^12.4 || ^13.4",
+		"typo3/cms-lowlevel": "^11.5 || ^12.4 || ^13.4",
+		"typo3/coding-standards": "^0.7 || ^0.8"
+	},
+	"autoload": {
+		"psr-4": {
+			"Xima\\XimaTypo3FrontendEdit\\": "Classes/"
+		}
+	},
+	"config": {
+		"allow-plugins": {
+			"eliashaeussler/version-bumper": true,
+			"ergebnis/composer-normalize": true,
+			"helhum/dotenv-connector": true,
+			"move-elevator/composer-translation-validator": true,
+			"php-http/discovery": true,
+			"typo3/class-alias-loader": true,
+			"typo3/cms-composer-installers": true
+		},
+		"audit": {
+			"ignore": {
+				"PKSA-2ssc-6m7w-s9xh": "Not relevant, for testing purpose",
+				"PKSA-3gg2-48j5-46ky": "Not relevant, for testing purpose",
+				"PKSA-6d7x-2gs8-wr59": "Not relevant, for testing purpose",
+				"PKSA-b5m3-ttcx-cz18": "Not relevant, for testing purpose",
+				"PKSA-ns26-fz7n-2jm8": "Not relevant, for testing purpose",
+				"PKSA-pz1k-khnw-3j7j": "Not relevant, for testing purpose",
+				"PKSA-q3vc-nbpk-d1gk": "Not relevant, for testing purpose"
+			}
+		},
+		"sort-packages": true
+	},
+	"extra": {
+		"konradmichalik/php-cs-fixer-preset": {
+			"copyright": 2024
+		},
+		"typo3/cms": {
+			"cms-package-dir": "{$vendor-dir}/typo3/cms",
+			"extension-key": "xima_typo3_frontend_edit",
+			"web-dir": "public"
+		}
+	},
+	"scripts": {
+		"docs": [
+			"@docs:cleanup",
+			"@docs:build",
+			"@docs:open"
+		],
+		"docs:build": "docker compose run --rm docs",
+		"docs:cleanup": "rm -rf .Build/docs",
+		"docs:open": "open .Build/docs/Index.html",
+		"fix": [
+			"@fix:composer",
+			"@fix:editorconfig",
+			"@fix:php"
+		],
+		"fix:composer": "@composer normalize",
+		"fix:editorconfig": "@lint:editorconfig --fix",
+		"fix:php": "php vendor/bin/php-cs-fixer --config=.php-cs-fixer.php fix",
+		"lint": [
+			"@lint:composer",
+			"@lint:editorconfig",
+			"@lint:language",
+			"@lint:php",
+			"@lint:typoscript",
+			"@lint:yaml"
+		],
+		"lint:composer": "@fix:composer --dry-run",
+		"lint:editorconfig": "ec --git-only",
+		"lint:language": "@composer validate-translations ./Resources/Private/Language",
+		"lint:php": "@fix:php --dry-run",
+		"lint:typoscript": "typoscript-lint --fail-on-warnings",
+		"lint:yaml": "find ./ ! -path './vendor/*' ! -path '*/node_modules/*' ! -path './.Build/*' ! -path './xima_typo3_content_planner/*' \\( -name '*.yaml' -o -name '*.yml' \\) | xargs -r yaml-lint",
+		"migration": [
+			"@migration:rector"
+		],
+		"migration:rector": "rector process -c rector.php",
+		"sca": [
+			"@sca:php"
+		],
+		"sca:php": "phpstan analyse --memory-limit=2G",
+		"test": "@test:coverage --no-coverage",
+		"test:coverage": "phpunit -c phpunit.xml"
+	}
 }
