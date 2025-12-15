@@ -11,7 +11,7 @@ Installation
 Requirements
 ============
 
--   PHP 8.2 - 8.4
+-   PHP 8.2 - 8.5
 -   TYPO3 13.4 LTS
 
 ..  _steps:
