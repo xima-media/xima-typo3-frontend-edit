@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Configuration;
 
-use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Imaging\IconSize;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, VersionNumberUtility};
 
@@ -41,35 +41,13 @@ final class VersionCompatibilityService
         return VersionNumberUtility::getCurrentTypo3Version();
     }
 
-    public function isVersion12(): bool
-    {
-        return 12 === $this->getMajorVersion();
-    }
-
-    public function isVersion13OrHigher(): bool
-    {
-        return $this->getMajorVersion() >= 13;
-    }
-
-    public function isVersionBelow13(): bool
-    {
-        return $this->getMajorVersion() < 13;
-    }
-
     public function getContentElementConfigValueKey(): string
     {
         return 'value';
     }
 
-    /**
-     * Get the default icon size based on TYPO3 version.
-     */
-    public function getDefaultIconSize(): string|\TYPO3\CMS\Core\Imaging\IconSize
+    public function getDefaultIconSize(): IconSize
     {
-        if ($this->isVersion13OrHigher()) {
-            return \TYPO3\CMS\Core\Imaging\IconSize::SMALL;
-        }
-
-        return Icon::SIZE_SMALL; // @phpstan-ignore classConstant.deprecated
+        return IconSize::SMALL;
     }
 }

@@ -18,8 +18,9 @@ use Throwable;
 use TYPO3\CMS\Core\Core\RequestId;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, PathUtility};
+use TYPO3\CMS\Core\View\{ViewFactoryData, ViewFactoryInterface};
 use Xima\XimaTypo3FrontendEdit\Configuration;
-use Xima\XimaTypo3FrontendEdit\Service\Configuration\{SettingsService, VersionCompatibilityService};
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
 use function sprintf;
@@ -33,7 +34,6 @@ use function sprintf;
 final readonly class ResourceRendererService
 {
     public function __construct(
-        private VersionCompatibilityService $versionCompatibilityService,
         private SettingsService $settingsService,
     ) {}
 
@@ -59,11 +59,7 @@ final readonly class ResourceRendererService
 
             $values = [...$values, 'resources' => $resources];
 
-            if ($this->versionCompatibilityService->isVersion13OrHigher()) {
-                return $this->renderView13($template, $values, $request);
-            }
-
-            return $this->renderView12($template, $values);
+            return $this->renderView($template, $values, $request);
         } catch (Throwable $exception) {
             throw new Exception('Failed to render template "'.$template.'": '.$exception->getMessage(), 1640000001, $exception);
         }
@@ -72,37 +68,16 @@ final readonly class ResourceRendererService
     /**
      * @param array<string, mixed> $values
      */
-    private function renderView12(string $template, array $values): string
+    private function renderView(string $template, array $values, ?ServerRequestInterface $request = null): string
     {
-        /** @var \TYPO3\CMS\Fluid\View\StandaloneView $view */
-        $view = GeneralUtility::makeInstance(\TYPO3\CMS\Fluid\View\StandaloneView::class); // @phpstan-ignore classConstant.deprecatedClass
-        $view->setFormat('html'); // @phpstan-ignore method.deprecatedClass
-        $view->setTemplateRootPaths(['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Templates/']); // @phpstan-ignore method.deprecatedClass
-        $view->setPartialRootPaths(['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Partials/']); // @phpstan-ignore method.deprecatedClass
-        if (PathUtility::isExtensionPath($template)) {
-            $template = GeneralUtility::getFileAbsFileName($template);
-            $view->setTemplatePathAndFilename($template); // @phpstan-ignore method.deprecatedClass
-        } else {
-            $view->setTemplate($template); // @phpstan-ignore method.deprecatedClass
-        }
-        $view->assignMultiple($values);
-
-        return $view->render();
-    }
-
-    /**
-     * @param array<string, mixed> $values
-     */
-    private function renderView13(string $template, array $values, ?ServerRequestInterface $request = null): string
-    {
-        $viewFactoryData = new \TYPO3\CMS\Core\View\ViewFactoryData(
+        $viewFactoryData = new ViewFactoryData(
             templateRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Templates/'],
             partialRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Partials/'],
             layoutRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Layouts/'],
             request: $request,
         );
 
-        $viewFactory = GeneralUtility::makeInstance(\TYPO3\CMS\Core\View\ViewFactoryInterface::class);
+        $viewFactory = GeneralUtility::makeInstance(ViewFactoryInterface::class);
         $view = $viewFactory->create($viewFactoryData);
         $view->assignMultiple($values);
 
@@ -116,11 +91,9 @@ final readonly class ResourceRendererService
     private function resolveNonceValue(): string
     {
         try {
-            if (property_exists(RequestId::class, 'nonce')) {
-                $requestId = GeneralUtility::makeInstance(RequestId::class);
+            $requestId = GeneralUtility::makeInstance(RequestId::class);
 
-                return $requestId->nonce->consume();
-            }
+            return $requestId->nonce->consume();
         } catch (Throwable) {
             // Silently fail and return empty string for nonce
         }

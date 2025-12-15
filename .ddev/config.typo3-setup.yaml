@@ -1,7 +1,6 @@
 type: php
 docroot: .Build
 additional_hostnames:
-  - 12.xima-typo3-frontend-edit
   - 13.xima-typo3-frontend-edit
 hooks:
    post-start:

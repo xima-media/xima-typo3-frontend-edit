@@ -54,7 +54,7 @@ final class IconService
     /**
      * Get the default icon size based on TYPO3 version.
      */
-    public function getDefaultIconSize(): string|IconSize
+    public function getDefaultIconSize(): IconSize
     {
         return $this->versionCompatibilityService->getDefaultIconSize();
     }
