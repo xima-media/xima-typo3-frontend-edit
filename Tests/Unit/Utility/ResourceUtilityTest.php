@@ -88,7 +88,7 @@ class ResourceUtilityTest extends TestCase
 
         self::assertFalse($reflection->isFinal());
         self::assertFalse($reflection->isAbstract());
-        self::assertEquals(\Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility::class, $reflection->getName());
+        self::assertEquals(ResourceUtility::class, $reflection->getName());
     }
 
     public function testGetResourcesMethodSignature(): void

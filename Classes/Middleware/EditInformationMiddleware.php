@@ -73,7 +73,7 @@ class EditInformationMiddleware implements MiddlewareInterface
 
         try {
             $data = $this->getRequestData($request);
-        } catch (InvalidArgumentException $e) {
+        } catch (InvalidArgumentException) {
             return new JsonResponse(['error' => 'Invalid request data'], 400);
         }
 

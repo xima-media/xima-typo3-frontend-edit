@@ -27,24 +27,14 @@ use function array_slice;
  */
 class Button
 {
-    protected string $label;
-    protected ButtonType $type;
-    protected ?string $url;
-    protected ?Icon $icon;
     /**
      * @var array<string|int, Button>
      */
     protected array $children;
-    protected bool $targetBlank = false;
 
-    public function __construct(string $label, ButtonType $type, ?string $url = null, ?Icon $icon = null, bool $targetBlank = false)
+    public function __construct(protected string $label, protected ButtonType $type, protected ?string $url = null, protected ?Icon $icon = null, protected bool $targetBlank = false)
     {
-        $this->label = $label;
-        $this->type = $type;
-        $this->url = $url;
-        $this->icon = $icon;
         $this->children = [];
-        $this->targetBlank = $targetBlank;
     }
 
     public function getLabel(): string
