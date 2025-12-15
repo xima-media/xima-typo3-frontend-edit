@@ -32,13 +32,13 @@ use function is_array;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class AdditionalDataHandler
+final readonly class AdditionalDataHandler
 {
     public function __construct(
-        private readonly BackendUserService $backendUserService,
-        private readonly UrlBuilderService $urlBuilderService,
-        private readonly IconService $iconService,
-        private readonly ContentElementRepository $contentElementRepository,
+        private BackendUserService $backendUserService,
+        private UrlBuilderService $urlBuilderService,
+        private IconService $iconService,
+        private ContentElementRepository $contentElementRepository,
     ) {}
 
     /**

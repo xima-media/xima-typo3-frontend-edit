@@ -26,12 +26,12 @@ use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class MenuButtonBuilder
+final readonly class MenuButtonBuilder
 {
     public function __construct(
-        private readonly IconService $iconService,
-        private readonly UrlBuilderService $urlBuilderService,
-        private readonly SettingsService $settingsService,
+        private IconService $iconService,
+        private UrlBuilderService $urlBuilderService,
+        private SettingsService $settingsService,
     ) {}
 
     /**

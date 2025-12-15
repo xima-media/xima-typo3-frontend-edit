@@ -30,11 +30,11 @@ use function sprintf;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class ResourceRendererService
+final readonly class ResourceRendererService
 {
     public function __construct(
-        private readonly VersionCompatibilityService $versionCompatibilityService,
-        private readonly SettingsService $settingsService,
+        private VersionCompatibilityService $versionCompatibilityService,
+        private SettingsService $settingsService,
     ) {}
 
     /**

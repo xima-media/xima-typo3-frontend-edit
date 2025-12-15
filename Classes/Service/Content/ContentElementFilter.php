@@ -25,11 +25,11 @@ use function in_array;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class ContentElementFilter
+final readonly class ContentElementFilter
 {
     public function __construct(
-        private readonly SettingsService $settingsService,
-        private readonly ContentElementRepository $contentElementRepository,
+        private SettingsService $settingsService,
+        private ContentElementRepository $contentElementRepository,
     ) {}
 
     /**

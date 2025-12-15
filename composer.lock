@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "49e0155c3f1b02adf3bed39d584b3728",
+    "content-hash": "ba8590382289ad247bc6f04fd032560c",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -6135,16 +6135,16 @@
         },
         {
             "name": "helhum/typo3-console",
-            "version": "v8.3.0",
+            "version": "v8.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/TYPO3-Console/TYPO3-Console.git",
-                "reference": "2ce41715a96d4c8fe250a361422243ab20968675"
+                "reference": "0a6f26d125b780a40c674820c42c78ce5607ff4c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/TYPO3-Console/TYPO3-Console/zipball/2ce41715a96d4c8fe250a361422243ab20968675",
-                "reference": "2ce41715a96d4c8fe250a361422243ab20968675",
+                "url": "https://api.github.com/repos/TYPO3-Console/TYPO3-Console/zipball/0a6f26d125b780a40c674820c42c78ce5607ff4c",
+                "reference": "0a6f26d125b780a40c674820c42c78ce5607ff4c",
                 "shasum": ""
             },
             "require": {
@@ -6238,7 +6238,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-12-11T22:18:32+00:00"
+            "time": "2025-12-12T12:00:43+00:00"
         },
         {
             "name": "justinrainbow/json-schema",
@@ -9665,7 +9665,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
+        "php": "~8.2.0 || ~8.3.0 || ~8.4.0",
         "ext-mbstring": "*"
     },
     "platform-dev": {},

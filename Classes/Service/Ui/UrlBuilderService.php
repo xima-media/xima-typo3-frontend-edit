@@ -23,9 +23,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class UrlBuilderService
+final readonly class UrlBuilderService
 {
-    private readonly UriBuilder $uriBuilder;
+    private UriBuilder $uriBuilder;
 
     public function __construct()
     {
