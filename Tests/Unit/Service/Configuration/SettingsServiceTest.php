@@ -30,9 +30,9 @@ class SettingsServiceTest extends TestCase
 {
     public function testSettingsServiceCanBeInstantiated(): void
     {
-        $extensionConfigurationMock = $this->createMock(ExtensionConfiguration::class);
+        $extensionConfigurationStub = $this->createStub(ExtensionConfiguration::class);
 
-        $subject = new SettingsService($extensionConfigurationMock);
+        $subject = new SettingsService($extensionConfigurationStub);
 
         self::assertInstanceOf(SettingsService::class, $subject);
     }
