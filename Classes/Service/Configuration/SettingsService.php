@@ -224,7 +224,6 @@ final class SettingsService
         }
 
         $result = match (true) {
-            $this->versionCompatibilityService->isVersionBelow12() => $this->getTypoScriptSetupArrayV11(),
             $this->versionCompatibilityService->isVersionBelow13() => $this->getTypoScriptSetupArrayV12($GLOBALS['TYPO3_REQUEST']),
             default => $this->getTypoScriptSetupArrayV13($GLOBALS['TYPO3_REQUEST']),
         };
@@ -239,8 +238,7 @@ final class SettingsService
     {
         $languageId = $this->context->getAspect('language')->getId();
         $pageId = $GLOBALS['TSFE']->id ?? 0;
-        $version = $this->versionCompatibilityService->isVersionBelow12() ? 'v11' :
-                  ($this->versionCompatibilityService->isVersionBelow13() ? 'v12' : 'v13');
+        $version = $this->versionCompatibilityService->isVersionBelow13() ? 'v12' : 'v13';
 
         return "typoscript:{$version}:{$pageId}:{$languageId}";
     }
@@ -261,21 +259,6 @@ final class SettingsService
      * These methods need to handle the case that the TypoScript setup array is not available within full cached setup.
      * Workaround from https://github.com/derhansen/fe_change_pwd to ensure that the TypoScript setup is available.
      */
-    /**
-     * @return array<string, mixed>
-     */
-    private function getTypoScriptSetupArrayV11(): array
-    {
-        // Ensure, TSFE setup is loaded for cached pages
-        if (null === $GLOBALS['TSFE']->tmpl || ($GLOBALS['TSFE']->tmpl && [] === $GLOBALS['TSFE']->tmpl->setup)) {
-            /* @phpstan-ignore-next-line */
-            $this->context->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
-            $GLOBALS['TSFE']->getConfigArray();
-        }
-
-        return $GLOBALS['TSFE']->tmpl->setup;
-    }
-
     /**
      * @return array<string, mixed>
      */
