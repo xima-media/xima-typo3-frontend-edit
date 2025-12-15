@@ -69,7 +69,6 @@ final class SettingsService
 
     public function __construct(
         private readonly Context $context,
-        private readonly VersionCompatibilityService $versionCompatibilityService,
     ) {
         $this->typoScriptCache = new ArrayObject();
     }
@@ -223,10 +222,7 @@ final class SettingsService
             return $this->typoScriptCache[$cacheKey];
         }
 
-        $result = match (true) {
-            $this->versionCompatibilityService->isVersionBelow13() => $this->getTypoScriptSetupArrayV12($GLOBALS['TYPO3_REQUEST']),
-            default => $this->getTypoScriptSetupArrayV13($GLOBALS['TYPO3_REQUEST']),
-        };
+        $result = $this->getTypoScriptSetupArrayFromRequest($GLOBALS['TYPO3_REQUEST']);
 
         $this->manageCacheSize();
         $this->typoScriptCache->offsetSet($cacheKey, $result);
@@ -237,10 +233,9 @@ final class SettingsService
     private function generateTypoScriptCacheKey(): string
     {
         $languageId = $this->context->getAspect('language')->getId();
-        $pageId = $GLOBALS['TSFE']->id ?? 0;
-        $version = $this->versionCompatibilityService->isVersionBelow13() ? 'v12' : 'v13';
+        $pageId = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.page.information')->getId() ?? 0;
 
-        return "typoscript:{$version}:{$pageId}:{$languageId}";
+        return "typoscript:{$pageId}:{$languageId}";
     }
 
     private function manageCacheSize(): void
@@ -256,48 +251,9 @@ final class SettingsService
     }
 
     /**
-     * These methods need to handle the case that the TypoScript setup array is not available within full cached setup.
-     * Workaround from https://github.com/derhansen/fe_change_pwd to ensure that the TypoScript setup is available.
-     */
-    /**
      * @return array<string, mixed>
      */
-    private function getTypoScriptSetupArrayV12(ServerRequestInterface $request): array
-    {
-        try {
-            $frontendTypoScript = $request->getAttribute('frontend.typoscript');
-            if (null === $frontendTypoScript) {
-                return [];
-            }
-            $fullTypoScript = $frontendTypoScript->getSetupArray();
-        } catch (Exception) {
-            // An exception is thrown, when TypoScript setup array is not available. This is usually the case,
-            // when the current page request is cached. Therefore, the TSFE TypoScript parsing is forced here.
-
-            // ToDo: This workaround is not working for TYPO3 v13
-            // @see https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/13.0/Breaking-102583-RemovedContextAspectTyposcript.html#breaking-102583-1701510037
-            if (!class_exists(\TYPO3\CMS\Core\Context\TypoScriptAspect::class)) {
-                return [];
-            }
-
-            // Set a TypoScriptAspect which forces template parsing
-            /* @phpstan-ignore-next-line */
-            $this->context->setAspect('typoscript', GeneralUtility::makeInstance(\TYPO3\CMS\Core\Context\TypoScriptAspect::class, true));
-            $tsfe = $request->getAttribute('frontend.controller');
-            $requestWithFullTypoScript = $tsfe->getFromCache($request); // @phpstan-ignore-line
-
-            // Call TSFE getFromCache, which re-processes TypoScript respecting $forcedTemplateParsing property
-            // from TypoScriptAspect
-            $fullTypoScript = $requestWithFullTypoScript->getAttribute('frontend.typoscript')->getSetupArray();
-        }
-
-        return $fullTypoScript;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function getTypoScriptSetupArrayV13(ServerRequestInterface $request): array
+    private function getTypoScriptSetupArrayFromRequest(ServerRequestInterface $request): array
     {
         try {
             $frontendTypoScript = $request->getAttribute('frontend.typoscript');

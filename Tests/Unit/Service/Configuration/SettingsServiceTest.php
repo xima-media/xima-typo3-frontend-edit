@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionNamedType;
 use TYPO3\CMS\Core\Context\Context;
-use Xima\XimaTypo3FrontendEdit\Service\Configuration\{SettingsService, VersionCompatibilityService};
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 
 /**
  * SettingsServiceTest.
@@ -30,9 +30,8 @@ class SettingsServiceTest extends TestCase
     public function testSettingsServiceCanBeInstantiated(): void
     {
         $contextMock = $this->createMock(Context::class);
-        $versionCompatibilityService = new VersionCompatibilityService();
 
-        $subject = new SettingsService($contextMock, $versionCompatibilityService);
+        $subject = new SettingsService($contextMock);
 
         self::assertInstanceOf(SettingsService::class, $subject);
     }
@@ -71,10 +70,9 @@ class SettingsServiceTest extends TestCase
         self::assertNotNull($constructor);
 
         $parameters = $constructor->getParameters();
-        self::assertCount(2, $parameters);
+        self::assertCount(1, $parameters);
 
         self::assertEquals('context', $parameters[0]->getName());
-        self::assertEquals('versionCompatibilityService', $parameters[1]->getName());
     }
 
     public function testClassIsFinal(): void

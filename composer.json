@@ -19,20 +19,19 @@
 		"psr/http-message": "^1.0 || ^2.0",
 		"psr/http-server-handler": "^1.0",
 		"psr/http-server-middleware": "^1.0",
-		"typo3/cms-backend": "^12.0 || ^13.0",
-		"typo3/cms-beuser": "^12.0 || ^13.0",
-		"typo3/cms-core": "^12.0 || ^13.0",
-		"typo3/cms-fluid": "^12.0 || ^13.0",
-		"typo3/cms-frontend": "^12.0 || ^13.0",
-		"typo3fluid/fluid": "^2.7 || ^4.2"
+		"typo3/cms-backend": "^13.0",
+		"typo3/cms-beuser": "^13.0",
+		"typo3/cms-core": "^13.0",
+		"typo3/cms-fluid": "^13.0",
+		"typo3/cms-frontend": "^13.0",
+		"typo3fluid/fluid": "^4.2 || ^5.0"
 	},
 	"require-dev": {
-		"eliashaeussler/version-bumper": "^2.4 || ^3.0",
-		"helhum/typo3-console": "^7.0 || ^8.1",
-		"move-elevator/composer-translation-validator": "^1.0",
-		"phpunit/phpunit": "^10.2 || ^12.0",
-		"typo3/cms-base-distribution": "^12.4 || ^13.4",
-		"typo3/cms-lowlevel": "^12.4 || ^13.4"
+		"eliashaeussler/version-bumper": "^3.0",
+		"helhum/typo3-console": "^8.1",
+		"phpunit/phpunit": "^12.0",
+		"typo3/cms-base-distribution": "^13.4",
+		"typo3/cms-lowlevel": "^13.4"
 	},
 	"autoload": {
 		"psr-4": {

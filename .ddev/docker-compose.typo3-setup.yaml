@@ -5,20 +5,7 @@ services:
             - EXTENSION_KEY=xima_typo3_frontend_edit
             - EXTENSION_NAME=xima-typo3-frontend-edit
             - PACKAGE_NAME=xima/xima-typo3-frontend-edit
-            - TYPO3_VERSIONS=12 13
-
-            # TYPO3 v11 and v12 config
-            - TYPO3_INSTALL_DB_DRIVER=mysqli
-            - TYPO3_INSTALL_DB_USER=root
-            - TYPO3_INSTALL_DB_PASSWORD=root
-            - TYPO3_INSTALL_DB_HOST=db
-            - TYPO3_INSTALL_DB_UNIX_SOCKET=
-            - TYPO3_INSTALL_DB_USE_EXISTING=0
-            - TYPO3_INSTALL_ADMIN_USER=admin
-            - TYPO3_INSTALL_ADMIN_PASSWORD=Password1!
-            - TYPO3_INSTALL_SITE_NAME=EXT:xima-typo3-frontend-edit Dev Environment
-            - TYPO3_INSTALL_SITE_SETUP_TYPE=site
-            - TYPO3_INSTALL_WEB_SERVER_CONFIG=apache
+            - TYPO3_VERSIONS=13
 
             # TYPO3 v13 config
             - TYPO3_DB_DRIVER=mysqli
