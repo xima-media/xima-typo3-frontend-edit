@@ -1,12 +1,7 @@
 <?php
-
-// ddev-generated
-// If you want to take over this file and customize it, remove the line above
-// and ddev will respect it and won't overwrite the file.
-
 $extensionKey = getenv('EXTENSION_NAME');
-$typo3AdminUser = getenv('TYPO3_INSTALL_ADMIN_USER');
-$typo3AdminPassword = getenv('TYPO3_INSTALL_ADMIN_PASSWORD');
+$typo3AdminUser = getenv('TYPO3_SETUP_ADMIN_USERNAME');
+$typo3AdminPassword = getenv('TYPO3_SETUP_ADMIN_PASSWORD');
 $supportedVersions = explode(' ', getenv('TYPO3_VERSIONS'));
 
 // Check if composer.json exists

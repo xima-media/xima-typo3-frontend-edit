@@ -5,7 +5,7 @@
 ## Usage: 13
 ## Example: "ddev 13 composer du -o" or "ddev 13 typo3 cache:flush"
 
-. .ddev/.typo3-setup/scripts/utils.sh
+. .ddev/.setup/scripts/utils.sh
 
 command=$@
 version=13
