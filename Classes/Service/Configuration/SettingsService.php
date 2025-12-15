@@ -18,6 +18,7 @@ use Psr\Container\{ContainerExceptionInterface, NotFoundExceptionInterface};
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
+use Xima\XimaTypo3FrontendEdit\Configuration;
 
 use function array_map;
 use function explode;
@@ -91,7 +92,7 @@ final readonly class SettingsService
      */
     public function getIgnoredUids(ServerRequestInterface $request): array
     {
-        $values = $this->parseCommaDelimitedSetting($request, 'frontendEdit.filter.ignoredUids');
+        $values = $this->parseCommaDelimitedSetting($request, 'frontendEdit.filter.ignoreUids');
 
         return array_map(intval(...), $values);
     }
@@ -134,7 +135,7 @@ final readonly class SettingsService
     public function isFrontendDebugModeEnabled(): bool
     {
         try {
-            $configuration = $this->extensionConfiguration->get('xima_typo3_frontend_edit');
+            $configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
 
             return (bool) ($configuration['frontendDebugMode'] ?? false);
         } catch (Exception) {
