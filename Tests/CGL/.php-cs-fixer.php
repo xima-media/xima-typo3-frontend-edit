@@ -18,21 +18,23 @@ use KonradMichalik\PhpDocBlockHeaderFixer\Generators\DocBlockHeader;
 use KonradMichalik\PhpDocBlockHeaderFixer\Rules\DocBlockHeaderFixer;
 use Symfony\Component\Finder\Finder;
 
+$rootPath = dirname(__DIR__, 2);
+
 return Config::create()
     ->registerCustomFixers([
         new DocBlockHeaderFixer(),
     ])
     ->withRule(
-        Header::fromComposer(),
+        Header::fromComposer($rootPath.'/composer.json'),
     )
     ->withRule(
         Set::fromArray(
-            DocBlockHeader::fromComposer()->__toArray(),
+            DocBlockHeader::fromComposer($rootPath.'/composer.json')->__toArray(),
         ),
     )
     ->withFinder(
         static fn (Finder $finder) => $finder
-            ->in(__DIR__)
+            ->in($rootPath)
             ->notPath(['ext_emconf.php']),
     )
 ;

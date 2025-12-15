@@ -65,7 +65,7 @@ final class SettingsService
     /**
      * @var ArrayObject<string, array<string, mixed>>
      */
-    private ArrayObject $typoScriptCache;
+    private readonly ArrayObject $typoScriptCache;
 
     public function __construct(
         private readonly Context $context,
@@ -117,7 +117,7 @@ final class SettingsService
     {
         if ([] === $this->ignoredUids) {
             $values = $this->parseCommaDelimitedConfig('ignoredUids');
-            $this->ignoredUids = array_map('intval', $values);
+            $this->ignoredUids = array_map(intval(...), $values);
         }
 
         return $this->ignoredUids;
@@ -207,7 +207,7 @@ final class SettingsService
         $configuration = $this->getConfiguration();
 
         return isset($configuration[$configKey])
-            ? array_map('trim', explode(',', $configuration[$configKey]))
+            ? array_map(trim(...), explode(',', $configuration[$configKey]))
             : [];
     }
 
@@ -219,9 +219,8 @@ final class SettingsService
         $cacheKey = $this->generateTypoScriptCacheKey();
 
         if ($this->typoScriptCache->offsetExists($cacheKey)) {
-            $cached = $this->typoScriptCache->offsetGet($cacheKey);
-
-            return is_array($cached) ? $cached : [];
+            // @phpstan-ignore return.type (ArrayObject generic type inference limitation)
+            return $this->typoScriptCache[$cacheKey];
         }
 
         $result = match (true) {

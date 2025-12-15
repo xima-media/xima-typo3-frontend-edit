@@ -1,0 +1,74 @@
+{
+	"authors": [
+		{
+			"name": "Konrad Michalik",
+			"email": "km@move-elevator.de",
+			"role": "Maintainer"
+		}
+	],
+	"require-dev": {
+		"armin/editorconfig-cli": "^2.0",
+		"ergebnis/composer-normalize": "^2.44",
+		"helmich/typo3-typoscript-lint": "^3.2",
+		"konradmichalik/php-cs-fixer-preset": "^0.1.0",
+		"konradmichalik/php-doc-block-header-fixer": "^0.3.0",
+		"konradmichalik/phpstan-typo3-preset": "^0.1",
+		"move-elevator/composer-translation-validator": "^1.0.0",
+		"phpstan/phpstan-phpunit": "^1.0 || ^2.0",
+		"psr/http-message": "^1.0 || ^2.0",
+		"shipmonk/composer-dependency-analyser": "1.8.4",
+		"ssch/typo3-rector": "^2.10 || ^3.0",
+		"typo3/coding-standards": "^0.7 || ^0.8"
+	},
+	"replace": {
+		"typo3/cms-core": "*",
+		"typo3/cms-extbase": "*"
+	},
+	"config": {
+		"allow-plugins": {
+			"ergebnis/composer-normalize": true,
+			"move-elevator/composer-translation-validator": true,
+			"php-http/discovery": true,
+			"typo3/class-alias-loader": false,
+			"typo3/cms-composer-installers": false
+		},
+		"lock": false,
+		"sort-packages": true
+	},
+	"scripts": {
+		"analyze": [
+			"@analyze:dependencies"
+		],
+		"analyze:dependencies": "composer-dependency-analyser --composer-json ../../composer.json",
+		"fix": [
+			"@fix:composer",
+			"@fix:editorconfig",
+			"@fix:php"
+		],
+		"fix:composer": [
+			"@composer normalize",
+			"@composer normalize ../../composer.json"
+		],
+		"fix:editorconfig": "@lint:editorconfig --fix",
+		"fix:php": "@php vendor/bin/php-cs-fixer --config=.php-cs-fixer.php fix",
+		"lint": [
+			"@lint:composer",
+			"@lint:editorconfig",
+			"@lint:language",
+			"@lint:php",
+			"@lint:typoscript"
+		],
+		"lint:composer": "@fix:composer --dry-run",
+		"lint:editorconfig": "ec --git-only",
+		"lint:language": "@composer validate-translations ./../../Resources/Private/Language",
+		"lint:php": "@fix:php --dry-run",
+		"migration": [
+			"@migration:rector"
+		],
+		"migration:rector": "rector process -c rector.php",
+		"sca": [
+			"@sca:php"
+		],
+		"sca:php": "phpstan analyse --memory-limit=2G"
+	}
+}

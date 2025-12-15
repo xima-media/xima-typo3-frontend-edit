@@ -29,7 +29,6 @@ class ResourceUtilityTest extends TestCase
 {
     protected function setUp(): void
     {
-        parent::setUp();
         // Reset globals for each test
         $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY] = [];
     }
@@ -89,7 +88,7 @@ class ResourceUtilityTest extends TestCase
 
         self::assertFalse($reflection->isFinal());
         self::assertFalse($reflection->isAbstract());
-        self::assertEquals('Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility', $reflection->getName());
+        self::assertEquals(ResourceUtility::class, $reflection->getName());
     }
 
     public function testGetResourcesMethodSignature(): void

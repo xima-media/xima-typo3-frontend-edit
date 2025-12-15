@@ -36,12 +36,12 @@ final class ContentElementRepository
     /**
      * @var ArrayObject<string, bool>
      */
-    private ArrayObject $rootlineCache;
+    private readonly ArrayObject $rootlineCache;
 
     /**
      * @var ArrayObject<string, array<string, mixed>|false>
      */
-    private ArrayObject $configCache;
+    private readonly ArrayObject $configCache;
 
     public function __construct(
         private readonly ConnectionPool $connectionPool,
@@ -147,9 +147,8 @@ final class ContentElementRepository
         $cacheKey = $cType.':'.$listType;
 
         if ($this->configCache->offsetExists($cacheKey)) {
-            $cached = $this->configCache->offsetGet($cacheKey);
-
-            return (false !== $cached && null !== $cached) ? $cached : false;
+            // @phpstan-ignore return.type (ArrayObject generic type inference limitation)
+            return $this->configCache[$cacheKey];
         }
 
         if (!isset($GLOBALS['TCA']['tt_content']['columns'])) {
