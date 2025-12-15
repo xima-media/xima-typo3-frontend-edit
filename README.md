@@ -27,7 +27,7 @@ The extension has been developed to provide a simple and lightweight solution to
 ### Requirements
 
 * TYPO3 >= 11.5
-* PHP 8.1+
+* PHP 8.2+
 
 ### Composer
 

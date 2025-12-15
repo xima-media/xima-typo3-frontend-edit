@@ -28,7 +28,7 @@ use function array_slice;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class ContentElementRepository
+final readonly class ContentElementRepository
 {
     private const MAX_CACHE_SIZE = 100;
     private const CACHE_CLEANUP_THRESHOLD = 80;
@@ -36,16 +36,16 @@ final class ContentElementRepository
     /**
      * @var ArrayObject<string, bool>
      */
-    private readonly ArrayObject $rootlineCache;
+    private ArrayObject $rootlineCache;
 
     /**
      * @var ArrayObject<string, array<string, mixed>|false>
      */
-    private readonly ArrayObject $configCache;
+    private ArrayObject $configCache;
 
     public function __construct(
-        private readonly ConnectionPool $connectionPool,
-        private readonly VersionCompatibilityService $versionCompatibilityService,
+        private ConnectionPool $connectionPool,
+        private VersionCompatibilityService $versionCompatibilityService,
     ) {
         $this->rootlineCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
         $this->configCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
