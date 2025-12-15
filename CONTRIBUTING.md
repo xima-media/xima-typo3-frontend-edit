@@ -24,33 +24,33 @@ ddev composer install
 
 ```bash
 # All linters
-ddev composer lint
+ddev cgl lint
 
 # Specific linters
-ddev composer lint:composer
-ddev composer lint:editorconfig
-ddev composer lint:language
-ddev composer lint:php
-ddev composer lint:typoscript
-ddev composer lint:yaml
+ddev cgl lint:composer
+ddev cgl lint:editorconfig
+ddev cgl lint:language
+ddev cgl lint:php
+ddev cgl lint:typoscript
+ddev cgl lint:yaml
 
 # Fix all CGL issues
-ddev composer fix
+ddev cgl fix
 
 # Fix specific CGL issues
-ddev composer fix:composer
-ddev composer fix:editorconfig
-ddev composer fix:php
+ddev cgl fix:composer
+ddev cgl fix:editorconfig
+ddev cgl fix:php
 ```
 
 ## Run static code analysis
 
 ```bash
 # All static code analyzers
-ddev composer sca
+ddev cgl sca
 
 # Specific static code analyzers
-ddev composer sca:php
+ddev cgl sca:php
 ```
 
 ## Run tests

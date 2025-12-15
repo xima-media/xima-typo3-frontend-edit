@@ -5,14 +5,16 @@ includes:
 parameters:
 	level: 8
 
+	scanDirectories:
+		- ../../vendor
+		- ../../vendor/phpunit/phpunit/src
 	paths:
-		- Classes
-		- Configuration
-		- Resources
-		- Tests/Unit
+		- ../../Classes
+		- ../../Configuration
+		- ../../Resources
 
 	excludePaths:
-		- .Build (?)
+		- ../../.Build (?)
 
 	type_coverage:
 		constant: 0 # TODO: Set to 100, when PHP 8.3 is minimum requirement

@@ -13,19 +13,22 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\PostRector\Rector\NameImportingPostRector;
+use Rector\Set\ValueObject\LevelSetList;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddVoidReturnTypeWhereNoReturnRector;
 use Rector\ValueObject\PhpVersion;
 use Ssch\TYPO3Rector\CodeQuality\General\{ConvertImplicitVariablesToExplicitGlobalsRector, ExtEmConfRector};
 use Ssch\TYPO3Rector\Configuration\Typo3Option;
 use Ssch\TYPO3Rector\Set\{Typo3LevelSetList, Typo3SetList};
 
+$rootPath = dirname(__DIR__, 2);
+
 return RectorConfig::configure()
     ->withPaths([
-        __DIR__.'/Classes',
-        __DIR__.'/Configuration',
-        __DIR__.'/ext_emconf.php',
-        __DIR__.'/ext_tables.php',
-        __DIR__.'/Tests/Unit',
+        $rootPath.'/Classes',
+        $rootPath.'/Configuration',
+        $rootPath.'/ext_emconf.php',
+        $rootPath.'/ext_tables.php',
+        $rootPath.'/Tests/Unit',
     ])
     // uncomment to reach your current PHP version
     // ->withPhpSets()
@@ -34,6 +37,7 @@ return RectorConfig::configure()
         Typo3SetList::CODE_QUALITY,
         Typo3SetList::GENERAL,
         Typo3LevelSetList::UP_TO_TYPO3_11,
+        LevelSetList::UP_TO_PHP_81,
     ])
     // To have a better analysis from PHPStan, we teach it here some more things
     ->withPHPStanConfigs([
@@ -52,7 +56,7 @@ return RectorConfig::configure()
     // TYPO3 files.
     ->withSkip([
         // @see https://github.com/sabbelasichon/typo3-rector/issues/2536
-        __DIR__.'/**/Configuration/ExtensionBuilder/*',
+        $rootPath.'/**/Configuration/ExtensionBuilder/*',
         NameImportingPostRector::class => [
             // This line can be removed since TYPO3 11.4, see
             // https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/11.4/Important-94280-MoveContentsOfExtPhpIntoLocalScopes.html
