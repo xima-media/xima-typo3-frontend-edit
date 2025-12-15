@@ -36,7 +36,7 @@ return RectorConfig::configure()
     ->withSets([
         Typo3SetList::CODE_QUALITY,
         Typo3SetList::GENERAL,
-        Typo3LevelSetList::UP_TO_TYPO3_11,
+        Typo3LevelSetList::UP_TO_TYPO3_12,
         LevelSetList::UP_TO_PHP_82,
     ])
     // To have a better analysis from PHPStan, we teach it here some more things
@@ -49,7 +49,7 @@ return RectorConfig::configure()
     ])
     ->withConfiguredRule(ExtEmConfRector::class, [
         ExtEmConfRector::PHP_VERSION_CONSTRAINT => '8.2.0-8.4.99',
-        ExtEmConfRector::TYPO3_VERSION_CONSTRAINT => '11.5.0-13.4.99',
+        ExtEmConfRector::TYPO3_VERSION_CONSTRAINT => '12.4.0-13.4.99',
         ExtEmConfRector::ADDITIONAL_VALUES_TO_BE_REMOVED => [],
     ])
     // If you use withImportNames(), you should consider excluding some
@@ -58,12 +58,6 @@ return RectorConfig::configure()
         // @see https://github.com/sabbelasichon/typo3-rector/issues/2536
         $rootPath.'/**/Configuration/ExtensionBuilder/*',
         NameImportingPostRector::class => [
-            // This line can be removed since TYPO3 11.4, see
-            // https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/11.4/Important-94280-MoveContentsOfExtPhpIntoLocalScopes.html
-            'ext_localconf.php',
-            // This line can be removed since TYPO3 11.4, see
-            // https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/11.4/Important-94280-MoveContentsOfExtPhpIntoLocalScopes.html
-            'ext_tables.php',
             'ClassAliasMap.php',
         ],
     ])

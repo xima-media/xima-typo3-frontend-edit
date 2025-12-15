@@ -264,21 +264,6 @@ final readonly class ContentElementRepository
      */
     private function mapContentElementConfig(array $config): array
     {
-        if ($this->versionCompatibilityService->isVersionBelow12()) {
-            for ($i = 0; $i <= 3; ++$i) {
-                if (!isset($config[$i])) {
-                    $config[$i] = '';
-                }
-            }
-
-            return [
-                'label' => $config[0],
-                'value' => $config[1],
-                'icon' => $config[2],
-                'group' => $config[3],
-            ];
-        }
-
         return $config;
     }
 }

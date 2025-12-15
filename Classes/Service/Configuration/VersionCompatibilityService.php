@@ -41,11 +41,6 @@ final class VersionCompatibilityService
         return VersionNumberUtility::getCurrentTypo3Version();
     }
 
-    public function isVersion11(): bool
-    {
-        return 11 === $this->getMajorVersion();
-    }
-
     public function isVersion12(): bool
     {
         return 12 === $this->getMajorVersion();
@@ -56,11 +51,6 @@ final class VersionCompatibilityService
         return $this->getMajorVersion() >= 13;
     }
 
-    public function isVersionBelow12(): bool
-    {
-        return $this->getMajorVersion() < 12;
-    }
-
     public function isVersionBelow13(): bool
     {
         return $this->getMajorVersion() < 13;
@@ -68,7 +58,7 @@ final class VersionCompatibilityService
 
     public function getContentElementConfigValueKey(): string
     {
-        return $this->isVersionBelow12() ? '1' : 'value';
+        return 'value';
     }
 
     /**
