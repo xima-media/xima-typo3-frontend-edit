@@ -50,10 +50,10 @@
                 <source>Comma-separated list of plugin types (list_type) to exclude from frontend editing.</source>
             </trans-unit>
 
-            <trans-unit id="settings.frontendEdit.filter.ignoredUids">
+            <trans-unit id="settings.frontendEdit.filter.ignoreUids">
                 <source>Ignore UIDs</source>
             </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.filter.ignoredUids">
+            <trans-unit id="settings.description.frontendEdit.filter.ignoreUids">
                 <source>Comma-separated list of specific content element UIDs to exclude from frontend editing.</source>
             </trans-unit>
 

@@ -39,11 +39,11 @@ settings:
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.filter.ignoreListTypes
     category: frontendEdit.filter
 
-  frontendEdit.filter.ignoredUids:
+  frontendEdit.filter.ignoreUids:
     default: ''
     type: string
-    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.filter.ignoredUids
-    description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.filter.ignoredUids
+    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.filter.ignoreUids
+    description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.filter.ignoreUids
     category: frontendEdit.filter
 
   frontendEdit.menu.showDivInfo:
