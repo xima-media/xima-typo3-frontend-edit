@@ -61,7 +61,7 @@ class ResourceUtility
                 ...$attributes,
                 'rel' => 'stylesheet',
                 'media' => 'all',
-                'href' => PathUtility::getPublicResourceWebPath($cssFileLocation),
+                'href' => PathUtility::getAbsoluteWebPath(GeneralUtility::getFileAbsFileName($cssFileLocation)),
             ], true),
         );
     }
@@ -75,7 +75,7 @@ class ResourceUtility
             '<script %s></script>',
             GeneralUtility::implodeAttributes([
                 ...$attributes,
-                'src' => PathUtility::getPublicResourceWebPath($jsFileLocation),
+                'src' => PathUtility::getAbsoluteWebPath(GeneralUtility::getFileAbsFileName($jsFileLocation)),
             ], true),
         );
     }

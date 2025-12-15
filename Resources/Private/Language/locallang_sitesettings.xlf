@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+    <file source-language="en" datatype="plaintext" original="locallang_sitesettings"
+          product-name="xima_typo3_frontend_edit">
+        <header/>
+        <body>
+            <trans-unit id="label">
+                <source>Frontend Edit</source>
+            </trans-unit>
+
+            <trans-unit id="categories.frontendEdit">
+                <source>Frontend Edit</source>
+            </trans-unit>
+            <trans-unit id="categories.frontendEdit.filter">
+                <source>Filter Settings</source>
+            </trans-unit>
+            <trans-unit id="categories.frontendEdit.menu">
+                <source>Menu Structure</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.enabled">
+                <source>Enable Frontend Edit</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.enabled">
+                <source>Enable or disable the frontend editing functionality for this site.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.filter.ignorePids">
+                <source>Ignore PIDs</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.filter.ignorePids">
+                <source>Comma-separated list of page IDs (and their subpages) where frontend editing should be
+                    disabled.
+                </source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.filter.ignoreCTypes">
+                <source>Ignore Content Types</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.filter.ignoreCTypes">
+                <source>Comma-separated list of content types (CType) to exclude from frontend editing (e.g.,
+                    html,div).
+                </source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.filter.ignoreListTypes">
+                <source>Ignore Plugin Types</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.filter.ignoreListTypes">
+                <source>Comma-separated list of plugin types (list_type) to exclude from frontend editing.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.filter.ignoredUids">
+                <source>Ignore UIDs</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.filter.ignoredUids">
+                <source>Comma-separated list of specific content element UIDs to exclude from frontend editing.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.menu.showDivInfo">
+                <source>Show Info Section</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.menu.showDivInfo">
+                <source>Show the info section divider in the dropdown menu.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.menu.showHeader">
+                <source>Show Header</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.menu.showHeader">
+                <source>Show the header with content element info in the dropdown menu.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.menu.showDivEdit">
+                <source>Show Edit Section</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.menu.showDivEdit">
+                <source>Show the edit section divider in the dropdown menu.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.menu.showEdit">
+                <source>Show Edit Button</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.menu.showEdit">
+                <source>Show the edit content element button in the dropdown menu.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.menu.showEditPage">
+                <source>Show Edit Page Button</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.menu.showEditPage">
+                <source>Show the edit page button in the dropdown menu.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.menu.showDivAction">
+                <source>Show Action Section</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.menu.showDivAction">
+                <source>Show the action section divider in the dropdown menu.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.menu.showHide">
+                <source>Show Hide Button</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.menu.showHide">
+                <source>Show the hide/unhide content element button in the dropdown menu.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.menu.showMove">
+                <source>Show Move Button</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.menu.showMove">
+                <source>Show the move content element button in the dropdown menu.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.menu.showInfo">
+                <source>Show Info Button</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.menu.showInfo">
+                <source>Show the info button in the dropdown menu.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.menu.showHistory">
+                <source>Show History Button</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.menu.showHistory">
+                <source>Show the history button in the dropdown menu.</source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

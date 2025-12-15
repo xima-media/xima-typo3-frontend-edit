@@ -5,7 +5,7 @@ services:
             - EXTENSION_KEY=xima_typo3_frontend_edit
             - EXTENSION_NAME=xima-typo3-frontend-edit
             - PACKAGE_NAME=xima/xima-typo3-frontend-edit
-            - TYPO3_VERSIONS=13
+            - TYPO3_VERSIONS=13 14
 
             # TYPO3 v13 config
             - TYPO3_DB_DRIVER=mysqli

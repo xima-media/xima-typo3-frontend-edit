@@ -1,0 +1,18 @@
+#!/bin/bash
+
+. .ddev/.setup/scripts/utils.sh
+
+# Pre-setup function for TYPO3 version 14
+# This function is part of the installation script and is responsible for performing
+# initial setup tasks before the main installation process begins.
+pre_setup 14
+
+#_progress " ├─ Install additional composer packages"
+#  composer req x/y:'^1.0' \
+#          --no-progress -n -d $BASE_PATH
+#_done
+
+# Function to perform post-setup tasks.
+# This function is called after the main installation process to finalize the setup.
+# It typically includes tasks such as configuring settings, modifying files, and other necessary adjustments.
+post_setup

@@ -62,6 +62,7 @@ final class ModifyButtonBarEventListener
 
         if ($saveButton instanceof InputButton) {
             $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
+            /** @phpstan-ignore method.deprecated (TYPO3 v13 compatibility - ButtonFactory only exists in v14+) */
             $saveCloseButton = $buttonBar->makeInputButton()
                 ->setName('_saveandclosedok')
                 ->setValue('1')

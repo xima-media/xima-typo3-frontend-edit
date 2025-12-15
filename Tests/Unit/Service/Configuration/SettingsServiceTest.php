@@ -14,9 +14,10 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Configuration;
 
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
 use ReflectionNamedType;
-use TYPO3\CMS\Core\Context\Context;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 
 /**
@@ -29,9 +30,9 @@ class SettingsServiceTest extends TestCase
 {
     public function testSettingsServiceCanBeInstantiated(): void
     {
-        $contextMock = $this->createMock(Context::class);
+        $extensionConfigurationMock = $this->createMock(ExtensionConfiguration::class);
 
-        $subject = new SettingsService($contextMock);
+        $subject = new SettingsService($extensionConfigurationMock);
 
         self::assertInstanceOf(SettingsService::class, $subject);
     }
@@ -40,6 +41,7 @@ class SettingsServiceTest extends TestCase
     {
         $reflection = new ReflectionClass(SettingsService::class);
 
+        self::assertTrue($reflection->hasMethod('isEnabled'));
         self::assertTrue($reflection->hasMethod('getIgnoredPids'));
         self::assertTrue($reflection->hasMethod('getIgnoredCTypes'));
         self::assertTrue($reflection->hasMethod('getIgnoredListTypes'));
@@ -53,6 +55,7 @@ class SettingsServiceTest extends TestCase
     {
         $reflection = new ReflectionClass(SettingsService::class);
 
+        self::assertTrue($reflection->getMethod('isEnabled')->isPublic());
         self::assertTrue($reflection->getMethod('getIgnoredPids')->isPublic());
         self::assertTrue($reflection->getMethod('getIgnoredCTypes')->isPublic());
         self::assertTrue($reflection->getMethod('getIgnoredListTypes')->isPublic());
@@ -72,7 +75,7 @@ class SettingsServiceTest extends TestCase
         $parameters = $constructor->getParameters();
         self::assertCount(1, $parameters);
 
-        self::assertEquals('context', $parameters[0]->getName());
+        self::assertEquals('extensionConfiguration', $parameters[0]->getName());
     }
 
     public function testClassIsFinal(): void
@@ -101,7 +104,7 @@ class SettingsServiceTest extends TestCase
     {
         $reflection = new ReflectionClass(SettingsService::class);
 
-        $methods = ['checkDefaultMenuStructure', 'checkSimpleModeMenuStructure', 'isFrontendDebugModeEnabled'];
+        $methods = ['isEnabled', 'checkDefaultMenuStructure', 'checkSimpleModeMenuStructure', 'isFrontendDebugModeEnabled'];
 
         foreach ($methods as $methodName) {
             $method = $reflection->getMethod($methodName);
@@ -113,33 +116,75 @@ class SettingsServiceTest extends TestCase
         }
     }
 
-    public function testCheckDefaultMenuStructureHasStringParameter(): void
+    public function testCheckDefaultMenuStructureHasCorrectParameters(): void
     {
         $reflection = new ReflectionClass(SettingsService::class);
         $method = $reflection->getMethod('checkDefaultMenuStructure');
         $parameters = $method->getParameters();
 
-        self::assertCount(1, $parameters);
+        self::assertCount(2, $parameters);
 
-        $param = $parameters[0];
-        $paramType = $param->getType();
-        self::assertEquals('identifier', $param->getName());
-        self::assertTrue($param->hasType());
-        self::assertInstanceOf(ReflectionNamedType::class, $paramType);
-        self::assertEquals('string', $paramType->getName());
+        // First parameter: ServerRequestInterface
+        $requestParam = $parameters[0];
+        self::assertEquals('request', $requestParam->getName());
+        self::assertTrue($requestParam->hasType());
+        $requestType = $requestParam->getType();
+        self::assertInstanceOf(ReflectionNamedType::class, $requestType);
+        self::assertEquals(ServerRequestInterface::class, $requestType->getName());
+
+        // Second parameter: string identifier
+        $identifierParam = $parameters[1];
+        self::assertEquals('identifier', $identifierParam->getName());
+        self::assertTrue($identifierParam->hasType());
+        $identifierType = $identifierParam->getType();
+        self::assertInstanceOf(ReflectionNamedType::class, $identifierType);
+        self::assertEquals('string', $identifierType->getName());
     }
 
-    public function testPrivatePropertiesExist(): void
+    public function testMethodsRequireServerRequestParameter(): void
     {
         $reflection = new ReflectionClass(SettingsService::class);
 
-        $expectedProperties = ['configuration', 'ignoredPids', 'ignoredCTypes', 'ignoredListTypes', 'ignoredUids'];
+        $methodsWithRequest = [
+            'isEnabled',
+            'getIgnoredPids',
+            'getIgnoredCTypes',
+            'getIgnoredListTypes',
+            'getIgnoredUids',
+            'checkDefaultMenuStructure',
+            'checkSimpleModeMenuStructure',
+        ];
 
-        foreach ($expectedProperties as $propertyName) {
-            self::assertTrue($reflection->hasProperty($propertyName), "Property {$propertyName} should exist");
+        foreach ($methodsWithRequest as $methodName) {
+            $method = $reflection->getMethod($methodName);
+            $parameters = $method->getParameters();
 
-            $property = $reflection->getProperty($propertyName);
-            self::assertTrue($property->isPrivate(), "Property {$propertyName} should be private");
+            self::assertNotEmpty($parameters, "Method {$methodName} should have parameters");
+
+            $firstParam = $parameters[0];
+            self::assertEquals('request', $firstParam->getName(), "First parameter of {$methodName} should be 'request'");
+
+            $paramType = $firstParam->getType();
+            self::assertInstanceOf(ReflectionNamedType::class, $paramType);
+            self::assertEquals(ServerRequestInterface::class, $paramType->getName(), "First parameter of {$methodName} should be ServerRequestInterface");
         }
+    }
+
+    public function testMenuStructureMapConstantExists(): void
+    {
+        $reflection = new ReflectionClass(SettingsService::class);
+
+        self::assertTrue($reflection->hasConstant('MENU_STRUCTURE_MAP'));
+
+        $constant = $reflection->getReflectionConstant('MENU_STRUCTURE_MAP');
+        self::assertNotNull($constant);
+        self::assertTrue($constant->isPrivate());
+
+        $value = $constant->getValue();
+        self::assertIsArray($value);
+        self::assertArrayHasKey('div_info', $value);
+        self::assertArrayHasKey('header', $value);
+        self::assertArrayHasKey('edit', $value);
+        self::assertArrayHasKey('history', $value);
     }
 }
