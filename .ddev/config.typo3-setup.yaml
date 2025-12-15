@@ -6,4 +6,4 @@ additional_hostnames:
   - 13.xima-typo3-frontend-edit
 hooks:
    post-start:
-    - exec: mkdir -p /var/www/html/.Build/ && cp /var/www/html/.ddev/.typo3-setup/templates/* /var/www/html/.Build/
+    - exec: mkdir -p /var/www/html/.Build/ && cp /var/www/html/.ddev/.setup/templates/* /var/www/html/.Build/

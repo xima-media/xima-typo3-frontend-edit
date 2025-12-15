@@ -1,8 +1,58 @@
 #!/bin/bash
 
-#ddev-generated
-# If you want to take over this file and customize it, remove the line above
-# and ddev will respect it and won't overwrite the file.
+# Global variable to store spinner PID
+SPINNER_PID=0
+
+# Function to display a spinner at the current cursor position (simple colored style)
+function _spinner() {
+    local chars="|/-\\"
+    local delay=0.1
+    local i=0
+
+    while true; do
+        printf "\b\e[36m%c\e[0m" "${chars:$i:1}"
+        ((i++))
+        if [ $i -eq ${#chars} ]; then
+            i=0
+        fi
+        sleep $delay
+    done
+}
+
+function _progress() {
+
+    printf "%s... " "$1"
+    # Check if we're in CI environment or non-interactive terminal
+    if [[ "$VERBOSE" -eq 0 ]] && [[ -z "$CI" ]] && [[ -z "$GITHUB_ACTIONS" ]] && [[ -z "$GITLAB_CI" ]] && [[ -z "$JENKINS_URL" ]] && [[ -t 1 ]]; then
+      # Print initial space for spinner
+      printf " "
+      # Start spinner in background at current position
+      _spinner &
+      SPINNER_PID=$!
+      # Save current stdout/stderr
+      exec 3>&1 4>&2
+      exec >/dev/null 2>&1
+    else
+      printf "\n"
+    fi
+}
+
+function _done() {
+    # Stop spinner if it was started
+    if [ $SPINNER_PID -ne 0 ]; then
+      kill $SPINNER_PID 2>/dev/null
+      wait $SPINNER_PID 2>/dev/null
+      SPINNER_PID=0
+      # Restore stdout/stderr
+      exec 1>&3 2>&4
+      # Clear any remaining color codes and replace with checkmark
+      printf "\b\e[0m\e[32m✔\e[39m\n"
+    else
+      # No spinner was running, just print checkmark
+      printf "\e[32m✔\e[39m\n"
+    fi
+}
+
 
 # Function to get the lowest supported TYPO3 version from the environment variable TYPO3_VERSIONS
 # It reads the TYPO3_VERSIONS environment variable, splits it into an array, and sorts the versions.
@@ -89,11 +139,14 @@ function check_typo3_version() {
 #   pre_setup <TYPO3_VERSION>
 function pre_setup() {
   export VERSION=$1
-  export BASE_PATH="/var/www/html/.Build/$VERSION"
-  intro_typo3
-  message blue "Pre Setup for TYPO3 $VERSION"
+  message magenta "Install TYPO3 $VERSION"
+  _progress " ├─ Prepare environment"
+    export BASE_PATH="/var/www/html/.Build/$VERSION"
+    intro_typo3
+    message blue "Pre Setup for TYPO3 $VERSION"
+  _done
   install_start
-  message blue "Install Composer Packages"
+  install_composer_packages
 }
 
 # Function to perform post-setup tasks for TYPO3 installation.
@@ -101,20 +154,31 @@ function pre_setup() {
 # and calls the appropriate post-setup function based on the TYPO3 version.
 # After that, it imports data and updates TYPO3.
 function post_setup() {
-  message blue "Post Setup for TYPO3 $VERSION"
+  prepare_acceptance_testing
+
   cd $BASE_PATH
   TYPO3_INSTALL_DB_DBNAME=$DATABASE
 
-  if [ "$VERSION" == "11" ]; then
-    post_setup_11
-  elif [ "$VERSION" == "12" ]; then
-    post_setup_12
-  elif [ "$VERSION" == "13" ]; then
-    post_setup_13
-  fi
+  _progress " ├─ Setup TYPO3"
+    if [ "$VERSION" == "11" ]; then
+      post_setup_11
+    elif [ "$VERSION" == "12" ]; then
+      post_setup_12
+    elif [ "$VERSION" == "13" ]; then
+      post_setup_13
+    elif [ "$VERSION" == "14" ]; then
+      post_setup_14
+    fi
+  _done
 
-  import_data
-  update_typo3
+  _progress " ├─ Import data"
+    import_xml_data
+    import_sql_data
+  _done
+  _progress " ├─ Update TYPO3"
+    update_typo3
+  _done
+  printf " └─ \033[33mTYPO3 $VERSION setup completed!\033[0m Open in your browser: https://$VERSION.${EXTENSION_NAME}.ddev.site\n"
 }
 
 # Function to display an introductory message for the TYPO3 version.
@@ -133,10 +197,16 @@ function intro_typo3() {
 # and sets up Composer for the TYPO3 installation.
 function install_start() {
     rm -rf /var/www/html/.Build/$VERSION/*
-    setup_environment
-    create_symlinks_main_extension
-    create_symlinks_additional_extensions
-    setup_composer
+    _progress " ├─ Setup environment"
+      setup_environment
+    _done
+    _progress " ├─ Create symlinks"
+      create_symlinks_main_extension
+      create_symlinks_additional_extensions
+    _done
+    _progress " ├─ Setup composer"
+      setup_composer
+    _done
 }
 
 # Function to set up the environment for TYPO3 installation.
@@ -176,7 +246,7 @@ function create_symlinks_main_extension() {
 # It iterates over the directories in the specified path and creates symbolic links
 # for each directory in the base path.
 function create_symlinks_additional_extensions() {
-    for dir in Tests/.typo3-setup/packages/*/; do
+    for dir in Tests/Acceptance/Fixtures/packages/*/; do
         ln -sr "$dir" "$BASE_PATH/packages/$(basename "$dir")"
     done
 }
@@ -186,7 +256,7 @@ function create_symlinks_additional_extensions() {
 # configures the TYPO3 web directory, sets up the repository for packages,
 # and allows necessary Composer plugins.
 function setup_composer() {
-    composer init --name="xima/typo3-$VERSION" --description="TYPO3 $VERSION" --no-interaction --working-dir "$BASE_PATH"
+    composer init --name="move-elevator/typo3-$VERSION" --description="TYPO3 $VERSION" --no-interaction --working-dir "$BASE_PATH"
     composer config extra.typo3/cms.web-dir public --working-dir "$BASE_PATH"
     composer config repositories.packages path 'packages/*' --working-dir "$BASE_PATH"
     composer config --no-interaction allow-plugins.typo3/cms-composer-installers true --working-dir "$BASE_PATH"
@@ -218,22 +288,86 @@ function update_typo3() {
     $TYPO3_BIN cache:flush
 }
 
-# Function to import data into TYPO3.
-# It sets the public directory and export directory paths, checks if the data file exists,
-# and if it does, it copies the data file to the export directory and imports the data using TYPO3's import/export tool.
-function import_data() {
+# Function to install required Composer packages for TYPO3.
+function install_composer_packages() {
+  _progress " ├─ Install composer packages"
+    composer req typo3/cms-base-distribution:"^$VERSION" \
+            typo3/cms-reports:"^$VERSION" \
+            typo3/cms-lowlevel:"^$VERSION" \
+            $PACKAGE_NAME:'*@dev' \
+            test/sitepackage:'*@dev' \
+            helhum/typo3-console:'*' \
+            --no-progress -n -d $BASE_PATH
+  _done
+}
+
+# Function to install Codeception and related packages using Composer.
+# It checks if the codeception.yml file exists in the extension's package directory.
+# If the file exists, it installs the necessary Codeception packages, creates symlinks for
+# the codeception.yml file and acceptance tests directory, and builds the Codeception configuration.
+function prepare_acceptance_testing() {
+  if [ ! -f "$BASE_PATH/packages/$EXTENSION_KEY/codeception.yml" ]; then
+      return
+  fi
+  _progress " ├─ Prepare acceptance testing"
+    composer config --no-interaction allow-plugins.codeception/c3 true --working-dir "$BASE_PATH"
+    composer req --dev codeception/codeception:'*' \
+              codeception/module-asserts:'*' \
+              codeception/module-cli:'*' \
+              codeception/module-db:'*' \
+              codeception/module-phpbrowser:'*' \
+              codeception/module-webdriver:'*' \
+              eliashaeussler/typo3-codeception-helper:'*' \
+              typo3/testing-framework:'*' \
+              --no-progress -n -d $BASE_PATH
+
+    ln -sr "$BASE_PATH/packages/$EXTENSION_KEY/codeception.yml" "$BASE_PATH/codeception.yml"
+    mkdir -p "$BASE_PATH/Tests"
+    ln -sr "$BASE_PATH/packages/$EXTENSION_KEY/Tests/Acceptance" "$BASE_PATH/Tests/Acceptance"
+
+    $BASE_PATH/vendor/bin/codecept build -c $BASE_PATH/codeception.yml
+  _done
+}
+
+# Function to import XML data into TYPO3.
+# It sets the public directory and export directory paths, checks for all .xml files in the FIXTURE_DIR,
+# and imports each XML file using TYPO3's import/export tool.
+function import_xml_data() {
     PUBLIC_DIR="/var/www/html/.Build/${VERSION}/public"
     EXPORT_DIR="${PUBLIC_DIR}/fileadmin/user_upload/_temp_/importexport"
-    DATA_FILE="/var/www/html/Tests/.typo3-setup/data/data.xml"
-
-    if [ ! -f "$DATA_FILE" ]; then
-        message yellow "Data file $DATA_FILE not found. Skipping import."
-        return
-    fi
+    FIXTURE_DIR="/var/www/html/Tests/Acceptance/Fixtures"
 
     mkdir -p $EXPORT_DIR
-    cp /$DATA_FILE $EXPORT_DIR
-    $TYPO3_BIN impexp:import -vvv --force-uid "$EXPORT_DIR/data.xml"
+
+    for XML_FILE in "$FIXTURE_DIR"/*.xml; do
+        if [ -f "$XML_FILE" ]; then
+            FILENAME=$(basename "$XML_FILE")
+            message yellow "Importing XML file $FILENAME..."
+            cp "$XML_FILE" "$EXPORT_DIR/"
+            $TYPO3_BIN impexp:import -vvv --force-uid "$EXPORT_DIR/$FILENAME"
+        fi
+    done
+
+    # Check if no XML files were found
+    if ! ls "$FIXTURE_DIR"/*.xml >/dev/null 2>&1; then
+        message yellow "No XML files found in $FIXTURE_DIR. Skipping XML import."
+    fi
+}
+
+# Function to import SQL data into TYPO3.
+# It checks if the SQL data files exists, and if it does, it imports the SQL
+# data into the TYPO3 database using the MySQL command.
+function import_sql_data() {
+    FIXTURE_DIR="/var/www/html/Tests/Acceptance/Fixtures"
+
+    for DATA_FILE in "$FIXTURE_DIR"/*.sql; do
+        if [ -f "$DATA_FILE" ]; then
+            message yellow "Importing $DATA_FILE..."
+            mysql -h db -u root -p"root" $DATABASE < "$DATA_FILE"
+        else
+          message yellow "No SQL files found in $FIXTURE_DIR. Import will be skipped."
+        fi
+    done
 }
 
 # Function to perform post-setup tasks for TYPO3 version 11.
@@ -267,6 +401,17 @@ function post_setup_12 {
 # It creates the TYPO3 database, sets up TYPO3 by running the installation setup,
 # configures TYPO3 settings, and modifies configuration files to enable deprecations.
 function post_setup_13 {
+  mysql -h db -u root -p"root" -e "CREATE DATABASE $DATABASE;"
+  $TYPO3_BIN  setup -n --dbname=$DATABASE --password=$TYPO3_DB_PASSWORD --create-site="https://${VERSION}.${EXTENSION_NAME}.ddev.site" --admin-user-password=$TYPO3_SETUP_ADMIN_PASSWORD
+  setup_typo3
+
+  sed -i "/'deprecations'/,/^[[:space:]]*'disabled' => true,/s/'disabled' => true,/'disabled' => false,/" /var/www/html/.Build/$VERSION/config/system/settings.php
+}
+
+# Function to perform post-setup tasks for TYPO3 version 14.
+# It creates the TYPO3 database, sets up TYPO3 by running the installation setup,
+# configures TYPO3 settings, and modifies configuration files to enable deprecations.
+function post_setup_14 {
   mysql -h db -u root -p"root" -e "CREATE DATABASE $DATABASE;"
   $TYPO3_BIN  setup -n --dbname=$DATABASE --password=$TYPO3_DB_PASSWORD --create-site="https://${VERSION}.${EXTENSION_NAME}.ddev.site" --admin-user-password=$TYPO3_SETUP_ADMIN_PASSWORD
   setup_typo3
