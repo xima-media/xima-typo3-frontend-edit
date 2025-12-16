@@ -15,7 +15,7 @@
   };
 
   /**
-   * Debug Logger - Only logs when debug mode is enabled
+   * Debug Logger
    */
   const Logger = {
     log(message, data = null, level = 'log') {
@@ -29,7 +29,7 @@
   };
 
   /**
-   * Tooltip Manager - Handles tooltip creation and positioning
+   * Tooltip Manager
    */
   const Tooltip = {
     element: null,
@@ -53,13 +53,11 @@
 
       const { tooltip, arrow: arrowEl } = this.getElements();
 
-      // Clear and set text
       Array.from(tooltip.childNodes).forEach(node => {
         if (node !== arrowEl) tooltip.removeChild(node);
       });
       tooltip.insertBefore(document.createTextNode(text), arrowEl);
 
-      // Position with Floating UI
       const { x, y, placement, middlewareData } = await computePosition(btn, tooltip, {
         placement: 'top',
         middleware: [
@@ -99,7 +97,7 @@
   };
 
   /**
-   * Dropdown Manager - Handles dropdown positioning and visibility
+   * Dropdown Manager
    */
   const Dropdown = {
     async position(trigger, dropdown) {
@@ -114,7 +112,6 @@
         });
         Object.assign(dropdown.style, { left: `${x}px`, top: `${y}px` });
       } else {
-        // Fallback positioning
         const rect = trigger.getBoundingClientRect();
         const scrollTop = document.documentElement.scrollTop;
         const scrollLeft = document.documentElement.scrollLeft;
@@ -145,7 +142,170 @@
   };
 
   /**
-   * UI Factory - Creates toolbar and menu elements
+   * Element Resolver - Handles anchor patterns and finds the actual content element
+   */
+  const ElementResolver = {
+    /**
+     * Check if element is an empty anchor (just an ID carrier)
+     */
+    isEmptyAnchor(element) {
+      if (element.tagName.toLowerCase() !== 'a') return false;
+
+      // Check if anchor has no meaningful content
+      const hasNoContent = element.children.length === 0 &&
+                          element.textContent.trim() === '';
+
+      // Check if anchor has no href or has empty href
+      const hasNoHref = !element.href || element.getAttribute('href') === '';
+
+      return hasNoContent || hasNoHref;
+    },
+
+    /**
+     * Find the actual content element for a given ID element
+     * Handles the pattern: <a id="c123"></a><div class="content">
+     */
+    resolveContentElement(idElement) {
+      if (!this.isEmptyAnchor(idElement)) {
+        return idElement;
+      }
+
+      // Look for next sibling that is an element (not text node)
+      let sibling = idElement.nextElementSibling;
+
+      // Skip empty text nodes or other anchors
+      while (sibling && this.isEmptyAnchor(sibling)) {
+        sibling = sibling.nextElementSibling;
+      }
+
+      if (sibling) {
+        Logger.log(`Anchor pattern detected: Using next sibling for #${idElement.id}`, {
+          anchor: idElement.outerHTML.substring(0, 50),
+          sibling: sibling.tagName + (sibling.className ? '.' + sibling.className.split(' ')[0] : '')
+        });
+        return sibling;
+      }
+
+      // Fallback to original element
+      return idElement;
+    }
+  };
+
+  /**
+   * Overlay Manager - Handles toolbar positioning as fixed overlays
+   */
+  const OverlayManager = {
+    container: null,
+    overlays: new Map(), // Map<targetElement, {toolbar, outline}>
+    scrollRAF: null,
+
+    init() {
+      // Create overlay container
+      this.container = document.createElement('div');
+      this.container.className = 'frontend-edit__overlay-container';
+      this.container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:10000;overflow:visible;';
+      document.body.appendChild(this.container);
+
+      // Setup scroll/resize handlers
+      this.setupEventHandlers();
+    },
+
+    setupEventHandlers() {
+      const updatePositions = () => {
+        if (this.scrollRAF) return;
+        this.scrollRAF = requestAnimationFrame(() => {
+          this.updateAllPositions();
+          this.scrollRAF = null;
+        });
+      };
+
+      window.addEventListener('scroll', updatePositions, { passive: true });
+      window.addEventListener('resize', updatePositions, { passive: true });
+    },
+
+    createOverlay(uid, targetElement, contentElement, showContextMenu) {
+      const overlay = document.createElement('div');
+      overlay.className = 'frontend-edit__overlay';
+      overlay.dataset.cid = uid;
+      overlay.style.cssText = 'position:absolute;pointer-events:none;';
+
+      // Create outline element
+      const outline = document.createElement('div');
+      outline.className = 'frontend-edit__outline';
+
+      // Create toolbar
+      const toolbar = UI.createToolbar(uid, contentElement, showContextMenu);
+      toolbar.style.pointerEvents = 'auto';
+
+      overlay.appendChild(outline);
+      overlay.appendChild(toolbar);
+      this.container.appendChild(overlay);
+
+      // Store reference
+      this.overlays.set(targetElement, { overlay, toolbar, outline, uid });
+
+      // Initial position
+      this.updatePosition(targetElement);
+
+      return { overlay, toolbar };
+    },
+
+    updatePosition(targetElement) {
+      const data = this.overlays.get(targetElement);
+      if (!data) return;
+
+      const rect = targetElement.getBoundingClientRect();
+      const { overlay, outline } = data;
+
+      // Update overlay position and size
+      overlay.style.left = `${rect.left}px`;
+      overlay.style.top = `${rect.top}px`;
+      overlay.style.width = `${rect.width}px`;
+      overlay.style.height = `${rect.height}px`;
+
+      // Update outline to match
+      outline.style.cssText = `
+        position: absolute;
+        inset: -1px;
+        border-radius: 2px;
+        pointer-events: none;
+      `;
+
+      // Position toolbar at bottom if element is near top of viewport
+      const toolbarHeight = 20; // Approximate height of toolbar
+      if (rect.top < toolbarHeight) {
+        overlay.classList.add('frontend-edit__overlay--bottom');
+      } else {
+        overlay.classList.remove('frontend-edit__overlay--bottom');
+      }
+    },
+
+    updateAllPositions() {
+      this.overlays.forEach((_, targetElement) => {
+        this.updatePosition(targetElement);
+      });
+    },
+
+    setActive(targetElement, active) {
+      const data = this.overlays.get(targetElement);
+      if (!data) return;
+
+      if (active) {
+        data.overlay.classList.add('frontend-edit__overlay--active');
+        this.updatePosition(targetElement);
+      } else {
+        data.overlay.classList.remove('frontend-edit__overlay--active');
+      }
+    },
+
+    getToolbar(targetElement) {
+      const data = this.overlays.get(targetElement);
+      return data?.toolbar;
+    }
+  };
+
+  /**
+   * UI Factory
    */
   const UI = {
     createToolbar(uid, contentElement, showContextMenu) {
@@ -163,7 +323,6 @@
       const container = document.createElement('div');
       container.className = 'frontend-edit__toolbar-label';
 
-      // CType icon
       if (contentElement.element.ctypeIcon) {
         const iconWrapper = document.createElement('span');
         iconWrapper.className = 'frontend-edit__toolbar-icon';
@@ -171,7 +330,6 @@
         container.appendChild(iconWrapper);
       }
 
-      // Label text
       const label = document.createElement('span');
       const ctypeLabel = contentElement.element.ctypeLabel || contentElement.element.CType || 'Content';
       label.innerHTML = `${ctypeLabel} <code>${uid}</code>`;
@@ -184,12 +342,10 @@
       const container = document.createElement('div');
       container.className = 'frontend-edit__toolbar-actions';
 
-      // Edit button
       const editBtn = this.createEditButton(contentElement);
       Tooltip.attach(editBtn);
       container.appendChild(editBtn);
 
-      // Kebab menu button
       if (showContextMenu && contentElement.menu.children && Object.keys(contentElement.menu.children).length > 0) {
         const kebabBtn = this.createKebabButton(uid);
         Tooltip.attach(kebabBtn);
@@ -258,7 +414,7 @@
   };
 
   /**
-   * Data Service - Handles data collection and API communication
+   * Data Service
    */
   const DataService = {
     getClosestContentElement(element) {
@@ -315,7 +471,7 @@
   };
 
   /**
-   * Content Element Renderer - Renders toolbars for content elements
+   * Renderer
    */
   const Renderer = {
     render(jsonResponse) {
@@ -326,31 +482,35 @@
       let failed = 0;
 
       for (let [uid, contentElement] of Object.entries(jsonResponse)) {
-        let element = document.querySelector(`#c${uid}`);
+        let idElement = document.querySelector(`#c${uid}`);
 
         // Handle translation mapping
-        if (element?.tagName.toLowerCase() === 'a' && contentElement.element.l10n_source) {
+        if (idElement?.tagName.toLowerCase() === 'a' && contentElement.element.l10n_source) {
           const l10nElement = document.querySelector(`#c${contentElement.element.l10n_source}`);
           if (l10nElement) {
             Logger.log(`Translation mapping: c${uid} → c${contentElement.element.l10n_source}`);
             uid = contentElement.element.l10n_source;
-            element = l10nElement;
+            idElement = l10nElement;
           }
         }
 
-        if (!element) {
+        if (!idElement) {
           failed++;
           Logger.log(`DOM assignment failed: Element c${uid} not found`, null, 'warn');
           continue;
         }
 
+        // Resolve actual content element (handles anchor pattern)
+        const targetElement = ElementResolver.resolveContentElement(idElement);
+
         successful++;
-        this.setupContentElement(element, uid, contentElement, showContextMenu);
+        this.setupContentElement(targetElement, uid, contentElement, showContextMenu);
 
         Logger.log(`DOM assignment successful: c${uid}`, {
           CType: contentElement.element.CType,
           ctypeLabel: contentElement.element.ctypeLabel,
-          showContextMenu
+          showContextMenu,
+          usedSibling: targetElement !== idElement
         });
       }
 
@@ -361,18 +521,12 @@
       });
     },
 
-    setupContentElement(element, uid, contentElement, showContextMenu) {
-      // Ensure relative positioning
-      if (window.getComputedStyle(element).position === 'static') {
-        element.style.position = 'relative';
-      }
-
+    setupContentElement(targetElement, uid, contentElement, showContextMenu) {
       const hasMenuChildren = contentElement.menu.children && Object.keys(contentElement.menu.children).length > 0;
       const effectiveShowContextMenu = showContextMenu && hasMenuChildren && !contentElement.menu.url;
 
-      // Create and append toolbar
-      const toolbar = UI.createToolbar(uid, contentElement, effectiveShowContextMenu);
-      element.appendChild(toolbar);
+      // Create overlay with toolbar
+      const { toolbar } = OverlayManager.createOverlay(uid, targetElement, contentElement, effectiveShowContextMenu);
 
       // Create dropdown if needed
       let dropdown = null;
@@ -383,7 +537,7 @@
       }
 
       // Setup hover events
-      this.setupHoverEvents(element, dropdown);
+      this.setupHoverEvents(targetElement, dropdown);
     },
 
     setupKebabEvents(toolbar, dropdown) {
@@ -404,22 +558,44 @@
       });
     },
 
-    setupHoverEvents(element, dropdown) {
-      element.addEventListener('mouseenter', () => {
-        element.classList.add('frontend-edit--active');
+    setupHoverEvents(targetElement, dropdown) {
+      targetElement.addEventListener('mouseenter', () => {
+        OverlayManager.setActive(targetElement, true);
       });
 
-      element.addEventListener('mouseleave', (e) => {
+      targetElement.addEventListener('mouseleave', (e) => {
         if (dropdown?.contains(e.relatedTarget)) return;
-        element.classList.remove('frontend-edit--active');
+
+        const toolbar = OverlayManager.getToolbar(targetElement);
+        if (toolbar?.contains(e.relatedTarget)) return;
+
+        OverlayManager.setActive(targetElement, false);
         if (dropdown) dropdown.style.display = 'none';
       });
 
+      // Keep active when hovering toolbar
+      const toolbar = OverlayManager.getToolbar(targetElement);
+      if (toolbar) {
+        toolbar.addEventListener('mouseenter', () => {
+          OverlayManager.setActive(targetElement, true);
+        });
+
+        toolbar.addEventListener('mouseleave', (e) => {
+          if (targetElement.contains(e.relatedTarget)) return;
+          if (dropdown?.contains(e.relatedTarget)) return;
+
+          OverlayManager.setActive(targetElement, false);
+          if (dropdown) dropdown.style.display = 'none';
+        });
+      }
+
       if (dropdown) {
         dropdown.addEventListener('mouseleave', (e) => {
-          if (element.contains(e.relatedTarget)) return;
+          if (targetElement.contains(e.relatedTarget)) return;
+          if (toolbar?.contains(e.relatedTarget)) return;
+
           dropdown.style.display = 'none';
-          element.classList.remove('frontend-edit--active');
+          OverlayManager.setActive(targetElement, false);
         });
       }
     }
@@ -442,6 +618,7 @@
         }
 
         this.initTheme();
+        OverlayManager.init();
 
         const dataItems = DataService.collectDataItems();
         const contentElements = await DataService.fetchContentElements(dataItems);
@@ -465,6 +642,5 @@
     }
   };
 
-  // Start application
   FrontendEdit.init();
 })();
