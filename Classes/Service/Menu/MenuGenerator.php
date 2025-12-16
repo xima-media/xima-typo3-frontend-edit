@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Exception;
@@ -54,9 +55,14 @@ final class MenuGenerator
      *
      * @throws Exception
      */
-    public function getDropdown(int $pid, string $returnUrl, int $languageUid, array $data = []): array
-    {
-        if ($this->contentElementFilter->isPageIgnored($pid)) {
+    public function getDropdown(
+        int $pid,
+        string $returnUrl,
+        int $languageUid,
+        ServerRequestInterface $request,
+        array $data = [],
+    ): array {
+        if ($this->contentElementFilter->isPageIgnored($pid, $request)) {
             return [];
         }
 
@@ -66,13 +72,13 @@ final class MenuGenerator
         }
 
         $contentElements = $this->contentElementRepository->fetchContentElements($pid, $languageUid);
-        $filteredElements = $this->contentElementFilter->filterContentElements($contentElements, $backendUser);
+        $filteredElements = $this->contentElementFilter->filterContentElements($contentElements, $backendUser, $request);
 
         $result = [];
         foreach ($filteredElements as $contentElement) {
             $contentElementConfig = $this->contentElementRepository->getContentElementConfig(
                 $contentElement['CType'],
-                $contentElement['list_type'],
+                $contentElement['list_type'] ?? '',
             );
             $returnUrlAnchor = $returnUrl.'#c'.$contentElement['uid'];
 
@@ -80,7 +86,7 @@ final class MenuGenerator
                 continue;
             }
 
-            $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig);
+            $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request);
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
             $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
@@ -103,8 +109,9 @@ final class MenuGenerator
         int $pid,
         string $returnUrlAnchor,
         array $contentElementConfig,
+        ServerRequestInterface $request,
     ): Button {
-        $simpleMode = $this->isSimpleMode() || $this->settingsService->checkSimpleModeMenuStructure();
+        $simpleMode = $this->isSimpleMode() || $this->settingsService->checkSimpleModeMenuStructure($request);
 
         if ($simpleMode) {
             return $this->menuButtonBuilder->createSimpleEditButton(
@@ -117,9 +124,9 @@ final class MenuGenerator
 
         $menuButton = $this->menuButtonBuilder->createFullMenuButton();
 
-        $this->menuButtonBuilder->addInfoSection($menuButton, $contentElement, $contentElementConfig);
-        $this->menuButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor);
-        $this->menuButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor);
+        $this->menuButtonBuilder->addInfoSection($menuButton, $contentElement, $contentElementConfig, $request);
+        $this->menuButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor, $request);
+        $this->menuButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor, $request);
 
         return $menuButton;
     }

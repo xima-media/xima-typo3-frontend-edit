@@ -13,16 +13,16 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Configuration;
 
-use ArrayObject;
 use Exception;
+use Psr\Container\{ContainerExceptionInterface, NotFoundExceptionInterface};
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Context\Context;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
+use Xima\XimaTypo3FrontendEdit\Configuration;
 
-use function array_key_exists;
-use function array_slice;
-use function is_array;
+use function array_map;
+use function explode;
+use function trim;
 
 /**
  * SettingsService.
@@ -30,151 +30,101 @@ use function is_array;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class SettingsService
+final readonly class SettingsService
 {
-    private const MAX_CACHE_SIZE = 10;
-    private const CACHE_CLEANUP_THRESHOLD = 8;
-
-    /**
-     * @var array<string, mixed>
-     */
-    private array $configuration = [];
-
-    /**
-     * @var array<int, string>
-     */
-    private array $ignoredPids = [];
-
-    /**
-     * @var array<int, string>
-     */
-    private array $ignoredCTypes = [];
-
-    /**
-     * @var array<int, string>
-     */
-    private array $ignoredListTypes = [];
-
-    /**
-     * @var array<int, int>
-     */
-    private array $ignoredUids = [];
-
-    private ?bool $simpleModeMenuStructure = null;
-
-    /**
-     * @var ArrayObject<string, array<string, mixed>>
-     */
-    private readonly ArrayObject $typoScriptCache;
+    private const MENU_STRUCTURE_MAP = [
+        'div_info' => 'frontendEdit.menu.showDivInfo',
+        'header' => 'frontendEdit.menu.showHeader',
+        'div_edit' => 'frontendEdit.menu.showDivEdit',
+        'edit' => 'frontendEdit.menu.showEdit',
+        'edit_page' => 'frontendEdit.menu.showEditPage',
+        'div_action' => 'frontendEdit.menu.showDivAction',
+        'hide' => 'frontendEdit.menu.showHide',
+        'move' => 'frontendEdit.menu.showMove',
+        'info' => 'frontendEdit.menu.showInfo',
+        'history' => 'frontendEdit.menu.showHistory',
+    ];
 
     public function __construct(
-        private readonly Context $context,
-    ) {
-        $this->typoScriptCache = new ArrayObject();
+        private ExtensionConfiguration $extensionConfiguration,
+    ) {}
+
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function isEnabled(ServerRequestInterface $request): bool
+    {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
+            return false;
+        }
+
+        return (bool) $settings->get('frontendEdit.enabled', true);
     }
 
     /**
      * @return array<int, string>
      */
-    public function getIgnoredPids(): array
+    public function getIgnoredPids(ServerRequestInterface $request): array
     {
-        if ([] === $this->ignoredPids) {
-            $this->ignoredPids = $this->parseCommaDelimitedConfig('ignorePids');
-        }
-
-        return $this->ignoredPids;
+        return $this->parseCommaDelimitedSetting($request, 'frontendEdit.filter.ignorePids');
     }
 
     /**
      * @return array<int, string>
      */
-    public function getIgnoredCTypes(): array
+    public function getIgnoredCTypes(ServerRequestInterface $request): array
     {
-        if ([] === $this->ignoredCTypes) {
-            $this->ignoredCTypes = $this->parseCommaDelimitedConfig('ignoreCTypes');
-        }
-
-        return $this->ignoredCTypes;
+        return $this->parseCommaDelimitedSetting($request, 'frontendEdit.filter.ignoreCTypes');
     }
 
     /**
      * @return array<int, string>
      */
-    public function getIgnoredListTypes(): array
+    public function getIgnoredListTypes(ServerRequestInterface $request): array
     {
-        if ([] === $this->ignoredListTypes) {
-            $this->ignoredListTypes = $this->parseCommaDelimitedConfig('ignoreListTypes');
-        }
-
-        return $this->ignoredListTypes;
+        return $this->parseCommaDelimitedSetting($request, 'frontendEdit.filter.ignoreListTypes');
     }
 
     /**
      * @return array<int, int>
      */
-    public function getIgnoredUids(): array
+    public function getIgnoredUids(ServerRequestInterface $request): array
     {
-        if ([] === $this->ignoredUids) {
-            $values = $this->parseCommaDelimitedConfig('ignoredUids');
-            $this->ignoredUids = array_map(intval(...), $values);
-        }
+        $values = $this->parseCommaDelimitedSetting($request, 'frontendEdit.filter.ignoreUids');
 
-        return $this->ignoredUids;
+        return array_map(intval(...), $values);
     }
 
-    public function checkDefaultMenuStructure(string $identifier): bool
+    public function checkDefaultMenuStructure(ServerRequestInterface $request, string $identifier): bool
     {
-        $configuration = $this->getConfiguration();
-
-        if (!array_key_exists('defaultMenuStructure', $configuration)) {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
             return true;
         }
 
-        return array_key_exists($identifier, $configuration['defaultMenuStructure']) && (bool) $configuration['defaultMenuStructure'][$identifier];
-    }
-
-    public function checkSimpleModeMenuStructure(): bool
-    {
-        if (null === $this->simpleModeMenuStructure) {
-            $configuration = $this->getConfiguration();
-            $this->simpleModeMenuStructure = $this->calculateSimpleModeMenuStructure($configuration);
+        $settingKey = self::MENU_STRUCTURE_MAP[$identifier] ?? null;
+        if (null === $settingKey) {
+            return true;
         }
 
-        return $this->simpleModeMenuStructure;
+        return (bool) $settings->get($settingKey, true);
     }
 
-    public function isFrontendDebugModeEnabled(): bool
+    public function checkSimpleModeMenuStructure(ServerRequestInterface $request): bool
     {
-        $extensionConfiguration = GeneralUtility::makeInstance(ExtensionConfiguration::class);
-        try {
-            $configuration = $extensionConfiguration->get('xima_typo3_frontend_edit');
-
-            return (bool) ($configuration['frontendDebugMode'] ?? false);
-        } catch (Exception) {
-            return false;
-        }
-    }
-
-    /**
-     * @param array<string, mixed> $configuration
-     */
-    private function calculateSimpleModeMenuStructure(array $configuration): bool
-    {
-        if (!isset($configuration['defaultMenuStructure'])) {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
             return false;
         }
 
-        $menuStructure = $configuration['defaultMenuStructure'];
-
-        if (!is_array($menuStructure) || [] === $menuStructure) {
-            return false;
-        }
-
-        foreach ($menuStructure as $key => $value) {
-            if ('edit' === $key && 1 !== (int) $value) {
+        foreach (self::MENU_STRUCTURE_MAP as $key => $settingKey) {
+            $value = (bool) $settings->get($settingKey, true);
+            if ('edit' === $key && !$value) {
                 return false;
             }
-            if ('edit' !== $key && 0 !== (int) $value) {
+            if ('edit' !== $key && $value) {
                 return false;
             }
         }
@@ -182,88 +132,48 @@ final class SettingsService
         return true;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function getConfiguration(): array
+    public function isFrontendDebugModeEnabled(): bool
     {
-        if ([] !== $this->configuration) {
-            return $this->configuration;
+        try {
+            $configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
+
+            return (bool) ($configuration['frontendDebugMode'] ?? false);
+        } catch (Exception) {
+            return false;
+        }
+    }
+
+    private function getSiteSettings(ServerRequestInterface $request): ?SiteSettings
+    {
+        $site = $request->getAttribute('site');
+        if (!$site instanceof Site) {
+            return null;
         }
 
-        $fullTypoScript = $this->getTypoScriptSetupArray();
-        $settings = $fullTypoScript['plugin.']['tx_ximatypo3frontendedit.']['settings.'] ?? [];
-        $this->configuration = GeneralUtility::removeDotsFromTS($settings);
-
-        return $this->configuration;
+        return $site->getSettings();
     }
 
     /**
      * @return array<int, string>
      */
-    private function parseCommaDelimitedConfig(string $configKey): array
+    private function parseCommaDelimitedSetting(ServerRequestInterface $request, string $settingKey): array
     {
-        $configuration = $this->getConfiguration();
-
-        return isset($configuration[$configKey])
-            ? array_map(trim(...), explode(',', $configuration[$configKey]))
-            : [];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function getTypoScriptSetupArray(): array
-    {
-        $cacheKey = $this->generateTypoScriptCacheKey();
-
-        if ($this->typoScriptCache->offsetExists($cacheKey)) {
-            // @phpstan-ignore return.type (ArrayObject generic type inference limitation)
-            return $this->typoScriptCache[$cacheKey];
-        }
-
-        $result = $this->getTypoScriptSetupArrayFromRequest($GLOBALS['TYPO3_REQUEST']);
-
-        $this->manageCacheSize();
-        $this->typoScriptCache->offsetSet($cacheKey, $result);
-
-        return $result;
-    }
-
-    private function generateTypoScriptCacheKey(): string
-    {
-        $languageId = $this->context->getAspect('language')->getId();
-        $pageId = $GLOBALS['TYPO3_REQUEST']->getAttribute('frontend.page.information')->getId() ?? 0;
-
-        return "typoscript:{$pageId}:{$languageId}";
-    }
-
-    private function manageCacheSize(): void
-    {
-        if ($this->typoScriptCache->count() >= self::MAX_CACHE_SIZE) {
-            $keys = array_keys(iterator_to_array($this->typoScriptCache, true));
-            $keysToRemove = array_slice($keys, 0, self::MAX_CACHE_SIZE - self::CACHE_CLEANUP_THRESHOLD);
-
-            foreach ($keysToRemove as $key) {
-                $this->typoScriptCache->offsetUnset($key);
-            }
-        }
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function getTypoScriptSetupArrayFromRequest(ServerRequestInterface $request): array
-    {
-        try {
-            $frontendTypoScript = $request->getAttribute('frontend.typoscript');
-            if (null === $frontendTypoScript) {
-                return [];
-            }
-
-            return $frontendTypoScript->getSetupArray();
-        } catch (Exception) {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
             return [];
         }
+
+        $value = '';
+
+        try {
+            $value = (string) $settings->get($settingKey, '');
+        } catch (NotFoundExceptionInterface|ContainerExceptionInterface) {
+        }
+
+        if ('' === $value) {
+            return [];
+        }
+
+        return array_filter(array_map(trim(...), explode(',', $value)), static fn (string $item): bool => '' !== $item);
     }
 }

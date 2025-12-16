@@ -15,6 +15,7 @@ Learn what configuration options are available on the following pages:
 ..  toctree::
     :maxdepth: 3
 
-    TypoScript
+    SiteSettings
     ExtensionConfiguration
     UserSettings
+    Migration

@@ -15,8 +15,8 @@ namespace Xima\XimaTypo3FrontendEdit\Middleware;
 
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
-use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\Stream;
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\ResourceRendererService;
 
 use function array_key_exists;
@@ -32,36 +32,37 @@ class ToolRendererMiddleware implements MiddlewareInterface
 {
     public function __construct(
         private readonly ResourceRendererService $resourceRendererService,
+        private readonly SettingsService $settingsService,
     ) {}
 
-    /**
-     * @throws Exception
-     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
-        $typoScriptConfig = $GLOBALS['TSFE']->config['config'];
 
-        if (
-            array_key_exists('tx_ximatypo3frontendedit_enable', $typoScriptConfig)
-            && $typoScriptConfig['tx_ximatypo3frontendedit_enable']
-            && null !== $GLOBALS['BE_USER']
-            && is_array($GLOBALS['BE_USER']->user)
-            && (!array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user) || !$GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])
-        ) {
-            $body = $response->getBody();
-            $body->rewind();
-            $contents = $response->getBody()->getContents();
-            $content = str_ireplace(
-                '</body>',
-                $this->resourceRendererService->render(request: $request).'</body>',
-                $contents,
-            );
-            $body = new Stream('php://temp', 'rw');
-            $body->write($content);
-            $response = $response->withBody($body);
+        if (!$this->settingsService->isEnabled($request)) {
+            return $response;
         }
 
-        return $response;
+        if (
+            null === $GLOBALS['BE_USER']
+            || !is_array($GLOBALS['BE_USER']->user)
+            || (array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user)
+                && (bool) $GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])
+        ) {
+            return $response;
+        }
+
+        $body = $response->getBody();
+        $body->rewind();
+        $contents = $response->getBody()->getContents();
+        $content = str_ireplace(
+            '</body>',
+            $this->resourceRendererService->render(request: $request).'</body>',
+            $contents,
+        );
+        $body = new Stream('php://temp', 'rw');
+        $body->write($content);
+
+        return $response->withBody($body);
     }
 }

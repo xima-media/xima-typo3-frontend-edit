@@ -77,7 +77,7 @@ class EditInformationMiddleware implements MiddlewareInterface
             return new JsonResponse(['error' => 'Invalid request data'], 400);
         }
 
-        $dropdown = $this->menuGenerator->getDropdown($pid, $returnUrl, $languageUid, $data);
+        $dropdown = $this->menuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
 
         return new JsonResponse(mb_convert_encoding($dropdown, 'UTF-8'));
     }

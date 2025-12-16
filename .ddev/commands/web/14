@@ -1,0 +1,23 @@
+#!/bin/bash
+
+## Description: Exec command for TYPO3 instance 14.
+## Usage: 14
+## Example: "ddev 14 composer du -o" or "ddev 14 typo3 cache:flush"
+
+. .ddev/.setup/scripts/utils.sh
+
+command=$@
+version=14
+
+if [[ $command == typo3* ]]; then
+    command="/usr/bin/php vendor/bin/${command}"
+fi
+
+TYPO3_PATH=".Build/${version}"
+if [ -d "$TYPO3_PATH" ]; then
+    message magenta "[TYPO3 v${version}] ${command}"
+    cd $TYPO3_PATH
+    $command
+else
+    message red "TYPO3 binary not found for version ${version}"
+fi

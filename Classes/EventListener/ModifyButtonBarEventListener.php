@@ -22,6 +22,7 @@ use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
+use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\ButtonFactoryUtility;
 
 use function array_key_exists;
 
@@ -62,7 +63,7 @@ final class ModifyButtonBarEventListener
 
         if ($saveButton instanceof InputButton) {
             $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
-            $saveCloseButton = $buttonBar->makeInputButton()
+            $saveCloseButton = ButtonFactoryUtility::createInputButton($buttonBar)
                 ->setName('_saveandclosedok')
                 ->setValue('1')
                 ->setForm($saveButton->getForm())

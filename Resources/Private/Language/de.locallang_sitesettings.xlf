@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file source-language="en" target-language="de" datatype="plaintext" original="locallang_sitesettings" product-name="xima_typo3_frontend_edit">
+		<header/>
+		<body>
+			<trans-unit id="label">
+				<source>Frontend Edit</source>
+				<target>Frontend-Bearbeitung</target>
+			</trans-unit>
+
+			<trans-unit id="categories.frontendEdit">
+				<source>Frontend Edit</source>
+				<target>Frontend-Bearbeitung</target>
+			</trans-unit>
+			<trans-unit id="categories.frontendEdit.filter">
+				<source>Filter Settings</source>
+				<target>Filtereinstellungen</target>
+			</trans-unit>
+			<trans-unit id="categories.frontendEdit.menu">
+				<source>Menu Structure</source>
+				<target>Menüstruktur</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.enabled">
+				<source>Enable Frontend Edit</source>
+				<target>Frontend-Bearbeitung aktivieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.enabled">
+				<source>Enable or disable the frontend editing functionality for this site.</source>
+				<target>Aktiviert oder deaktiviert die Frontend-Bearbeitungsfunktion für diese Website.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.filter.ignorePids">
+				<source>Ignore PIDs</source>
+				<target>PIDs ignorieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.filter.ignorePids">
+				<source>Comma-separated list of page IDs (and their subpages) where frontend editing should be disabled.</source>
+				<target>Kommagetrennte Liste von Seiten-IDs (und deren Unterseiten), auf denen die Frontend-Bearbeitung deaktiviert werden soll.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.filter.ignoreCTypes">
+				<source>Ignore Content Types</source>
+				<target>Inhaltstypen ignorieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.filter.ignoreCTypes">
+				<source>Comma-separated list of content types (CType) to exclude from frontend editing (e.g., html,div).</source>
+				<target>Kommagetrennte Liste von Inhaltstypen (CType), die von der Frontend-Bearbeitung ausgeschlossen werden sollen (z.B. html,div).</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.filter.ignoreListTypes">
+				<source>Ignore Plugin Types</source>
+				<target>Plugin-Typen ignorieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.filter.ignoreListTypes">
+				<source>Comma-separated list of plugin types (list_type) to exclude from frontend editing.</source>
+				<target>Kommagetrennte Liste von Plugin-Typen (list_type), die von der Frontend-Bearbeitung ausgeschlossen werden sollen.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.filter.ignoreUids">
+				<source>Ignore UIDs</source>
+				<target>UIDs ignorieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.filter.ignoreUids">
+				<source>Comma-separated list of specific content element UIDs to exclude from frontend editing.</source>
+				<target>Kommagetrennte Liste von spezifischen Inhaltselement-UIDs, die von der Frontend-Bearbeitung ausgeschlossen werden sollen.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.menu.showDivInfo">
+				<source>Show Info Section</source>
+				<target>Info-Bereich anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.menu.showDivInfo">
+				<source>Show the info section divider in the dropdown menu.</source>
+				<target>Zeigt den Info-Bereich-Trenner im Dropdown-Menü an.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.menu.showHeader">
+				<source>Show Header</source>
+				<target>Kopfzeile anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.menu.showHeader">
+				<source>Show the header with content element info in the dropdown menu.</source>
+				<target>Zeigt die Kopfzeile mit Inhaltselement-Informationen im Dropdown-Menü an.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.menu.showDivEdit">
+				<source>Show Edit Section</source>
+				<target>Bearbeitungs-Bereich anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.menu.showDivEdit">
+				<source>Show the edit section divider in the dropdown menu.</source>
+				<target>Zeigt den Bearbeitungs-Bereich-Trenner im Dropdown-Menü an.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.menu.showEdit">
+				<source>Show Edit Button</source>
+				<target>Bearbeiten-Button anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.menu.showEdit">
+				<source>Show the edit content element button in the dropdown menu.</source>
+				<target>Zeigt den Button zum Bearbeiten des Inhaltselements im Dropdown-Menü an.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.menu.showEditPage">
+				<source>Show Edit Page Button</source>
+				<target>Seite-bearbeiten-Button anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.menu.showEditPage">
+				<source>Show the edit page button in the dropdown menu.</source>
+				<target>Zeigt den Button zum Bearbeiten der Seite im Dropdown-Menü an.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.menu.showDivAction">
+				<source>Show Action Section</source>
+				<target>Aktions-Bereich anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.menu.showDivAction">
+				<source>Show the action section divider in the dropdown menu.</source>
+				<target>Zeigt den Aktions-Bereich-Trenner im Dropdown-Menü an.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.menu.showHide">
+				<source>Show Hide Button</source>
+				<target>Verbergen-Button anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.menu.showHide">
+				<source>Show the hide/unhide content element button in the dropdown menu.</source>
+				<target>Zeigt den Button zum Verbergen/Anzeigen des Inhaltselements im Dropdown-Menü an.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.menu.showMove">
+				<source>Show Move Button</source>
+				<target>Verschieben-Button anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.menu.showMove">
+				<source>Show the move content element button in the dropdown menu.</source>
+				<target>Zeigt den Button zum Verschieben des Inhaltselements im Dropdown-Menü an.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.menu.showInfo">
+				<source>Show Info Button</source>
+				<target>Info-Button anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.menu.showInfo">
+				<source>Show the info button in the dropdown menu.</source>
+				<target>Zeigt den Info-Button im Dropdown-Menü an.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.menu.showHistory">
+				<source>Show History Button</source>
+				<target>Verlauf-Button anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.menu.showHistory">
+				<source>Show the history button in the dropdown menu.</source>
+				<target>Zeigt den Verlauf-Button im Dropdown-Menü an.</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>
