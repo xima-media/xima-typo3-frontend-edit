@@ -15,6 +15,7 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\RequestId;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, PathUtility};
@@ -23,6 +24,8 @@ use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
+use function array_key_exists;
+use function in_array;
 use function sprintf;
 
 /**
@@ -35,6 +38,7 @@ final readonly class ResourceRendererService
 {
     public function __construct(
         private SettingsService $settingsService,
+        private ExtensionConfiguration $extensionConfiguration,
     ) {}
 
     /**
@@ -46,15 +50,36 @@ final readonly class ResourceRendererService
     {
         try {
             $nonceValue = $this->resolveNonceValue();
+            $nonceAttribute = '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '';
             $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
 
+            // Add Floating UI library
+            $floatingUiPath = PathUtility::getAbsoluteWebPath(
+                GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/vendor/floating-ui.dom.bundle.js'),
+            );
+            $resources['floating_ui'] = sprintf(
+                '<script%s type="module">import * as FloatingUIDOM from "%s"; window.FloatingUIDOM = FloatingUIDOM;</script>',
+                $nonceAttribute,
+                $floatingUiPath,
+            );
+
+            // Add settings configuration (colorScheme and showContextMenu)
+            $colorScheme = $this->getColorScheme();
+            $showContextMenu = $this->isShowContextMenu() ? 'true' : 'false';
+            $resources['settings_config'] = sprintf(
+                '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s;</script>',
+                $nonceAttribute,
+                $colorScheme,
+                $showContextMenu,
+            );
+
+            // Add debug mode if enabled
             $debugMode = $this->settingsService->isFrontendDebugModeEnabled();
             if ($debugMode) {
-                $debugScript = sprintf(
+                $resources['debug_config'] = sprintf(
                     '<script%s>window.FRONTEND_EDIT_DEBUG = true;</script>',
-                    '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '',
+                    $nonceAttribute,
                 );
-                $resources['debug_config'] = $debugScript;
             }
 
             $values = [...$values, 'resources' => $resources];
@@ -62,6 +87,29 @@ final readonly class ResourceRendererService
             return $this->renderView($template, $values, $request);
         } catch (Throwable $exception) {
             throw new Exception('Failed to render template "'.$template.'": '.$exception->getMessage(), 1640000001, $exception);
+        }
+    }
+
+    private function isShowContextMenu(): bool
+    {
+        try {
+            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
+
+            return !array_key_exists('showContextMenu', $config) || (bool) $config['showContextMenu'];
+        } catch (Throwable) {
+            return true;
+        }
+    }
+
+    private function getColorScheme(): string
+    {
+        try {
+            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
+            $scheme = $config['colorScheme'] ?? 'auto';
+
+            return in_array($scheme, ['auto', 'light', 'dark'], true) ? $scheme : 'auto';
+        } catch (Throwable) {
+            return 'auto';
         }
     }
 

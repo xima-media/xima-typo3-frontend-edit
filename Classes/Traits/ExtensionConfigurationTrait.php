@@ -17,6 +17,7 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 
 use function array_key_exists;
+use function in_array;
 
 /**
  * ExtensionConfigurationTrait.
@@ -56,10 +57,18 @@ trait ExtensionConfigurationTrait
         return array_key_exists('forceReturnUrlGeneration', $config) && (bool) $config['forceReturnUrlGeneration'];
     }
 
-    protected function isSimpleMode(): bool
+    protected function isShowContextMenu(): bool
     {
         $config = $this->getExtensionConfiguration();
 
-        return array_key_exists('simpleMode', $config) && (bool) $config['simpleMode'];
+        return !array_key_exists('showContextMenu', $config) || (bool) $config['showContextMenu'];
+    }
+
+    protected function getColorScheme(): string
+    {
+        $config = $this->getExtensionConfiguration();
+        $scheme = $config['colorScheme'] ?? 'auto';
+
+        return in_array($scheme, ['auto', 'light', 'dark'], true) ? $scheme : 'auto';
     }
 }

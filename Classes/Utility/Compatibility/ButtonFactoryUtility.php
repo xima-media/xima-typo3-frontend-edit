@@ -28,18 +28,17 @@ class ButtonFactoryUtility
     public static function createInputButton(ButtonBar $buttonBar): InputButton
     {
         if (VersionUtility::is14OrHigher()) {
-            /* @phpstan-ignore method.notFound (ButtonFactory only exists in TYPO3 v14+) */
-            return self::getButtonFactory()->createInputButton();
+            /* @phpstan-ignore method.notFound (ComponentFactory only exists in TYPO3 v14+) */
+            return self::getComponentFactory()->createInputButton();
         }
 
         /* @phpstan-ignore method.deprecated (Required for TYPO3 v13 compatibility) */
         return $buttonBar->makeInputButton();
     }
 
-    private static function getButtonFactory(): object
+    private static function getComponentFactory(): object
     {
         // Use dynamic class name to avoid autoload issues on TYPO3 13
-        /* @phpstan-ignore argument.type */
-        return GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Template\\Components\\ButtonFactory');
+        return GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Template\\Components\\ComponentFactory');
     }
 }

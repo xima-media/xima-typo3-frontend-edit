@@ -90,6 +90,11 @@ final class MenuGenerator
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
             $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
+
+            // Add ctypeLabel for frontend display
+            $ctypeLabel = $GLOBALS['LANG']->sL($contentElementConfig['label'] ?? '');
+            $contentElement['ctypeLabel'] = '' !== $ctypeLabel ? $ctypeLabel : $contentElement['CType'];
+
             $result[$contentElement['uid']] = [
                 'element' => $contentElement,
                 'menu' => $menuButton,
@@ -111,9 +116,9 @@ final class MenuGenerator
         array $contentElementConfig,
         ServerRequestInterface $request,
     ): Button {
-        $simpleMode = $this->isSimpleMode() || $this->settingsService->checkSimpleModeMenuStructure($request);
+        $showContextMenu = $this->isShowContextMenu() && !$this->settingsService->isOnlyEditEnabled($request);
 
-        if ($simpleMode) {
+        if (!$showContextMenu) {
             return $this->menuButtonBuilder->createSimpleEditButton(
                 $contentElement,
                 $languageUid,
@@ -124,7 +129,6 @@ final class MenuGenerator
 
         $menuButton = $this->menuButtonBuilder->createFullMenuButton();
 
-        $this->menuButtonBuilder->addInfoSection($menuButton, $contentElement, $contentElementConfig, $request);
         $this->menuButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor, $request);
         $this->menuButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor, $request);
 

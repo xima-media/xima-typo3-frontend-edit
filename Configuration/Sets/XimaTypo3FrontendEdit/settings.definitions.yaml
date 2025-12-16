@@ -3,6 +3,9 @@ labels: EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitese
 categories:
   frontendEdit:
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:categories.frontendEdit
+  frontendEdit.appearance:
+    parent: frontendEdit
+    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:categories.frontendEdit.appearance
   frontendEdit.filter:
     parent: frontendEdit
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:categories.frontendEdit.filter
@@ -17,6 +20,13 @@ settings:
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.enabled
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.enabled
     category: frontendEdit
+
+  frontendEdit.colorScheme:
+    default: 'auto'
+    type: string
+    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.colorScheme
+    description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.colorScheme
+    category: frontendEdit.appearance
 
   frontendEdit.filter.ignorePids:
     default: ''
@@ -45,20 +55,6 @@ settings:
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.filter.ignoreUids
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.filter.ignoreUids
     category: frontendEdit.filter
-
-  frontendEdit.menu.showDivInfo:
-    default: true
-    type: bool
-    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showDivInfo
-    description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showDivInfo
-    category: frontendEdit.menu
-
-  frontendEdit.menu.showHeader:
-    default: true
-    type: bool
-    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showHeader
-    description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showHeader
-    category: frontendEdit.menu
 
   frontendEdit.menu.showDivEdit:
     default: true
