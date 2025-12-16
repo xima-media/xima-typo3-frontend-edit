@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const { tooltip, arrow: arrowEl } = getTooltip();
 
     // Set text (insert before arrow)
-    tooltip.childNodes.forEach(node => {
+    Array.from(tooltip.childNodes).forEach(node => {
       if (node !== arrowEl) tooltip.removeChild(node);
     });
     const textNode = document.createTextNode(text);
@@ -187,11 +187,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const labelContainer = document.createElement('div');
     labelContainer.className = 'frontend-edit__toolbar-label';
 
-    // Icon from header if available
-    const headerInfo = contentElement.menu.children?.header;
-    if (headerInfo?.icon) {
+    // CType icon
+    if (contentElement.element.ctypeIcon) {
       const iconWrapper = document.createElement('span');
-      iconWrapper.innerHTML = headerInfo.icon;
+      iconWrapper.className = 'frontend-edit__toolbar-icon';
+      iconWrapper.innerHTML = contentElement.element.ctypeIcon;
       labelContainer.appendChild(iconWrapper);
     }
 
