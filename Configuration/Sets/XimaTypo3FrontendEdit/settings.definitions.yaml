@@ -12,7 +12,7 @@ categories:
 
 settings:
   frontendEdit.enabled:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.enabled
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.enabled
@@ -47,70 +47,70 @@ settings:
     category: frontendEdit.filter
 
   frontendEdit.menu.showDivInfo:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showDivInfo
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showDivInfo
     category: frontendEdit.menu
 
   frontendEdit.menu.showHeader:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showHeader
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showHeader
     category: frontendEdit.menu
 
   frontendEdit.menu.showDivEdit:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showDivEdit
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showDivEdit
     category: frontendEdit.menu
 
   frontendEdit.menu.showEdit:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showEdit
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showEdit
     category: frontendEdit.menu
 
   frontendEdit.menu.showEditPage:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showEditPage
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showEditPage
     category: frontendEdit.menu
 
   frontendEdit.menu.showDivAction:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showDivAction
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showDivAction
     category: frontendEdit.menu
 
   frontendEdit.menu.showHide:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showHide
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showHide
     category: frontendEdit.menu
 
   frontendEdit.menu.showMove:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showMove
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showMove
     category: frontendEdit.menu
 
   frontendEdit.menu.showInfo:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showInfo
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showInfo
     category: frontendEdit.menu
 
   frontendEdit.menu.showHistory:
-    default: 'true'
+    default: true
     type: bool
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.menu.showHistory
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.menu.showHistory
