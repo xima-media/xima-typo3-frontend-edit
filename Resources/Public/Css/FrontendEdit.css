@@ -65,7 +65,6 @@
     content: '';
     position: absolute;
     inset: -6px;
-    border: 1px dashed var(--xfe-outline-color);
     border-radius: 2px;
     pointer-events: none;
     background:
