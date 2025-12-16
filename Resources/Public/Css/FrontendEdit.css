@@ -56,23 +56,38 @@
     }
 }
 
-/* Block: frontend-edit - Content element container with dashed outline */
-.frontend-edit--active {
-    position: relative;
+/* Overlay container - fixed position, covers viewport */
+.frontend-edit__overlay-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10000;
+    overflow: visible;
 }
 
-.frontend-edit--active::before {
-    content: '';
+/* Individual overlay - positioned over each content element */
+.frontend-edit__overlay {
     position: absolute;
-    inset: -6px;
+    pointer-events: none;
+}
+
+/* Outline element - dashed border around content */
+.frontend-edit__outline {
+    position: absolute;
+    inset: -1px;
     border-radius: 2px;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
     background:
         repeating-linear-gradient(to right, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) top/100% 1px no-repeat,
         repeating-linear-gradient(to right, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) bottom/100% 1px no-repeat,
         repeating-linear-gradient(to bottom, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) left/1px 100% no-repeat,
         repeating-linear-gradient(to bottom, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) right/1px 100% no-repeat;
-    border: none;
+}
+
+.frontend-edit__overlay--active .frontend-edit__outline {
+    opacity: 1;
 }
 
 /* Element: toolbar - invisible container for label and actions */
@@ -82,15 +97,28 @@
     left: 0;
     right: 0;
     height: 0;
-    z-index: 10000;
+    z-index: 1;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.15s ease;
 }
 
-.frontend-edit--active .frontend-edit__toolbar {
+.frontend-edit__overlay--active .frontend-edit__toolbar {
     opacity: 1;
     pointer-events: auto;
+}
+
+/* Modifier: toolbar at bottom when element is near top of viewport */
+.frontend-edit__overlay--bottom .frontend-edit__toolbar {
+    top: auto;
+    bottom: 0;
+}
+
+.frontend-edit__overlay--bottom .frontend-edit__toolbar-label,
+.frontend-edit__overlay--bottom .frontend-edit__toolbar-actions {
+    top: auto;
+    bottom: 0;
+    transform: translateY(50%);
 }
 
 /* Element: toolbar-label (top-left, standing on outline) */
@@ -295,7 +323,11 @@
     margin-top: 0;
 }
 
-/* Legacy wrapper - kept for compatibility but not used in new design */
+/* Legacy styles - kept for compatibility */
 .frontend-edit__wrapper {
     display: none;
+}
+
+.frontend-edit--active {
+    /* No longer used - overlay system handles highlighting */
 }
