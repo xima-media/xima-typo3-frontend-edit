@@ -22,6 +22,7 @@ use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\ContentElementFilter;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\IconService;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
 
@@ -45,6 +46,7 @@ final class MenuGenerator
         private readonly MenuButtonBuilder $menuButtonBuilder,
         private readonly ContentElementRepository $contentElementRepository,
         private readonly AdditionalDataHandler $additionalDataHandler,
+        private readonly IconService $iconService,
         protected readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
 
@@ -91,9 +93,13 @@ final class MenuGenerator
 
             $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
 
-            // Add ctypeLabel for frontend display
+            // Add ctypeLabel and ctypeIcon for frontend display
             $ctypeLabel = $GLOBALS['LANG']->sL($contentElementConfig['label'] ?? '');
             $contentElement['ctypeLabel'] = '' !== $ctypeLabel ? $ctypeLabel : $contentElement['CType'];
+
+            // Render CType icon as HTML
+            $iconIdentifier = $contentElementConfig['icon'] ?? 'content-textpic';
+            $contentElement['ctypeIcon'] = (string) $this->iconService->getIcon($iconIdentifier);
 
             $result[$contentElement['uid']] = [
                 'element' => $contentElement,
