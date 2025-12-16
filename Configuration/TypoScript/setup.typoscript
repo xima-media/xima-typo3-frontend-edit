@@ -1,9 +1,0 @@
-# AJAX endpoint for frontend edit information
-tx_ximatypo3frontendedit_editinformationen = PAGE
-tx_ximatypo3frontendedit_editinformationen {
-  typeNum = 1729341864
-  config {
-    contentType = application/json
-    no_cache = 1
-  }
-}
