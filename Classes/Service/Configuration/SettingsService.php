@@ -33,8 +33,6 @@ use function trim;
 final readonly class SettingsService
 {
     private const MENU_STRUCTURE_MAP = [
-        'div_info' => 'frontendEdit.menu.showDivInfo',
-        'header' => 'frontendEdit.menu.showHeader',
         'div_edit' => 'frontendEdit.menu.showDivEdit',
         'edit' => 'frontendEdit.menu.showEdit',
         'edit_page' => 'frontendEdit.menu.showEditPage',
@@ -112,7 +110,11 @@ final readonly class SettingsService
         return (bool) $settings->get($settingKey, true);
     }
 
-    public function checkSimpleModeMenuStructure(ServerRequestInterface $request): bool
+    /**
+     * Check if only the edit button is enabled (all other menu items disabled).
+     * Used to determine if context menu should be forced to hide.
+     */
+    public function isOnlyEditEnabled(ServerRequestInterface $request): bool
     {
         $settings = $this->getSiteSettings($request);
         if (null === $settings) {

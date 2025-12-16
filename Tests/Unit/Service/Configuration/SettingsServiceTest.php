@@ -47,7 +47,7 @@ class SettingsServiceTest extends TestCase
         self::assertTrue($reflection->hasMethod('getIgnoredListTypes'));
         self::assertTrue($reflection->hasMethod('getIgnoredUids'));
         self::assertTrue($reflection->hasMethod('checkDefaultMenuStructure'));
-        self::assertTrue($reflection->hasMethod('checkSimpleModeMenuStructure'));
+        self::assertTrue($reflection->hasMethod('isOnlyEditEnabled'));
         self::assertTrue($reflection->hasMethod('isFrontendDebugModeEnabled'));
     }
 
@@ -61,7 +61,7 @@ class SettingsServiceTest extends TestCase
         self::assertTrue($reflection->getMethod('getIgnoredListTypes')->isPublic());
         self::assertTrue($reflection->getMethod('getIgnoredUids')->isPublic());
         self::assertTrue($reflection->getMethod('checkDefaultMenuStructure')->isPublic());
-        self::assertTrue($reflection->getMethod('checkSimpleModeMenuStructure')->isPublic());
+        self::assertTrue($reflection->getMethod('isOnlyEditEnabled')->isPublic());
         self::assertTrue($reflection->getMethod('isFrontendDebugModeEnabled')->isPublic());
     }
 
@@ -104,7 +104,7 @@ class SettingsServiceTest extends TestCase
     {
         $reflection = new ReflectionClass(SettingsService::class);
 
-        $methods = ['isEnabled', 'checkDefaultMenuStructure', 'checkSimpleModeMenuStructure', 'isFrontendDebugModeEnabled'];
+        $methods = ['isEnabled', 'checkDefaultMenuStructure', 'isOnlyEditEnabled', 'isFrontendDebugModeEnabled'];
 
         foreach ($methods as $methodName) {
             $method = $reflection->getMethod($methodName);
@@ -152,7 +152,7 @@ class SettingsServiceTest extends TestCase
             'getIgnoredListTypes',
             'getIgnoredUids',
             'checkDefaultMenuStructure',
-            'checkSimpleModeMenuStructure',
+            'isOnlyEditEnabled',
         ];
 
         foreach ($methodsWithRequest as $methodName) {
@@ -182,8 +182,6 @@ class SettingsServiceTest extends TestCase
 
         $value = $constant->getValue();
         self::assertIsArray($value);
-        self::assertArrayHasKey('div_info', $value);
-        self::assertArrayHasKey('header', $value);
         self::assertArrayHasKey('edit', $value);
         self::assertArrayHasKey('history', $value);
     }

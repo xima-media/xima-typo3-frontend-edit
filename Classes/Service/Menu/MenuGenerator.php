@@ -22,6 +22,7 @@ use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\ContentElementFilter;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\IconService;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
 
@@ -45,6 +46,7 @@ final class MenuGenerator
         private readonly MenuButtonBuilder $menuButtonBuilder,
         private readonly ContentElementRepository $contentElementRepository,
         private readonly AdditionalDataHandler $additionalDataHandler,
+        private readonly IconService $iconService,
         protected readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
 
@@ -90,6 +92,15 @@ final class MenuGenerator
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
             $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
+
+            // Add ctypeLabel and ctypeIcon for frontend display
+            $ctypeLabel = $GLOBALS['LANG']->sL($contentElementConfig['label'] ?? '');
+            $contentElement['ctypeLabel'] = '' !== $ctypeLabel ? $ctypeLabel : $contentElement['CType'];
+
+            // Render CType icon as HTML
+            $iconIdentifier = $contentElementConfig['icon'] ?? 'content-textpic';
+            $contentElement['ctypeIcon'] = (string) $this->iconService->getIcon($iconIdentifier);
+
             $result[$contentElement['uid']] = [
                 'element' => $contentElement,
                 'menu' => $menuButton,
@@ -111,9 +122,9 @@ final class MenuGenerator
         array $contentElementConfig,
         ServerRequestInterface $request,
     ): Button {
-        $simpleMode = $this->isSimpleMode() || $this->settingsService->checkSimpleModeMenuStructure($request);
+        $showContextMenu = $this->isShowContextMenu() && !$this->settingsService->isOnlyEditEnabled($request);
 
-        if ($simpleMode) {
+        if (!$showContextMenu) {
             return $this->menuButtonBuilder->createSimpleEditButton(
                 $contentElement,
                 $languageUid,
@@ -124,7 +135,6 @@ final class MenuGenerator
 
         $menuButton = $this->menuButtonBuilder->createFullMenuButton();
 
-        $this->menuButtonBuilder->addInfoSection($menuButton, $contentElement, $contentElementConfig, $request);
         $this->menuButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor, $request);
         $this->menuButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor, $request);
 

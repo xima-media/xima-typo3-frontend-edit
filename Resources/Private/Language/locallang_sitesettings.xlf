@@ -11,6 +11,9 @@
             <trans-unit id="categories.frontendEdit">
                 <source>Frontend Edit</source>
             </trans-unit>
+            <trans-unit id="categories.frontendEdit.appearance">
+                <source>Appearance</source>
+            </trans-unit>
             <trans-unit id="categories.frontendEdit.filter">
                 <source>Filter Settings</source>
             </trans-unit>
@@ -23,6 +26,13 @@
             </trans-unit>
             <trans-unit id="settings.description.frontendEdit.enabled">
                 <source>Enable or disable the frontend editing functionality for this site.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.colorScheme">
+                <source>Color Scheme</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.colorScheme">
+                <source>Choose the color scheme for the frontend editing UI. Options: auto (follows system preference), light, dark.</source>
             </trans-unit>
 
             <trans-unit id="settings.frontendEdit.filter.ignorePids">

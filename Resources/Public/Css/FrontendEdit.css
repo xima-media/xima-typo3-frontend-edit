@@ -1,109 +1,301 @@
-.xima-typo3-frontend-edit--edit-container {
-    outline: 1px dashed gray;
+/* CSS Custom Properties for Theming */
+:root {
+    --xfe-toolbar-bg: rgba(50, 50, 50, 0.95);
+    --xfe-toolbar-text: #ffffff;
+    --xfe-toolbar-btn-hover: rgba(255, 255, 255, 0.15);
+    --xfe-bg-primary: #ffffff;
+    --xfe-bg-hover: #f0f0f0;
+    --xfe-text-primary: #1a1a1a;
+    --xfe-text-secondary: #666666;
+    --xfe-border-color: #e0e0e0;
+    --xfe-outline-color: #aaaaaa;
+    --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.xima-typo3-frontend-edit--wrapper {
-    position: absolute;
+/* Light theme (explicit) */
+[data-xfe-theme="light"] {
+    --xfe-toolbar-bg: rgba(245, 245, 245, 0.95);
+    --xfe-toolbar-text: #1a1a1a;
+    --xfe-toolbar-btn-hover: rgba(0, 0, 0, 0.1);
+    --xfe-bg-primary: #ffffff;
+    --xfe-bg-hover: #f0f0f0;
+    --xfe-text-primary: #1a1a1a;
+    --xfe-text-secondary: #666666;
+    --xfe-border-color: #e0e0e0;
+    --xfe-outline-color: #aaaaaa;
+    --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.xima-typo3-frontend-edit--edit-button {
+/* Dark theme (explicit) */
+[data-xfe-theme="dark"] {
+    --xfe-toolbar-bg: rgba(30, 30, 30, 0.95);
+    --xfe-toolbar-text: #f0f0f0;
+    --xfe-toolbar-btn-hover: rgba(255, 255, 255, 0.15);
+    --xfe-bg-primary: #2d2d2d;
+    --xfe-bg-hover: #3d3d3d;
+    --xfe-text-primary: #f0f0f0;
+    --xfe-text-secondary: #a0a0a0;
+    --xfe-border-color: #444444;
+    --xfe-outline-color: #666666;
+    --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Auto theme - follows system preference */
+@media (prefers-color-scheme: dark) {
+    [data-xfe-theme="auto"] {
+        --xfe-toolbar-bg: rgba(30, 30, 30, 0.95);
+        --xfe-toolbar-text: #f0f0f0;
+        --xfe-toolbar-btn-hover: rgba(255, 255, 255, 0.15);
+        --xfe-bg-primary: #2d2d2d;
+        --xfe-bg-hover: #3d3d3d;
+        --xfe-text-primary: #f0f0f0;
+        --xfe-text-secondary: #a0a0a0;
+        --xfe-border-color: #444444;
+        --xfe-outline-color: #666666;
+        --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* Block: frontend-edit - Content element container with dashed outline */
+.frontend-edit--active {
     position: relative;
-    align-content: center;
-    justify-content: center;
-    display: none;
-    width: 30px;
-    height: 30px;
-    background-color: white;
-    color: #333;
-    border-radius: 15px;
-    border: 1px solid #CCC;
-    cursor: pointer;
-    z-index: 1000;
-    opacity: 0.5;
-    padding: 0;
-    margin: 0;
-    flex-wrap: wrap;
 }
 
-.xima-typo3-frontend-edit--edit-button svg {
-    width: 10px;
-}
-
-.xima-typo3-frontend-edit--edit-button:hover {
-    opacity: 1;
-    box-shadow: 0 0 1px 1px rgba(0, 0, 0, .1);
-}
-
-.xima-typo3-frontend-edit--dropdown-menu {
+.frontend-edit--active::before {
+    content: '';
     position: absolute;
-    display: none;
+    inset: -6px;
+    border-radius: 2px;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(to right, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) top/100% 1px no-repeat,
+        repeating-linear-gradient(to right, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) bottom/100% 1px no-repeat,
+        repeating-linear-gradient(to bottom, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) left/1px 100% no-repeat,
+        repeating-linear-gradient(to bottom, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) right/1px 100% no-repeat;
+    border: none;
+}
+
+/* Element: toolbar - invisible container for label and actions */
+.frontend-edit__toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
     right: 0;
-    margin: 0;
-    min-width: 120px;
-    z-index: 1000;
-    direction: ltr;
-    background: transparent;
-    font-family: 'Helvetica Neue', Helvetica, Arial, Verdana, sans-serif;
+    height: 0;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
 }
 
-.xima-typo3-frontend-edit--dropdown-menu-inner {
-    margin: 10px;
-    background: white;
-    border: 0 none;
-    border-radius: .75rem;
-    box-shadow: 0 0 1px 1px rgba(0, 0, 0, .1);
-    padding: .5em;
+.frontend-edit--active .frontend-edit__toolbar {
+    opacity: 1;
+    pointer-events: auto;
 }
 
-.xima-typo3-frontend-edit--dropdown-menu-inner a, .xima-typo3-frontend-edit--dropdown-menu-inner div {
+/* Element: toolbar-label (top-left, standing on outline) */
+.frontend-edit__toolbar-label {
+    position: absolute;
+    top: 0;
+    left: 8px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--xfe-toolbar-bg);
+    color: var(--xfe-toolbar-text);
+    padding: 4px 10px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.frontend-edit__toolbar-label code {
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+.frontend-edit__toolbar-label svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.frontend-edit__toolbar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.frontend-edit__toolbar-icon img {
+    width: 14px;
+    height: 14px;
+}
+
+/* Element: toolbar-actions (top-right, standing on outline) */
+.frontend-edit__toolbar-actions {
+    position: absolute;
+    top: 0;
+    right: 8px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--xfe-toolbar-bg);
+    border-radius: 4px;
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+/* Element: btn - toolbar buttons */
+.frontend-edit__btn {
+    position: relative;
     display: flex;
-    align-items: flex-start;
-    gap: 5px;
-    padding: 10px;
-    color: #333;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--xfe-toolbar-text);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    padding: 0;
     text-decoration: none;
-    text-align: left;
+}
+
+.frontend-edit__btn:hover {
+    background: var(--xfe-toolbar-btn-hover);
+}
+
+.frontend-edit__btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Tooltip element (positioned with Floating UI) */
+.frontend-edit__tooltip {
+    position: absolute;
+    z-index: 10002;
+    padding: 4px 8px;
+    background: var(--xfe-text-primary);
+    color: var(--xfe-bg-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.frontend-edit__tooltip--visible {
+    opacity: 1;
+}
+
+/* Tooltip arrow */
+.frontend-edit__tooltip-arrow {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--xfe-text-primary);
+    transform: rotate(45deg);
+}
+
+.frontend-edit__tooltip[data-placement^="top"] .frontend-edit__tooltip-arrow {
+    bottom: -4px;
+}
+
+.frontend-edit__tooltip[data-placement^="bottom"] .frontend-edit__tooltip-arrow {
+    top: -4px;
+}
+
+.frontend-edit__tooltip[data-placement^="left"] .frontend-edit__tooltip-arrow {
+    right: -4px;
+}
+
+.frontend-edit__tooltip[data-placement^="right"] .frontend-edit__tooltip-arrow {
+    left: -4px;
+}
+
+/* Modifier: btn--kebab (three dots) */
+.frontend-edit__btn--kebab svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Element: dropdown - dropdown menu */
+.frontend-edit__dropdown {
+    position: absolute;
+    z-index: 10001;
+    min-width: 180px;
+    background: var(--xfe-bg-primary);
+    border: 1px solid var(--xfe-border-color);
+    border-radius: 8px;
+    box-shadow: var(--xfe-shadow);
+    padding: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: none;
+}
+
+.frontend-edit__dropdown a,
+.frontend-edit__dropdown div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    color: var(--xfe-text-primary);
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.4;
     white-space: nowrap;
     margin: 0;
     background: transparent;
-    border-radius: .375rem;
-    font-size: 14px;
-    line-height: 14px;
-    font-weight: normal;
+    cursor: pointer;
+    transition: background 0.1s ease;
 }
 
-.xima-typo3-frontend-edit--dropdown-menu-inner div {
-    border-radius: 0;
+.frontend-edit__dropdown a:hover {
+    background: var(--xfe-bg-hover);
 }
 
-.xima-typo3-frontend-edit--dropdown-menu-inner p {
-    margin-top: 10px;
-    margin-bottom: 0;
-    font-size: 14px;
-    line-height: 1;
-}
-
-.xima-typo3-frontend-edit--dropdown-menu-inner div.xima-typo3-frontend-edit--divider {
-    color: #666;
-    text-transform: uppercase;
-    font-size: 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, .1);
-    padding: 5px;
-}
-
-.xima-typo3-frontend-edit--dropdown-menu-inner a svg, .xima-typo3-frontend-edit--dropdown-menu-inner div svg {
+.frontend-edit__dropdown a svg,
+.frontend-edit__dropdown div svg {
     width: 16px;
-    margin-top: -1px;
+    height: 16px;
+    flex-shrink: 0;
+    opacity: 0.7;
 }
 
-.xima-typo3-frontend-edit--dropdown-menu-inner a:hover {
-    background-color: #f0f0f0;
+/* Element: divider - divider in dropdown */
+.frontend-edit__divider {
+    color: var(--xfe-text-secondary);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 6px 12px 4px !important;
+    margin-top: 4px;
+    cursor: default !important;
+    border-top: 1px solid var(--xfe-border-color);
 }
 
-.xima-typo3-frontend-edit--edit-container .xima-typo3-frontend-edit--edit-button {
-    visibility: hidden;
+.frontend-edit__divider:first-child {
+    border-top: none;
+    margin-top: 0;
 }
 
-.xima-typo3-frontend-edit--edit-container:hover .xima-typo3-frontend-edit--edit-button {
-    visibility: visible;
+/* Legacy wrapper - kept for compatibility but not used in new design */
+.frontend-edit__wrapper {
+    display: none;
 }
