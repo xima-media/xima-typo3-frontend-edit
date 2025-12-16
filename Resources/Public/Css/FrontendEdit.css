@@ -128,6 +128,17 @@
     opacity: 0.8;
 }
 
+.frontend-edit__toolbar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.frontend-edit__toolbar-icon img {
+    width: 14px;
+    height: 14px;
+}
+
 /* Element: toolbar-actions (top-right, standing on outline) */
 .frontend-edit__toolbar-actions {
     position: absolute;
