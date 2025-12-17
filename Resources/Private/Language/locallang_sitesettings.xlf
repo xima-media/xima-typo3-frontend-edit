@@ -17,9 +17,6 @@
             <trans-unit id="categories.frontendEdit.filter">
                 <source>Filter Settings</source>
             </trans-unit>
-            <trans-unit id="categories.frontendEdit.menu">
-                <source>Menu Structure</source>
-            </trans-unit>
 
             <trans-unit id="settings.frontendEdit.enabled">
                 <source>Enable Frontend Edit</source>
@@ -33,6 +30,27 @@
             </trans-unit>
             <trans-unit id="settings.description.frontendEdit.colorScheme">
                 <source>Choose the color scheme for the frontend editing UI. Options: auto (follows system preference), light, dark.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.showContextMenu">
+                <source>Show Context Menu</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.showContextMenu">
+                <source>Show the context menu dropdown with additional actions (edit page, hide, move, history). Disable to show only the edit button.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.showStickyToolbar">
+                <source>Show Sticky Toolbar</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.showStickyToolbar">
+                <source>Show the sticky toolbar with page editing options and toggle functionality.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.toolbarPosition">
+                <source>Toolbar Position</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.toolbarPosition">
+                <source>Choose the position for the sticky toolbar. Options: bottom-right, bottom-left, top-right, top-left, bottom, top, left, right.</source>
             </trans-unit>
 
             <trans-unit id="settings.frontendEdit.filter.ignorePids">
@@ -65,76 +83,6 @@
             </trans-unit>
             <trans-unit id="settings.description.frontendEdit.filter.ignoreUids">
                 <source>Comma-separated list of specific content element UIDs to exclude from frontend editing.</source>
-            </trans-unit>
-
-            <trans-unit id="settings.frontendEdit.menu.showDivInfo">
-                <source>Show Info Section</source>
-            </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.menu.showDivInfo">
-                <source>Show the info section divider in the dropdown menu.</source>
-            </trans-unit>
-
-            <trans-unit id="settings.frontendEdit.menu.showHeader">
-                <source>Show Header</source>
-            </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.menu.showHeader">
-                <source>Show the header with content element info in the dropdown menu.</source>
-            </trans-unit>
-
-            <trans-unit id="settings.frontendEdit.menu.showDivEdit">
-                <source>Show Edit Section</source>
-            </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.menu.showDivEdit">
-                <source>Show the edit section divider in the dropdown menu.</source>
-            </trans-unit>
-
-            <trans-unit id="settings.frontendEdit.menu.showEdit">
-                <source>Show Edit Button</source>
-            </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.menu.showEdit">
-                <source>Show the edit content element button in the dropdown menu.</source>
-            </trans-unit>
-
-            <trans-unit id="settings.frontendEdit.menu.showEditPage">
-                <source>Show Edit Page Button</source>
-            </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.menu.showEditPage">
-                <source>Show the edit page button in the dropdown menu.</source>
-            </trans-unit>
-
-            <trans-unit id="settings.frontendEdit.menu.showDivAction">
-                <source>Show Action Section</source>
-            </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.menu.showDivAction">
-                <source>Show the action section divider in the dropdown menu.</source>
-            </trans-unit>
-
-            <trans-unit id="settings.frontendEdit.menu.showHide">
-                <source>Show Hide Button</source>
-            </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.menu.showHide">
-                <source>Show the hide/unhide content element button in the dropdown menu.</source>
-            </trans-unit>
-
-            <trans-unit id="settings.frontendEdit.menu.showMove">
-                <source>Show Move Button</source>
-            </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.menu.showMove">
-                <source>Show the move content element button in the dropdown menu.</source>
-            </trans-unit>
-
-            <trans-unit id="settings.frontendEdit.menu.showInfo">
-                <source>Show Info Button</source>
-            </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.menu.showInfo">
-                <source>Show the info button in the dropdown menu.</source>
-            </trans-unit>
-
-            <trans-unit id="settings.frontendEdit.menu.showHistory">
-                <source>Show History Button</source>
-            </trans-unit>
-            <trans-unit id="settings.description.frontendEdit.menu.showHistory">
-                <source>Show the history button in the dropdown menu.</source>
             </trans-unit>
         </body>
     </file>

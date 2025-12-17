@@ -13,11 +13,9 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
-use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
-use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
@@ -33,11 +31,11 @@ final readonly class MenuButtonBuilder
     public function __construct(
         private IconService $iconService,
         private UrlBuilderService $urlBuilderService,
-        private SettingsService $settingsService,
     ) {}
 
     /**
      * @param array<string, mixed> $contentElement
+     *
      * @throws RouteNotFoundException
      */
     public function createSimpleEditButton(
@@ -79,13 +77,8 @@ final readonly class MenuButtonBuilder
         Button $menuButton,
         array $contentElement,
         array $contentElementConfig,
-        ServerRequestInterface $request,
     ): void {
-        if (!$this->settingsService->checkDefaultMenuStructure($request, 'div_info')) {
-            return;
-        }
-
-        $this->addButton($menuButton, 'div_info', ButtonType::Divider, request: $request);
+        $this->addButton($menuButton, 'div_info', ButtonType::Divider);
 
         $additionalUid = $GLOBALS['BE_USER']->isAdmin()
             ? ' <code>['.$contentElement['uid'].']</code>'
@@ -103,12 +96,12 @@ final readonly class MenuButtonBuilder
             ButtonType::Info,
             $label,
             icon: $contentElementConfig['icon'],
-            request: $request,
         );
     }
 
     /**
      * @param array<string, mixed> $contentElement
+     *
      * @throws RouteNotFoundException
      */
     public function addEditSection(
@@ -117,13 +110,8 @@ final readonly class MenuButtonBuilder
         int $languageUid,
         int $pid,
         string $returnUrlAnchor,
-        ServerRequestInterface $request,
     ): void {
-        if (!$this->settingsService->checkDefaultMenuStructure($request, 'div_edit')) {
-            return;
-        }
-
-        $this->addButton($menuButton, 'div_edit', ButtonType::Divider, request: $request);
+        $this->addButton($menuButton, 'div_edit', ButtonType::Divider);
 
         // Edit content element button
         $editLabel = 'list' === $contentElement['CType']
@@ -139,36 +127,32 @@ final readonly class MenuButtonBuilder
 
         $editIcon = 'list' === $contentElement['CType'] ? 'content-plugin' : 'content-textpic';
 
-        $this->addButton($menuButton, 'edit', ButtonType::Link, $editLabel, $editUrl, $editIcon, $request);
+        $this->addButton($menuButton, 'edit', ButtonType::Link, $editLabel, $editUrl, $editIcon);
 
         // Edit page button
         $pageUrl = $this->urlBuilderService->buildPageLayoutUrl($pid, $languageUid, $returnUrlAnchor);
-        $this->addButton($menuButton, 'edit_page', ButtonType::Link, url: $pageUrl, icon: 'apps-pagetree-page-default', request: $request);
+        $this->addButton($menuButton, 'edit_page', ButtonType::Link, url: $pageUrl, icon: 'apps-pagetree-page-default');
     }
 
     /**
      * @param array<string, mixed> $contentElement
+     *
      * @throws RouteNotFoundException
      */
     public function addActionSection(
         Button $menuButton,
         array $contentElement,
         string $returnUrlAnchor,
-        ServerRequestInterface $request,
     ): void {
-        if (!$this->settingsService->checkDefaultMenuStructure($request, 'div_action')) {
-            return;
-        }
-
-        $this->addButton($menuButton, 'div_action', ButtonType::Divider, request: $request);
+        $this->addButton($menuButton, 'div_action', ButtonType::Divider);
 
         // Hide button
         $hideUrl = $this->urlBuilderService->buildHideUrl($contentElement['uid'], $returnUrlAnchor);
-        $this->addButton($menuButton, 'hide', ButtonType::Link, url: $hideUrl, icon: 'actions-toggle-on', request: $request);
+        $this->addButton($menuButton, 'hide', ButtonType::Link, url: $hideUrl, icon: 'actions-toggle-on');
 
         // Info button
         $infoUrl = $this->urlBuilderService->buildInfoUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
-        $this->addButton($menuButton, 'info', ButtonType::Link, url: $infoUrl, icon: 'actions-info', request: $request);
+        $this->addButton($menuButton, 'info', ButtonType::Link, url: $infoUrl, icon: 'actions-info');
 
         // Move button
         $moveUrl = $this->urlBuilderService->buildMoveUrl(
@@ -177,11 +161,11 @@ final readonly class MenuButtonBuilder
             (int) $contentElement['pid'],
             $returnUrlAnchor,
         );
-        $this->addButton($menuButton, 'move', ButtonType::Link, url: $moveUrl, icon: 'actions-move', request: $request);
+        $this->addButton($menuButton, 'move', ButtonType::Link, url: $moveUrl, icon: 'actions-move');
 
         // History button
         $historyUrl = $this->urlBuilderService->buildHistoryUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
-        $this->addButton($menuButton, 'history', ButtonType::Link, url: $historyUrl, icon: 'actions-history', request: $request);
+        $this->addButton($menuButton, 'history', ButtonType::Link, url: $historyUrl, icon: 'actions-history');
     }
 
     /**
@@ -230,12 +214,7 @@ final readonly class MenuButtonBuilder
         ?string $label = null,
         ?string $url = null,
         ?string $icon = null,
-        ?ServerRequestInterface $request = null,
     ): void {
-        if (null !== $request && !$this->settingsService->checkDefaultMenuStructure($request, $identifier)) {
-            return;
-        }
-
         $finalLabel = $label ?? 'LLL:EXT:'.Configuration::EXT_KEY."/Resources/Private/Language/locallang.xlf:$identifier";
         $finalIcon = null !== $icon ? $this->iconService->getIcon($icon) : null;
 

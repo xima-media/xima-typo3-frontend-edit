@@ -16,9 +16,7 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 use Throwable;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use Xima\XimaTypo3FrontendEdit\Configuration;
-use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
 
-use function array_key_exists;
 use function in_array;
 
 /**
@@ -29,22 +27,9 @@ use function in_array;
  */
 abstract class AbstractMenuGenerator
 {
-    use ExtensionConfigurationTrait;
-
     public function __construct(
         protected readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
-
-    protected function isShowContextMenu(): bool
-    {
-        try {
-            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
-
-            return !array_key_exists('showContextMenu', $config) || (bool) $config['showContextMenu'];
-        } catch (Throwable) {
-            return true;
-        }
-    }
 
     protected function isLinkTargetBlank(): bool
     {

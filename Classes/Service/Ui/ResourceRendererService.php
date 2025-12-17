@@ -15,7 +15,6 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\RequestId;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, PathUtility};
@@ -26,8 +25,6 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
-use function array_key_exists;
-use function in_array;
 use function sprintf;
 
 /**
@@ -40,7 +37,6 @@ final readonly class ResourceRendererService
 {
     public function __construct(
         private SettingsService $settingsService,
-        private ExtensionConfiguration $extensionConfiguration,
         private BackendUserService $backendUserService,
         private UrlBuilderService $urlBuilderService,
         private PageMenuGenerator $pageMenuGenerator,
@@ -69,8 +65,8 @@ final readonly class ResourceRendererService
             );
 
             // Add settings configuration (colorScheme and showContextMenu)
-            $colorScheme = $this->getColorScheme();
-            $showContextMenu = $this->isShowContextMenu() ? 'true' : 'false';
+            $colorScheme = null !== $request ? $this->settingsService->getColorScheme($request) : 'auto';
+            $showContextMenu = (null !== $request && $this->settingsService->isShowContextMenu($request)) ? 'true' : 'false';
             $resources['settings_config'] = sprintf(
                 '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s;</script>',
                 $nonceAttribute,
@@ -100,34 +96,8 @@ final readonly class ResourceRendererService
             );
 
             // Add sticky toolbar resources only if enabled
-            if ($this->isShowStickyToolbar()) {
-                $toolbarPosition = $this->getToolbarPosition();
-                $toggleUrl = $this->getToggleUrl();
-                $resources['sticky_toolbar_config'] = sprintf(
-                    '<div id="frontend-edit-sticky-toolbar-config" data-position="%s" data-toggle-url="%s" hidden></div>',
-                    $toolbarPosition,
-                    htmlspecialchars($toggleUrl, \ENT_QUOTES, 'UTF-8'),
-                );
-
-                // Add page menu data as JSON (rendered client-side like content element menus)
-                $pageMenuData = null !== $request ? $this->pageMenuGenerator->getDropdown($request) : [];
-                if ([] !== $pageMenuData) {
-                    $resources['page_menu_data'] = sprintf(
-                        '<script%s type="application/json" id="frontend-edit-page-menu-data">%s</script>',
-                        $nonceAttribute,
-                        json_encode($pageMenuData, \JSON_THROW_ON_ERROR | \JSON_HEX_TAG | \JSON_HEX_AMP),
-                    );
-                }
-
-                // Add sticky toolbar script
-                $stickyToolbarPath = PathUtility::getAbsoluteWebPath(
-                    GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/sticky_toolbar.js'),
-                );
-                $resources['sticky_toolbar'] = sprintf(
-                    '<script%s src="%s"></script>',
-                    $nonceAttribute,
-                    $stickyToolbarPath,
-                );
+            if (null !== $request && $this->settingsService->isShowStickyToolbar($request)) {
+                $this->addStickyToolbarResources($resources, $request, $nonceAttribute);
             }
 
             $values = [...$values, 'resources' => $resources];
@@ -138,52 +108,38 @@ final readonly class ResourceRendererService
         }
     }
 
-    private function isShowContextMenu(): bool
+    /**
+     * @param array<string, string> $resources
+     */
+    private function addStickyToolbarResources(array &$resources, ServerRequestInterface $request, string $nonceAttribute): void
     {
-        try {
-            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
+        $toolbarPosition = $this->settingsService->getToolbarPosition($request);
+        $toggleUrl = $this->getToggleUrl();
+        $resources['sticky_toolbar_config'] = sprintf(
+            '<div id="frontend-edit-sticky-toolbar-config" data-position="%s" data-toggle-url="%s" hidden></div>',
+            $toolbarPosition,
+            htmlspecialchars($toggleUrl, \ENT_QUOTES, 'UTF-8'),
+        );
 
-            return !array_key_exists('showContextMenu', $config) || (bool) $config['showContextMenu'];
-        } catch (Throwable) {
-            return true;
+        // Add page menu data as JSON (rendered client-side like content element menus)
+        $pageMenuData = $this->pageMenuGenerator->getDropdown($request);
+        if ([] !== $pageMenuData) {
+            $resources['page_menu_data'] = sprintf(
+                '<script%s type="application/json" id="frontend-edit-page-menu-data">%s</script>',
+                $nonceAttribute,
+                json_encode($pageMenuData, \JSON_THROW_ON_ERROR | \JSON_HEX_TAG | \JSON_HEX_AMP),
+            );
         }
-    }
 
-    private function isShowStickyToolbar(): bool
-    {
-        try {
-            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
-
-            return !array_key_exists('showStickyToolbar', $config) || (bool) $config['showStickyToolbar'];
-        } catch (Throwable) {
-            return true;
-        }
-    }
-
-    private function getColorScheme(): string
-    {
-        try {
-            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
-            $scheme = $config['colorScheme'] ?? 'auto';
-
-            return in_array($scheme, ['auto', 'light', 'dark'], true) ? $scheme : 'auto';
-        } catch (Throwable) {
-            return 'auto';
-        }
-    }
-
-    private function getToolbarPosition(): string
-    {
-        $validPositions = ['bottom-right', 'bottom-left', 'top-right', 'top-left', 'bottom', 'top', 'left', 'right'];
-
-        try {
-            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
-            $position = $config['toolbarPosition'] ?? 'bottom-right';
-
-            return in_array($position, $validPositions, true) ? $position : 'bottom-right';
-        } catch (Throwable) {
-            return 'bottom-right';
-        }
+        // Add sticky toolbar script
+        $stickyToolbarPath = PathUtility::getAbsoluteWebPath(
+            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/sticky_toolbar.js'),
+        );
+        $resources['sticky_toolbar'] = sprintf(
+            '<script%s src="%s"></script>',
+            $nonceAttribute,
+            $stickyToolbarPath,
+        );
     }
 
     private function getToggleUrl(): string

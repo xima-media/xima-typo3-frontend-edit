@@ -20,10 +20,6 @@
 				<source>Filter Settings</source>
 				<target>Filtereinstellungen</target>
 			</trans-unit>
-			<trans-unit id="categories.frontendEdit.menu">
-				<source>Menu Structure</source>
-				<target>Menüstruktur</target>
-			</trans-unit>
 
 			<trans-unit id="settings.frontendEdit.enabled">
 				<source>Enable Frontend Edit</source>
@@ -41,6 +37,33 @@
 			<trans-unit id="settings.description.frontendEdit.colorScheme">
 				<source>Choose the color scheme for the frontend editing UI. Options: auto (follows system preference), light, dark.</source>
 				<target>Wähle das Farbschema für die Frontend-Bearbeitungs-UI. Optionen: auto (folgt Systemeinstellung), light, dark.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.showContextMenu">
+				<source>Show Context Menu</source>
+				<target>Kontextmenü anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.showContextMenu">
+				<source>Show the context menu dropdown with additional actions (edit page, hide, move, history). Disable to show only the edit button.</source>
+				<target>Zeigt das Kontextmenü-Dropdown mit zusätzlichen Aktionen (Seite bearbeiten, Verbergen, Verschieben, Verlauf). Deaktivieren, um nur den Bearbeiten-Button anzuzeigen.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.showStickyToolbar">
+				<source>Show Sticky Toolbar</source>
+				<target>Fixierte Toolbar anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.showStickyToolbar">
+				<source>Show the sticky toolbar with page editing options and toggle functionality.</source>
+				<target>Zeigt die fixierte Toolbar mit Seitenbearbeitungsoptionen und Umschaltfunktion.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.toolbarPosition">
+				<source>Toolbar Position</source>
+				<target>Toolbar-Position</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.toolbarPosition">
+				<source>Choose the position for the sticky toolbar. Options: bottom-right, bottom-left, top-right, top-left, bottom, top, left, right.</source>
+				<target>Wähle die Position für die fixierte Toolbar. Optionen: bottom-right, bottom-left, top-right, top-left, bottom, top, left, right.</target>
 			</trans-unit>
 
 			<trans-unit id="settings.frontendEdit.filter.ignorePids">
@@ -77,96 +100,6 @@
 			<trans-unit id="settings.description.frontendEdit.filter.ignoreUids">
 				<source>Comma-separated list of specific content element UIDs to exclude from frontend editing.</source>
 				<target>Kommagetrennte Liste von spezifischen Inhaltselement-UIDs, die von der Frontend-Bearbeitung ausgeschlossen werden sollen.</target>
-			</trans-unit>
-
-			<trans-unit id="settings.frontendEdit.menu.showDivInfo">
-				<source>Show Info Section</source>
-				<target>Info-Bereich anzeigen</target>
-			</trans-unit>
-			<trans-unit id="settings.description.frontendEdit.menu.showDivInfo">
-				<source>Show the info section divider in the dropdown menu.</source>
-				<target>Zeigt den Info-Bereich-Trenner im Dropdown-Menü an.</target>
-			</trans-unit>
-
-			<trans-unit id="settings.frontendEdit.menu.showHeader">
-				<source>Show Header</source>
-				<target>Kopfzeile anzeigen</target>
-			</trans-unit>
-			<trans-unit id="settings.description.frontendEdit.menu.showHeader">
-				<source>Show the header with content element info in the dropdown menu.</source>
-				<target>Zeigt die Kopfzeile mit Inhaltselement-Informationen im Dropdown-Menü an.</target>
-			</trans-unit>
-
-			<trans-unit id="settings.frontendEdit.menu.showDivEdit">
-				<source>Show Edit Section</source>
-				<target>Bearbeitungs-Bereich anzeigen</target>
-			</trans-unit>
-			<trans-unit id="settings.description.frontendEdit.menu.showDivEdit">
-				<source>Show the edit section divider in the dropdown menu.</source>
-				<target>Zeigt den Bearbeitungs-Bereich-Trenner im Dropdown-Menü an.</target>
-			</trans-unit>
-
-			<trans-unit id="settings.frontendEdit.menu.showEdit">
-				<source>Show Edit Button</source>
-				<target>Bearbeiten-Button anzeigen</target>
-			</trans-unit>
-			<trans-unit id="settings.description.frontendEdit.menu.showEdit">
-				<source>Show the edit content element button in the dropdown menu.</source>
-				<target>Zeigt den Button zum Bearbeiten des Inhaltselements im Dropdown-Menü an.</target>
-			</trans-unit>
-
-			<trans-unit id="settings.frontendEdit.menu.showEditPage">
-				<source>Show Edit Page Button</source>
-				<target>Seite-bearbeiten-Button anzeigen</target>
-			</trans-unit>
-			<trans-unit id="settings.description.frontendEdit.menu.showEditPage">
-				<source>Show the edit page button in the dropdown menu.</source>
-				<target>Zeigt den Button zum Bearbeiten der Seite im Dropdown-Menü an.</target>
-			</trans-unit>
-
-			<trans-unit id="settings.frontendEdit.menu.showDivAction">
-				<source>Show Action Section</source>
-				<target>Aktions-Bereich anzeigen</target>
-			</trans-unit>
-			<trans-unit id="settings.description.frontendEdit.menu.showDivAction">
-				<source>Show the action section divider in the dropdown menu.</source>
-				<target>Zeigt den Aktions-Bereich-Trenner im Dropdown-Menü an.</target>
-			</trans-unit>
-
-			<trans-unit id="settings.frontendEdit.menu.showHide">
-				<source>Show Hide Button</source>
-				<target>Verbergen-Button anzeigen</target>
-			</trans-unit>
-			<trans-unit id="settings.description.frontendEdit.menu.showHide">
-				<source>Show the hide/unhide content element button in the dropdown menu.</source>
-				<target>Zeigt den Button zum Verbergen/Anzeigen des Inhaltselements im Dropdown-Menü an.</target>
-			</trans-unit>
-
-			<trans-unit id="settings.frontendEdit.menu.showMove">
-				<source>Show Move Button</source>
-				<target>Verschieben-Button anzeigen</target>
-			</trans-unit>
-			<trans-unit id="settings.description.frontendEdit.menu.showMove">
-				<source>Show the move content element button in the dropdown menu.</source>
-				<target>Zeigt den Button zum Verschieben des Inhaltselements im Dropdown-Menü an.</target>
-			</trans-unit>
-
-			<trans-unit id="settings.frontendEdit.menu.showInfo">
-				<source>Show Info Button</source>
-				<target>Info-Button anzeigen</target>
-			</trans-unit>
-			<trans-unit id="settings.description.frontendEdit.menu.showInfo">
-				<source>Show the info button in the dropdown menu.</source>
-				<target>Zeigt den Info-Button im Dropdown-Menü an.</target>
-			</trans-unit>
-
-			<trans-unit id="settings.frontendEdit.menu.showHistory">
-				<source>Show History Button</source>
-				<target>Verlauf-Button anzeigen</target>
-			</trans-unit>
-			<trans-unit id="settings.description.frontendEdit.menu.showHistory">
-				<source>Show the history button in the dropdown menu.</source>
-				<target>Zeigt den Verlauf-Button im Dropdown-Menü an.</target>
 			</trans-unit>
 		</body>
 	</file>

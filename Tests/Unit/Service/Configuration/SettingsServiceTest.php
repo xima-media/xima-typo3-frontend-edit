@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Configuration;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
 use ReflectionNamedType;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -46,8 +45,6 @@ class SettingsServiceTest extends TestCase
         self::assertTrue($reflection->hasMethod('getIgnoredCTypes'));
         self::assertTrue($reflection->hasMethod('getIgnoredListTypes'));
         self::assertTrue($reflection->hasMethod('getIgnoredUids'));
-        self::assertTrue($reflection->hasMethod('checkDefaultMenuStructure'));
-        self::assertTrue($reflection->hasMethod('isOnlyEditEnabled'));
         self::assertTrue($reflection->hasMethod('isFrontendDebugModeEnabled'));
     }
 
@@ -60,8 +57,6 @@ class SettingsServiceTest extends TestCase
         self::assertTrue($reflection->getMethod('getIgnoredCTypes')->isPublic());
         self::assertTrue($reflection->getMethod('getIgnoredListTypes')->isPublic());
         self::assertTrue($reflection->getMethod('getIgnoredUids')->isPublic());
-        self::assertTrue($reflection->getMethod('checkDefaultMenuStructure')->isPublic());
-        self::assertTrue($reflection->getMethod('isOnlyEditEnabled')->isPublic());
         self::assertTrue($reflection->getMethod('isFrontendDebugModeEnabled')->isPublic());
     }
 
@@ -104,7 +99,7 @@ class SettingsServiceTest extends TestCase
     {
         $reflection = new ReflectionClass(SettingsService::class);
 
-        $methods = ['isEnabled', 'checkDefaultMenuStructure', 'isOnlyEditEnabled', 'isFrontendDebugModeEnabled'];
+        $methods = ['isEnabled', 'isFrontendDebugModeEnabled'];
 
         foreach ($methods as $methodName) {
             $method = $reflection->getMethod($methodName);
@@ -114,75 +109,5 @@ class SettingsServiceTest extends TestCase
             self::assertInstanceOf(ReflectionNamedType::class, $returnType, "Method {$methodName} should have named return type");
             self::assertEquals('bool', $returnType->getName(), "Method {$methodName} should return bool");
         }
-    }
-
-    public function testCheckDefaultMenuStructureHasCorrectParameters(): void
-    {
-        $reflection = new ReflectionClass(SettingsService::class);
-        $method = $reflection->getMethod('checkDefaultMenuStructure');
-        $parameters = $method->getParameters();
-
-        self::assertCount(2, $parameters);
-
-        // First parameter: ServerRequestInterface
-        $requestParam = $parameters[0];
-        self::assertEquals('request', $requestParam->getName());
-        self::assertTrue($requestParam->hasType());
-        $requestType = $requestParam->getType();
-        self::assertInstanceOf(ReflectionNamedType::class, $requestType);
-        self::assertEquals(ServerRequestInterface::class, $requestType->getName());
-
-        // Second parameter: string identifier
-        $identifierParam = $parameters[1];
-        self::assertEquals('identifier', $identifierParam->getName());
-        self::assertTrue($identifierParam->hasType());
-        $identifierType = $identifierParam->getType();
-        self::assertInstanceOf(ReflectionNamedType::class, $identifierType);
-        self::assertEquals('string', $identifierType->getName());
-    }
-
-    public function testMethodsRequireServerRequestParameter(): void
-    {
-        $reflection = new ReflectionClass(SettingsService::class);
-
-        $methodsWithRequest = [
-            'isEnabled',
-            'getIgnoredPids',
-            'getIgnoredCTypes',
-            'getIgnoredListTypes',
-            'getIgnoredUids',
-            'checkDefaultMenuStructure',
-            'isOnlyEditEnabled',
-        ];
-
-        foreach ($methodsWithRequest as $methodName) {
-            $method = $reflection->getMethod($methodName);
-            $parameters = $method->getParameters();
-
-            self::assertNotEmpty($parameters, "Method {$methodName} should have parameters");
-
-            $firstParam = $parameters[0];
-            self::assertEquals('request', $firstParam->getName(), "First parameter of {$methodName} should be 'request'");
-
-            $paramType = $firstParam->getType();
-            self::assertInstanceOf(ReflectionNamedType::class, $paramType);
-            self::assertEquals(ServerRequestInterface::class, $paramType->getName(), "First parameter of {$methodName} should be ServerRequestInterface");
-        }
-    }
-
-    public function testMenuStructureMapConstantExists(): void
-    {
-        $reflection = new ReflectionClass(SettingsService::class);
-
-        self::assertTrue($reflection->hasConstant('MENU_STRUCTURE_MAP'));
-
-        $constant = $reflection->getReflectionConstant('MENU_STRUCTURE_MAP');
-        self::assertNotNull($constant);
-        self::assertTrue($constant->isPrivate());
-
-        $value = $constant->getValue();
-        self::assertIsArray($value);
-        self::assertArrayHasKey('edit', $value);
-        self::assertArrayHasKey('history', $value);
     }
 }

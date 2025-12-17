@@ -37,13 +37,13 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 {
     public function __construct(
         private readonly EventDispatcher $eventDispatcher,
-        private readonly SettingsService $settingsService,
         private readonly BackendUserService $backendUserService,
         private readonly ContentElementFilter $contentElementFilter,
         private readonly MenuButtonBuilder $menuButtonBuilder,
         private readonly ContentElementRepository $contentElementRepository,
         private readonly AdditionalDataHandler $additionalDataHandler,
         private readonly IconService $iconService,
+        private readonly SettingsService $settingsService,
         ExtensionConfiguration $extensionConfiguration,
     ) {
         parent::__construct($extensionConfiguration);
@@ -121,9 +121,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         array $contentElementConfig,
         ServerRequestInterface $request,
     ): Button {
-        $showContextMenu = $this->isShowContextMenu() && !$this->settingsService->isOnlyEditEnabled($request);
-
-        if (!$showContextMenu) {
+        if (!$this->settingsService->isShowContextMenu($request)) {
             return $this->menuButtonBuilder->createSimpleEditButton(
                 $contentElement,
                 $languageUid,
@@ -134,8 +132,8 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
         $menuButton = $this->menuButtonBuilder->createFullMenuButton();
 
-        $this->menuButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor, $request);
-        $this->menuButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor, $request);
+        $this->menuButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor);
+        $this->menuButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor);
 
         return $menuButton;
     }

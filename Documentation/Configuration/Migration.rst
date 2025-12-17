@@ -70,20 +70,8 @@ Migrate your existing TypoScript configuration to Site Settings:
     * - ``plugin.tx_ximatypo3frontendedit.settings.ignoreUids``
       - ``frontendEdit.filter.ignoreUids``
 
-    * - ``plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.div_info``
-      - ``frontendEdit.menu.showDivInfo``
-
-    * - ``plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.header``
-      - ``frontendEdit.menu.showHeader``
-
-    * - ``plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.edit``
-      - ``frontendEdit.menu.showEdit``
-
-    * - ``plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.history``
-      - ``frontendEdit.menu.showHistory``
-
-    * - (all other menu structure settings)
-      - ``frontendEdit.menu.show*``
+    * - ``plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.*``
+      - Removed (menu items are no longer configurable)
 
 Example Migration
 -----------------
@@ -98,10 +86,6 @@ Example Migration
         settings {
             ignorePids = 1,2,3
             ignoreCTypes = html,div
-            defaultMenuStructure {
-                history = 0
-                info = 0
-            }
         }
     }
 
@@ -115,9 +99,6 @@ Example Migration
       filter:
         ignorePids: '1,2,3'
         ignoreCTypes: 'html,div'
-      menu:
-        showHistory: false
-        showInfo: false
 
 Step-by-Step Migration
 ======================
