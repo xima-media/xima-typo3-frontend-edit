@@ -29,7 +29,16 @@
                 <source>Color Scheme</source>
             </trans-unit>
             <trans-unit id="settings.description.frontendEdit.colorScheme">
-                <source>Choose the color scheme for the frontend editing UI. Options: auto (follows system preference), light, dark.</source>
+                <source>Choose the color scheme for the frontend editing UI.</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.colorScheme.auto">
+                <source>Auto (System)</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.colorScheme.light">
+                <source>Light</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.colorScheme.dark">
+                <source>Dark</source>
             </trans-unit>
 
             <trans-unit id="settings.frontendEdit.showContextMenu">
@@ -50,7 +59,43 @@
                 <source>Toolbar Position</source>
             </trans-unit>
             <trans-unit id="settings.description.frontendEdit.toolbarPosition">
-                <source>Choose the position for the sticky toolbar. Options: bottom-right, bottom-left, top-right, top-left, bottom, top, left, right.</source>
+                <source>Choose the position for the sticky toolbar.</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.top-left">
+                <source>Top Left</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.top-center">
+                <source>Top Center</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.top-right">
+                <source>Top Right</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.bottom-left">
+                <source>Bottom Left</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.bottom-center">
+                <source>Bottom Center</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.bottom-right">
+                <source>Bottom Right</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.left-top">
+                <source>Left Top</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.left-center">
+                <source>Left Center</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.left-bottom">
+                <source>Left Bottom</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.right-top">
+                <source>Right Top</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.right-center">
+                <source>Right Center</source>
+            </trans-unit>
+            <trans-unit id="settings.frontendEdit.toolbarPosition.right-bottom">
+                <source>Right Bottom</source>
             </trans-unit>
 
             <trans-unit id="settings.frontendEdit.filter.ignorePids">

@@ -119,7 +119,12 @@ final readonly class SettingsService
 
     public function getToolbarPosition(ServerRequestInterface $request): string
     {
-        $validPositions = ['bottom-right', 'bottom-left', 'top-right', 'top-left', 'bottom', 'top', 'left', 'right'];
+        $validPositions = [
+            'top-left', 'top-center', 'top-right',
+            'bottom-left', 'bottom-center', 'bottom-right',
+            'left-top', 'left-center', 'left-bottom',
+            'right-top', 'right-center', 'right-bottom',
+        ];
 
         $settings = $this->getSiteSettings($request);
         if (null === $settings) {
