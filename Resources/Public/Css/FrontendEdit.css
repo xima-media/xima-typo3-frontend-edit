@@ -375,21 +375,21 @@
 }
 
 /* Position variants - centered on edges */
-.frontend-edit__sticky-toolbar--bottom {
+.frontend-edit__sticky-toolbar--bottom-center {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
     border-radius: 4px 4px 0 0;
 }
 
-.frontend-edit__sticky-toolbar--top {
+.frontend-edit__sticky-toolbar--top-center {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
     border-radius: 0 0 4px 4px;
 }
 
-.frontend-edit__sticky-toolbar--left {
+.frontend-edit__sticky-toolbar--left-center {
     left: 0;
     top: 50%;
     transform: translateY(-50%);
@@ -397,10 +397,39 @@
     border-radius: 0 4px 4px 0;
 }
 
-.frontend-edit__sticky-toolbar--right {
+.frontend-edit__sticky-toolbar--right-center {
     right: 0;
     top: 50%;
     transform: translateY(-50%);
+    flex-direction: column;
+    border-radius: 4px 0 0 4px;
+}
+
+/* Position variants - vertical edges with top/bottom alignment */
+.frontend-edit__sticky-toolbar--left-top {
+    left: 0;
+    top: 10px;
+    flex-direction: column;
+    border-radius: 0 4px 4px 0;
+}
+
+.frontend-edit__sticky-toolbar--left-bottom {
+    left: 0;
+    bottom: 10px;
+    flex-direction: column;
+    border-radius: 0 4px 4px 0;
+}
+
+.frontend-edit__sticky-toolbar--right-top {
+    right: 0;
+    top: 10px;
+    flex-direction: column;
+    border-radius: 4px 0 0 4px;
+}
+
+.frontend-edit__sticky-toolbar--right-bottom {
+    right: 0;
+    bottom: 10px;
     flex-direction: column;
     border-radius: 4px 0 0 4px;
 }
@@ -453,8 +482,12 @@
 }
 
 /* Vertical separator for left/right positions */
-.frontend-edit__sticky-toolbar--left .frontend-edit__sticky-separator,
-.frontend-edit__sticky-toolbar--right .frontend-edit__sticky-separator {
+.frontend-edit__sticky-toolbar--left-top .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--left-center .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--left-bottom .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--right-top .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--right-center .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--right-bottom .frontend-edit__sticky-separator {
     width: 16px;
     height: 1px;
     margin: 2px 0;
@@ -490,7 +523,7 @@
 }
 
 /* Position adjustments for dropdown - top positions */
-.frontend-edit__sticky-toolbar--top .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--top-center .frontend-edit__sticky-dropdown,
 .frontend-edit__sticky-toolbar--top-left .frontend-edit__sticky-dropdown,
 .frontend-edit__sticky-toolbar--top-right .frontend-edit__sticky-dropdown {
     bottom: auto;
@@ -498,33 +531,42 @@
     transform: translateY(-8px);
 }
 
-.frontend-edit__sticky-toolbar--top .frontend-edit__sticky-dropdown--visible,
+.frontend-edit__sticky-toolbar--top-center .frontend-edit__sticky-dropdown--visible,
 .frontend-edit__sticky-toolbar--top-left .frontend-edit__sticky-dropdown--visible,
 .frontend-edit__sticky-toolbar--top-right .frontend-edit__sticky-dropdown--visible {
     transform: translateY(0);
 }
 
-/* Position adjustments for dropdown - left positions */
-.frontend-edit__sticky-toolbar--left .frontend-edit__sticky-dropdown,
+/* Position adjustments for dropdown - left-aligned horizontal positions */
 .frontend-edit__sticky-toolbar--bottom-left .frontend-edit__sticky-dropdown,
-.frontend-edit__sticky-toolbar--top-left .frontend-edit__sticky-dropdown {
+.frontend-edit__sticky-toolbar--top-left .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--bottom-center .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--top-center .frontend-edit__sticky-dropdown {
     right: auto;
     left: 0;
 }
 
-/* Position adjustments for dropdown - vertical toolbars (left/right edge) */
-.frontend-edit__sticky-toolbar--left .frontend-edit__sticky-dropdown {
+/* Position adjustments for dropdown - vertical toolbars (left edge) */
+.frontend-edit__sticky-toolbar--left-top .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--left-center .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--left-bottom .frontend-edit__sticky-dropdown {
     bottom: auto;
     top: 0;
     left: calc(100% + 8px);
+    right: auto;
     transform: translateX(-8px);
 }
 
-.frontend-edit__sticky-toolbar--left .frontend-edit__sticky-dropdown--visible {
+.frontend-edit__sticky-toolbar--left-top .frontend-edit__sticky-dropdown--visible,
+.frontend-edit__sticky-toolbar--left-center .frontend-edit__sticky-dropdown--visible,
+.frontend-edit__sticky-toolbar--left-bottom .frontend-edit__sticky-dropdown--visible {
     transform: translateX(0);
 }
 
-.frontend-edit__sticky-toolbar--right .frontend-edit__sticky-dropdown {
+/* Position adjustments for dropdown - vertical toolbars (right edge) */
+.frontend-edit__sticky-toolbar--right-top .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--right-center .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--right-bottom .frontend-edit__sticky-dropdown {
     bottom: auto;
     top: 0;
     right: calc(100% + 8px);
@@ -532,7 +574,9 @@
     transform: translateX(8px);
 }
 
-.frontend-edit__sticky-toolbar--right .frontend-edit__sticky-dropdown--visible {
+.frontend-edit__sticky-toolbar--right-top .frontend-edit__sticky-dropdown--visible,
+.frontend-edit__sticky-toolbar--right-center .frontend-edit__sticky-dropdown--visible,
+.frontend-edit__sticky-toolbar--right-bottom .frontend-edit__sticky-dropdown--visible {
     transform: translateX(0);
 }
 

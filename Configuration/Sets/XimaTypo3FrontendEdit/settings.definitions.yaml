@@ -24,6 +24,10 @@ settings:
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.colorScheme
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.colorScheme
     category: frontendEdit.appearance
+    enum:
+      auto: 'Auto (System)'
+      light: 'Light'
+      dark: 'Dark'
 
   frontendEdit.showContextMenu:
     default: true
@@ -45,6 +49,19 @@ settings:
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.toolbarPosition
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.toolbarPosition
     category: frontendEdit.appearance
+    enum:
+      top-left: 'Top Left'
+      top-center: 'Top Center'
+      top-right: 'Top Right'
+      bottom-left: 'Bottom Left'
+      bottom-center: 'Bottom Center'
+      bottom-right: 'Bottom Right'
+      left-top: 'Left Top'
+      left-center: 'Left Center'
+      left-bottom: 'Left Bottom'
+      right-top: 'Right Top'
+      right-center: 'Right Center'
+      right-bottom: 'Right Bottom'
 
   frontendEdit.filter.ignorePids:
     default: ''
