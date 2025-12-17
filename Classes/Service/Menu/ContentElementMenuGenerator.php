@@ -56,7 +56,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
     /**
      * @param array<int|string, mixed> $data
      *
-     * @return array
+     * @return array<int, array{element: array<string, mixed>, menu: array<string, mixed>}>
      *
      * @throws Exception
      * @throws RouteNotFoundException
@@ -127,6 +127,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
     /**
      * @param array<string, mixed> $contentElement
      * @param array<string, mixed> $contentElementConfig
+     *
      * @throws RouteNotFoundException
      */
     private function createMenuButton(
@@ -198,9 +199,9 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
     }
 
     /**
-     * @param array $result
+     * @param array<int, array{element: array<string, mixed>, menu: Button}> $result
      *
-     * @return array
+     * @return array<int, array{element: array<string, mixed>, menu: array<string, mixed>}>
      */
     private function renderMenuButtons(array $result): array
     {
