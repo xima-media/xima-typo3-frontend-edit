@@ -129,8 +129,13 @@ final readonly class MenuButtonBuilder
 
         $this->addButton($menuButton, 'edit', ButtonType::Link, $editLabel, $editUrl, $editIcon);
 
-        // Edit page button
-        $pageUrl = $this->urlBuilderService->buildPageLayoutUrl($pid, $languageUid, $returnUrlAnchor);
+        // Edit page button (with anchor to scroll to content element)
+        $pageUrl = $this->urlBuilderService->buildPageLayoutUrl(
+            $pid,
+            $languageUid,
+            $returnUrlAnchor,
+            (int) $contentElement['uid'],
+        );
         $this->addButton($menuButton, 'edit_page', ButtonType::Link, url: $pageUrl, icon: 'apps-pagetree-page-default');
     }
 

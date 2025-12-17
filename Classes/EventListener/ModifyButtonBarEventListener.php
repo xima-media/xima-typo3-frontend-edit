@@ -15,6 +15,7 @@ namespace Xima\XimaTypo3FrontendEdit\EventListener;
 
 use TYPO3\CMS\Backend\Template\Components\{ButtonBar, ModifyButtonBarEvent};
 use TYPO3\CMS\Backend\Template\Components\Buttons\InputButton;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Configuration\Exception\{ExtensionConfigurationExtensionNotConfiguredException, ExtensionConfigurationPathDoesNotExistException};
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Imaging\{IconFactory, IconSize};
@@ -32,6 +33,7 @@ use function array_key_exists;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
+#[AsEventListener(identifier: 'xima-typo3-frontend-edit/backend/modify-button-bar')]
 final class ModifyButtonBarEventListener
 {
     /** @var array<string, mixed> */
