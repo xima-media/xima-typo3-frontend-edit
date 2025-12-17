@@ -117,18 +117,21 @@
     toggleUrl: '',
 
     init() {
-      // Read configuration from data attributes (Admin Panel pattern)
-      this.configElement = document.getElementById('frontend-edit-toolbar-config');
+      // Read sticky toolbar configuration
+      this.configElement = document.getElementById('frontend-edit-sticky-toolbar-config');
       if (!this.configElement) {
-        Logger.log('Config element not found', {}, 'error');
+        Logger.log('Sticky toolbar disabled or config not found');
         return;
       }
+
+      // Read general config for disabled state
+      const generalConfig = document.getElementById('frontend-edit-toolbar-config');
 
       // Get page menu template (server-rendered)
       this.pageMenuTemplate = document.getElementById('frontend-edit-page-menu');
 
       this.position = this.configElement.dataset.position || 'bottom-right';
-      this.isDisabled = this.configElement.dataset.disabled === 'true';
+      this.isDisabled = generalConfig ? generalConfig.dataset.disabled === 'true' : false;
       this.toggleUrl = this.configElement.dataset.toggleUrl || '';
 
       this.createToolbar();

@@ -88,39 +88,46 @@ final readonly class ResourceRendererService
             }
 
             // Add sticky toolbar configuration as data attributes (like Admin Panel pattern)
-            $toolbarPosition = $this->getToolbarPosition();
             $isDisabled = $this->backendUserService->isFrontendEditDisabled();
-            $toggleUrl = $this->getToggleUrl();
             $editInfoUrl = $this->getEditInformationUrl();
             $pageInfo = $this->getPageInfo($request);
             $resources['toolbar_config'] = sprintf(
-                '<div id="frontend-edit-toolbar-config" data-position="%s" data-disabled="%s" data-toggle-url="%s" data-edit-info-url="%s" data-pid="%d" data-language="%d" hidden></div>',
-                $toolbarPosition,
+                '<div id="frontend-edit-toolbar-config" data-disabled="%s" data-edit-info-url="%s" data-pid="%d" data-language="%d" hidden></div>',
                 $isDisabled ? 'true' : 'false',
-                htmlspecialchars($toggleUrl, \ENT_QUOTES, 'UTF-8'),
                 htmlspecialchars($editInfoUrl, \ENT_QUOTES, 'UTF-8'),
                 $pageInfo['pid'],
                 $pageInfo['language'],
             );
 
-            // Add page menu template (rendered server-side like content element menus)
-            $pageMenuHtml = null !== $request ? $this->pageMenuGenerator->getDropdown($request) : '';
-            if ('' !== $pageMenuHtml) {
-                $resources['page_menu_template'] = sprintf(
-                    '<template id="frontend-edit-page-menu">%s</template>',
-                    $pageMenuHtml,
+            // Add sticky toolbar resources only if enabled
+            if ($this->isShowStickyToolbar()) {
+                $toolbarPosition = $this->getToolbarPosition();
+                $toggleUrl = $this->getToggleUrl();
+                $resources['sticky_toolbar_config'] = sprintf(
+                    '<div id="frontend-edit-sticky-toolbar-config" data-position="%s" data-toggle-url="%s" hidden></div>',
+                    $toolbarPosition,
+                    htmlspecialchars($toggleUrl, \ENT_QUOTES, 'UTF-8'),
+                );
+
+                // Add page menu template (rendered server-side like content element menus)
+                $pageMenuHtml = null !== $request ? $this->pageMenuGenerator->getDropdown($request) : '';
+                if ('' !== $pageMenuHtml) {
+                    $resources['page_menu_template'] = sprintf(
+                        '<template id="frontend-edit-page-menu">%s</template>',
+                        $pageMenuHtml,
+                    );
+                }
+
+                // Add sticky toolbar script
+                $stickyToolbarPath = PathUtility::getAbsoluteWebPath(
+                    GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/sticky_toolbar.js'),
+                );
+                $resources['sticky_toolbar'] = sprintf(
+                    '<script%s src="%s"></script>',
+                    $nonceAttribute,
+                    $stickyToolbarPath,
                 );
             }
-
-            // Add sticky toolbar script (always loaded)
-            $stickyToolbarPath = PathUtility::getAbsoluteWebPath(
-                GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/sticky_toolbar.js'),
-            );
-            $resources['sticky_toolbar'] = sprintf(
-                '<script%s src="%s"></script>',
-                $nonceAttribute,
-                $stickyToolbarPath,
-            );
 
             $values = [...$values, 'resources' => $resources];
 
@@ -136,6 +143,17 @@ final readonly class ResourceRendererService
             $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
 
             return !array_key_exists('showContextMenu', $config) || (bool) $config['showContextMenu'];
+        } catch (Throwable) {
+            return true;
+        }
+    }
+
+    private function isShowStickyToolbar(): bool
+    {
+        try {
+            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
+
+            return !array_key_exists('showStickyToolbar', $config) || (bool) $config['showStickyToolbar'];
         } catch (Throwable) {
             return true;
         }
