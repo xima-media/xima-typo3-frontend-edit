@@ -22,7 +22,6 @@
 		"psr/http-server-middleware": "^1.0",
 		"symfony/dependency-injection": "^7.0 || ^8.0",
 		"typo3/cms-backend": "^13.4 || ^14.0",
-		"typo3/cms-beuser": "^13.4 || ^14.0",
 		"typo3/cms-core": "^13.4 || ^14.0",
 		"typo3/cms-frontend": "^13.4 || ^14.0",
 		"typo3fluid/fluid": "^4.2 || ^5.0"
