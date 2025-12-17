@@ -65,11 +65,13 @@ final class PageMenuGenerator extends AbstractMenuGenerator
         $this->menuButtonBuilder->addPageEditSection($menuButton, $pid, $languageUid, $returnUrl);
         $this->menuButtonBuilder->addPageActionSection($menuButton, $pid, $returnUrl);
 
-        $this->eventDispatcher->dispatch(
+        /** @var FrontendEditPageDropdownModifyEvent $event */
+        $event = $this->eventDispatcher->dispatch(
             new FrontendEditPageDropdownModifyEvent($pid, $languageUid, $menuButton, $returnUrl),
         );
 
-        $rendered = $menuButton->render();
+        // Use potentially modified button from event listeners
+        $rendered = $event->getMenuButton()->render();
         $rendered['targetBlank'] = $this->isLinkTargetBlank();
 
         return $rendered;

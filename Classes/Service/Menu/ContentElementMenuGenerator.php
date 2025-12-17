@@ -90,7 +90,8 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
             $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request);
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
-            $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
+            /** @var FrontendEditDropdownModifyEvent $event */
+            $event = $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
 
             // Add ctypeLabel and ctypeIcon for frontend display
             $ctypeLabel = $GLOBALS['LANG']->sL($contentElementConfig['label'] ?? '');
@@ -100,9 +101,10 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
             $iconIdentifier = $contentElementConfig['icon'] ?? 'content-textpic';
             $contentElement['ctypeIcon'] = (string) $this->iconService->getIcon($iconIdentifier);
 
+            // Use potentially modified button from event listeners
             $result[$contentElement['uid']] = [
                 'element' => $contentElement,
-                'menu' => $menuButton,
+                'menu' => $event->getMenuButton(),
             ];
         }
 
