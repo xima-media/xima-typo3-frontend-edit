@@ -111,6 +111,79 @@ final readonly class ContentElementRepository
     }
 
     /**
+     * Fetch content elements by UIDs regardless of PID.
+     *
+     * This method is used in onepager scenarios where content from multiple pages
+     * is rendered on a single page. Permission checks are performed per-element
+     * in the ContentElementFilter layer.
+     *
+     * @param array<int> $uids Array of content element UIDs
+     *
+     * @return array<int, array<string, mixed>> Array of content element records
+     *
+     * @throws Exception
+     *
+     * @see ContentElementFilter::shouldIncludeElement() for permission validation
+     */
+    public function fetchContentElementsByUids(
+        array $uids,
+        int $languageUid,
+        bool $includeMultilingualContent = true,
+    ): array {
+        if ([] === $uids) {
+            return [];
+        }
+
+        try {
+            $queryBuilder = $this->connectionPool->getQueryBuilderForTable('tt_content');
+
+            $query = $queryBuilder
+                ->select('*')
+                ->from('tt_content')
+                ->where(
+                    $queryBuilder->expr()->eq(
+                        'hidden',
+                        $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
+                    ),
+                    $queryBuilder->expr()->eq(
+                        'deleted',
+                        $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
+                    ),
+                    $queryBuilder->expr()->in(
+                        'uid',
+                        $queryBuilder->createNamedParameter($uids, Connection::PARAM_INT_ARRAY),
+                    ),
+                );
+
+            if ($includeMultilingualContent) {
+                $query->andWhere(
+                    $queryBuilder->expr()->or(
+                        $queryBuilder->expr()->eq(
+                            'sys_language_uid',
+                            $queryBuilder->createNamedParameter(-1, Connection::PARAM_INT),
+                        ),
+                        $queryBuilder->expr()->eq(
+                            'sys_language_uid',
+                            $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
+                        ),
+                    ),
+                );
+            } else {
+                $query->andWhere(
+                    $queryBuilder->expr()->eq(
+                        'sys_language_uid',
+                        $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
+                    ),
+                );
+            }
+
+            return $query->executeQuery()->fetchAllAssociative();
+        } catch (\Doctrine\DBAL\Exception $exception) {
+            throw new Exception('Failed to fetch content elements by UIDs: '.$exception->getMessage(), 1640000011, $exception);
+        }
+    }
+
+    /**
      * @return array<string, mixed>|false
      *
      * @throws \Doctrine\DBAL\Exception

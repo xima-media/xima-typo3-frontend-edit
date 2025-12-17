@@ -432,6 +432,23 @@
 
     collectDataItems() {
       const dataItems = {};
+      const allUids = new Set();
+
+      // Scan DOM for all content elements by id="c{uid}" pattern
+      // This enables editing content from other pages (onepager scenarios)
+      document.querySelectorAll('[id]').forEach(element => {
+        const match = element.id.match(/^c(\d+)$/);
+        if (match) {
+          const uid = parseInt(match[1], 10);
+          if (uid > 0) {
+            allUids.add(uid);
+          }
+        }
+      });
+
+      Logger.log(`Found ${allUids.size} content elements in DOM with id="c{uid}" pattern`);
+
+      // Collect additional data from .frontend-edit__data elements
       const dataElements = document.querySelectorAll('.frontend-edit__data');
 
       Logger.log(`Found ${dataElements.length} custom additional data elements on page`);
@@ -441,12 +458,26 @@
         if (!closestElement) return;
 
         const id = closestElement.id.replace('c', '');
-        if (!dataItems[id]) dataItems[id] = [];
+        const uid = parseInt(id, 10);
+
+        if (!dataItems[uid]) dataItems[uid] = [];
 
         const parsedData = JSON.parse(element.value);
-        dataItems[id].push(parsedData);
+        dataItems[uid].push(parsedData);
 
-        Logger.log(`Additional data element ${index + 1}: Found content element c${id}`, { parsedData });
+        // Ensure this UID is included
+        if (uid > 0) {
+          allUids.add(uid);
+        }
+
+        Logger.log(`Additional data element ${index + 1}: Found content element c${uid}`, { parsedData });
+      });
+
+      // Add UIDs array for backend to fetch content elements
+      dataItems._uids = Array.from(allUids).sort((a, b) => a - b);
+
+      Logger.log(`Collected ${allUids.size} unique content element UIDs for backend request`, {
+        uids: dataItems._uids
       });
 
       return dataItems;

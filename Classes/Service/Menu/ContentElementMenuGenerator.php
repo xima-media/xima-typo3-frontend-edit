@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Exception;
@@ -26,6 +27,9 @@ use Xima\XimaTypo3FrontendEdit\Service\Ui\IconService;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 
 use function array_key_exists;
+use function array_slice;
+use function count;
+use function is_array;
 
 /**
  * ContentElementMenuGenerator.
@@ -50,11 +54,12 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
     }
 
     /**
-     * @param array<int, mixed> $data
+     * @param array<int|string, mixed> $data
      *
-     * @return array<mixed>
+     * @return array
      *
      * @throws Exception
+     * @throws RouteNotFoundException
      */
     public function getDropdown(
         int $pid,
@@ -72,7 +77,15 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
             return [];
         }
 
-        $contentElements = $this->contentElementRepository->fetchContentElements($pid, $languageUid);
+        // Try UID-based fetching first (onepager support)
+        // Falls back to PID-based fetching if no UIDs provided (backwards compatibility)
+        $uids = $this->extractValidatedUids($data);
+        if ([] !== $uids) {
+            $contentElements = $this->contentElementRepository->fetchContentElementsByUids($uids, $languageUid);
+        } else {
+            $contentElements = $this->contentElementRepository->fetchContentElements($pid, $languageUid);
+        }
+
         $filteredElements = $this->contentElementFilter->filterContentElements($contentElements, $backendUser, $request);
 
         $result = [];
@@ -114,6 +127,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
     /**
      * @param array<string, mixed> $contentElement
      * @param array<string, mixed> $contentElementConfig
+     * @throws RouteNotFoundException
      */
     private function createMenuButton(
         array $contentElement,
@@ -141,9 +155,9 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
     }
 
     /**
-     * @param array<string, mixed> $contentElement
-     * @param array<string, mixed> $contentElementConfig
-     * @param array<int, mixed>    $data
+     * @param array<string, mixed>     $contentElement
+     * @param array<string, mixed>     $contentElementConfig
+     * @param array<int|string, mixed> $data
      */
     private function handleAdditionalData(
         Button $button,
@@ -162,8 +176,8 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
     }
 
     /**
-     * @param array<string, mixed> $contentElement
-     * @param array<int, mixed>    $data
+     * @param array<string, mixed>     $contentElement
+     * @param array<int|string, mixed> $data
      */
     private function resolveDataUid(array $contentElement, array $data): ?int
     {
@@ -184,9 +198,9 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
     }
 
     /**
-     * @param array<mixed> $result
+     * @param array $result
      *
-     * @return array<mixed>
+     * @return array
      */
     private function renderMenuButtons(array $result): array
     {
@@ -195,5 +209,39 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         }
 
         return $result;
+    }
+
+    /**
+     * Extract and validate UIDs from request data.
+     *
+     * @param array<int|string, mixed> $data Request data from frontend
+     *
+     * @return array<int> Validated array of unique UIDs
+     */
+    private function extractValidatedUids(array $data): array
+    {
+        if (!isset($data['_uids']) || !is_array($data['_uids'])) {
+            return [];
+        }
+
+        $uids = [];
+        foreach ($data['_uids'] as $uid) {
+            $validated = filter_var($uid, \FILTER_VALIDATE_INT, [
+                'options' => ['min_range' => 1],
+            ]);
+
+            if (false !== $validated) {
+                $uids[] = $validated;
+            }
+        }
+
+        $uids = array_unique($uids);
+
+        // Limit to 500 UIDs to prevent DoS attacks
+        if (count($uids) > 500) {
+            $uids = array_slice($uids, 0, 500);
+        }
+
+        return array_values($uids);
     }
 }
