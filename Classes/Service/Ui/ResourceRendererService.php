@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 
+use JsonException;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 use TYPO3\CMS\Core\Core\RequestId;
@@ -110,15 +111,26 @@ final readonly class ResourceRendererService
 
     /**
      * @param array<string, string> $resources
+     *
+     * @throws JsonException
      */
     private function addStickyToolbarResources(array &$resources, ServerRequestInterface $request, string $nonceAttribute): void
     {
         $toolbarPosition = $this->settingsService->getToolbarPosition($request);
         $toggleUrl = $this->getToggleUrl();
+
+        // Get translated tooltip strings
+        $tooltipEnable = $this->translate('tooltip.enable', 'Enable frontend editing mode');
+        $tooltipDisable = $this->translate('tooltip.disable', 'Disable frontend editing mode');
+        $tooltipPageOptions = $this->translate('tooltip.pageOptions', 'Page options');
+
         $resources['sticky_toolbar_config'] = sprintf(
-            '<div id="frontend-edit-sticky-toolbar-config" data-position="%s" data-toggle-url="%s" hidden></div>',
+            '<div id="frontend-edit-sticky-toolbar-config" data-position="%s" data-toggle-url="%s" data-tooltip-enable="%s" data-tooltip-disable="%s" data-tooltip-page-options="%s" hidden></div>',
             $toolbarPosition,
             htmlspecialchars($toggleUrl, \ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($tooltipEnable, \ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($tooltipDisable, \ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($tooltipPageOptions, \ENT_QUOTES, 'UTF-8'),
         );
 
         // Add page menu data as JSON (rendered client-side like content element menus)
@@ -219,5 +231,12 @@ final readonly class ResourceRendererService
         }
 
         return '';
+    }
+
+    private function translate(string $key, string $fallback): string
+    {
+        $label = $GLOBALS['LANG']->sL('LLL:EXT:'.Configuration::EXT_KEY.'/Resources/Private/Language/locallang.xlf:'.$key);
+
+        return '' !== $label ? $label : $fallback;
     }
 }

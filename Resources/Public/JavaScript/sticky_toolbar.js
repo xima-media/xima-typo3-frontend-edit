@@ -115,6 +115,12 @@
     isToggling: false,
     position: 'bottom-right',
     toggleUrl: '',
+    // Tooltip translations (with English fallbacks)
+    tooltips: {
+      enable: 'Enable frontend editing mode',
+      disable: 'Disable frontend editing mode',
+      pageOptions: 'Page options'
+    },
 
     init() {
       // Read sticky toolbar configuration
@@ -142,6 +148,17 @@
       this.isDisabled = generalConfig ? generalConfig.dataset.disabled === 'true' : false;
       this.toggleUrl = this.configElement.dataset.toggleUrl || '';
 
+      // Read tooltip translations from data attributes (with fallbacks)
+      if (this.configElement.dataset.tooltipEnable) {
+        this.tooltips.enable = this.configElement.dataset.tooltipEnable;
+      }
+      if (this.configElement.dataset.tooltipDisable) {
+        this.tooltips.disable = this.configElement.dataset.tooltipDisable;
+      }
+      if (this.configElement.dataset.tooltipPageOptions) {
+        this.tooltips.pageOptions = this.configElement.dataset.tooltipPageOptions;
+      }
+
       this.createToolbar();
       this.setupEventListeners();
       this.updateVisualState();
@@ -156,9 +173,7 @@
     },
 
     getToolbarHTML() {
-      const toggleTooltip = this.isDisabled
-        ? 'Enable frontend editing mode'
-        : 'Disable frontend editing mode';
+      const toggleTooltip = this.isDisabled ? this.tooltips.enable : this.tooltips.disable;
       const toggleIcon = this.isDisabled ? ICONS.eyeClosed : ICONS.eyeOpen;
 
       // Only show page menu when not disabled and data exists
@@ -175,7 +190,7 @@
         html += `
         <div class="frontend-edit__sticky-separator"></div>
         <div class="frontend-edit__sticky-dropdown-container">
-          <button class="frontend-edit__sticky-btn frontend-edit__sticky-btn--menu" data-tooltip="Page options" type="button">
+          <button class="frontend-edit__sticky-btn frontend-edit__sticky-btn--menu" data-tooltip="${this.tooltips.pageOptions}" type="button">
             ${ICONS.kebab}
           </button>
           <div class="frontend-edit__sticky-dropdown">
@@ -280,9 +295,7 @@
     updateVisualState() {
       const toggleBtn = this.container.querySelector('.frontend-edit__sticky-btn--toggle');
       toggleBtn.innerHTML = this.isDisabled ? ICONS.eyeClosed : ICONS.eyeOpen;
-      toggleBtn.dataset.tooltip = this.isDisabled
-        ? 'Enable frontend editing mode'
-        : 'Disable frontend editing mode';
+      toggleBtn.dataset.tooltip = this.isDisabled ? this.tooltips.enable : this.tooltips.disable;
       this.container.classList.toggle('frontend-edit__sticky-toolbar--disabled', this.isDisabled);
     }
   };

@@ -63,6 +63,18 @@
 				<source />
 				<target>Seitenlayout</target>
 			</trans-unit>
+			<trans-unit id="tooltip.enable">
+				<source />
+				<target>Frontend-Bearbeitung aktivieren</target>
+			</trans-unit>
+			<trans-unit id="tooltip.disable">
+				<source />
+				<target>Frontend-Bearbeitung deaktivieren</target>
+			</trans-unit>
+			<trans-unit id="tooltip.pageOptions">
+				<source />
+				<target>Seitenoptionen</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
