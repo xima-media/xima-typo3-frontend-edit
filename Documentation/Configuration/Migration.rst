@@ -71,7 +71,7 @@ Migrate your existing TypoScript configuration to Site Settings:
       - ``frontendEdit.filter.ignoreUids``
 
     * - ``plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure.*``
-      - Removed (menu items are no longer configurable)
+      - Removed — see :ref:`menu-structure-deprecation`
 
 Example Migration
 -----------------
@@ -123,3 +123,155 @@ Step-by-Step Migration
 5. **Test**
 
    Verify that frontend editing works as expected on your site.
+
+..  _menu-structure-deprecation:
+
+Breaking Change: Menu Structure Customization Removed
+=====================================================
+
+In version 2.x, the ``defaultMenuStructure`` configuration options have been removed.
+This section explains why and how to migrate if you relied on this feature.
+
+Why Was This Removed?
+---------------------
+
+The granular menu item configuration (``showEdit``, ``showHistory``, ``showInfo``, etc.)
+was removed for the following reasons:
+
+- **Low usage:** Analysis showed this feature was rarely used in practice
+- **Complexity reduction:** Removing 8+ configuration options simplifies the extension
+- **Maintainability:** Less configuration means fewer edge cases and easier testing
+- **Consistency:** The dropdown menu now always shows all available actions
+
+The ``frontendEdit.showContextMenu`` Site Setting still allows you to toggle between
+the full dropdown menu and a simple edit button.
+
+Migration Approaches
+--------------------
+
+Depending on your use case, choose one of the following approaches:
+
+**Option A: Use the Context Menu Toggle (Recommended)**
+
+If you previously disabled most menu items to show only the edit button,
+use the new ``showContextMenu`` setting:
+
+..  code-block:: yaml
+    :caption: config/sites/my-site/settings.yaml
+
+    frontendEdit:
+      showContextMenu: false  # Shows only the edit button
+
+**Option B: Use Event Listeners for Custom Menus**
+
+For advanced customization, use the provided PSR-14 events to modify the menu:
+
+..  code-block:: php
+    :caption: EXT:my_extension/Classes/EventListener/ModifyFrontendEditDropdown.php
+
+    <?php
+    namespace MyVendor\MyExtension\EventListener;
+
+    use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
+
+    final class ModifyFrontendEditDropdown
+    {
+        public function __invoke(FrontendEditDropdownModifyEvent $event): void
+        {
+            $menuButton = $event->getMenuButton();
+
+            // Remove specific menu items
+            $menuButton->removeChild('history');
+            $menuButton->removeChild('info');
+
+            // Or add custom items
+            // $menuButton->appendChild($customButton, 'my_action');
+
+            $event->setMenuButton($menuButton);
+        }
+    }
+
+Register the listener in your extension's :file:`Configuration/Services.yaml`:
+
+..  code-block:: yaml
+    :caption: EXT:my_extension/Configuration/Services.yaml
+
+    services:
+      MyVendor\MyExtension\EventListener\ModifyFrontendEditDropdown:
+        tags:
+          - name: event.listener
+            identifier: 'my-extension/modify-frontend-edit-dropdown'
+
+**Option C: Override Templates**
+
+For complete control over the menu rendering, override the Fluid templates:
+
+..  code-block:: typoscript
+
+    # In your site package TypoScript
+    # Override the button partial
+    [... template override configuration ...]
+
+Migration Recipe
+----------------
+
+Follow these steps if you had custom ``defaultMenuStructure`` configuration:
+
+1. **Identify your customizations**
+
+   Review your old TypoScript configuration:
+
+   ..  code-block:: typoscript
+
+       plugin.tx_ximatypo3frontendedit.settings.defaultMenuStructure {
+           history = 0
+           info = 0
+           move = 0
+       }
+
+2. **Choose your approach**
+
+   - If you disabled *all* items except ``edit``: Use ``showContextMenu: false``
+   - If you need specific items hidden: Implement an event listener
+   - If you need complete control: Override templates
+
+3. **Implement the solution**
+
+   Apply the chosen approach from the options above.
+
+4. **Remove old configuration**
+
+   Delete all ``defaultMenuStructure`` TypoScript settings.
+
+5. **Test thoroughly**
+
+   - Verify the menu appears correctly in the frontend
+   - Check that edit links work as expected
+   - Test with different user permissions
+
+Troubleshooting
+---------------
+
+**Menu shows all items when I want fewer**
+
+Use an event listener to remove unwanted items. The ``showContextMenu: false``
+setting only toggles between "full menu" and "edit button only".
+
+**Event listener not being called**
+
+- Ensure your Services.yaml is properly configured
+- Clear all caches including the DI container cache
+- Verify the event class name is correct
+
+**Custom menu items not appearing**
+
+When adding items via event listener:
+
+- Use ``appendChild()`` with a unique identifier
+- Ensure the Button component is properly configured
+- Check that the item type (Link, Divider, etc.) is correct
+
+**Need help?**
+
+If you have complex menu customization needs that cannot be addressed with the
+approaches above, please open an issue on the extension's GitHub repository.
