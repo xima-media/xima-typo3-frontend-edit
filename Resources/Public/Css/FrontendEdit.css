@@ -121,6 +121,18 @@
     transform: translateY(50%);
 }
 
+/* Modifier: nested - toolbar inside element (not centered on outline) */
+.frontend-edit__overlay--nested .frontend-edit__toolbar-label,
+.frontend-edit__overlay--nested .frontend-edit__toolbar-actions {
+    transform: translateY(0);
+}
+
+/* Nested + bottom: toolbar stays inside element */
+.frontend-edit__overlay--nested.frontend-edit__overlay--bottom .frontend-edit__toolbar-label,
+.frontend-edit__overlay--nested.frontend-edit__overlay--bottom .frontend-edit__toolbar-actions {
+    transform: translateY(-100%);
+}
+
 /* Element: toolbar-label (top-left, standing on outline) */
 .frontend-edit__toolbar-label {
     position: absolute;

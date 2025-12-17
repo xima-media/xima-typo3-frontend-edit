@@ -205,6 +205,26 @@
     overlays: new Map(), // Map<targetElement, {toolbar, outline}>
     scrollRAF: null,
 
+    /**
+     * Check if a content element is nested inside another content element
+     * Used to apply different toolbar positioning for nested elements
+     */
+    isNestedContentElement(targetElement) {
+      let parent = targetElement.parentElement;
+      while (parent) {
+        // Check if parent has content element ID pattern
+        if (parent.id && /^c\d+$/.test(parent.id)) {
+          return true;
+        }
+        // Also check for anchor pattern: <a id="c123"></a><div>
+        if (parent.previousElementSibling?.id && /^c\d+$/.test(parent.previousElementSibling.id)) {
+          return true;
+        }
+        parent = parent.parentElement;
+      }
+      return false;
+    },
+
     init() {
       // Create overlay container
       this.container = document.createElement('div');
@@ -234,6 +254,11 @@
       overlay.className = 'frontend-edit__overlay';
       overlay.dataset.cid = uid;
       overlay.style.cssText = 'position:absolute;pointer-events:none;';
+
+      // Add nested modifier for elements inside other content elements
+      if (this.isNestedContentElement(targetElement)) {
+        overlay.classList.add('frontend-edit__overlay--nested');
+      }
 
       // Create outline element
       const outline = document.createElement('div');
