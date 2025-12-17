@@ -476,6 +476,7 @@
     border-radius: 8px;
     box-shadow: var(--xfe-shadow);
     padding: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     display: none;
     opacity: 0;
     transform: translateY(8px);
@@ -535,36 +536,33 @@
     transform: translateX(0);
 }
 
-/* Dropdown items */
-.frontend-edit__sticky-dropdown-item {
+/* Dropdown items - same pattern as content element dropdown */
+.frontend-edit__sticky-dropdown a,
+.frontend-edit__sticky-dropdown div {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 12px;
+    padding: 8px 12px;
     color: var(--xfe-text-primary);
     text-decoration: none;
-    border-radius: 6px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    font-size: 14px;
+    border-radius: 4px;
+    font-size: 13px;
     line-height: 1.4;
     white-space: nowrap;
+    margin: 0;
+    background: transparent;
     cursor: pointer;
     transition: background 0.1s ease;
 }
 
-.frontend-edit__sticky-dropdown-item:hover {
+.frontend-edit__sticky-dropdown a:hover {
     background: var(--xfe-bg-hover);
 }
 
-.frontend-edit__sticky-dropdown-item svg {
-    width: 18px;
-    height: 18px;
+.frontend-edit__sticky-dropdown a svg,
+.frontend-edit__sticky-dropdown div svg {
+    width: 16px;
+    height: 16px;
     flex-shrink: 0;
     opacity: 0.7;
-}
-
-.frontend-edit__sticky-dropdown-divider {
-    height: 1px;
-    background: var(--xfe-border-color);
-    margin: 4px 0;
 }

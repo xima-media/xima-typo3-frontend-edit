@@ -65,13 +65,20 @@ final class PageMenuGenerator extends AbstractMenuGenerator
 
         $html = '';
 
+        // Edit section header
+        $editHeader = $GLOBALS['LANG']->sL('LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_edit');
+        $html .= sprintf(
+            '<div class="frontend-edit__divider div_edit"><span>%s</span></div>',
+            htmlspecialchars((string) $editHeader, \ENT_QUOTES, 'UTF-8'),
+        );
+
         // Edit page properties
         try {
             $editUrl = $this->urlBuilderService->buildEditUrl($pid, 'pages', $languageUid, $returnUrl);
             $editIcon = $this->iconService->getIcon('actions-page-open')->getAlternativeMarkup('inline');
             $editLabel = $GLOBALS['LANG']->sL('LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_page_properties');
             $html .= sprintf(
-                '<a href="%s" class="frontend-edit__sticky-dropdown-item"%s>%s<span>%s</span></a>',
+                '<a href="%s"%s>%s<span>%s</span></a>',
                 htmlspecialchars($editUrl, \ENT_QUOTES, 'UTF-8'),
                 $targetAttr,
                 $editIcon,
@@ -81,17 +88,56 @@ final class PageMenuGenerator extends AbstractMenuGenerator
             // Skip if URL cannot be built
         }
 
-        // Page layout (Backend)
+        // Edit page (Backend Page Layout)
         try {
             $layoutUrl = $this->urlBuilderService->buildPageLayoutUrl($pid, $languageUid, $returnUrl);
-            $layoutIcon = $this->iconService->getIcon('actions-view-table-expand')->getAlternativeMarkup('inline');
-            $layoutLabel = $GLOBALS['LANG']->sL('LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:page_layout');
+            $layoutIcon = $this->iconService->getIcon('apps-pagetree-page-default')->getAlternativeMarkup('inline');
+            $layoutLabel = $GLOBALS['LANG']->sL('LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:edit_page');
             $html .= sprintf(
-                '<a href="%s" class="frontend-edit__sticky-dropdown-item"%s>%s<span>%s</span></a>',
+                '<a href="%s"%s>%s<span>%s</span></a>',
                 htmlspecialchars($layoutUrl, \ENT_QUOTES, 'UTF-8'),
                 $targetAttr,
                 $layoutIcon,
                 htmlspecialchars((string) $layoutLabel, \ENT_QUOTES, 'UTF-8'),
+            );
+        } catch (Throwable) {
+            // Skip if URL cannot be built
+        }
+
+        // Action section header
+        $actionHeader = $GLOBALS['LANG']->sL('LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:div_action');
+        $html .= sprintf(
+            '<div class="frontend-edit__divider div_action"><span>%s</span></div>',
+            htmlspecialchars((string) $actionHeader, \ENT_QUOTES, 'UTF-8'),
+        );
+
+        // Page info
+        try {
+            $infoUrl = $this->urlBuilderService->buildInfoUrl($pid, 'pages', $returnUrl);
+            $infoIcon = $this->iconService->getIcon('actions-info')->getAlternativeMarkup('inline');
+            $infoLabel = $GLOBALS['LANG']->sL('LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:info');
+            $html .= sprintf(
+                '<a href="%s"%s>%s<span>%s</span></a>',
+                htmlspecialchars($infoUrl, \ENT_QUOTES, 'UTF-8'),
+                $targetAttr,
+                $infoIcon,
+                htmlspecialchars((string) $infoLabel, \ENT_QUOTES, 'UTF-8'),
+            );
+        } catch (Throwable) {
+            // Skip if URL cannot be built
+        }
+
+        // Page history
+        try {
+            $historyUrl = $this->urlBuilderService->buildHistoryUrl($pid, 'pages', $returnUrl);
+            $historyIcon = $this->iconService->getIcon('actions-history')->getAlternativeMarkup('inline');
+            $historyLabel = $GLOBALS['LANG']->sL('LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang.xlf:history');
+            $html .= sprintf(
+                '<a href="%s"%s>%s<span>%s</span></a>',
+                htmlspecialchars($historyUrl, \ENT_QUOTES, 'UTF-8'),
+                $targetAttr,
+                $historyIcon,
+                htmlspecialchars((string) $historyLabel, \ENT_QUOTES, 'UTF-8'),
             );
         } catch (Throwable) {
             // Skip if URL cannot be built
