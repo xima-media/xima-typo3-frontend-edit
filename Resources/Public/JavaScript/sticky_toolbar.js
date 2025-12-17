@@ -110,7 +110,7 @@
   const StickyToolbar = {
     container: null,
     configElement: null,
-    pageMenuTemplate: null,
+    pageMenuData: null,
     isDisabled: false,
     isToggling: false,
     position: 'bottom-right',
@@ -127,8 +127,16 @@
       // Read general config for disabled state
       const generalConfig = document.getElementById('frontend-edit-toolbar-config');
 
-      // Get page menu template (server-rendered)
-      this.pageMenuTemplate = document.getElementById('frontend-edit-page-menu');
+      // Get page menu data (JSON)
+      const pageMenuDataElement = document.getElementById('frontend-edit-page-menu-data');
+      if (pageMenuDataElement) {
+        try {
+          this.pageMenuData = JSON.parse(pageMenuDataElement.textContent);
+          Logger.log('Page menu data loaded', this.pageMenuData);
+        } catch (e) {
+          Logger.log('Failed to parse page menu data', { error: e.message }, 'error');
+        }
+      }
 
       this.position = this.configElement.dataset.position || 'bottom-right';
       this.isDisabled = generalConfig ? generalConfig.dataset.disabled === 'true' : false;
@@ -153,9 +161,8 @@
         : 'Disable frontend editing mode';
       const toggleIcon = this.isDisabled ? ICONS.eyeClosed : ICONS.eyeOpen;
 
-      // Only show page menu when not disabled and template exists
-      const showPageMenu = !this.isDisabled && this.pageMenuTemplate;
-      const pageMenuContent = showPageMenu ? this.pageMenuTemplate.innerHTML : '';
+      // Only show page menu when not disabled and data exists
+      const showPageMenu = !this.isDisabled && this.pageMenuData && this.pageMenuData.children;
 
       let html = `
         <button class="frontend-edit__sticky-btn frontend-edit__sticky-btn--toggle" data-tooltip="${toggleTooltip}" type="button">
@@ -163,7 +170,8 @@
         </button>`;
 
       // Add page dropdown only when enabled
-      if (showPageMenu && pageMenuContent) {
+      if (showPageMenu) {
+        const dropdownContent = this.renderDropdownContent();
         html += `
         <div class="frontend-edit__sticky-separator"></div>
         <div class="frontend-edit__sticky-dropdown-container">
@@ -171,9 +179,29 @@
             ${ICONS.kebab}
           </button>
           <div class="frontend-edit__sticky-dropdown">
-            ${pageMenuContent}
+            ${dropdownContent}
           </div>
         </div>`;
+      }
+
+      return html;
+    },
+
+    renderDropdownContent() {
+      if (!this.pageMenuData || !this.pageMenuData.children) {
+        return '';
+      }
+
+      const targetBlank = this.pageMenuData.targetBlank || false;
+      let html = '';
+
+      for (const [name, item] of Object.entries(this.pageMenuData.children)) {
+        if (item.type === 'divider') {
+          html += `<div class="frontend-edit__divider ${name}"><span>${item.label}</span></div>`;
+        } else if (item.type === 'link') {
+          const targetAttr = targetBlank ? ' target="_blank"' : '';
+          html += `<a href="${item.url}"${targetAttr}>${item.icon ?? ''}<span>${item.label}</span></a>`;
+        }
       }
 
       return html;

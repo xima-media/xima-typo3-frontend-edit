@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
 use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
@@ -37,6 +38,7 @@ final readonly class MenuButtonBuilder
 
     /**
      * @param array<string, mixed> $contentElement
+     * @throws RouteNotFoundException
      */
     public function createSimpleEditButton(
         array $contentElement,
@@ -107,6 +109,7 @@ final readonly class MenuButtonBuilder
 
     /**
      * @param array<string, mixed> $contentElement
+     * @throws RouteNotFoundException
      */
     public function addEditSection(
         Button $menuButton,
@@ -145,6 +148,7 @@ final readonly class MenuButtonBuilder
 
     /**
      * @param array<string, mixed> $contentElement
+     * @throws RouteNotFoundException
      */
     public function addActionSection(
         Button $menuButton,
@@ -180,7 +184,46 @@ final readonly class MenuButtonBuilder
         $this->addButton($menuButton, 'history', ButtonType::Link, url: $historyUrl, icon: 'actions-history', request: $request);
     }
 
-    private function addButton(
+    /**
+     * Add page edit section (for page dropdown in sticky toolbar).
+     */
+    public function addPageEditSection(
+        Button $menuButton,
+        int $pageId,
+        int $languageUid,
+        string $returnUrl,
+    ): void {
+        $this->addButton($menuButton, 'div_edit', ButtonType::Divider);
+
+        // Edit page properties
+        $editUrl = $this->urlBuilderService->buildEditUrl($pageId, 'pages', $languageUid, $returnUrl);
+        $this->addButton($menuButton, 'edit_page_properties', ButtonType::Link, url: $editUrl, icon: 'actions-page-open');
+
+        // Edit page (Backend Page Layout)
+        $pageUrl = $this->urlBuilderService->buildPageLayoutUrl($pageId, $languageUid, $returnUrl);
+        $this->addButton($menuButton, 'edit_page', ButtonType::Link, url: $pageUrl, icon: 'apps-pagetree-page-default');
+    }
+
+    /**
+     * Add page action section (for page dropdown in sticky toolbar).
+     */
+    public function addPageActionSection(
+        Button $menuButton,
+        int $pageId,
+        string $returnUrl,
+    ): void {
+        $this->addButton($menuButton, 'div_action', ButtonType::Divider);
+
+        // Page info
+        $infoUrl = $this->urlBuilderService->buildInfoUrl($pageId, 'pages', $returnUrl);
+        $this->addButton($menuButton, 'info', ButtonType::Link, url: $infoUrl, icon: 'actions-info');
+
+        // Page history
+        $historyUrl = $this->urlBuilderService->buildHistoryUrl($pageId, 'pages', $returnUrl);
+        $this->addButton($menuButton, 'history', ButtonType::Link, url: $historyUrl, icon: 'actions-history');
+    }
+
+    public function addButton(
         Button $menuButton,
         string $identifier,
         ButtonType $type,

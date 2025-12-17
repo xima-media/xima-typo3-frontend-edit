@@ -109,12 +109,13 @@ final readonly class ResourceRendererService
                     htmlspecialchars($toggleUrl, \ENT_QUOTES, 'UTF-8'),
                 );
 
-                // Add page menu template (rendered server-side like content element menus)
-                $pageMenuHtml = null !== $request ? $this->pageMenuGenerator->getDropdown($request) : '';
-                if ('' !== $pageMenuHtml) {
-                    $resources['page_menu_template'] = sprintf(
-                        '<template id="frontend-edit-page-menu">%s</template>',
-                        $pageMenuHtml,
+                // Add page menu data as JSON (rendered client-side like content element menus)
+                $pageMenuData = null !== $request ? $this->pageMenuGenerator->getDropdown($request) : [];
+                if ([] !== $pageMenuData) {
+                    $resources['page_menu_data'] = sprintf(
+                        '<script%s type="application/json" id="frontend-edit-page-menu-data">%s</script>',
+                        $nonceAttribute,
+                        json_encode($pageMenuData, \JSON_THROW_ON_ERROR | \JSON_HEX_TAG | \JSON_HEX_AMP),
                     );
                 }
 
