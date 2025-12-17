@@ -39,7 +39,7 @@ For now only all content elements on the current page are "editable". So if you'
 
 **Debug**
 
-Check the network tab for the initial ajax call (something like :code:`/?type=1729341864` with the information about the editable content elements and the according dropdown menus.
+Check the network tab for the initial AJAX call to :code:`/typo3/ajax/xima-frontend-edit/edit-information` with the information about the editable content elements and the according dropdown menus.
 
 
 .. rst-class:: panel panel-default

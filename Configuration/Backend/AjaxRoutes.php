@@ -15,6 +15,9 @@ return [
     'frontendEdit_toggle' => [
         'path' => '/xima-frontend-edit/toggle',
         'target' => Xima\XimaTypo3FrontendEdit\Controller\AjaxController::class.'::toggleAction',
-        'csrf' => false,
+    ],
+    'frontendEdit_editInformation' => [
+        'path' => '/xima-frontend-edit/edit-information',
+        'target' => Xima\XimaTypo3FrontendEdit\Controller\AjaxController::class.'::editInformationAction',
     ],
 ];

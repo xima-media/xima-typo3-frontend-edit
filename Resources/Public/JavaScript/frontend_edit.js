@@ -453,8 +453,20 @@
     },
 
     async fetchContentElements(dataItems) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('type', '1729341864');
+      const config = document.getElementById('frontend-edit-toolbar-config');
+      if (!config) {
+        throw new Error('Frontend edit configuration not found');
+      }
+
+      const editInfoUrl = config.dataset.editInfoUrl;
+      const pid = config.dataset.pid;
+      const language = config.dataset.language;
+      const returnUrl = window.location.href;
+
+      const url = new URL(editInfoUrl, window.location.origin);
+      url.searchParams.set('pid', pid);
+      url.searchParams.set('language', language);
+      url.searchParams.set('returnUrl', returnUrl);
 
       Logger.log('Sending request to backend', { url: url.toString() });
 

@@ -91,11 +91,16 @@ final readonly class ResourceRendererService
             $toolbarPosition = $this->getToolbarPosition();
             $isDisabled = $this->backendUserService->isFrontendEditDisabled();
             $toggleUrl = $this->getToggleUrl();
+            $editInfoUrl = $this->getEditInformationUrl();
+            $pageInfo = $this->getPageInfo($request);
             $resources['toolbar_config'] = sprintf(
-                '<div id="frontend-edit-toolbar-config" data-position="%s" data-disabled="%s" data-toggle-url="%s" hidden></div>',
+                '<div id="frontend-edit-toolbar-config" data-position="%s" data-disabled="%s" data-toggle-url="%s" data-edit-info-url="%s" data-pid="%d" data-language="%d" hidden></div>',
                 $toolbarPosition,
                 $isDisabled ? 'true' : 'false',
                 htmlspecialchars($toggleUrl, \ENT_QUOTES, 'UTF-8'),
+                htmlspecialchars($editInfoUrl, \ENT_QUOTES, 'UTF-8'),
+                $pageInfo['pid'],
+                $pageInfo['language'],
             );
 
             // Add page menu template (rendered server-side like content element menus)
@@ -170,6 +175,39 @@ final readonly class ResourceRendererService
         } catch (Throwable) {
             return '';
         }
+    }
+
+    private function getEditInformationUrl(): string
+    {
+        try {
+            // AJAX routes get 'ajax_' prefix automatically
+            return $this->urlBuilderService->buildRoute('ajax_frontendEdit_editInformation');
+        } catch (Throwable) {
+            return '';
+        }
+    }
+
+    /**
+     * @return array{pid: int, language: int}
+     */
+    private function getPageInfo(?ServerRequestInterface $request): array
+    {
+        $pid = 0;
+        $language = 0;
+
+        if (null !== $request) {
+            $routing = $request->getAttribute('routing');
+            if ($routing instanceof \TYPO3\CMS\Core\Routing\PageArguments) {
+                $pid = $routing->getPageId();
+            }
+
+            $siteLanguage = $request->getAttribute('language');
+            if ($siteLanguage instanceof \TYPO3\CMS\Core\Site\Entity\SiteLanguage) {
+                $language = $siteLanguage->getLanguageId();
+            }
+        }
+
+        return ['pid' => $pid, 'language' => $language];
     }
 
     /**
