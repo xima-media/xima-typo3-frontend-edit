@@ -14,6 +14,7 @@
 	],
 	"require": {
 		"php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+		"ext-filter": "*",
 		"ext-mbstring": "*",
 		"doctrine/dbal": "^3.9 || ^4.2",
 		"psr/container": "^1.1 || ^2.0",
