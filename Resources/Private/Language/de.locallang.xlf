@@ -51,6 +51,30 @@
 				<source />
 				<target>Daten</target>
 			</trans-unit>
+			<trans-unit id="page_menu">
+				<source />
+				<target>Seitenmenü</target>
+			</trans-unit>
+			<trans-unit id="edit_page_properties">
+				<source />
+				<target>Seiteneigenschaften bearbeiten</target>
+			</trans-unit>
+			<trans-unit id="page_layout">
+				<source />
+				<target>Seitenlayout</target>
+			</trans-unit>
+			<trans-unit id="tooltip.enable">
+				<source />
+				<target>Frontend-Bearbeitung aktivieren</target>
+			</trans-unit>
+			<trans-unit id="tooltip.disable">
+				<source />
+				<target>Frontend-Bearbeitung deaktivieren</target>
+			</trans-unit>
+			<trans-unit id="tooltip.pageOptions">
+				<source />
+				<target>Seitenoptionen</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

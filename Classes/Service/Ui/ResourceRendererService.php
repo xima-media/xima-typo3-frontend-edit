@@ -13,19 +13,19 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 
+use JsonException;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\RequestId;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, PathUtility};
 use TYPO3\CMS\Core\View\{ViewFactoryData, ViewFactoryInterface};
 use Xima\XimaTypo3FrontendEdit\Configuration;
+use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
+use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
-use function array_key_exists;
-use function in_array;
 use function sprintf;
 
 /**
@@ -38,7 +38,9 @@ final readonly class ResourceRendererService
 {
     public function __construct(
         private SettingsService $settingsService,
-        private ExtensionConfiguration $extensionConfiguration,
+        private BackendUserService $backendUserService,
+        private UrlBuilderService $urlBuilderService,
+        private PageMenuGenerator $pageMenuGenerator,
     ) {}
 
     /**
@@ -53,19 +55,19 @@ final readonly class ResourceRendererService
             $nonceAttribute = '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '';
             $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
 
-            // Add Floating UI library
+            // Add Floating UI library - loaded as module, then signals ready
             $floatingUiPath = PathUtility::getAbsoluteWebPath(
                 GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/vendor/floating-ui.dom.bundle.js'),
             );
             $resources['floating_ui'] = sprintf(
-                '<script%s type="module">import * as FloatingUIDOM from "%s"; window.FloatingUIDOM = FloatingUIDOM;</script>',
+                '<script%s type="module">import * as FloatingUIDOM from "%s"; window.FloatingUIDOM = FloatingUIDOM; window.dispatchEvent(new Event("floatingui:ready"));</script>',
                 $nonceAttribute,
                 $floatingUiPath,
             );
 
             // Add settings configuration (colorScheme and showContextMenu)
-            $colorScheme = $this->getColorScheme();
-            $showContextMenu = $this->isShowContextMenu() ? 'true' : 'false';
+            $colorScheme = null !== $request ? $this->settingsService->getColorScheme($request) : 'auto';
+            $showContextMenu = (null !== $request && $this->settingsService->isShowContextMenu($request)) ? 'true' : 'false';
             $resources['settings_config'] = sprintf(
                 '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s;</script>',
                 $nonceAttribute,
@@ -82,6 +84,23 @@ final readonly class ResourceRendererService
                 );
             }
 
+            // Add sticky toolbar configuration as data attributes (like Admin Panel pattern)
+            $isDisabled = $this->backendUserService->isFrontendEditDisabled();
+            $editInfoUrl = $this->getEditInformationUrl();
+            $pageInfo = $this->getPageInfo($request);
+            $resources['toolbar_config'] = sprintf(
+                '<div id="frontend-edit-toolbar-config" data-disabled="%s" data-edit-info-url="%s" data-pid="%d" data-language="%d" hidden></div>',
+                $isDisabled ? 'true' : 'false',
+                htmlspecialchars($editInfoUrl, \ENT_QUOTES, 'UTF-8'),
+                $pageInfo['pid'],
+                $pageInfo['language'],
+            );
+
+            // Add sticky toolbar resources only if enabled
+            if (null !== $request && $this->settingsService->isShowStickyToolbar($request)) {
+                $this->addStickyToolbarResources($resources, $request, $nonceAttribute);
+            }
+
             $values = [...$values, 'resources' => $resources];
 
             return $this->renderView($template, $values, $request);
@@ -90,27 +109,92 @@ final readonly class ResourceRendererService
         }
     }
 
-    private function isShowContextMenu(): bool
+    /**
+     * @param array<string, string> $resources
+     *
+     * @throws JsonException
+     */
+    private function addStickyToolbarResources(array &$resources, ServerRequestInterface $request, string $nonceAttribute): void
+    {
+        $toolbarPosition = $this->settingsService->getToolbarPosition($request);
+        $toggleUrl = $this->getToggleUrl();
+
+        // Get translated tooltip strings
+        $tooltipEnable = $this->translate('tooltip.enable', 'Enable frontend editing mode');
+        $tooltipDisable = $this->translate('tooltip.disable', 'Disable frontend editing mode');
+        $tooltipPageOptions = $this->translate('tooltip.pageOptions', 'Page options');
+
+        $resources['sticky_toolbar_config'] = sprintf(
+            '<div id="frontend-edit-sticky-toolbar-config" data-position="%s" data-toggle-url="%s" data-tooltip-enable="%s" data-tooltip-disable="%s" data-tooltip-page-options="%s" hidden></div>',
+            $toolbarPosition,
+            htmlspecialchars($toggleUrl, \ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($tooltipEnable, \ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($tooltipDisable, \ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($tooltipPageOptions, \ENT_QUOTES, 'UTF-8'),
+        );
+
+        // Add page menu data as JSON (rendered client-side like content element menus)
+        $pageMenuData = $this->pageMenuGenerator->getDropdown($request);
+        if ([] !== $pageMenuData) {
+            $resources['page_menu_data'] = sprintf(
+                '<script%s type="application/json" id="frontend-edit-page-menu-data">%s</script>',
+                $nonceAttribute,
+                json_encode($pageMenuData, \JSON_THROW_ON_ERROR | \JSON_HEX_TAG | \JSON_HEX_AMP),
+            );
+        }
+
+        // Add sticky toolbar script
+        $stickyToolbarPath = PathUtility::getAbsoluteWebPath(
+            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/sticky_toolbar.js'),
+        );
+        $resources['sticky_toolbar'] = sprintf(
+            '<script%s src="%s"></script>',
+            $nonceAttribute,
+            $stickyToolbarPath,
+        );
+    }
+
+    private function getToggleUrl(): string
     {
         try {
-            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
-
-            return !array_key_exists('showContextMenu', $config) || (bool) $config['showContextMenu'];
+            // AJAX routes get 'ajax_' prefix automatically
+            return $this->urlBuilderService->buildRoute('ajax_frontendEdit_toggle');
         } catch (Throwable) {
-            return true;
+            return '';
         }
     }
 
-    private function getColorScheme(): string
+    private function getEditInformationUrl(): string
     {
         try {
-            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
-            $scheme = $config['colorScheme'] ?? 'auto';
-
-            return in_array($scheme, ['auto', 'light', 'dark'], true) ? $scheme : 'auto';
+            // AJAX routes get 'ajax_' prefix automatically
+            return $this->urlBuilderService->buildRoute('ajax_frontendEdit_editInformation');
         } catch (Throwable) {
-            return 'auto';
+            return '';
         }
+    }
+
+    /**
+     * @return array{pid: int, language: int}
+     */
+    private function getPageInfo(?ServerRequestInterface $request): array
+    {
+        $pid = 0;
+        $language = 0;
+
+        if (null !== $request) {
+            $routing = $request->getAttribute('routing');
+            if ($routing instanceof \TYPO3\CMS\Core\Routing\PageArguments) {
+                $pid = $routing->getPageId();
+            }
+
+            $siteLanguage = $request->getAttribute('language');
+            if ($siteLanguage instanceof \TYPO3\CMS\Core\Site\Entity\SiteLanguage) {
+                $language = $siteLanguage->getLanguageId();
+            }
+        }
+
+        return ['pid' => $pid, 'language' => $language];
     }
 
     /**
@@ -147,5 +231,12 @@ final readonly class ResourceRendererService
         }
 
         return '';
+    }
+
+    private function translate(string $key, string $fallback): string
+    {
+        $label = $GLOBALS['LANG']->sL('LLL:EXT:'.Configuration::EXT_KEY.'/Resources/Private/Language/locallang.xlf:'.$key);
+
+        return '' !== $label ? $label : $fallback;
     }
 }

@@ -30,6 +30,57 @@ Enable/Disable
         frontendEdit:
           enabled: true
 
+Appearance Settings
+-------------------
+
+..  confval:: frontendEdit.colorScheme
+
+    :type: string
+    :Default: 'auto'
+
+    Choose the color scheme for the frontend editing UI. Options: auto (follows system preference), light, dark.
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          colorScheme: 'auto'
+
+..  confval:: frontendEdit.showContextMenu
+
+    :type: bool
+    :Default: true
+
+    Show the context menu dropdown with additional actions (edit page, hide, move, history). Disable to show only the edit button.
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          showContextMenu: true
+
+..  confval:: frontendEdit.showStickyToolbar
+
+    :type: bool
+    :Default: true
+
+    Show the sticky toolbar with page editing options and toggle functionality.
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          showStickyToolbar: true
+
+..  confval:: frontendEdit.toolbarPosition
+
+    :type: string
+    :Default: 'bottom-right'
+
+    Choose the position for the sticky toolbar. Options: bottom-right, bottom-left, top-right, top-left, bottom, top, left, right.
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          toolbarPosition: 'bottom-right'
+
 Filter Settings
 ---------------
 
@@ -85,81 +136,6 @@ Filter Settings
           filter:
             ignoreUids: '100,200,300'
 
-Menu Structure
---------------
-
-You can customize which menu items are shown in the dropdown menu.
-
-..  confval:: frontendEdit.menu.showDivInfo
-
-    :type: bool
-    :Default: true
-
-    Show the info section divider in the dropdown menu.
-
-..  confval:: frontendEdit.menu.showHeader
-
-    :type: bool
-    :Default: true
-
-    Show the header with content element info in the dropdown menu.
-
-..  confval:: frontendEdit.menu.showDivEdit
-
-    :type: bool
-    :Default: true
-
-    Show the edit section divider in the dropdown menu.
-
-..  confval:: frontendEdit.menu.showEdit
-
-    :type: bool
-    :Default: true
-
-    Show the edit content element button in the dropdown menu.
-
-..  confval:: frontendEdit.menu.showEditPage
-
-    :type: bool
-    :Default: true
-
-    Show the edit page button in the dropdown menu.
-
-..  confval:: frontendEdit.menu.showDivAction
-
-    :type: bool
-    :Default: true
-
-    Show the action section divider in the dropdown menu.
-
-..  confval:: frontendEdit.menu.showHide
-
-    :type: bool
-    :Default: true
-
-    Show the hide/unhide content element button in the dropdown menu.
-
-..  confval:: frontendEdit.menu.showMove
-
-    :type: bool
-    :Default: true
-
-    Show the move content element button in the dropdown menu.
-
-..  confval:: frontendEdit.menu.showInfo
-
-    :type: bool
-    :Default: true
-
-    Show the info button in the dropdown menu.
-
-..  confval:: frontendEdit.menu.showHistory
-
-    :type: bool
-    :Default: true
-
-    Show the history button in the dropdown menu.
-
 Example Configuration
 =====================
 
@@ -170,41 +146,12 @@ Full example with all available options:
 
     frontendEdit:
       enabled: true
+      colorScheme: 'auto'
+      showContextMenu: true
+      showStickyToolbar: true
+      toolbarPosition: 'bottom-right'
       filter:
         ignorePids: '1,2,3'
         ignoreCTypes: 'html,div'
         ignoreListTypes: ''
         ignoreUids: ''
-      menu:
-        showDivInfo: true
-        showHeader: true
-        showDivEdit: true
-        showEdit: true
-        showEditPage: true
-        showDivAction: true
-        showHide: true
-        showMove: true
-        showInfo: true
-        showHistory: true
-
-Simple Mode Example
--------------------
-
-To show only the edit button (simple mode), disable all other menu items:
-
-..  code-block:: yaml
-    :caption: config/sites/my-site/settings.yaml
-
-    frontendEdit:
-      enabled: true
-      menu:
-        showDivInfo: false
-        showHeader: false
-        showDivEdit: false
-        showEdit: true
-        showEditPage: false
-        showDivAction: false
-        showHide: false
-        showMove: false
-        showInfo: false
-        showHistory: false

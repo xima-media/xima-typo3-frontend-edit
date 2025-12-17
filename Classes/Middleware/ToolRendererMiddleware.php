@@ -19,7 +19,6 @@ use TYPO3\CMS\Core\Http\Stream;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\ResourceRendererService;
 
-use function array_key_exists;
 use function is_array;
 
 /**
@@ -43,11 +42,11 @@ class ToolRendererMiddleware implements MiddlewareInterface
             return $response;
         }
 
+        // Only check if backend user is logged in - the sticky toolbar must be visible
+        // even when frontend edit is disabled so the user can re-enable it
         if (
             null === $GLOBALS['BE_USER']
             || !is_array($GLOBALS['BE_USER']->user)
-            || (array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user)
-                && (bool) $GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable'])
         ) {
             return $response;
         }

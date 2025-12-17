@@ -22,6 +22,7 @@ use Xima\XimaTypo3FrontendEdit\Configuration;
 
 use function array_map;
 use function explode;
+use function in_array;
 use function trim;
 
 /**
@@ -32,17 +33,6 @@ use function trim;
  */
 final readonly class SettingsService
 {
-    private const MENU_STRUCTURE_MAP = [
-        'div_edit' => 'frontendEdit.menu.showDivEdit',
-        'edit' => 'frontendEdit.menu.showEdit',
-        'edit_page' => 'frontendEdit.menu.showEditPage',
-        'div_action' => 'frontendEdit.menu.showDivAction',
-        'hide' => 'frontendEdit.menu.showHide',
-        'move' => 'frontendEdit.menu.showMove',
-        'info' => 'frontendEdit.menu.showInfo',
-        'history' => 'frontendEdit.menu.showHistory',
-    ];
-
     public function __construct(
         private ExtensionConfiguration $extensionConfiguration,
     ) {}
@@ -95,43 +85,50 @@ final readonly class SettingsService
         return array_map(intval(...), $values);
     }
 
-    public function checkDefaultMenuStructure(ServerRequestInterface $request, string $identifier): bool
+    public function getColorScheme(ServerRequestInterface $request): string
     {
         $settings = $this->getSiteSettings($request);
         if (null === $settings) {
-            return true;
+            return 'auto';
         }
 
-        $settingKey = self::MENU_STRUCTURE_MAP[$identifier] ?? null;
-        if (null === $settingKey) {
-            return true;
-        }
+        $scheme = (string) $settings->get('frontendEdit.colorScheme', 'auto');
 
-        return (bool) $settings->get($settingKey, true);
+        return in_array($scheme, ['auto', 'light', 'dark'], true) ? $scheme : 'auto';
     }
 
-    /**
-     * Check if only the edit button is enabled (all other menu items disabled).
-     * Used to determine if context menu should be forced to hide.
-     */
-    public function isOnlyEditEnabled(ServerRequestInterface $request): bool
+    public function isShowContextMenu(ServerRequestInterface $request): bool
     {
         $settings = $this->getSiteSettings($request);
         if (null === $settings) {
-            return false;
+            return true;
         }
 
-        foreach (self::MENU_STRUCTURE_MAP as $key => $settingKey) {
-            $value = (bool) $settings->get($settingKey, true);
-            if ('edit' === $key && !$value) {
-                return false;
-            }
-            if ('edit' !== $key && $value) {
-                return false;
-            }
+        return (bool) $settings->get('frontendEdit.showContextMenu', true);
+    }
+
+    public function isShowStickyToolbar(ServerRequestInterface $request): bool
+    {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
+            return true;
         }
 
-        return true;
+        return (bool) $settings->get('frontendEdit.showStickyToolbar', true);
+    }
+
+    public function getToolbarPosition(ServerRequestInterface $request): string
+    {
+        $validPositions = ['bottom-right', 'bottom-left', 'top-right', 'top-left', 'bottom', 'top', 'left', 'right'];
+
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
+            return 'bottom-right';
+        }
+
+        $position = (string) $settings->get('frontendEdit.toolbarPosition', 'bottom-right');
+
+        return in_array($position, $validPositions, true) ? $position : 'bottom-right';
     }
 
     public function isFrontendDebugModeEnabled(): bool

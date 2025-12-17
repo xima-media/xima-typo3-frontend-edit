@@ -1,6 +1,6 @@
 {
   "name": "test/sitepackage",
-  "description": "typo3-natural-language-query testing",
+  "description": "xima-typo3-frontend-edit testing",
   "license": "GPL-2.0-or-later",
   "type": "typo3-cms-extension",
   "authors": [
@@ -9,7 +9,8 @@
 	  "email": "x@y.com"
 	}
   ],
-  "require": {},
+  "require": {
+  },
   "suggest": {},
   "conflict": {},
   "extra": {

@@ -5,8 +5,14 @@
 (function () {
   'use strict';
 
-  // Floating UI imports
-  const { computePosition, flip, shift, offset, arrow } = window.FloatingUIDOM || {};
+  // Floating UI imports - will be set when ready
+  let computePosition, flip, shift, offset, arrow;
+
+  function initFloatingUI() {
+    if (window.FloatingUIDOM) {
+      ({ computePosition, flip, shift, offset, arrow } = window.FloatingUIDOM);
+    }
+  }
 
   // SVG Icons
   const ICONS = {
@@ -447,8 +453,20 @@
     },
 
     async fetchContentElements(dataItems) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('type', '1729341864');
+      const config = document.getElementById('frontend-edit-toolbar-config');
+      if (!config) {
+        throw new Error('Frontend edit configuration not found');
+      }
+
+      const editInfoUrl = config.dataset.editInfoUrl;
+      const pid = config.dataset.pid;
+      const language = config.dataset.language;
+      const returnUrl = window.location.href;
+
+      const url = new URL(editInfoUrl, window.location.origin);
+      url.searchParams.set('pid', pid);
+      url.searchParams.set('language', language);
+      url.searchParams.set('returnUrl', returnUrl);
 
       Logger.log('Sending request to backend', { url: url.toString() });
 
@@ -606,7 +624,24 @@
    */
   const FrontendEdit = {
     init() {
-      document.addEventListener('DOMContentLoaded', () => this.bootstrap());
+      // Wait for both DOM and FloatingUI to be ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => this.checkAndBootstrap());
+      } else {
+        this.checkAndBootstrap();
+      }
+    },
+
+    checkAndBootstrap() {
+      if (window.FloatingUIDOM) {
+        initFloatingUI();
+        this.bootstrap();
+      } else {
+        window.addEventListener('floatingui:ready', () => {
+          initFloatingUI();
+          this.bootstrap();
+        }, { once: true });
+      }
     },
 
     async bootstrap() {
@@ -618,13 +653,17 @@
         }
 
         this.initTheme();
-        OverlayManager.init();
 
-        const dataItems = DataService.collectDataItems();
-        const contentElements = await DataService.fetchContentElements(dataItems);
+        // Only initialize content element editing if not disabled
+        if (!window.FRONTEND_EDIT_DISABLED) {
+          OverlayManager.init();
 
-        Renderer.render(contentElements);
-        Dropdown.setupGlobalHandler();
+          const dataItems = DataService.collectDataItems();
+          const contentElements = await DataService.fetchContentElements(dataItems);
+
+          Renderer.render(contentElements);
+          Dropdown.setupGlobalHandler();
+        }
 
         Logger.log(`Frontend Edit initialization completed in ${Math.round(performance.now() - startTime)}ms`);
       } catch (error) {

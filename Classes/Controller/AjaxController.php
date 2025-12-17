@@ -11,65 +11,94 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Xima\XimaTypo3FrontendEdit\Middleware;
+namespace Xima\XimaTypo3FrontendEdit\Controller;
 
 use InvalidArgumentException;
 use JsonException;
-use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
-use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
-use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use Psr\Http\Message\ServerRequestInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\JsonResponse;
-use TYPO3\CMS\Frontend\Typolink\UnableToLinkException;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
-use Xima\XimaTypo3FrontendEdit\Service\Menu\MenuGenerator;
-use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
-use Xima\XimaTypo3FrontendEdit\Utility\UrlUtility;
+use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator;
 
 use function is_array;
 use function is_scalar;
 
 /**
- * EditInformationMiddleware.
+ * AjaxController.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-class EditInformationMiddleware implements MiddlewareInterface
+#[Autoconfigure(public: true)]
+readonly class AjaxController
 {
-    use ExtensionConfigurationTrait;
-
     public function __construct(
-        protected readonly MenuGenerator $menuGenerator,
-        protected readonly BackendUserService $backendUserService,
-        protected readonly ExtensionConfiguration $extensionConfiguration,
+        private ContentElementMenuGenerator $contentElementMenuGenerator,
+        private BackendUserService $backendUserService,
     ) {}
 
     /**
-     * @throws UnableToLinkException
-     * @throws JsonException
+     * Toggle frontend edit active state.
+     *
+     * Uses the backend user's uc (user configuration) to persist the state.
      */
-    public function process(
-        ServerRequestInterface $request,
-        RequestHandlerInterface $handler,
-    ): ResponseInterface {
-        $response = $handler->handle($request);
-        $params = $request->getQueryParams();
+    public function toggleAction(): JsonResponse
+    {
+        $backendUser = $this->getBackendUser();
 
-        if (!isset($params['type']) || Configuration::TYPE !== $params['type']) {
-            return $response;
+        if (null === $backendUser || null === $backendUser->user) {
+            return new JsonResponse(['success' => false, 'error' => 'No backend user'], 403);
         }
 
-        $routing = $request->getAttribute('routing');
-        $pid = $routing instanceof \TYPO3\CMS\Core\Routing\PageArguments ? $routing->getPageId() : 0;
-        $language = $request->getAttribute('language');
-        $languageUid = $language instanceof \TYPO3\CMS\Core\Site\Entity\SiteLanguage ? $language->getLanguageId() : 0;
+        $currentValue = (bool) ($backendUser->uc[Configuration::UC_KEY_DISABLED] ?? false);
+        $newValue = !$currentValue;
+
+        // Update user configuration and persist
+        $backendUser->uc[Configuration::UC_KEY_DISABLED] = $newValue;
+        $backendUser->writeUC();
+
+        return new JsonResponse([
+            'success' => true,
+            'disabled' => $newValue,
+        ]);
+    }
+
+    /**
+     * Get edit information for content elements on a page.
+     *
+     * Expects query parameters:
+     * - pid: Page ID (required)
+     * - language: Language UID (optional, defaults to 0)
+     * - returnUrl: URL to return to after editing (required)
+     *
+     * Expects JSON body with additional data (optional).
+     */
+    public function editInformationAction(ServerRequestInterface $request): JsonResponse
+    {
+        $backendUser = $this->backendUserService->getBackendUser();
+        if (null === $backendUser || null === $backendUser->user) {
+            return new JsonResponse([]);
+        }
+
+        $params = $request->getQueryParams();
+
+        $pid = (int) ($params['pid'] ?? 0);
+        if (0 === $pid) {
+            return new JsonResponse(['error' => 'Missing required parameter: pid'], 400);
+        }
+
+        $languageUid = (int) ($params['language'] ?? 0);
+        $returnUrl = (string) ($params['returnUrl'] ?? '');
+        if ('' === $returnUrl) {
+            return new JsonResponse(['error' => 'Missing required parameter: returnUrl'], 400);
+        }
 
         if (!$this->backendUserService->hasPageAccess($pid)) {
             return new JsonResponse([]);
         }
-
-        $returnUrl = $this->getReturnUrl($request, $pid, $languageUid);
 
         try {
             $data = $this->getRequestData($request);
@@ -77,23 +106,14 @@ class EditInformationMiddleware implements MiddlewareInterface
             return new JsonResponse(['error' => 'Invalid request data'], 400);
         }
 
-        $dropdown = $this->menuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
+        $dropdown = $this->contentElementMenuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
 
         return new JsonResponse(mb_convert_encoding($dropdown, 'UTF-8'));
     }
 
-    /**
-     * @throws UnableToLinkException
-     */
-    private function getReturnUrl(ServerRequestInterface $request, int $pid, int $languageUid): string
+    protected function getBackendUser(): ?BackendUserAuthentication
     {
-        $referer = $request->getHeaderLine('Referer');
-
-        if ('' === $referer || $this->shouldForceReturnUrlGeneration()) {
-            return UrlUtility::getUrl($pid, $languageUid);
-        }
-
-        return $referer;
+        return $GLOBALS['BE_USER'] ?? null;
     }
 
     private function validateContentType(ServerRequestInterface $request): void

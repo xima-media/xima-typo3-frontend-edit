@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\ViewHelpers;
 
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
+use Xima\XimaTypo3FrontendEdit\Configuration;
 
-use function array_key_exists;
 use function sprintf;
 
 /**
@@ -72,10 +72,7 @@ class DataViewHelper extends AbstractViewHelper
     {
         if (
             null === $GLOBALS['BE_USER']
-            || (
-                array_key_exists('tx_ximatypo3frontendedit_disable', $GLOBALS['BE_USER']->user)
-                && $GLOBALS['BE_USER']->user['tx_ximatypo3frontendedit_disable']
-            )
+            || ($GLOBALS['BE_USER']->uc[Configuration::UC_KEY_DISABLED] ?? false)
         ) {
             return '';
         }

@@ -17,6 +17,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use Xima\XimaTypo3FrontendEdit\Configuration;
 
 /**
  * BackendUserService.
@@ -90,8 +91,7 @@ final class BackendUserService
             return true;
         }
 
-        return isset($backendUser->user['tx_ximatypo3frontendedit_disable'])
-            && $backendUser->user['tx_ximatypo3frontendedit_disable'];
+        return (bool) ($backendUser->uc[Configuration::UC_KEY_DISABLED] ?? false);
     }
 
     private function initializeBackendUser(): void

@@ -24,31 +24,30 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\ContentElementFilter;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\IconService;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
 
 use function array_key_exists;
 
 /**
- * MenuGenerator.
+ * ContentElementMenuGenerator.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class MenuGenerator
+final class ContentElementMenuGenerator extends AbstractMenuGenerator
 {
-    use ExtensionConfigurationTrait;
-
     public function __construct(
         private readonly EventDispatcher $eventDispatcher,
-        private readonly SettingsService $settingsService,
         private readonly BackendUserService $backendUserService,
         private readonly ContentElementFilter $contentElementFilter,
         private readonly MenuButtonBuilder $menuButtonBuilder,
         private readonly ContentElementRepository $contentElementRepository,
         private readonly AdditionalDataHandler $additionalDataHandler,
         private readonly IconService $iconService,
-        protected readonly ExtensionConfiguration $extensionConfiguration,
-    ) {}
+        private readonly SettingsService $settingsService,
+        ExtensionConfiguration $extensionConfiguration,
+    ) {
+        parent::__construct($extensionConfiguration);
+    }
 
     /**
      * @param array<int, mixed> $data
@@ -91,7 +90,8 @@ final class MenuGenerator
             $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request);
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
-            $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
+            /** @var FrontendEditDropdownModifyEvent $event */
+            $event = $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
 
             // Add ctypeLabel and ctypeIcon for frontend display
             $ctypeLabel = $GLOBALS['LANG']->sL($contentElementConfig['label'] ?? '');
@@ -101,9 +101,10 @@ final class MenuGenerator
             $iconIdentifier = $contentElementConfig['icon'] ?? 'content-textpic';
             $contentElement['ctypeIcon'] = (string) $this->iconService->getIcon($iconIdentifier);
 
+            // Use potentially modified button from event listeners
             $result[$contentElement['uid']] = [
                 'element' => $contentElement,
-                'menu' => $menuButton,
+                'menu' => $event->getMenuButton(),
             ];
         }
 
@@ -122,9 +123,7 @@ final class MenuGenerator
         array $contentElementConfig,
         ServerRequestInterface $request,
     ): Button {
-        $showContextMenu = $this->isShowContextMenu() && !$this->settingsService->isOnlyEditEnabled($request);
-
-        if (!$showContextMenu) {
+        if (!$this->settingsService->isShowContextMenu($request)) {
             return $this->menuButtonBuilder->createSimpleEditButton(
                 $contentElement,
                 $languageUid,
@@ -135,8 +134,8 @@ final class MenuGenerator
 
         $menuButton = $this->menuButtonBuilder->createFullMenuButton();
 
-        $this->menuButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor, $request);
-        $this->menuButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor, $request);
+        $this->menuButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor);
+        $this->menuButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor);
 
         return $menuButton;
     }

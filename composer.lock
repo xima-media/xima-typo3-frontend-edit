@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e0c965694fd8bd1e99ea3cd5798ce7a3",
+    "content-hash": "c26c1ccf07ccce9ac7d3be0bdd406963",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4693,73 +4693,6 @@
             "time": "2025-12-02T10:59:38+00:00"
         },
         {
-            "name": "typo3/cms-beuser",
-            "version": "v14.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/TYPO3-CMS/beuser.git",
-                "reference": "c3a24892d3fbde9c07cf3880ef8c2bcec12b9b41"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/TYPO3-CMS/beuser/zipball/c3a24892d3fbde9c07cf3880ef8c2bcec12b9b41",
-                "reference": "c3a24892d3fbde9c07cf3880ef8c2bcec12b9b41",
-                "shasum": ""
-            },
-            "require": {
-                "typo3/cms-core": "14.0.1"
-            },
-            "conflict": {
-                "typo3/cms": "*"
-            },
-            "type": "typo3-cms-framework",
-            "extra": {
-                "typo3/cms": {
-                    "Package": {
-                        "partOfFactoryDefault": true
-                    },
-                    "extension-key": "beuser"
-                },
-                "branch-alias": {
-                    "dev-main": "14.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "TYPO3\\CMS\\Beuser\\": "Classes/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "TYPO3 Core Team",
-                    "email": "typo3cms@typo3.org",
-                    "role": "Developer"
-                }
-            ],
-            "description": "TYPO3 CMS Backend User - TYPO3 backend module Administration > Users for managing backend users and groups.",
-            "homepage": "https://typo3.community/",
-            "support": {
-                "chat": "https://typo3.community/meet/slack/",
-                "docs": "https://docs.typo3.org/",
-                "forum": "https://talk.typo3.org/",
-                "issues": "https://forge.typo3.org/issues/",
-                "rss": "https://news.typo3.com/rss/",
-                "security": "https://typo3.org/security/",
-                "source": "https://github.com/TYPO3/typo3/"
-            },
-            "funding": [
-                {
-                    "url": "https://typo3.org/membership",
-                    "type": "membership"
-                }
-            ],
-            "time": "2025-12-02T10:59:38+00:00"
-        },
-        {
             "name": "typo3/cms-cli",
             "version": "3.1.2",
             "source": {
@@ -8136,6 +8069,73 @@
                 }
             ],
             "description": "TYPO3 CMS Log - View logs from the sys_log table in the TYPO3 backend modules System>Log",
+            "homepage": "https://typo3.community/",
+            "support": {
+                "chat": "https://typo3.community/meet/slack/",
+                "docs": "https://docs.typo3.org/",
+                "forum": "https://talk.typo3.org/",
+                "issues": "https://forge.typo3.org/issues/",
+                "rss": "https://news.typo3.com/rss/",
+                "security": "https://typo3.org/security/",
+                "source": "https://github.com/TYPO3/typo3/"
+            },
+            "funding": [
+                {
+                    "url": "https://typo3.org/membership",
+                    "type": "membership"
+                }
+            ],
+            "time": "2025-12-02T10:59:38+00:00"
+        },
+        {
+            "name": "typo3/cms-beuser",
+            "version": "v14.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/TYPO3-CMS/beuser.git",
+                "reference": "c3a24892d3fbde9c07cf3880ef8c2bcec12b9b41"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/TYPO3-CMS/beuser/zipball/c3a24892d3fbde9c07cf3880ef8c2bcec12b9b41",
+                "reference": "c3a24892d3fbde9c07cf3880ef8c2bcec12b9b41",
+                "shasum": ""
+            },
+            "require": {
+                "typo3/cms-core": "14.0.1"
+            },
+            "conflict": {
+                "typo3/cms": "*"
+            },
+            "type": "typo3-cms-framework",
+            "extra": {
+                "typo3/cms": {
+                    "Package": {
+                        "partOfFactoryDefault": true
+                    },
+                    "extension-key": "beuser"
+                },
+                "branch-alias": {
+                    "dev-main": "14.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "TYPO3\\CMS\\Beuser\\": "Classes/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "TYPO3 Core Team",
+                    "email": "typo3cms@typo3.org",
+                    "role": "Developer"
+                }
+            ],
+            "description": "TYPO3 CMS Backend User - TYPO3 backend module Administration > Users for managing backend users and groups.",
             "homepage": "https://typo3.community/",
             "support": {
                 "chat": "https://typo3.community/meet/slack/",
