@@ -7,8 +7,3 @@ services:
     Xima\XimaTypo3FrontendEdit\:
         resource: '../Classes/*'
         exclude: '../Classes/Domain/Model/*'
-
-    Xima\XimaTypo3FrontendEdit\EventListener\ModifyButtonBarEventListener:
-      tags:
-        - name: event.listener
-          identifier: 'xima-typo3-frontend-edit/backend/modify-button-bar'

@@ -52,16 +52,23 @@ final readonly class UrlBuilderService
     /**
      * @throws RouteNotFoundException
      */
-    public function buildPageLayoutUrl(int $pageId, int $languageUid, string $returnUrl): string
-    {
-        return $this->uriBuilder->buildUriFromRoute(
-            'web_layout',
-            [
-                'id' => $pageId,
-                'language' => $languageUid,
-                'returnUrl' => $returnUrl,
-            ],
-        )->__toString();
+    public function buildPageLayoutUrl(
+        int $pageId,
+        int $languageUid,
+        string $returnUrl,
+        ?int $contentElementUid = null,
+    ): string {
+        $parameters = [
+            'id' => $pageId,
+            'language' => $languageUid,
+            'returnUrl' => $returnUrl,
+        ];
+
+        if (null !== $contentElementUid) {
+            $parameters['scrollToElement'] = $contentElementUid;
+        }
+
+        return $this->uriBuilder->buildUriFromRoute('web_layout', $parameters)->__toString();
     }
 
     /**
