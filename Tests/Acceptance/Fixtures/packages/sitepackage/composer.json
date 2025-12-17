@@ -1,6 +1,6 @@
 {
   "name": "test/sitepackage",
-  "description": "txima-ypo3-frontend-edit testing",
+  "description": "xima-typo3-frontend-edit testing",
   "license": "GPL-2.0-or-later",
   "type": "typo3-cms-extension",
   "authors": [
