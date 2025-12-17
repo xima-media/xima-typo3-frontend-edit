@@ -27,7 +27,6 @@ return RectorConfig::configure()
         $rootPath.'/Classes',
         $rootPath.'/Configuration',
         $rootPath.'/ext_emconf.php',
-        $rootPath.'/ext_tables.php',
         $rootPath.'/Tests/Unit',
     ])
     // uncomment to reach your current PHP version

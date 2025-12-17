@@ -5,8 +5,14 @@
 (function () {
   'use strict';
 
-  // Floating UI imports
-  const { computePosition, flip, shift, offset, arrow } = window.FloatingUIDOM || {};
+  // Floating UI imports - will be set when ready
+  let computePosition, flip, shift, offset, arrow;
+
+  function initFloatingUI() {
+    if (window.FloatingUIDOM) {
+      ({ computePosition, flip, shift, offset, arrow } = window.FloatingUIDOM);
+    }
+  }
 
   // SVG Icons
   const ICONS = {
@@ -606,7 +612,24 @@
    */
   const FrontendEdit = {
     init() {
-      document.addEventListener('DOMContentLoaded', () => this.bootstrap());
+      // Wait for both DOM and FloatingUI to be ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => this.checkAndBootstrap());
+      } else {
+        this.checkAndBootstrap();
+      }
+    },
+
+    checkAndBootstrap() {
+      if (window.FloatingUIDOM) {
+        initFloatingUI();
+        this.bootstrap();
+      } else {
+        window.addEventListener('floatingui:ready', () => {
+          initFloatingUI();
+          this.bootstrap();
+        }, { once: true });
+      }
     },
 
     async bootstrap() {
@@ -618,13 +641,17 @@
         }
 
         this.initTheme();
-        OverlayManager.init();
 
-        const dataItems = DataService.collectDataItems();
-        const contentElements = await DataService.fetchContentElements(dataItems);
+        // Only initialize content element editing if not disabled
+        if (!window.FRONTEND_EDIT_DISABLED) {
+          OverlayManager.init();
 
-        Renderer.render(contentElements);
-        Dropdown.setupGlobalHandler();
+          const dataItems = DataService.collectDataItems();
+          const contentElements = await DataService.fetchContentElements(dataItems);
+
+          Renderer.render(contentElements);
+          Dropdown.setupGlobalHandler();
+        }
 
         Logger.log(`Frontend Edit initialization completed in ${Math.round(performance.now() - startTime)}ms`);
       } catch (error) {

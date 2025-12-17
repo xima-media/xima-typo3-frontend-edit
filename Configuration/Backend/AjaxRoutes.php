@@ -11,15 +11,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Xima\XimaTypo3FrontendEdit\Domain\Model\BackendUser;
-
 return [
-    BackendUser::class => [
-        'tableName' => 'be_users',
-        'properties' => [
-            'disable' => [
-                'fieldName' => 'tx_ximatypo3frontendedit_disable',
-            ],
-        ],
+    'frontendEdit_toggle' => [
+        'path' => '/xima-frontend-edit/toggle',
+        'target' => Xima\XimaTypo3FrontendEdit\Controller\AjaxController::class.'::toggleAction',
+        'csrf' => false,
     ],
 ];

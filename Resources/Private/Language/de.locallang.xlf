@@ -51,6 +51,18 @@
 				<source />
 				<target>Daten</target>
 			</trans-unit>
+			<trans-unit id="page_menu">
+				<source />
+				<target>Seitenmenü</target>
+			</trans-unit>
+			<trans-unit id="edit_page_properties">
+				<source />
+				<target>Seiteneigenschaften bearbeiten</target>
+			</trans-unit>
+			<trans-unit id="page_layout">
+				<source />
+				<target>Seitenlayout</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

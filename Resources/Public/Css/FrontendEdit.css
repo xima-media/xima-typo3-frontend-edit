@@ -331,3 +331,240 @@
 .frontend-edit--active {
     /* No longer used - overlay system handles highlighting */
 }
+
+/* ==========================================
+   STICKY TOOLBAR
+   ========================================== */
+
+.frontend-edit__sticky-toolbar {
+    position: fixed;
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--xfe-toolbar-bg);
+    border-radius: 4px;
+    padding: 2px;
+    box-shadow: var(--xfe-shadow);
+    transition: opacity 0.2s ease;
+}
+
+/* Position variants - corners */
+.frontend-edit__sticky-toolbar--bottom-right {
+    bottom: 0;
+    right: 10px;
+    border-radius: 4px 4px 0 0;
+}
+
+.frontend-edit__sticky-toolbar--bottom-left {
+    bottom: 0;
+    left: 10px;
+    border-radius: 4px 4px 0 0;
+}
+
+.frontend-edit__sticky-toolbar--top-right {
+    top: 0;
+    right: 10px;
+    border-radius: 0 0 4px 4px;
+}
+
+.frontend-edit__sticky-toolbar--top-left {
+    top: 0;
+    left: 10px;
+    border-radius: 0 0 4px 4px;
+}
+
+/* Position variants - centered on edges */
+.frontend-edit__sticky-toolbar--bottom {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 4px 4px 0 0;
+}
+
+.frontend-edit__sticky-toolbar--top {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0 0 4px 4px;
+}
+
+.frontend-edit__sticky-toolbar--left {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    border-radius: 0 4px 4px 0;
+}
+
+.frontend-edit__sticky-toolbar--right {
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    border-radius: 4px 0 0 4px;
+}
+
+/* Disabled state */
+.frontend-edit__sticky-toolbar--disabled {
+    opacity: 0.7;
+}
+
+.frontend-edit__sticky-toolbar--disabled .frontend-edit__sticky-btn--toggle {
+    color: var(--xfe-text-secondary);
+}
+
+/* Sticky toolbar buttons */
+.frontend-edit__sticky-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--xfe-toolbar-text);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    padding: 0;
+}
+
+.frontend-edit__sticky-btn:hover {
+    background: var(--xfe-toolbar-btn-hover);
+}
+
+.frontend-edit__sticky-btn:active {
+    transform: scale(0.95);
+}
+
+.frontend-edit__sticky-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Separator */
+.frontend-edit__sticky-separator {
+    width: 1px;
+    height: 16px;
+    background: var(--xfe-border-color);
+    margin: 0 2px;
+    opacity: 0.5;
+}
+
+/* Vertical separator for left/right positions */
+.frontend-edit__sticky-toolbar--left .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--right .frontend-edit__sticky-separator {
+    width: 16px;
+    height: 1px;
+    margin: 2px 0;
+}
+
+/* Dropdown container */
+.frontend-edit__sticky-dropdown-container {
+    position: relative;
+}
+
+/* Dropdown menu */
+.frontend-edit__sticky-dropdown {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    min-width: 200px;
+    background: var(--xfe-bg-primary);
+    border: 1px solid var(--xfe-border-color);
+    border-radius: 8px;
+    box-shadow: var(--xfe-shadow);
+    padding: 4px;
+    display: none;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.frontend-edit__sticky-dropdown--visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Position adjustments for dropdown - top positions */
+.frontend-edit__sticky-toolbar--top .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--top-left .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--top-right .frontend-edit__sticky-dropdown {
+    bottom: auto;
+    top: calc(100% + 8px);
+    transform: translateY(-8px);
+}
+
+.frontend-edit__sticky-toolbar--top .frontend-edit__sticky-dropdown--visible,
+.frontend-edit__sticky-toolbar--top-left .frontend-edit__sticky-dropdown--visible,
+.frontend-edit__sticky-toolbar--top-right .frontend-edit__sticky-dropdown--visible {
+    transform: translateY(0);
+}
+
+/* Position adjustments for dropdown - left positions */
+.frontend-edit__sticky-toolbar--left .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--bottom-left .frontend-edit__sticky-dropdown,
+.frontend-edit__sticky-toolbar--top-left .frontend-edit__sticky-dropdown {
+    right: auto;
+    left: 0;
+}
+
+/* Position adjustments for dropdown - vertical toolbars (left/right edge) */
+.frontend-edit__sticky-toolbar--left .frontend-edit__sticky-dropdown {
+    bottom: auto;
+    top: 0;
+    left: calc(100% + 8px);
+    transform: translateX(-8px);
+}
+
+.frontend-edit__sticky-toolbar--left .frontend-edit__sticky-dropdown--visible {
+    transform: translateX(0);
+}
+
+.frontend-edit__sticky-toolbar--right .frontend-edit__sticky-dropdown {
+    bottom: auto;
+    top: 0;
+    right: calc(100% + 8px);
+    left: auto;
+    transform: translateX(8px);
+}
+
+.frontend-edit__sticky-toolbar--right .frontend-edit__sticky-dropdown--visible {
+    transform: translateX(0);
+}
+
+/* Dropdown items */
+.frontend-edit__sticky-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: var(--xfe-text-primary);
+    text-decoration: none;
+    border-radius: 6px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.frontend-edit__sticky-dropdown-item:hover {
+    background: var(--xfe-bg-hover);
+}
+
+.frontend-edit__sticky-dropdown-item svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.frontend-edit__sticky-dropdown-divider {
+    height: 1px;
+    background: var(--xfe-border-color);
+    margin: 4px 0;
+}

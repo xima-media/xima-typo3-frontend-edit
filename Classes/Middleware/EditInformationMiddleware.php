@@ -18,11 +18,12 @@ use JsonException;
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use TYPO3\CMS\Frontend\Typolink\UnableToLinkException;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
-use Xima\XimaTypo3FrontendEdit\Service\Menu\MenuGenerator;
+use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
 use Xima\XimaTypo3FrontendEdit\Utility\UrlUtility;
 
@@ -40,24 +41,24 @@ class EditInformationMiddleware implements MiddlewareInterface
     use ExtensionConfigurationTrait;
 
     public function __construct(
-        protected readonly MenuGenerator $menuGenerator,
+        protected readonly ContentElementMenuGenerator $contentElementMenuGenerator,
         protected readonly BackendUserService $backendUserService,
         protected readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
 
     /**
      * @throws UnableToLinkException
-     * @throws JsonException
+     * @throws JsonException|Exception
      */
     public function process(
         ServerRequestInterface $request,
         RequestHandlerInterface $handler,
     ): ResponseInterface {
-        $response = $handler->handle($request);
         $params = $request->getQueryParams();
 
-        if (!isset($params['type']) || Configuration::TYPE !== $params['type']) {
-            return $response;
+        // Check type BEFORE calling handler to avoid "No page configured" errors
+        if (!isset($params['type']) || Configuration::TYPE_INFORMATION !== $params['type']) {
+            return $handler->handle($request);
         }
 
         $routing = $request->getAttribute('routing');
@@ -77,7 +78,7 @@ class EditInformationMiddleware implements MiddlewareInterface
             return new JsonResponse(['error' => 'Invalid request data'], 400);
         }
 
-        $dropdown = $this->menuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
+        $dropdown = $this->contentElementMenuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
 
         return new JsonResponse(mb_convert_encoding($dropdown, 'UTF-8'));
     }

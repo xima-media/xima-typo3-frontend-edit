@@ -24,20 +24,17 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\ContentElementFilter;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\IconService;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Traits\ExtensionConfigurationTrait;
 
 use function array_key_exists;
 
 /**
- * MenuGenerator.
+ * ContentElementMenuGenerator.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class MenuGenerator
+final class ContentElementMenuGenerator extends AbstractMenuGenerator
 {
-    use ExtensionConfigurationTrait;
-
     public function __construct(
         private readonly EventDispatcher $eventDispatcher,
         private readonly SettingsService $settingsService,
@@ -47,8 +44,10 @@ final class MenuGenerator
         private readonly ContentElementRepository $contentElementRepository,
         private readonly AdditionalDataHandler $additionalDataHandler,
         private readonly IconService $iconService,
-        protected readonly ExtensionConfiguration $extensionConfiguration,
-    ) {}
+        ExtensionConfiguration $extensionConfiguration,
+    ) {
+        parent::__construct($extensionConfiguration);
+    }
 
     /**
      * @param array<int, mixed> $data

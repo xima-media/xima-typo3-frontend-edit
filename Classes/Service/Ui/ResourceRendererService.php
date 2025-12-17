@@ -21,7 +21,9 @@ use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, PathUtility};
 use TYPO3\CMS\Core\View\{ViewFactoryData, ViewFactoryInterface};
 use Xima\XimaTypo3FrontendEdit\Configuration;
+use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
+use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
 use function array_key_exists;
@@ -39,6 +41,9 @@ final readonly class ResourceRendererService
     public function __construct(
         private SettingsService $settingsService,
         private ExtensionConfiguration $extensionConfiguration,
+        private BackendUserService $backendUserService,
+        private UrlBuilderService $urlBuilderService,
+        private PageMenuGenerator $pageMenuGenerator,
     ) {}
 
     /**
@@ -53,12 +58,12 @@ final readonly class ResourceRendererService
             $nonceAttribute = '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '';
             $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
 
-            // Add Floating UI library
+            // Add Floating UI library - loaded as module, then signals ready
             $floatingUiPath = PathUtility::getAbsoluteWebPath(
                 GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/vendor/floating-ui.dom.bundle.js'),
             );
             $resources['floating_ui'] = sprintf(
-                '<script%s type="module">import * as FloatingUIDOM from "%s"; window.FloatingUIDOM = FloatingUIDOM;</script>',
+                '<script%s type="module">import * as FloatingUIDOM from "%s"; window.FloatingUIDOM = FloatingUIDOM; window.dispatchEvent(new Event("floatingui:ready"));</script>',
                 $nonceAttribute,
                 $floatingUiPath,
             );
@@ -81,6 +86,36 @@ final readonly class ResourceRendererService
                     $nonceAttribute,
                 );
             }
+
+            // Add sticky toolbar configuration as data attributes (like Admin Panel pattern)
+            $toolbarPosition = $this->getToolbarPosition();
+            $isDisabled = $this->backendUserService->isFrontendEditDisabled();
+            $toggleUrl = $this->getToggleUrl();
+            $resources['toolbar_config'] = sprintf(
+                '<div id="frontend-edit-toolbar-config" data-position="%s" data-disabled="%s" data-toggle-url="%s" hidden></div>',
+                $toolbarPosition,
+                $isDisabled ? 'true' : 'false',
+                htmlspecialchars($toggleUrl, \ENT_QUOTES, 'UTF-8'),
+            );
+
+            // Add page menu template (rendered server-side like content element menus)
+            $pageMenuHtml = null !== $request ? $this->pageMenuGenerator->getDropdown($request) : '';
+            if ('' !== $pageMenuHtml) {
+                $resources['page_menu_template'] = sprintf(
+                    '<template id="frontend-edit-page-menu">%s</template>',
+                    $pageMenuHtml,
+                );
+            }
+
+            // Add sticky toolbar script (always loaded)
+            $stickyToolbarPath = PathUtility::getAbsoluteWebPath(
+                GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/sticky_toolbar.js'),
+            );
+            $resources['sticky_toolbar'] = sprintf(
+                '<script%s src="%s"></script>',
+                $nonceAttribute,
+                $stickyToolbarPath,
+            );
 
             $values = [...$values, 'resources' => $resources];
 
@@ -110,6 +145,30 @@ final readonly class ResourceRendererService
             return in_array($scheme, ['auto', 'light', 'dark'], true) ? $scheme : 'auto';
         } catch (Throwable) {
             return 'auto';
+        }
+    }
+
+    private function getToolbarPosition(): string
+    {
+        $validPositions = ['bottom-right', 'bottom-left', 'top-right', 'top-left', 'bottom', 'top', 'left', 'right'];
+
+        try {
+            $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);
+            $position = $config['toolbarPosition'] ?? 'bottom-right';
+
+            return in_array($position, $validPositions, true) ? $position : 'bottom-right';
+        } catch (Throwable) {
+            return 'bottom-right';
+        }
+    }
+
+    private function getToggleUrl(): string
+    {
+        try {
+            // AJAX routes get 'ajax_' prefix automatically
+            return $this->urlBuilderService->buildRoute('ajax_frontendEdit_toggle');
+        } catch (Throwable) {
+            return '';
         }
     }
 

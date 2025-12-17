@@ -39,6 +39,15 @@
 			<trans-unit id="div_data">
 				<source>Data</source>
 			</trans-unit>
+			<trans-unit id="page_menu">
+				<source>Page menu</source>
+			</trans-unit>
+			<trans-unit id="edit_page_properties">
+				<source>Edit page properties</source>
+			</trans-unit>
+			<trans-unit id="page_layout">
+				<source>Page layout</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
