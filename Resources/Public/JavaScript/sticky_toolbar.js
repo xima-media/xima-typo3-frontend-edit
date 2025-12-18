@@ -234,9 +234,15 @@
         const menuBtn = this.container.querySelector('.frontend-edit__sticky-btn--menu');
         const dropdown = this.container.querySelector('.frontend-edit__sticky-dropdown');
 
-        menuBtn.addEventListener('click', (e) => {
+        menuBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
-          dropdown.classList.toggle('frontend-edit__sticky-dropdown--visible');
+          const isVisible = dropdown.classList.contains('frontend-edit__sticky-dropdown--visible');
+          if (isVisible) {
+            dropdown.classList.remove('frontend-edit__sticky-dropdown--visible');
+          } else {
+            await this.positionDropdown(menuBtn, dropdown);
+            dropdown.classList.add('frontend-edit__sticky-dropdown--visible');
+          }
         });
 
         document.addEventListener('click', (e) => {
@@ -247,6 +253,81 @@
 
         Tooltip.attach(menuBtn);
       }
+    },
+
+    async positionDropdown(button, dropdown) {
+      if (!computePosition) {
+        Logger.log('Floating UI not available for dropdown positioning');
+        return;
+      }
+
+      // Determine preferred placement based on toolbar position
+      let preferredPlacement = 'top-start';
+      let fallbackPlacements = ['top-end', 'bottom-start', 'bottom-end'];
+
+      if (this.position.startsWith('top-')) {
+        preferredPlacement = 'bottom-start';
+        fallbackPlacements = ['bottom-end', 'top-start', 'top-end'];
+      } else if (this.position.startsWith('left-')) {
+        preferredPlacement = 'right-start';
+        fallbackPlacements = ['right-end', 'left-start', 'left-end'];
+      } else if (this.position.startsWith('right-')) {
+        preferredPlacement = 'left-start';
+        fallbackPlacements = ['left-end', 'right-start', 'right-end'];
+      }
+
+      const { x, y, placement } = await computePosition(button, dropdown, {
+        strategy: 'fixed',
+        placement: preferredPlacement,
+        middleware: [
+          offset(8),
+          flip({
+            fallbackPlacements: fallbackPlacements,
+            padding: 10,
+            crossAxis: true
+          }),
+          shift({
+            padding: 10,
+            crossAxis: true,
+            limiter: {
+              fn: ({ x, y }) => ({ x, y }),
+              options: {}
+            }
+          })
+        ]
+      });
+
+      // Ensure dropdown stays within viewport bounds
+      const rect = dropdown.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+
+      let adjustedY = y;
+      let adjustedX = x;
+
+      // Check if dropdown exceeds bottom of viewport
+      if (y + rect.height > viewportHeight - 10) {
+        adjustedY = viewportHeight - rect.height - 10;
+      }
+      // Check if dropdown exceeds top of viewport
+      if (adjustedY < 10) {
+        adjustedY = 10;
+      }
+      // Check if dropdown exceeds right of viewport
+      if (x + rect.width > viewportWidth - 10) {
+        adjustedX = viewportWidth - rect.width - 10;
+      }
+      // Check if dropdown exceeds left of viewport
+      if (adjustedX < 10) {
+        adjustedX = 10;
+      }
+
+      Logger.log('Dropdown positioned', { x: adjustedX, y: adjustedY, placement, preferredPlacement, originalX: x, originalY: y });
+
+      Object.assign(dropdown.style, {
+        left: `${adjustedX}px`,
+        top: `${adjustedY}px`
+      });
     },
 
     async handleToggle() {
