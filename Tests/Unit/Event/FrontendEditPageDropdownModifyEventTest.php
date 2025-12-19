@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Event;
 
-use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditPageDropdownModifyEvent;
@@ -22,11 +22,10 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 /**
  * FrontendEditPageDropdownModifyEventTest.
  *
- * @covers \Xima\XimaTypo3FrontendEdit\Event\FrontendEditPageDropdownModifyEvent
- *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
+#[CoversClass(FrontendEditPageDropdownModifyEvent::class)]
 final class FrontendEditPageDropdownModifyEventTest extends TestCase
 {
     #[Test]

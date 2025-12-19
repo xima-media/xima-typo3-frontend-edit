@@ -13,18 +13,17 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit;
 
-use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 
 /**
  * ConfigurationTest.
  *
- * @covers \Xima\XimaTypo3FrontendEdit\Configuration
- *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
+#[CoversClass(Configuration::class)]
 final class ConfigurationTest extends TestCase
 {
     #[Test]

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\ViewHelpers;
 
-use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Xima\XimaTypo3FrontendEdit\Configuration;
@@ -22,11 +22,10 @@ use Xima\XimaTypo3FrontendEdit\ViewHelpers\DataViewHelper;
 /**
  * DataViewHelperTest.
  *
- * @covers \Xima\XimaTypo3FrontendEdit\ViewHelpers\DataViewHelper
- *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
+#[CoversClass(DataViewHelper::class)]
 final class DataViewHelperTest extends TestCase
 {
     private DataViewHelper $viewHelper;

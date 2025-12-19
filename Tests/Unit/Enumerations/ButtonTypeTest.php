@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Enumerations;
 
-use PHPUnit\Framework\Attributes\{DataProvider, Test};
+use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use ValueError;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
@@ -21,11 +21,10 @@ use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 /**
  * ButtonTypeTest.
  *
- * @covers \Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType
- *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
+#[CoversClass(ButtonType::class)]
 final class ButtonTypeTest extends TestCase
 {
     #[Test]

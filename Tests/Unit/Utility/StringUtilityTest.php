@@ -13,18 +13,17 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Utility;
 
-use PHPUnit\Framework\Attributes\{DataProvider, Test};
+use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
 /**
  * StringUtilityTest.
  *
- * @covers \Xima\XimaTypo3FrontendEdit\Utility\StringUtility
- *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
+#[CoversClass(StringUtility::class)]
 final class StringUtilityTest extends TestCase
 {
     /**

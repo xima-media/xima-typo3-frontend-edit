@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Template\Component;
 
-use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Imaging\Icon;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -23,11 +23,10 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 /**
  * ButtonTest.
  *
- * @covers \Xima\XimaTypo3FrontendEdit\Template\Component\Button
- *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
+#[CoversClass(Button::class)]
 final class ButtonTest extends TestCase
 {
     protected function tearDown(): void
