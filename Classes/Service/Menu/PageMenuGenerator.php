@@ -13,8 +13,10 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
+use Doctrine\DBAL\Exception;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
@@ -32,9 +34,10 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 final class PageMenuGenerator extends AbstractMenuGenerator
 {
     public function __construct(
-        private readonly MenuButtonBuilder $menuButtonBuilder,
+        private readonly PageButtonBuilder $pageButtonBuilder,
         private readonly EventDispatcher $eventDispatcher,
         ExtensionConfiguration $extensionConfiguration,
+        private readonly ConnectionPool $connectionPool,
     ) {
         parent::__construct($extensionConfiguration);
     }
@@ -62,8 +65,13 @@ final class PageMenuGenerator extends AbstractMenuGenerator
             ButtonType::Menu,
         );
 
-        $this->menuButtonBuilder->addPageEditSection($menuButton, $pid, $languageUid, $returnUrl);
-        $this->menuButtonBuilder->addPageActionSection($menuButton, $pid, $returnUrl);
+        $pageRecord = $this->getPageRecord($pid);
+        if (null !== $pageRecord) {
+            $this->pageButtonBuilder->addInfoSection($menuButton, $pageRecord);
+        }
+
+        $this->pageButtonBuilder->addEditSection($menuButton, $pid, $languageUid, $returnUrl);
+        $this->pageButtonBuilder->addActionSection($menuButton, $pid, $returnUrl);
 
         /** @var FrontendEditPageDropdownModifyEvent $event */
         $event = $this->eventDispatcher->dispatch(
@@ -75,5 +83,29 @@ final class PageMenuGenerator extends AbstractMenuGenerator
         $rendered['targetBlank'] = $this->isLinkTargetBlank();
 
         return $rendered;
+    }
+
+    /**
+     * Get page record directly from database.
+     *
+     * @return array<string, mixed>|null
+     *
+     * @throws Exception
+     */
+    private function getPageRecord(int $pid): ?array
+    {
+        $queryBuilder = $this->connectionPool
+            ->getQueryBuilderForTable('pages');
+
+        $result = $queryBuilder
+            ->select('uid', 'title', 'doktype')
+            ->from('pages')
+            ->where(
+                $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)),
+            )
+            ->executeQuery()
+            ->fetchAssociative();
+
+        return false !== $result ? $result : null;
     }
 }

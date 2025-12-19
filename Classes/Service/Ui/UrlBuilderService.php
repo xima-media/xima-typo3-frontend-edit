@@ -137,6 +137,19 @@ final readonly class UrlBuilderService
     /**
      * @throws RouteNotFoundException
      */
+    public function buildNewContentAfterUrl(int $uid, string $returnUrl): string
+    {
+        return $this->uriBuilder->buildUriFromRoute(
+            'record_edit',
+            [
+                'edit' => [
+                    'tt_content' => [-$uid => 'new'],
+                ],
+                'returnUrl' => $returnUrl,
+            ],
+        )->__toString();
+    }
+
     /**
      * @param array<string, mixed> $parameters
      *

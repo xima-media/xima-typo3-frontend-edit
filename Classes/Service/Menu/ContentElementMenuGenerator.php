@@ -43,7 +43,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         private readonly EventDispatcher $eventDispatcher,
         private readonly BackendUserService $backendUserService,
         private readonly ContentElementFilter $contentElementFilter,
-        private readonly MenuButtonBuilder $menuButtonBuilder,
+        private readonly ContentElementButtonBuilder $contentElementButtonBuilder,
         private readonly ContentElementRepository $contentElementRepository,
         private readonly AdditionalDataHandler $additionalDataHandler,
         private readonly IconService $iconService,
@@ -139,7 +139,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         ServerRequestInterface $request,
     ): Button {
         if (!$this->settingsService->isShowContextMenu($request)) {
-            return $this->menuButtonBuilder->createSimpleEditButton(
+            return $this->contentElementButtonBuilder->createSimpleEditButton(
                 $contentElement,
                 $languageUid,
                 $returnUrlAnchor,
@@ -147,10 +147,11 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
             );
         }
 
-        $menuButton = $this->menuButtonBuilder->createFullMenuButton();
+        $menuButton = $this->contentElementButtonBuilder->createFullMenuButton();
 
-        $this->menuButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor);
-        $this->menuButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor);
+        $this->contentElementButtonBuilder->addInfoSection($menuButton, $contentElement, $contentElementConfig);
+        $this->contentElementButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor);
+        $this->contentElementButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor);
 
         return $menuButton;
     }
