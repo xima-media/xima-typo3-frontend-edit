@@ -18,6 +18,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
 use TYPO3\CMS\Core\Core\RequestId;
 use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Routing\PageArguments;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, PathUtility};
 use TYPO3\CMS\Core\View\{ViewFactoryData, ViewFactoryInterface};
 use Xima\XimaTypo3FrontendEdit\Configuration;
@@ -86,7 +88,7 @@ final readonly class ResourceRendererService
 
             // Add sticky toolbar configuration as data attributes (like Admin Panel pattern)
             $isDisabled = $this->backendUserService->isFrontendEditDisabled();
-            $editInfoUrl = $this->getEditInformationUrl();
+            $editInfoUrl = $this->urlBuilderService->buildEditInformationUrl();
             $pageInfo = $this->getPageInfo($request);
             $resources['toolbar_config'] = sprintf(
                 '<div id="frontend-edit-toolbar-config" data-disabled="%s" data-edit-info-url="%s" data-pid="%d" data-language="%d" hidden></div>',
@@ -117,7 +119,7 @@ final readonly class ResourceRendererService
     private function addStickyToolbarResources(array &$resources, ServerRequestInterface $request, string $nonceAttribute): void
     {
         $toolbarPosition = $this->settingsService->getToolbarPosition($request);
-        $toggleUrl = $this->getToggleUrl();
+        $toggleUrl = $this->urlBuilderService->buildToggleUrl();
 
         // Get translated tooltip strings
         $tooltipEnable = $this->translate('tooltip.enable', 'Enable frontend editing mode');
@@ -154,26 +156,6 @@ final readonly class ResourceRendererService
         );
     }
 
-    private function getToggleUrl(): string
-    {
-        try {
-            // AJAX routes get 'ajax_' prefix automatically
-            return $this->urlBuilderService->buildRoute('ajax_frontendEdit_toggle');
-        } catch (Throwable) {
-            return '';
-        }
-    }
-
-    private function getEditInformationUrl(): string
-    {
-        try {
-            // AJAX routes get 'ajax_' prefix automatically
-            return $this->urlBuilderService->buildRoute('ajax_frontendEdit_editInformation');
-        } catch (Throwable) {
-            return '';
-        }
-    }
-
     /**
      * @return array{pid: int, language: int}
      */
@@ -184,12 +166,12 @@ final readonly class ResourceRendererService
 
         if (null !== $request) {
             $routing = $request->getAttribute('routing');
-            if ($routing instanceof \TYPO3\CMS\Core\Routing\PageArguments) {
+            if ($routing instanceof PageArguments) {
                 $pid = $routing->getPageId();
             }
 
             $siteLanguage = $request->getAttribute('language');
-            if ($siteLanguage instanceof \TYPO3\CMS\Core\Site\Entity\SiteLanguage) {
+            if ($siteLanguage instanceof SiteLanguage) {
                 $language = $siteLanguage->getLanguageId();
             }
         }

@@ -35,6 +35,10 @@
 				<source />
 				<target>Verschieben</target>
 			</trans-unit>
+			<trans-unit id="new_content_after">
+				<source />
+				<target>Neues Inhaltselement danach</target>
+			</trans-unit>
 			<trans-unit id="div_info">
 				<source />
 				<target>Info</target>

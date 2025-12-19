@@ -213,6 +213,8 @@
       for (const [name, item] of Object.entries(this.pageMenuData.children)) {
         if (item.type === 'divider') {
           html += `<div class="frontend-edit__divider ${name}"><span>${item.label}</span></div>`;
+        } else if (item.type === 'info') {
+          html += `<div class="frontend-edit__info ${name}">${item.icon ?? ''}<span>${item.label}</span></div>`;
         } else if (item.type === 'link') {
           const targetAttr = targetBlank ? ' target="_blank"' : '';
           html += `<a href="${item.url}"${targetAttr}>${item.icon ?? ''}<span>${item.label}</span></a>`;

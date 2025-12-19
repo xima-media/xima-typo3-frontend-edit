@@ -137,6 +137,19 @@ final readonly class UrlBuilderService
     /**
      * @throws RouteNotFoundException
      */
+    public function buildNewContentAfterUrl(int $uid, string $returnUrl): string
+    {
+        return $this->uriBuilder->buildUriFromRoute(
+            'record_edit',
+            [
+                'edit' => [
+                    'tt_content' => [-$uid => 'new'],
+                ],
+                'returnUrl' => $returnUrl,
+            ],
+        )->__toString();
+    }
+
     /**
      * @param array<string, mixed> $parameters
      *
@@ -145,5 +158,21 @@ final readonly class UrlBuilderService
     public function buildRoute(string $route, array $parameters = []): string
     {
         return $this->uriBuilder->buildUriFromRoute($route, $parameters)->__toString();
+    }
+
+    /**
+     * @throws RouteNotFoundException
+     */
+    public function buildToggleUrl(): string
+    {
+        return $this->buildRoute('ajax_frontendEdit_toggle');
+    }
+
+    /**
+     * @throws RouteNotFoundException
+     */
+    public function buildEditInformationUrl(): string
+    {
+        return $this->buildRoute('ajax_frontendEdit_editInformation');
     }
 }

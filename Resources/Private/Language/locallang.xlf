@@ -27,6 +27,9 @@
 			<trans-unit id="move">
 				<source>Move</source>
 			</trans-unit>
+			<trans-unit id="new_content_after">
+				<source>New content after</source>
+			</trans-unit>
 			<trans-unit id="div_info">
 				<source>Info</source>
 			</trans-unit>

@@ -419,7 +419,7 @@
       dropdown.className = 'frontend-edit__dropdown';
       dropdown.dataset.cid = uid;
 
-      const skipActions = ['edit', 'header', 'div_info'];
+      const skipActions = ['header'];
 
       for (const [name, action] of Object.entries(contentElement.menu.children)) {
         if (skipActions.includes(name)) continue;
@@ -433,6 +433,10 @@
 
         if (action.type === 'divider') {
           el.className = 'frontend-edit__divider';
+        }
+
+        if (action.type === 'info') {
+          el.className = 'frontend-edit__info';
         }
 
         el.classList.add(name);

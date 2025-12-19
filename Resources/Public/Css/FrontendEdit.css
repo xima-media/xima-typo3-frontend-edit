@@ -335,6 +335,45 @@
     margin-top: 0;
 }
 
+/* Element: info - info block in dropdown */
+.frontend-edit__info {
+    color: var(--xfe-text-primary);
+    font-size: 12px;
+    padding: 8px 12px !important;
+    cursor: default !important;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.frontend-edit__info svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    opacity: 0.8;
+    align-self: start;
+}
+
+.frontend-edit__info span {
+    flex: 1;
+}
+
+.frontend-edit__info small {
+    display: block;
+    color: var(--xfe-text-secondary);
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.frontend-edit__info code {
+    display: block;
+    font-size: 10px;
+    font-family: monospace;
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
 /* Legacy styles - kept for compatibility */
 .frontend-edit__wrapper {
     display: none;
