@@ -42,6 +42,13 @@ The extension has been developed to provide a simple and lightweight solution to
 * TYPO3 >= 13.4
 * PHP 8.2+
 
+### Supports
+
+| **Version** | **TYPO3** | **PHP** |
+|-------------|-----------|---------|
+| 2.x         | 13-14     | 8.2-8.5 |
+| 1.x         | 11-13     | 8.1-8.5 |
+
 ### Composer
 
 [![Packagist](https://img.shields.io/packagist/v/xima/xima-typo3-frontend-edit?label=version&logo=packagist)](https://packagist.org/packages/xima/xima-typo3-frontend-edit)
