@@ -11,7 +11,7 @@ Introduction
 What does it do?
 ================
 
-This extension provides an edit menu/button for editors within the frontend regarding content elements and pages.
+This extension provides an edit menu for editors within the frontend regarding content elements and pages.
 
 ..  figure:: /Images/screenshot.jpg
     :alt: Frontend Edit Preview

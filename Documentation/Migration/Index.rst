@@ -95,6 +95,7 @@ The ``defaultMenuStructure`` configuration has been removed.
 
 .. code-block:: php
 
+   use TYPO3\CMS\Core\Attribute\AsEventListener;
    use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
 
    #[AsEventListener]
