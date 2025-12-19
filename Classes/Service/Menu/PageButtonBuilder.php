@@ -37,7 +37,7 @@ final readonly class PageButtonBuilder extends AbstractMenuButtonBuilder
         $this->addButton($menuButton, 'div_info', ButtonType::Divider);
 
         $title = isset($pageRecord['title']) && '' !== $pageRecord['title']
-            ? htmlspecialchars(StringUtility::shortenString((string) $pageRecord['title']), ENT_QUOTES, 'UTF-8')
+            ? htmlspecialchars(StringUtility::shortenString((string) $pageRecord['title']), \ENT_QUOTES, 'UTF-8')
             : '';
         $doktype = (int) ($pageRecord['doktype'] ?? 1);
         $uid = (int) $pageRecord['uid'];

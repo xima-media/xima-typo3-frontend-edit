@@ -18,7 +18,6 @@ use Generator;
 use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, RootlineUtility};
-use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
 
 use function array_slice;
 
@@ -45,7 +44,6 @@ final readonly class ContentElementRepository
 
     public function __construct(
         private ConnectionPool $connectionPool,
-        private VersionCompatibilityService $versionCompatibilityService,
     ) {
         $this->rootlineCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
         $this->configCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
@@ -228,12 +226,10 @@ final readonly class ContentElementRepository
             return false;
         }
 
-        $valueKey = $this->versionCompatibilityService->getContentElementConfigValueKey();
-
         // Lazy loading: iterate through TCA items using generator to avoid loading entire array
         foreach ($this->getTcaItemsLazily($cType) as $item) {
-            if (('list' === $cType && $item[$valueKey] === $listType)
-                || $item[$valueKey] === $cType) {
+            if (('list' === $cType && $item['value'] === $listType)
+                || $item['value'] === $cType) {
                 $this->manageCacheSize($this->configCache);
                 $this->configCache->offsetSet($cacheKey, $item);
 

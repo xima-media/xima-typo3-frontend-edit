@@ -46,6 +46,7 @@ final class PageMenuGenerator extends AbstractMenuGenerator
      * Generate the page dropdown menu data for the sticky toolbar.
      *
      * @return array<string, mixed>
+     *
      * @throws Exception
      */
     public function getDropdown(ServerRequestInterface $request): array

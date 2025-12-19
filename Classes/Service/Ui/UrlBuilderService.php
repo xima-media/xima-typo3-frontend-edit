@@ -159,4 +159,20 @@ final readonly class UrlBuilderService
     {
         return $this->uriBuilder->buildUriFromRoute($route, $parameters)->__toString();
     }
+
+    /**
+     * @throws RouteNotFoundException
+     */
+    public function buildToggleUrl(): string
+    {
+        return $this->buildRoute('ajax_frontendEdit_toggle');
+    }
+
+    /**
+     * @throws RouteNotFoundException
+     */
+    public function buildEditInformationUrl(): string
+    {
+        return $this->buildRoute('ajax_frontendEdit_editInformation');
+    }
 }
