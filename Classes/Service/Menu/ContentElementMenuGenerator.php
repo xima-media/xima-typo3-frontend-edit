@@ -90,13 +90,16 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
         $enableScrollToElement = $this->settingsService->isEnableScrollToElement($request);
 
+        // Remove existing URL fragment to prevent accumulation (e.g. page.html#c123#c456)
+        $returnUrlWithoutFragment = strtok($returnUrl, '#') ?: $returnUrl;
+
         $result = [];
         foreach ($filteredElements as $contentElement) {
             $contentElementConfig = $this->contentElementRepository->getContentElementConfig(
                 $contentElement['CType'],
                 $contentElement['list_type'] ?? '',
             );
-            $returnUrlAnchor = $enableScrollToElement ? $returnUrl.'#c'.$contentElement['uid'] : $returnUrl;
+            $returnUrlAnchor = $enableScrollToElement ? $returnUrlWithoutFragment.'#c'.$contentElement['uid'] : $returnUrlWithoutFragment;
 
             if (false === $contentElementConfig) {
                 continue;
