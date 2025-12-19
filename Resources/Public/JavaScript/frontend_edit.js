@@ -327,6 +327,14 @@
       if (!data) return;
 
       if (active) {
+        // Deactivate all other overlays first (hover priority)
+        this.overlays.forEach((otherData, otherElement) => {
+          if (otherElement !== targetElement) {
+            otherData.overlay.classList.remove('frontend-edit__overlay--active');
+          }
+        });
+        // Close any open dropdowns
+        Dropdown.closeAll();
         data.overlay.classList.add('frontend-edit__overlay--active');
         this.updatePosition(targetElement);
       } else {
