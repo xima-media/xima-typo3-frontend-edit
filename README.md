@@ -39,7 +39,7 @@ The extension has been developed to provide a simple and lightweight solution to
 
 ### Requirements
 
-* TYPO3 >= 13.0
+* TYPO3 >= 13.4
 * PHP 8.2+
 
 ### Composer
