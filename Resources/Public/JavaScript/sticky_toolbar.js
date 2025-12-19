@@ -167,8 +167,15 @@
 
     createToolbar() {
       this.container = document.createElement('div');
-      this.container.className = `frontend-edit__sticky-toolbar frontend-edit__sticky-toolbar--${this.position}`;
+      this.container.className = `frontend-edit__sticky-toolbar frontend-edit__sticky-toolbar--${this.escapeClassName(this.position)}`;
       this.container.innerHTML = this.getToolbarHTML();
+
+      // Populate dropdown with safely constructed DOM elements
+      const dropdown = this.container.querySelector('.frontend-edit__sticky-dropdown');
+      if (dropdown) {
+        dropdown.appendChild(this.createDropdownItems());
+      }
+
       document.body.appendChild(this.container);
     },
 
@@ -180,48 +187,131 @@
       const showPageMenu = !this.isDisabled && this.pageMenuData && this.pageMenuData.children;
 
       let html = `
-        <button class="frontend-edit__sticky-btn frontend-edit__sticky-btn--toggle" data-tooltip="${toggleTooltip}" type="button">
+        <button class="frontend-edit__sticky-btn frontend-edit__sticky-btn--toggle" data-tooltip="${this.escapeAttribute(toggleTooltip)}" type="button">
           ${toggleIcon}
         </button>`;
 
-      // Add page dropdown only when enabled
+      // Add page dropdown only when enabled (dropdown content added via DOM in createToolbar)
       if (showPageMenu) {
-        const dropdownContent = this.renderDropdownContent();
         html += `
         <div class="frontend-edit__sticky-separator"></div>
         <div class="frontend-edit__sticky-dropdown-container">
-          <button class="frontend-edit__sticky-btn frontend-edit__sticky-btn--menu" data-tooltip="${this.tooltips.pageOptions}" type="button">
+          <button class="frontend-edit__sticky-btn frontend-edit__sticky-btn--menu" data-tooltip="${this.escapeAttribute(this.tooltips.pageOptions)}" type="button">
             ${ICONS.kebab}
           </button>
-          <div class="frontend-edit__sticky-dropdown">
-            ${dropdownContent}
-          </div>
+          <div class="frontend-edit__sticky-dropdown"></div>
         </div>`;
       }
 
       return html;
     },
 
-    renderDropdownContent() {
-      if (!this.pageMenuData || !this.pageMenuData.children) {
+    /**
+     * Escapes HTML attribute values to prevent XSS.
+     */
+    escapeAttribute(str) {
+      if (!str || typeof str !== 'string') {
         return '';
+      }
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    },
+
+    /**
+     * Creates dropdown content using safe DOM construction.
+     * Returns a DocumentFragment with dropdown items.
+     *
+     * Security note: Icons (item.icon) are trusted HTML from the TYPO3 backend
+     * (generated via IconFactory). Labels are safely inserted via textContent.
+     */
+    createDropdownItems() {
+      const fragment = document.createDocumentFragment();
+
+      if (!this.pageMenuData || !this.pageMenuData.children) {
+        return fragment;
       }
 
       const targetBlank = this.pageMenuData.targetBlank || false;
-      let html = '';
 
       for (const [name, item] of Object.entries(this.pageMenuData.children)) {
+        let element;
+
         if (item.type === 'divider') {
-          html += `<div class="frontend-edit__divider ${name}"><span>${item.label}</span></div>`;
+          element = document.createElement('div');
+          element.className = `frontend-edit__divider ${this.escapeClassName(name)}`;
+          const span = document.createElement('span');
+          span.textContent = item.label || '';
+          element.appendChild(span);
         } else if (item.type === 'info') {
-          html += `<div class="frontend-edit__info ${name}">${item.icon ?? ''}<span>${item.label}</span></div>`;
+          element = document.createElement('div');
+          element.className = `frontend-edit__info ${this.escapeClassName(name)}`;
+          // Icons are trusted HTML from TYPO3 backend (IconFactory)
+          if (item.icon) {
+            const iconWrapper = document.createElement('span');
+            iconWrapper.innerHTML = item.icon;
+            element.appendChild(iconWrapper);
+          }
+          const span = document.createElement('span');
+          span.textContent = item.label || '';
+          element.appendChild(span);
         } else if (item.type === 'link') {
-          const targetAttr = targetBlank ? ' target="_blank"' : '';
-          html += `<a href="${item.url}"${targetAttr}>${item.icon ?? ''}<span>${item.label}</span></a>`;
+          element = document.createElement('a');
+          // Validate URL to prevent javascript: protocol attacks
+          if (item.url && this.isValidUrl(item.url)) {
+            element.href = item.url;
+          }
+          if (targetBlank) {
+            element.target = '_blank';
+          }
+          // Icons are trusted HTML from TYPO3 backend (IconFactory)
+          if (item.icon) {
+            const iconWrapper = document.createElement('span');
+            iconWrapper.innerHTML = item.icon;
+            element.appendChild(iconWrapper);
+          }
+          const span = document.createElement('span');
+          span.textContent = item.label || '';
+          element.appendChild(span);
+        }
+
+        if (element) {
+          fragment.appendChild(element);
         }
       }
 
-      return html;
+      return fragment;
+    },
+
+    /**
+     * Validates URL to prevent javascript: and other dangerous protocols.
+     */
+    isValidUrl(url) {
+      if (!url || typeof url !== 'string') {
+        return false;
+      }
+      const trimmed = url.trim().toLowerCase();
+      // Block javascript:, data:, vbscript: protocols
+      if (trimmed.startsWith('javascript:') ||
+          trimmed.startsWith('data:') ||
+          trimmed.startsWith('vbscript:')) {
+        return false;
+      }
+      return true;
+    },
+
+    /**
+     * Escapes class name to prevent injection via class attribute.
+     */
+    escapeClassName(name) {
+      if (!name || typeof name !== 'string') {
+        return '';
+      }
+      // Only allow alphanumeric, hyphens, and underscores
+      return name.replace(/[^a-zA-Z0-9_-]/g, '');
     },
 
     setupEventListeners() {

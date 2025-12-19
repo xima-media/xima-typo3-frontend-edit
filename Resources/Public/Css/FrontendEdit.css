@@ -111,14 +111,14 @@
 /* Modifier: toolbar at bottom when element is near top of viewport */
 .frontend-edit__overlay--bottom .frontend-edit__toolbar {
     top: auto;
-    bottom: 0;
+    bottom: 8px;
 }
 
 .frontend-edit__overlay--bottom .frontend-edit__toolbar-label,
 .frontend-edit__overlay--bottom .frontend-edit__toolbar-actions {
     top: auto;
     bottom: 0;
-    transform: translateY(50%);
+    transform: translateY(0);
 }
 
 /* Modifier: nested - toolbar inside element (not centered on outline) */
@@ -130,7 +130,7 @@
 /* Nested + bottom: toolbar stays inside element */
 .frontend-edit__overlay--nested.frontend-edit__overlay--bottom .frontend-edit__toolbar-label,
 .frontend-edit__overlay--nested.frontend-edit__overlay--bottom .frontend-edit__toolbar-actions {
-    transform: translateY(-100%);
+    transform: translateY(0);
 }
 
 /* Element: toolbar-label (top-left, standing on outline) */

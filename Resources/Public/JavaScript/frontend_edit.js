@@ -327,14 +327,6 @@
       if (!data) return;
 
       if (active) {
-        // Deactivate all other overlays first (hover priority)
-        this.overlays.forEach((otherData, otherElement) => {
-          if (otherElement !== targetElement) {
-            otherData.overlay.classList.remove('frontend-edit__overlay--active');
-          }
-        });
-        // Close any open dropdowns
-        Dropdown.closeAll();
         data.overlay.classList.add('frontend-edit__overlay--active');
         this.updatePosition(targetElement);
       } else {
@@ -367,6 +359,7 @@
       const container = document.createElement('div');
       container.className = 'frontend-edit__toolbar-label';
 
+      // Icons are trusted HTML from TYPO3 backend (IconFactory)
       if (contentElement.element.ctypeIcon) {
         const iconWrapper = document.createElement('span');
         iconWrapper.className = 'frontend-edit__toolbar-icon';
@@ -376,7 +369,11 @@
 
       const label = document.createElement('span');
       const ctypeLabel = contentElement.element.ctypeLabel || contentElement.element.CType || 'Content';
-      label.innerHTML = `${ctypeLabel} <code>${uid}</code>`;
+      // Use textContent for label to prevent XSS, append code element separately
+      label.textContent = ctypeLabel + ' ';
+      const codeEl = document.createElement('code');
+      codeEl.textContent = uid;
+      label.appendChild(codeEl);
       container.appendChild(label);
 
       return container;
@@ -406,10 +403,10 @@
       btn.innerHTML = ICONS.edit;
 
       const editAction = contentElement.menu.children?.edit;
-      if (editAction?.url) {
+      if (editAction?.url && this.isValidUrl(editAction.url)) {
         btn.href = editAction.url;
         if (editAction.targetBlank) btn.target = '_blank';
-      } else if (contentElement.menu.url) {
+      } else if (contentElement.menu.url && this.isValidUrl(contentElement.menu.url)) {
         btn.href = contentElement.menu.url;
         if (contentElement.menu.targetBlank) btn.target = '_blank';
       }
@@ -440,7 +437,10 @@
         const el = document.createElement(action.type === 'link' ? 'a' : 'div');
 
         if (action.type === 'link') {
-          el.href = action.url;
+          // Validate URL to prevent javascript: protocol attacks
+          if (action.url && this.isValidUrl(action.url)) {
+            el.href = action.url;
+          }
           if (action.targetBlank) el.target = '_blank';
         }
 
@@ -452,12 +452,55 @@
           el.className = 'frontend-edit__info';
         }
 
-        el.classList.add(name);
-        el.innerHTML = `${action.icon ?? ''} <span>${action.label}</span>`;
+        // Sanitize class name to prevent injection
+        const safeName = this.escapeClassName(name);
+        if (safeName) {
+          el.classList.add(safeName);
+        }
+
+        // Icons are trusted HTML from TYPO3 backend (IconFactory)
+        if (action.icon) {
+          const iconWrapper = document.createElement('span');
+          iconWrapper.innerHTML = action.icon;
+          el.appendChild(iconWrapper);
+        }
+        // Use textContent for label to prevent XSS
+        const labelSpan = document.createElement('span');
+        labelSpan.textContent = action.label || '';
+        el.appendChild(labelSpan);
+
         dropdown.appendChild(el);
       }
 
       return dropdown;
+    },
+
+    /**
+     * Validates URL to prevent javascript: and other dangerous protocols.
+     */
+    isValidUrl(url) {
+      if (!url || typeof url !== 'string') {
+        return false;
+      }
+      const trimmed = url.trim().toLowerCase();
+      // Block javascript:, data:, vbscript: protocols
+      if (trimmed.startsWith('javascript:') ||
+          trimmed.startsWith('data:') ||
+          trimmed.startsWith('vbscript:')) {
+        return false;
+      }
+      return true;
+    },
+
+    /**
+     * Escapes class name to prevent injection via class attribute.
+     */
+    escapeClassName(name) {
+      if (!name || typeof name !== 'string') {
+        return '';
+      }
+      // Only allow alphanumeric, hyphens, and underscores
+      return name.replace(/[^a-zA-Z0-9_-]/g, '');
     }
   };
 
