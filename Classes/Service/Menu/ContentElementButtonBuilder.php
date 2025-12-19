@@ -78,7 +78,7 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
 
         $typeLabel = $GLOBALS['LANG']->sL($contentElementConfig['label'] ?? '') ?: $contentElement['CType'];
         $header = isset($contentElement['header']) && '' !== $contentElement['header']
-            ? StringUtility::shortenString((string) $contentElement['header'])
+            ? htmlspecialchars(StringUtility::shortenString((string) $contentElement['header']), ENT_QUOTES, 'UTF-8')
             : '';
         $uid = (int) $contentElement['uid'];
 
