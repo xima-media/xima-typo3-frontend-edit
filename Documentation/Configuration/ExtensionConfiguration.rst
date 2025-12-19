@@ -20,7 +20,10 @@ Features
     :type: boolean
     :Default: 1
 
-    Enable this option to render a save and close button in the header of edit forms
+    Enable this option to render a save and close button in the header of edit forms.
+
+    ..  figure:: /Images/save-close.jpg
+        :alt: Frontend Edit Save and Close Button
 
 ..  _extconf-forceReturnUrlGeneration:
 
@@ -36,15 +39,7 @@ Features
     :type: boolean
     :Default: 0
 
-    Enable the target blank option for all dropdown links to open in a new tab
-
-..  _extconf-simpleMode:
-
-..  confval:: Simple mode
-    :type: boolean
-    :Default: 0
-
-    This mode will disable the menu dropdown and use the edit icon button directly as edit link instead
+    Enable the target blank option for all Edit Menu links to open in a new tab
 
 ..  _extconf-useRedirect:
 

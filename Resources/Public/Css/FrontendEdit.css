@@ -1,109 +1,604 @@
-.xima-typo3-frontend-edit--edit-container {
-    outline: 1px dashed gray;
+/* CSS Custom Properties for Theming */
+:root {
+    --xfe-toolbar-bg: rgba(50, 50, 50, 0.95);
+    --xfe-toolbar-text: #ffffff;
+    --xfe-toolbar-btn-hover: rgba(255, 255, 255, 0.15);
+    --xfe-bg-primary: #ffffff;
+    --xfe-bg-hover: #f0f0f0;
+    --xfe-text-primary: #1a1a1a;
+    --xfe-text-secondary: #666666;
+    --xfe-border-color: #e0e0e0;
+    --xfe-outline-color: #aaaaaa;
+    --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.xima-typo3-frontend-edit--wrapper {
+/* Light theme (explicit) */
+[data-xfe-theme="light"] {
+    --xfe-toolbar-bg: rgba(245, 245, 245, 0.95);
+    --xfe-toolbar-text: #1a1a1a;
+    --xfe-toolbar-btn-hover: rgba(0, 0, 0, 0.1);
+    --xfe-bg-primary: #ffffff;
+    --xfe-bg-hover: #f0f0f0;
+    --xfe-text-primary: #1a1a1a;
+    --xfe-text-secondary: #666666;
+    --xfe-border-color: #e0e0e0;
+    --xfe-outline-color: #aaaaaa;
+    --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark theme (explicit) */
+[data-xfe-theme="dark"] {
+    --xfe-toolbar-bg: rgba(30, 30, 30, 0.95);
+    --xfe-toolbar-text: #f0f0f0;
+    --xfe-toolbar-btn-hover: rgba(255, 255, 255, 0.15);
+    --xfe-bg-primary: #2d2d2d;
+    --xfe-bg-hover: #3d3d3d;
+    --xfe-text-primary: #f0f0f0;
+    --xfe-text-secondary: #a0a0a0;
+    --xfe-border-color: #444444;
+    --xfe-outline-color: #666666;
+    --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Auto theme - follows system preference */
+@media (prefers-color-scheme: dark) {
+    [data-xfe-theme="auto"] {
+        --xfe-toolbar-bg: rgba(30, 30, 30, 0.95);
+        --xfe-toolbar-text: #f0f0f0;
+        --xfe-toolbar-btn-hover: rgba(255, 255, 255, 0.15);
+        --xfe-bg-primary: #2d2d2d;
+        --xfe-bg-hover: #3d3d3d;
+        --xfe-text-primary: #f0f0f0;
+        --xfe-text-secondary: #a0a0a0;
+        --xfe-border-color: #444444;
+        --xfe-outline-color: #666666;
+        --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* Overlay container - fixed position, covers viewport */
+.frontend-edit__overlay-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10000;
+    overflow: visible;
+}
+
+/* Individual overlay - positioned over each content element */
+.frontend-edit__overlay {
     position: absolute;
+    pointer-events: none;
 }
 
-.xima-typo3-frontend-edit--edit-button {
-    position: relative;
-    align-content: center;
-    justify-content: center;
-    display: none;
-    width: 30px;
-    height: 30px;
-    background-color: white;
-    color: #333;
-    border-radius: 15px;
-    border: 1px solid #CCC;
-    cursor: pointer;
-    z-index: 1000;
-    opacity: 0.5;
-    padding: 0;
-    margin: 0;
-    flex-wrap: wrap;
+/* Outline element - dashed border around content */
+.frontend-edit__outline {
+    position: absolute;
+    inset: -1px;
+    border-radius: 2px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    background:
+        repeating-linear-gradient(to right, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) top/100% 1px no-repeat,
+        repeating-linear-gradient(to right, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) bottom/100% 1px no-repeat,
+        repeating-linear-gradient(to bottom, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) left/1px 100% no-repeat,
+        repeating-linear-gradient(to bottom, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) right/1px 100% no-repeat;
 }
 
-.xima-typo3-frontend-edit--edit-button svg {
-    width: 10px;
-}
-
-.xima-typo3-frontend-edit--edit-button:hover {
+.frontend-edit__overlay--active .frontend-edit__outline {
     opacity: 1;
-    box-shadow: 0 0 1px 1px rgba(0, 0, 0, .1);
 }
 
-.xima-typo3-frontend-edit--dropdown-menu {
+/* Element: toolbar - invisible container for label and actions */
+.frontend-edit__toolbar {
     position: absolute;
-    display: none;
+    top: 0;
+    left: 0;
     right: 0;
-    margin: 0;
-    min-width: 120px;
-    z-index: 1000;
-    direction: ltr;
-    background: transparent;
-    font-family: 'Helvetica Neue', Helvetica, Arial, Verdana, sans-serif;
+    height: 0;
+    z-index: 1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
 }
 
-.xima-typo3-frontend-edit--dropdown-menu-inner {
-    margin: 10px;
-    background: white;
-    border: 0 none;
-    border-radius: .75rem;
-    box-shadow: 0 0 1px 1px rgba(0, 0, 0, .1);
-    padding: .5em;
+.frontend-edit__overlay--active .frontend-edit__toolbar {
+    opacity: 1;
+    pointer-events: auto;
 }
 
-.xima-typo3-frontend-edit--dropdown-menu-inner a, .xima-typo3-frontend-edit--dropdown-menu-inner div {
+/* Modifier: toolbar at bottom when element is near top of viewport */
+.frontend-edit__overlay--bottom .frontend-edit__toolbar {
+    top: auto;
+    bottom: 8px;
+}
+
+.frontend-edit__overlay--bottom .frontend-edit__toolbar-label,
+.frontend-edit__overlay--bottom .frontend-edit__toolbar-actions {
+    top: auto;
+    bottom: 0;
+    transform: translateY(0);
+}
+
+/* Modifier: nested - toolbar inside element (not centered on outline) */
+.frontend-edit__overlay--nested .frontend-edit__toolbar-label,
+.frontend-edit__overlay--nested .frontend-edit__toolbar-actions {
+    transform: translateY(0);
+}
+
+/* Nested + bottom: toolbar stays inside element */
+.frontend-edit__overlay--nested.frontend-edit__overlay--bottom .frontend-edit__toolbar-label,
+.frontend-edit__overlay--nested.frontend-edit__overlay--bottom .frontend-edit__toolbar-actions {
+    transform: translateY(0);
+}
+
+/* Element: toolbar-label (top-left, standing on outline) */
+.frontend-edit__toolbar-label {
+    position: absolute;
+    top: 0;
+    left: 8px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--xfe-toolbar-bg);
+    color: var(--xfe-toolbar-text);
+    padding: 4px 10px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: nowrap;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.frontend-edit__toolbar-label code {
+    font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+.frontend-edit__toolbar-label svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.frontend-edit__toolbar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.frontend-edit__toolbar-icon img {
+    width: 14px;
+    height: 14px;
+}
+
+/* Element: toolbar-actions (top-right, standing on outline) */
+.frontend-edit__toolbar-actions {
+    position: absolute;
+    top: 0;
+    right: 8px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--xfe-toolbar-bg);
+    border-radius: 4px;
+    padding: 4px;
+    box-sizing: border-box;
+}
+
+/* Element: btn - toolbar buttons */
+.frontend-edit__btn {
+    position: relative;
     display: flex;
-    align-items: flex-start;
-    gap: 5px;
-    padding: 10px;
-    color: #333;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--xfe-toolbar-text);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    padding: 0;
     text-decoration: none;
-    text-align: left;
+}
+
+.frontend-edit__btn:hover {
+    background: var(--xfe-toolbar-btn-hover);
+}
+
+.frontend-edit__btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Tooltip element (positioned with Floating UI) */
+.frontend-edit__tooltip {
+    position: absolute;
+    z-index: 10002;
+    padding: 4px 8px;
+    background: var(--xfe-text-primary);
+    color: var(--xfe-bg-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    border-radius: 4px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.frontend-edit__tooltip--visible {
+    opacity: 1;
+}
+
+/* Tooltip arrow */
+.frontend-edit__tooltip-arrow {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: var(--xfe-text-primary);
+    transform: rotate(45deg);
+}
+
+.frontend-edit__tooltip[data-placement^="top"] .frontend-edit__tooltip-arrow {
+    bottom: -4px;
+}
+
+.frontend-edit__tooltip[data-placement^="bottom"] .frontend-edit__tooltip-arrow {
+    top: -4px;
+}
+
+.frontend-edit__tooltip[data-placement^="left"] .frontend-edit__tooltip-arrow {
+    right: -4px;
+}
+
+.frontend-edit__tooltip[data-placement^="right"] .frontend-edit__tooltip-arrow {
+    left: -4px;
+}
+
+/* Modifier: btn--kebab (three dots) */
+.frontend-edit__btn--kebab svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Element: dropdown - dropdown menu */
+.frontend-edit__dropdown {
+    position: absolute;
+    z-index: 10001;
+    min-width: 180px;
+    background: var(--xfe-bg-primary);
+    border: 1px solid var(--xfe-border-color);
+    border-radius: 8px;
+    box-shadow: var(--xfe-shadow);
+    padding: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    display: none;
+}
+
+.frontend-edit__dropdown a,
+.frontend-edit__dropdown div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    color: var(--xfe-text-primary);
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.4;
     white-space: nowrap;
     margin: 0;
     background: transparent;
-    border-radius: .375rem;
-    font-size: 14px;
-    line-height: 14px;
-    font-weight: normal;
+    cursor: pointer;
+    transition: background 0.1s ease;
 }
 
-.xima-typo3-frontend-edit--dropdown-menu-inner div {
-    border-radius: 0;
+.frontend-edit__dropdown a:hover {
+    background: var(--xfe-bg-hover);
 }
 
-.xima-typo3-frontend-edit--dropdown-menu-inner p {
-    margin-top: 10px;
-    margin-bottom: 0;
-    font-size: 14px;
-    line-height: 1;
-}
-
-.xima-typo3-frontend-edit--dropdown-menu-inner div.xima-typo3-frontend-edit--divider {
-    color: #666;
-    text-transform: uppercase;
-    font-size: 10px;
-    border-bottom: 1px solid rgba(0, 0, 0, .1);
-    padding: 5px;
-}
-
-.xima-typo3-frontend-edit--dropdown-menu-inner a svg, .xima-typo3-frontend-edit--dropdown-menu-inner div svg {
+.frontend-edit__dropdown a svg,
+.frontend-edit__dropdown div svg {
     width: 16px;
-    margin-top: -1px;
+    height: 16px;
+    flex-shrink: 0;
+    opacity: 0.7;
 }
 
-.xima-typo3-frontend-edit--dropdown-menu-inner a:hover {
-    background-color: #f0f0f0;
+/* Element: divider - divider in dropdown */
+.frontend-edit__divider {
+    color: var(--xfe-text-secondary);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 6px 12px 4px !important;
+    margin-top: 4px;
+    cursor: default !important;
+    border-top: 1px solid var(--xfe-border-color);
 }
 
-.xima-typo3-frontend-edit--edit-container .xima-typo3-frontend-edit--edit-button {
+.frontend-edit__divider:first-child {
+    border-top: none;
+    margin-top: 0;
+}
+
+/* Element: info - info block in dropdown */
+.frontend-edit__info {
+    color: var(--xfe-text-primary);
+    font-size: 12px;
+    padding: 8px 12px !important;
+    cursor: default !important;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.frontend-edit__info svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    opacity: 0.8;
+    align-self: start;
+}
+
+.frontend-edit__info span {
+    flex: 1;
+}
+
+.frontend-edit__info small {
+    display: block;
+    color: var(--xfe-text-secondary);
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+.frontend-edit__info code {
+    display: block;
+    font-size: 10px;
+    font-family: monospace;
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
+/* Legacy styles - kept for compatibility */
+.frontend-edit__wrapper {
+    display: none;
+}
+
+.frontend-edit--active {
+    /* No longer used - overlay system handles highlighting */
+}
+
+/* ==========================================
+   STICKY TOOLBAR
+   ========================================== */
+
+.frontend-edit__sticky-toolbar {
+    position: fixed;
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: var(--xfe-toolbar-bg);
+    border-radius: 4px;
+    padding: 2px;
+    box-shadow: var(--xfe-shadow);
+    transition: opacity 0.2s ease;
+}
+
+/* Position variants - corners */
+.frontend-edit__sticky-toolbar--bottom-right {
+    bottom: 0;
+    right: 10px;
+    border-radius: 4px 4px 0 0;
+}
+
+.frontend-edit__sticky-toolbar--bottom-left {
+    bottom: 0;
+    left: 10px;
+    border-radius: 4px 4px 0 0;
+}
+
+.frontend-edit__sticky-toolbar--top-right {
+    top: 0;
+    right: 10px;
+    border-radius: 0 0 4px 4px;
+}
+
+.frontend-edit__sticky-toolbar--top-left {
+    top: 0;
+    left: 10px;
+    border-radius: 0 0 4px 4px;
+}
+
+/* Position variants - centered on edges */
+.frontend-edit__sticky-toolbar--bottom-center {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 4px 4px 0 0;
+}
+
+.frontend-edit__sticky-toolbar--top-center {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 0 0 4px 4px;
+}
+
+.frontend-edit__sticky-toolbar--left-center {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    border-radius: 0 4px 4px 0;
+}
+
+.frontend-edit__sticky-toolbar--right-center {
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    flex-direction: column;
+    border-radius: 4px 0 0 4px;
+}
+
+/* Position variants - vertical edges with top/bottom alignment */
+.frontend-edit__sticky-toolbar--left-top {
+    left: 0;
+    top: 10px;
+    flex-direction: column;
+    border-radius: 0 4px 4px 0;
+}
+
+.frontend-edit__sticky-toolbar--left-bottom {
+    left: 0;
+    bottom: 10px;
+    flex-direction: column;
+    border-radius: 0 4px 4px 0;
+}
+
+.frontend-edit__sticky-toolbar--right-top {
+    right: 0;
+    top: 10px;
+    flex-direction: column;
+    border-radius: 4px 0 0 4px;
+}
+
+.frontend-edit__sticky-toolbar--right-bottom {
+    right: 0;
+    bottom: 10px;
+    flex-direction: column;
+    border-radius: 4px 0 0 4px;
+}
+
+/* Disabled state */
+.frontend-edit__sticky-toolbar--disabled {
+    opacity: 0.7;
+}
+
+.frontend-edit__sticky-toolbar--disabled .frontend-edit__sticky-btn--toggle {
+    color: var(--xfe-text-secondary);
+}
+
+/* Sticky toolbar buttons */
+.frontend-edit__sticky-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--xfe-toolbar-text);
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    padding: 0;
+}
+
+.frontend-edit__sticky-btn:hover {
+    background: var(--xfe-toolbar-btn-hover);
+}
+
+.frontend-edit__sticky-btn:active {
+    transform: scale(0.95);
+}
+
+.frontend-edit__sticky-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Separator */
+.frontend-edit__sticky-separator {
+    width: 1px;
+    height: 16px;
+    background: var(--xfe-border-color);
+    margin: 0 2px;
+    opacity: 0.5;
+}
+
+/* Vertical separator for left/right positions */
+.frontend-edit__sticky-toolbar--left-top .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--left-center .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--left-bottom .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--right-top .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--right-center .frontend-edit__sticky-separator,
+.frontend-edit__sticky-toolbar--right-bottom .frontend-edit__sticky-separator {
+    width: 16px;
+    height: 1px;
+    margin: 2px 0;
+}
+
+/* Dropdown container */
+.frontend-edit__sticky-dropdown-container {
+    position: relative;
+}
+
+/* Dropdown menu - positioned dynamically via Floating UI */
+.frontend-edit__sticky-dropdown {
+    position: fixed;
+    z-index: 10002;
+    min-width: 200px;
+    background: var(--xfe-bg-primary);
+    border: 1px solid var(--xfe-border-color);
+    border-radius: 8px;
+    box-shadow: var(--xfe-shadow);
+    padding: 4px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
 }
 
-.xima-typo3-frontend-edit--edit-container:hover .xima-typo3-frontend-edit--edit-button {
+.frontend-edit__sticky-dropdown--visible {
     visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Dropdown items - same pattern as content element dropdown */
+.frontend-edit__sticky-dropdown a,
+.frontend-edit__sticky-dropdown div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    color: var(--xfe-text-primary);
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: nowrap;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: background 0.1s ease;
+}
+
+.frontend-edit__sticky-dropdown a:hover {
+    background: var(--xfe-bg-hover);
+}
+
+.frontend-edit__sticky-dropdown a svg,
+.frontend-edit__sticky-dropdown div svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    opacity: 0.7;
 }

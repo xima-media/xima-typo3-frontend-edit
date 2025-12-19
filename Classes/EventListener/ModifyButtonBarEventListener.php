@@ -15,15 +15,15 @@ namespace Xima\XimaTypo3FrontendEdit\EventListener;
 
 use TYPO3\CMS\Backend\Template\Components\{ButtonBar, ModifyButtonBarEvent};
 use TYPO3\CMS\Backend\Template\Components\Buttons\InputButton;
+use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Configuration\Exception\{ExtensionConfigurationExtensionNotConfiguredException, ExtensionConfigurationPathDoesNotExistException};
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Imaging\IconFactory;
-use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Imaging\{IconFactory, IconSize};
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Page\PageRenderer;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
-use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
+use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\ButtonFactoryUtility;
 
 use function array_key_exists;
 
@@ -33,6 +33,7 @@ use function array_key_exists;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
+#[AsEventListener(identifier: 'xima-typo3-frontend-edit/backend/modify-button-bar')]
 final class ModifyButtonBarEventListener
 {
     /** @var array<string, mixed> */
@@ -44,7 +45,6 @@ final class ModifyButtonBarEventListener
      */
     public function __construct(
         private readonly ExtensionConfiguration $extensionConfiguration,
-        private readonly VersionCompatibilityService $versionCompatibilityService,
     ) {
         $this->configuration = $this->extensionConfiguration->get(Configuration::EXT_KEY);
     }
@@ -65,24 +65,20 @@ final class ModifyButtonBarEventListener
 
         if ($saveButton instanceof InputButton) {
             $iconFactory = GeneralUtility::makeInstance(IconFactory::class);
-            $saveCloseButton = $buttonBar->makeInputButton()
+            $saveCloseButton = ButtonFactoryUtility::createInputButton($buttonBar)
                 ->setName('_saveandclosedok')
                 ->setValue('1')
                 ->setForm($saveButton->getForm())
                 ->setTitle($this->getLanguageService()->sL('LLL:EXT:core/Resources/Private/Language/locallang_core.xlf:rm.saveCloseDoc'))
-                ->setIcon($iconFactory->getIcon('actions-document-save-close', $this->versionCompatibilityService->getDefaultIconSize()))
-                ->setShowLabelText(true);
-
-            $typo3Version = GeneralUtility::makeInstance(Typo3Version::class)->getMajorVersion();
-            if ($typo3Version >= 13) {
-                $saveCloseButton->setDataAttributes([
+                ->setIcon($iconFactory->getIcon('actions-document-save-close', IconSize::SMALL))
+                ->setShowLabelText(true)
+                ->setDataAttributes([
                     'js' => 'save-close',
                 ]);
 
-                /** @var PageRenderer $pageRenderer */
-                $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
-                $pageRenderer->loadJavaScriptModule('@xima/ximatypo3frontendedit/save_close.js');
-            }
+            /** @var PageRenderer $pageRenderer */
+            $pageRenderer = GeneralUtility::makeInstance(PageRenderer::class);
+            $pageRenderer->loadJavaScriptModule('@xima/ximatypo3frontendedit/save_close.js');
 
             $buttons[ButtonBar::BUTTON_POSITION_LEFT][2][] = $saveCloseButton;
         }

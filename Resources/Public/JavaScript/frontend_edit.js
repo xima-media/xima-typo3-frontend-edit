@@ -1,428 +1,803 @@
-document.addEventListener('DOMContentLoaded', function () {
-  /**
-   * Debug logging utility - only logs when debug mode is enabled
-   * @param {string} message - The debug message
-   * @param {*} data - Optional data to log
-   * @param {string} level - Log level (log, warn, error)
-   */
-  const debugLog = (message, data = null, level = 'log') => {
-    if (window.FRONTEND_EDIT_DEBUG) {
-      const prefix = '%c[xima-typo3-frontend-edit]%c';
-      if (data !== null) {
-        console[level](prefix, 'font-weight: bold;', 'font-weight: normal;', message, data);
-      } else {
-        console[level](prefix, 'font-weight: bold;', 'font-weight: normal;', message);
-      }
+/**
+ * TYPO3 Frontend Edit
+ * Provides inline editing capabilities for content elements in the frontend.
+ */
+(function () {
+  'use strict';
+
+  // Floating UI imports - will be set when ready
+  let computePosition, flip, shift, offset, arrow;
+
+  function initFloatingUI() {
+    if (window.FloatingUIDOM) {
+      ({ computePosition, flip, shift, offset, arrow } = window.FloatingUIDOM);
     }
-  };
-
-  /**
-   * Finds the closest parent element with an ID matching the pattern "c\d+".
-   * @param {HTMLElement} element - The starting element.
-   * @returns {HTMLElement|null} - The closest matching element or null if not found.
-   */
-  const getClosestElementWithId = (element) => {
-    while (element && !element.id.match(/c\d+/)) {
-      element = element.parentElement;
-    }
-    return element;
-  };
-
-  /**
-   * Collects data items from elements with the class "xima-typo3-frontend-edit--data".
-   * Groups the data by the closest element's ID.
-   * @returns {Object} - A dictionary of data items grouped by ID.
-   */
-  const collectDataItems = () => {
-    const dataItems = {};
-    const dataElements = document.querySelectorAll('.xima-typo3-frontend-edit--data');
-
-    debugLog(`Found ${dataElements.length} custom additional data elements on page`);
-
-    dataElements.forEach((element, index) => {
-      const data = element.value;
-      const closestElement = getClosestElementWithId(element);
-
-      if (closestElement) {
-        const id = closestElement.id.replace('c', '');
-        if (!dataItems[id]) {
-          dataItems[id] = [];
-        }
-        const parsedData = JSON.parse(data);
-        dataItems[id].push(parsedData);
-
-        debugLog(`Additional data element ${index + 1}: Found content element c${id}`, {
-          elementPosition: element.getBoundingClientRect(),
-          parsedData: parsedData,
-          closestElementId: closestElement.id
-        });
-      } else {
-        debugLog(`Additional data element ${index + 1}: No matching content element found`, {
-          element: element,
-          data: data
-        });
-      }
-    });
-
-    if (Object.keys(dataItems).length > 0) {
-      debugLog(`Collected additional data items summary:`, {
-        totalContentElements: Object.keys(dataItems).length,
-        contentElementIds: Object.keys(dataItems),
-        dataItems: dataItems
-      });
-    }
-
-    return dataItems;
-  };
-
-  /**
-   * Sends a POST request to fetch content elements based on the provided data items.
-   * @param {Object} dataItems - The data items to send in the request body.
-   * @returns {Promise<Object>} - The JSON response from the server.
-   * @throws {Error} - If the request fails.
-   */
-  const fetchContentElements = async (dataItems) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('type', '1729341864');
-
-    debugLog('Sending request to backend for content element information', {
-      url: url.toString(),
-      requestData: dataItems
-    });
-
-    const response = await fetch(url.toString(), {
-      cache: 'no-cache',
-      method: 'POST',
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(dataItems),
-    });
-
-    if (!response.ok) {
-      debugLog(`Backend request failed with status ${response.status}`, {
-        status: response.status,
-        statusText: response.statusText,
-        url: url.toString()
-      }, 'error');
-      throw new Error('Failed to fetch content elements');
-    }
-
-    const jsonResponse = await response.json();
-    debugLog(`Backend response received with ${Object.keys(jsonResponse).length} content element(s)`, {
-      responseData: jsonResponse,
-      contentElementCount: Object.keys(jsonResponse).length
-    });
-
-    return jsonResponse;
-  };
-
-  /**
-   * Creates an edit button for a content element.
-   * @param {string} uid - The unique ID of the content element.
-   * @param {Object} contentElement - The content element data.
-   * @returns {HTMLButtonElement} - The created edit button.
-   */
-  const createEditButton = (uid, contentElement) => {
-    const editButton = contentElement.menu.url ? document.createElement('a') : document.createElement('button');
-    editButton.className = 'xima-typo3-frontend-edit--edit-button';
-    editButton.title = contentElement.menu.label;
-    editButton.innerHTML = contentElement.menu.icon;
-
-    editButton.dataset.cid = contentElement.element.uid;
-    editButton.dataset.ctype = contentElement.element.CType;
-
-    if (contentElement.menu?.type === 'link' && contentElement.menu?.url) {
-      editButton.href = contentElement.menu.url;
-      if (contentElement.menu.targetBlank) editButton.target = '_blank';
-    }
-    return editButton;
-  };
-
-  /**
-   * Creates a dropdown menu for a content element.
-   * @param {string} uid - The unique ID of the content element.
-   * @param {Object} contentElement - The content element data.
-   * @returns {HTMLDivElement} - The created dropdown menu.
-   */
-  const createDropdownMenu = (uid, contentElement) => {
-    const dropdownMenu = document.createElement('div');
-    dropdownMenu.className = 'xima-typo3-frontend-edit--dropdown-menu';
-    dropdownMenu.setAttribute('data-cid', uid);
-
-    const dropdownMenuInner = document.createElement('div');
-    dropdownMenuInner.className = 'xima-typo3-frontend-edit--dropdown-menu-inner';
-    dropdownMenu.appendChild(dropdownMenuInner);
-
-    for (let actionName in contentElement.menu.children) {
-      const action = contentElement.menu.children[actionName];
-      const actionElement = document.createElement(action.type === 'link' ? 'a' : 'div');
-      if (action.type === 'link') {
-        actionElement.href = action.url;
-        if (action.targetBlank) actionElement.target = '_blank';
-      }
-      if (action.type === 'divider') actionElement.className = 'xima-typo3-frontend-edit--divider';
-
-      actionElement.classList.add(actionName);
-      actionElement.innerHTML = `${action.icon ?? ''} <span>${action.label}</span>`;
-      dropdownMenuInner.appendChild(actionElement);
-    }
-
-    return dropdownMenu;
-  };
-
-  /**
-   * Positions the edit button and dropdown menu relative to the target element.
-   * @param {HTMLElement} element - The target element.
-   * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
-   * @param {HTMLElement} editButton - The edit button.
-   * @param {HTMLElement} dropdownMenu - The dropdown menu.
-   */
-  const positionElements = (element, wrapperElement, editButton, dropdownMenu) => {
-    const rect = element.getBoundingClientRect();
-    const rectInPageContext = {
-      top: rect.top + document.documentElement.scrollTop,
-      left: rect.left + document.documentElement.scrollLeft,
-      width: rect.width,
-      height: rect.height,
-    };
-
-    let defaultEditButtonMargin = 10;
-    // if the element is too small, adjust the position of the edit button
-    if (rect.height < 50) {
-      defaultEditButtonMargin = (rect.height - 30) / 2;
-    }
-
-    // if the dropdown menu is too close to the bottom of the page, move it to the top
-    // currently it's not possible to fetch the height of the dropdown menu before it's visible once, so we have to use a fixed value
-    if (document.documentElement.scrollHeight - rectInPageContext.top - rect.height < 500 &&
-      rect.height < 700 &&
-      rectInPageContext.top > 500
-    ) {
-      dropdownMenu.style.bottom = `19px`;
-    } else {
-      dropdownMenu.style.top = `${defaultEditButtonMargin + 30}px`;
-    }
-
-    wrapperElement.style.top = `${rect.top + document.documentElement.scrollTop}px`;
-    wrapperElement.style.left = `${rect.right - 30}px`;
-    editButton.style.top = `${defaultEditButtonMargin}px`;
-    editButton.style.left = `-10px`;
-    editButton.style.display = 'flex';
-  };
-
-  /**
-   * Sets up hover events for the target element, edit button, and dropdown menu.
-   * @param {HTMLElement} element - The target element.
-   * @param {HTMLElement} wrapperElement - The wrapper element containing the button and menu.
-   * @param {HTMLElement} editButton - The edit button.
-   * @param {HTMLElement} dropdownMenu - The dropdown menu.
-   * @param {Object} contentElement - The content element data.
-   */
-  const setupHoverEvents = (element, wrapperElement, editButton, dropdownMenu, contentElement) => {
-    element.addEventListener('mouseover', () => {
-      positionElements(element, wrapperElement, editButton, dropdownMenu);
-      element.classList.add('xima-typo3-frontend-edit--edit-container');
-
-      element.dataset.cid = contentElement.element.uid;
-      element.dataset.ctype = contentElement.element.CType;
-    });
-
-    element.addEventListener('mouseout', (event) => {
-      if (event.relatedTarget === editButton || event.relatedTarget === dropdownMenu) return;
-      editButton.style.display = 'none';
-      dropdownMenu.style.display = 'none';
-      element.classList.remove('xima-typo3-frontend-edit--edit-container');
-
-      delete element.dataset.cid;
-      delete element.dataset.ctype;
-    });
-  };
-
-  /**
-   * Sets up events for dropdown menus to handle mouse leave and click outside.
-   */
-  const setupDropdownMenuEvents = () => {
-    document.querySelectorAll('.xima-typo3-frontend-edit--dropdown-menu').forEach((menu) => {
-      menu.addEventListener('mouseleave', (event) => {
-        const cid = menu.getAttribute('data-cid');
-        menu.style.display = 'none';
-        document.querySelector(`.xima-typo3-frontend-edit--edit-button[data-cid="${cid}"]`).style.display = 'none';
-        document.querySelector(`#c${cid}`).classList.remove('xima-typo3-frontend-edit--edit-container');
-      });
-    });
-
-    document.addEventListener('click', (event) => {
-      document.querySelectorAll('.xima-typo3-frontend-edit--dropdown-menu').forEach((menu) => {
-        const button = menu.previousElementSibling;
-        if (!menu.contains(event.target) && !button.contains(event.target)) {
-          menu.style.display = 'none';
-        }
-      });
-    });
-  };
-
-  /**
-   * Renders content elements by creating edit buttons and dropdown menus for each.
-   * @param {Object} jsonResponse - The JSON response containing content element data.
-   */
-  const renderContentElements = (jsonResponse) => {
-    debugLog(`Starting DOM assignment for ${Object.keys(jsonResponse).length} content element(s)`);
-
-    let successfulAssignments = 0;
-    let failedAssignments = 0;
-    let translationMappings = 0;
-
-    for (let uid in jsonResponse) {
-      const contentElement = jsonResponse[uid];
-      let element = document.querySelector(`#c${uid}`);
-      let originalUid = uid;
-      let translationInfo = null;
-
-      /*
-       *
-       * Handle translation mapping
-       *
-       * This is a little bit tricky, cause the correct container detection depends on the language overlay mode, especially for extbase models:
-       * https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/ExtensionArchitecture/Extbase/Reference/Domain/Model/Localization/Index.html
-       *
-       * We assume the default fluid_styled_content rendering, where both ids (of the original and the translation) are present in the DOM.
-       *
-       *  <div id="c{data.uid}">
-       *     <f:if condition="{data._LOCALIZED_UID}">
-       *         <a id="c{data._LOCALIZED_UID}"></a>
-       *     </f:if>
-       *     ...
-       * </div>
-       *
-       * By default, the `data.uid` is the original uid, and `data._LOCALIZED_UID` is the translation uid.
-       * So when we get the translated content element, we check if the c-ID is within an a-tag (so just an anchor for
-       * the translated uid) and if it has a `l10n_source` property.
-       * If so, we try to find the wrapper element with the original uid regarding the `l10n_source` property.
-       */
-      if (element && element.tagName.toLowerCase() === 'a' && contentElement.element.l10n_source) {
-        let l10nElement = document.querySelector(`#c${contentElement.element.l10n_source}`);
-        if (l10nElement) {
-          translationInfo = {
-            originalUid: uid,
-            translationSourceUid: contentElement.element.l10n_source,
-            language: contentElement.element.sys_language_uid || 'default'
-          };
-          uid = contentElement.element.l10n_source;
-          element = l10nElement;
-          translationMappings++;
-
-          debugLog(`Translation mapping: c${originalUid} → c${uid}`, translationInfo);
-        } else {
-          debugLog(`Translation source element c${contentElement.element.l10n_source} not found in DOM for c${uid}`, {
-            originalUid: uid,
-            l10nSource: contentElement.element.l10n_source,
-            contentElement: contentElement.element
-          }, 'warn');
-        }
-      }
-
-      if (!element) {
-        failedAssignments++;
-        debugLog(`DOM assignment failed: Element c${uid} not found`, {
-          originalUid: originalUid,
-          uid: uid,
-          contentElement: contentElement.element,
-          translationInfo: translationInfo
-        }, 'warn');
-        continue;
-      }
-
-      successfulAssignments++;
-      debugLog(`DOM assignment successful: c${uid}`, {
-        originalUid: originalUid,
-        element: {
-          id: element.id,
-          className: element.className,
-          tagName: element.tagName,
-          position: element.getBoundingClientRect()
-        },
-        contentElement: {
-          type: contentElement.element.CType,
-          pid: contentElement.element.pid,
-          sys_language_uid: contentElement.element.sys_language_uid,
-          l10n_source: contentElement.element.l10n_source
-        },
-        menuStructure: {
-          type: contentElement.menu.type,
-          hasChildren: Object.keys(contentElement.menu.children || {}).length,
-          isSimpleMode: !!contentElement.menu.url
-        },
-        translationInfo: translationInfo
-      });
-
-      const simpleMode = contentElement.menu.url;
-      const editButton = createEditButton(uid, contentElement);
-      const dropdownMenu = createDropdownMenu(uid, contentElement);
-
-      editButton.addEventListener('click', (event) => {
-        if (!simpleMode) {
-          event.preventDefault();
-          dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'visible' : 'block';
-        }
-      });
-
-      const wrapperElement = document.createElement('div');
-      wrapperElement.className = 'xima-typo3-frontend-edit--wrapper';
-
-      wrapperElement.dataset.cid = contentElement.element.uid;
-      wrapperElement.dataset.ctype = contentElement.element.CType;
-
-      wrapperElement.appendChild(editButton);
-      if (!simpleMode) wrapperElement.appendChild(dropdownMenu);
-      document.body.appendChild(wrapperElement);
-
-      setupHoverEvents(element, wrapperElement, editButton, dropdownMenu, contentElement);
-    }
-
-    debugLog('DOM assignment summary', {
-      totalProcessed: Object.keys(jsonResponse).length,
-      successfulAssignments: successfulAssignments,
-      failedAssignments: failedAssignments,
-      translationMappings: translationMappings,
-      assignmentRate: `${Math.round((successfulAssignments / Object.keys(jsonResponse).length) * 100)}%`
-    });
-
-    if (failedAssignments > 0) {
-      debugLog(`${failedAssignments} content elements could not be assigned to DOM elements`, null, 'warn');
-    }
-  };
-
-  /**
-   * Main function to collect data, fetch content elements, and render them.
-   * Handles errors during the process.
-   */
-  const getContentElements = async () => {
-    try {
-      const startTime = performance.now();
-
-      const dataItems = collectDataItems();
-      const jsonResponse = await fetchContentElements(dataItems);
-      renderContentElements(jsonResponse);
-      setupDropdownMenuEvents();
-
-      const endTime = performance.now();
-      debugLog(`Frontend Edit initialization completed successfully in ${Math.round(endTime - startTime)}ms`, {
-        processingTime: `${Math.round(endTime - startTime)}ms`,
-        contentElementsFound: Object.keys(dataItems).length,
-        contentElementsProcessed: Object.keys(jsonResponse).length
-      });
-
-    } catch (error) {
-      debugLog('Frontend Edit initialization failed', {
-        error: error.message,
-        stack: error.stack
-      }, 'error');
-    }
-  };
-
-  // Initialize when debug mode is enabled
-  if (window.FRONTEND_EDIT_DEBUG) {
-    debugLog('Debug mode enabled - detailed logging active');
   }
 
-  getContentElements();
-});
+  // SVG Icons
+  const ICONS = {
+    edit: '<svg viewBox="0 0 32 32" fill="currentColor"><path d="M4.834,29.665L25.007,29.665C26.561,29.663 27.839,28.385 27.841,26.831L27.841,16.157C27.841,15.608 27.39,15.157 26.841,15.157C26.292,15.157 25.841,15.608 25.841,16.157L25.841,26.831C25.84,27.288 25.464,27.664 25.007,27.665L4.834,27.665C4.377,27.664 4.001,27.288 4,26.831L4,7.651C4.001,7.194 4.377,6.818 4.834,6.817L16,6.817C16.549,6.817 17,6.366 17,5.817C17,5.268 16.549,4.817 16,4.817L4.834,4.817C3.28,4.819 2.002,6.097 2,7.651L2,26.831C2.002,28.385 3.28,29.663 4.834,29.665Z" fill-rule="nonzero"/><path d="M8.582,19.343L7.912,22.691C7.894,22.781 7.885,22.873 7.885,22.965C7.885,23.726 8.51,24.352 9.271,24.352C9.363,24.352 9.454,24.343 9.544,24.325L12.895,23.655C13.539,23.527 14.131,23.211 14.595,22.747L28.845,8.494C29.473,7.825 29.823,6.941 29.823,6.024C29.823,4.044 28.195,2.416 26.215,2.416C25.298,2.416 24.414,2.766 23.745,3.394L9.49,17.645C9.025,18.108 8.709,18.699 8.582,19.343ZM10.543,19.734C10.594,19.478 10.72,19.244 10.904,19.059L25.157,4.806C25.458,4.509 25.864,4.343 26.286,4.343C27.168,4.343 27.894,5.069 27.894,5.951C27.894,6.373 27.728,6.779 27.431,7.08L13.178,21.332C12.993,21.517 12.758,21.643 12.502,21.694L10.054,22.184L10.543,19.734Z" fill-rule="nonzero"/></svg>',
+    kebab: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="2.5" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13.5" r="1.5"/></svg>'
+  };
+
+  /**
+   * Debug Logger
+   */
+  const Logger = {
+    log(message, data = null, level = 'log') {
+      if (!window.FRONTEND_EDIT_DEBUG) return;
+      const prefix = '%c[xima-typo3-frontend-edit]%c';
+      const styles = ['font-weight: bold;', 'font-weight: normal;'];
+      data !== null
+        ? console[level](prefix, ...styles, message, data)
+        : console[level](prefix, ...styles, message);
+    }
+  };
+
+  /**
+   * Tooltip Manager
+   */
+  const Tooltip = {
+    element: null,
+    arrow: null,
+
+    getElements() {
+      if (!this.element) {
+        this.element = document.createElement('div');
+        this.element.className = 'frontend-edit__tooltip';
+        this.arrow = document.createElement('div');
+        this.arrow.className = 'frontend-edit__tooltip-arrow';
+        this.element.appendChild(this.arrow);
+        document.body.appendChild(this.element);
+      }
+      return { tooltip: this.element, arrow: this.arrow };
+    },
+
+    async show(btn) {
+      const text = btn.dataset.tooltip;
+      if (!text || !computePosition) return;
+
+      const { tooltip, arrow: arrowEl } = this.getElements();
+
+      Array.from(tooltip.childNodes).forEach(node => {
+        if (node !== arrowEl) tooltip.removeChild(node);
+      });
+      tooltip.insertBefore(document.createTextNode(text), arrowEl);
+
+      const { x, y, placement, middlewareData } = await computePosition(btn, tooltip, {
+        placement: 'top',
+        middleware: [
+          offset(8),
+          flip({ fallbackPlacements: ['bottom', 'left', 'right'] }),
+          shift({ padding: 8 }),
+          arrow({ element: arrowEl })
+        ]
+      });
+
+      Object.assign(tooltip.style, { left: `${x}px`, top: `${y}px` });
+      tooltip.setAttribute('data-placement', placement);
+
+      if (middlewareData.arrow) {
+        const { x: arrowX, y: arrowY } = middlewareData.arrow;
+        Object.assign(arrowEl.style, {
+          left: arrowX != null ? `${arrowX}px` : '',
+          top: arrowY != null ? `${arrowY}px` : ''
+        });
+      }
+
+      tooltip.classList.add('frontend-edit__tooltip--visible');
+    },
+
+    hide() {
+      if (this.element) {
+        this.element.classList.remove('frontend-edit__tooltip--visible');
+      }
+    },
+
+    attach(btn) {
+      btn.addEventListener('mouseenter', () => this.show(btn));
+      btn.addEventListener('mouseleave', () => this.hide());
+      btn.addEventListener('focus', () => this.show(btn));
+      btn.addEventListener('blur', () => this.hide());
+    }
+  };
+
+  /**
+   * Dropdown Manager
+   */
+  const Dropdown = {
+    async position(trigger, dropdown) {
+      if (computePosition) {
+        const { x, y } = await computePosition(trigger, dropdown, {
+          placement: 'bottom-end',
+          middleware: [
+            offset(4),
+            flip({ fallbackPlacements: ['top-end', 'bottom-start', 'top-start'] }),
+            shift({ padding: 8 })
+          ]
+        });
+        Object.assign(dropdown.style, { left: `${x}px`, top: `${y}px` });
+      } else {
+        const rect = trigger.getBoundingClientRect();
+        const scrollTop = document.documentElement.scrollTop;
+        const scrollLeft = document.documentElement.scrollLeft;
+
+        dropdown.style.top = `${rect.bottom + scrollTop + 4}px`;
+        dropdown.style.left = `${rect.right + scrollLeft - dropdown.offsetWidth}px`;
+
+        if (rect.bottom + 200 > window.innerHeight) {
+          dropdown.style.top = `${rect.top + scrollTop - dropdown.offsetHeight - 4}px`;
+        }
+      }
+    },
+
+    closeAll() {
+      document.querySelectorAll('.frontend-edit__dropdown').forEach(d => {
+        d.style.display = 'none';
+      });
+    },
+
+    setupGlobalHandler() {
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.frontend-edit__btn--kebab') &&
+            !e.target.closest('.frontend-edit__dropdown')) {
+          this.closeAll();
+        }
+      });
+    }
+  };
+
+  /**
+   * Element Resolver - Handles anchor patterns and finds the actual content element
+   */
+  const ElementResolver = {
+    /**
+     * Check if element is an empty anchor (just an ID carrier)
+     */
+    isEmptyAnchor(element) {
+      if (element.tagName.toLowerCase() !== 'a') return false;
+
+      // Check if anchor has no meaningful content
+      const hasNoContent = element.children.length === 0 &&
+                          element.textContent.trim() === '';
+
+      // Check if anchor has no href or has empty href
+      const hasNoHref = !element.href || element.getAttribute('href') === '';
+
+      return hasNoContent || hasNoHref;
+    },
+
+    /**
+     * Find the actual content element for a given ID element
+     * Handles the pattern: <a id="c123"></a><div class="content">
+     */
+    resolveContentElement(idElement) {
+      if (!this.isEmptyAnchor(idElement)) {
+        return idElement;
+      }
+
+      // Look for next sibling that is an element (not text node)
+      let sibling = idElement.nextElementSibling;
+
+      // Skip empty text nodes or other anchors
+      while (sibling && this.isEmptyAnchor(sibling)) {
+        sibling = sibling.nextElementSibling;
+      }
+
+      if (sibling) {
+        Logger.log(`Anchor pattern detected: Using next sibling for #${idElement.id}`, {
+          anchor: idElement.outerHTML.substring(0, 50),
+          sibling: sibling.tagName + (sibling.className ? '.' + sibling.className.split(' ')[0] : '')
+        });
+        return sibling;
+      }
+
+      // Fallback to original element
+      return idElement;
+    }
+  };
+
+  /**
+   * Overlay Manager - Handles toolbar positioning as fixed overlays
+   */
+  const OverlayManager = {
+    container: null,
+    overlays: new Map(), // Map<targetElement, {toolbar, outline}>
+    scrollRAF: null,
+
+    /**
+     * Check if a content element is nested inside another content element
+     * Used to apply different toolbar positioning for nested elements
+     */
+    isNestedContentElement(targetElement) {
+      let parent = targetElement.parentElement;
+      while (parent) {
+        // Check if parent has content element ID pattern
+        if (parent.id && /^c\d+$/.test(parent.id)) {
+          return true;
+        }
+        // Also check for anchor pattern: <a id="c123"></a><div>
+        if (parent.previousElementSibling?.id && /^c\d+$/.test(parent.previousElementSibling.id)) {
+          return true;
+        }
+        parent = parent.parentElement;
+      }
+      return false;
+    },
+
+    init() {
+      // Create overlay container
+      this.container = document.createElement('div');
+      this.container.className = 'frontend-edit__overlay-container';
+      this.container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:10000;overflow:visible;';
+      document.body.appendChild(this.container);
+
+      // Setup scroll/resize handlers
+      this.setupEventHandlers();
+    },
+
+    setupEventHandlers() {
+      const updatePositions = () => {
+        if (this.scrollRAF) return;
+        this.scrollRAF = requestAnimationFrame(() => {
+          this.updateAllPositions();
+          this.scrollRAF = null;
+        });
+      };
+
+      window.addEventListener('scroll', updatePositions, { passive: true });
+      window.addEventListener('resize', updatePositions, { passive: true });
+    },
+
+    createOverlay(uid, targetElement, contentElement, showContextMenu, enableOutline = true) {
+      const overlay = document.createElement('div');
+      overlay.className = 'frontend-edit__overlay';
+      overlay.dataset.cid = uid;
+      overlay.style.cssText = 'position:absolute;pointer-events:none;';
+
+      // Add nested modifier for elements inside other content elements
+      if (this.isNestedContentElement(targetElement)) {
+        overlay.classList.add('frontend-edit__overlay--nested');
+      }
+
+      // Create outline element (only if enabled)
+      let outline = null;
+      if (enableOutline) {
+        outline = document.createElement('div');
+        outline.className = 'frontend-edit__outline';
+        overlay.appendChild(outline);
+      }
+
+      // Create toolbar
+      const toolbar = UI.createToolbar(uid, contentElement, showContextMenu);
+      toolbar.style.pointerEvents = 'auto';
+
+      overlay.appendChild(toolbar);
+      this.container.appendChild(overlay);
+
+      // Store reference
+      this.overlays.set(targetElement, { overlay, toolbar, outline, uid });
+
+      // Initial position
+      this.updatePosition(targetElement);
+
+      return { overlay, toolbar };
+    },
+
+    updatePosition(targetElement) {
+      const data = this.overlays.get(targetElement);
+      if (!data) return;
+
+      const rect = targetElement.getBoundingClientRect();
+      const { overlay, outline } = data;
+
+      // Update overlay position and size
+      overlay.style.left = `${rect.left}px`;
+      overlay.style.top = `${rect.top}px`;
+      overlay.style.width = `${rect.width}px`;
+      overlay.style.height = `${rect.height}px`;
+
+      // Update outline to match (only if outline exists)
+      if (outline) {
+        outline.style.cssText = `
+          position: absolute;
+          inset: -1px;
+          border-radius: 2px;
+          pointer-events: none;
+        `;
+      }
+
+      // Position toolbar at bottom if element is near top of viewport
+      const toolbarHeight = 20; // Approximate height of toolbar
+      if (rect.top < toolbarHeight) {
+        overlay.classList.add('frontend-edit__overlay--bottom');
+      } else {
+        overlay.classList.remove('frontend-edit__overlay--bottom');
+      }
+    },
+
+    updateAllPositions() {
+      this.overlays.forEach((_, targetElement) => {
+        this.updatePosition(targetElement);
+      });
+    },
+
+    setActive(targetElement, active) {
+      const data = this.overlays.get(targetElement);
+      if (!data) return;
+
+      if (active) {
+        data.overlay.classList.add('frontend-edit__overlay--active');
+        this.updatePosition(targetElement);
+      } else {
+        data.overlay.classList.remove('frontend-edit__overlay--active');
+      }
+    },
+
+    getToolbar(targetElement) {
+      const data = this.overlays.get(targetElement);
+      return data?.toolbar;
+    }
+  };
+
+  /**
+   * UI Factory
+   */
+  const UI = {
+    createToolbar(uid, contentElement, showContextMenu) {
+      const toolbar = document.createElement('div');
+      toolbar.className = 'frontend-edit__toolbar';
+      toolbar.dataset.cid = uid;
+
+      toolbar.appendChild(this.createLabel(uid, contentElement));
+      toolbar.appendChild(this.createActions(uid, contentElement, showContextMenu));
+
+      return toolbar;
+    },
+
+    createLabel(uid, contentElement) {
+      const container = document.createElement('div');
+      container.className = 'frontend-edit__toolbar-label';
+
+      // Icons are trusted HTML from TYPO3 backend (IconFactory)
+      if (contentElement.element.ctypeIcon) {
+        const iconWrapper = document.createElement('span');
+        iconWrapper.className = 'frontend-edit__toolbar-icon';
+        iconWrapper.innerHTML = contentElement.element.ctypeIcon;
+        container.appendChild(iconWrapper);
+      }
+
+      const label = document.createElement('span');
+      const ctypeLabel = contentElement.element.ctypeLabel || contentElement.element.CType || 'Content';
+      // Use textContent for label to prevent XSS, append code element separately
+      label.textContent = ctypeLabel + ' ';
+      const codeEl = document.createElement('code');
+      codeEl.textContent = uid;
+      label.appendChild(codeEl);
+      container.appendChild(label);
+
+      return container;
+    },
+
+    createActions(uid, contentElement, showContextMenu) {
+      const container = document.createElement('div');
+      container.className = 'frontend-edit__toolbar-actions';
+
+      const editBtn = this.createEditButton(contentElement);
+      Tooltip.attach(editBtn);
+      container.appendChild(editBtn);
+
+      if (showContextMenu && contentElement.menu.children && Object.keys(contentElement.menu.children).length > 0) {
+        const kebabBtn = this.createKebabButton(uid);
+        Tooltip.attach(kebabBtn);
+        container.appendChild(kebabBtn);
+      }
+
+      return container;
+    },
+
+    createEditButton(contentElement) {
+      const btn = document.createElement('a');
+      btn.className = 'frontend-edit__btn frontend-edit__btn--edit';
+      btn.dataset.tooltip = 'Edit';
+      btn.innerHTML = ICONS.edit;
+
+      const editAction = contentElement.menu.children?.edit;
+      if (editAction?.url && this.isValidUrl(editAction.url)) {
+        btn.href = editAction.url;
+        if (editAction.targetBlank) btn.target = '_blank';
+      } else if (contentElement.menu.url && this.isValidUrl(contentElement.menu.url)) {
+        btn.href = contentElement.menu.url;
+        if (contentElement.menu.targetBlank) btn.target = '_blank';
+      }
+
+      return btn;
+    },
+
+    createKebabButton(uid) {
+      const btn = document.createElement('button');
+      btn.className = 'frontend-edit__btn frontend-edit__btn--kebab';
+      btn.dataset.tooltip = 'More actions';
+      btn.type = 'button';
+      btn.dataset.cid = uid;
+      btn.innerHTML = ICONS.kebab;
+      return btn;
+    },
+
+    createDropdown(uid, contentElement) {
+      const dropdown = document.createElement('div');
+      dropdown.className = 'frontend-edit__dropdown';
+      dropdown.dataset.cid = uid;
+
+      const skipActions = ['header'];
+
+      for (const [name, action] of Object.entries(contentElement.menu.children)) {
+        if (skipActions.includes(name)) continue;
+
+        const el = document.createElement(action.type === 'link' ? 'a' : 'div');
+
+        if (action.type === 'link') {
+          // Validate URL to prevent javascript: protocol attacks
+          if (action.url && this.isValidUrl(action.url)) {
+            el.href = action.url;
+          }
+          if (action.targetBlank) el.target = '_blank';
+        }
+
+        if (action.type === 'divider') {
+          el.className = 'frontend-edit__divider';
+        }
+
+        if (action.type === 'info') {
+          el.className = 'frontend-edit__info';
+        }
+
+        // Sanitize class name to prevent injection
+        const safeName = this.escapeClassName(name);
+        if (safeName) {
+          el.classList.add(safeName);
+        }
+
+        // Icons are trusted HTML from TYPO3 backend (IconFactory)
+        if (action.icon) {
+          const iconWrapper = document.createElement('span');
+          iconWrapper.innerHTML = action.icon;
+          el.appendChild(iconWrapper);
+        }
+        // Use textContent for label to prevent XSS
+        const labelSpan = document.createElement('span');
+        labelSpan.textContent = action.label || '';
+        el.appendChild(labelSpan);
+
+        dropdown.appendChild(el);
+      }
+
+      return dropdown;
+    },
+
+    /**
+     * Validates URL to prevent javascript: and other dangerous protocols.
+     */
+    isValidUrl(url) {
+      if (!url || typeof url !== 'string') {
+        return false;
+      }
+      const trimmed = url.trim().toLowerCase();
+      // Block javascript:, data:, vbscript: protocols
+      if (trimmed.startsWith('javascript:') ||
+          trimmed.startsWith('data:') ||
+          trimmed.startsWith('vbscript:')) {
+        return false;
+      }
+      return true;
+    },
+
+    /**
+     * Escapes class name to prevent injection via class attribute.
+     */
+    escapeClassName(name) {
+      if (!name || typeof name !== 'string') {
+        return '';
+      }
+      // Only allow alphanumeric, hyphens, and underscores
+      return name.replace(/[^a-zA-Z0-9_-]/g, '');
+    }
+  };
+
+  /**
+   * Data Service
+   */
+  const DataService = {
+    getClosestContentElement(element) {
+      while (element && !element.id.match(/c\d+/)) {
+        element = element.parentElement;
+      }
+      return element;
+    },
+
+    collectDataItems() {
+      const dataItems = {};
+      const allUids = new Set();
+
+      // Scan DOM for all content elements by id="c{uid}" pattern
+      // This enables editing content from other pages (onepager scenarios)
+      document.querySelectorAll('[id]').forEach(element => {
+        const match = element.id.match(/^c(\d+)$/);
+        if (match) {
+          const uid = parseInt(match[1], 10);
+          if (uid > 0) {
+            allUids.add(uid);
+          }
+        }
+      });
+
+      Logger.log(`Found ${allUids.size} content elements in DOM with id="c{uid}" pattern`);
+
+      // Collect additional data from .frontend-edit__data elements
+      const dataElements = document.querySelectorAll('.frontend-edit__data');
+
+      Logger.log(`Found ${dataElements.length} custom additional data elements on page`);
+
+      dataElements.forEach((element, index) => {
+        const closestElement = this.getClosestContentElement(element);
+        if (!closestElement) return;
+
+        const id = closestElement.id.replace('c', '');
+        const uid = parseInt(id, 10);
+
+        if (!dataItems[uid]) dataItems[uid] = [];
+
+        const parsedData = JSON.parse(element.value);
+        dataItems[uid].push(parsedData);
+
+        // Ensure this UID is included
+        if (uid > 0) {
+          allUids.add(uid);
+        }
+
+        Logger.log(`Additional data element ${index + 1}: Found content element c${uid}`, { parsedData });
+      });
+
+      // Add UIDs array for backend to fetch content elements
+      dataItems._uids = Array.from(allUids).sort((a, b) => a - b);
+
+      Logger.log(`Collected ${allUids.size} unique content element UIDs for backend request`, {
+        uids: dataItems._uids
+      });
+
+      return dataItems;
+    },
+
+    async fetchContentElements(dataItems) {
+      const config = document.getElementById('frontend-edit-toolbar-config');
+      if (!config) {
+        throw new Error('Frontend edit configuration not found');
+      }
+
+      const editInfoUrl = config.dataset.editInfoUrl;
+      const pid = config.dataset.pid;
+      const language = config.dataset.language;
+      const returnUrl = window.location.href;
+
+      const url = new URL(editInfoUrl, window.location.origin);
+      url.searchParams.set('pid', pid);
+      url.searchParams.set('language', language);
+      url.searchParams.set('returnUrl', returnUrl);
+
+      Logger.log('Sending request to backend', { url: url.toString() });
+
+      const response = await fetch(url.toString(), {
+        cache: 'no-cache',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataItems)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch content elements');
+      }
+
+      const data = await response.json();
+      Logger.log(`Backend response received with ${Object.keys(data).length} content element(s)`);
+
+      return data;
+    }
+  };
+
+  /**
+   * Renderer
+   */
+  const Renderer = {
+    render(jsonResponse) {
+      Logger.log(`Starting DOM assignment for ${Object.keys(jsonResponse).length} content element(s)`);
+
+      const showContextMenu = window.FRONTEND_EDIT_SHOW_CONTEXT_MENU !== false;
+      const enableOutline = window.FRONTEND_EDIT_ENABLE_OUTLINE !== false;
+      let successful = 0;
+      let failed = 0;
+
+      for (let [uid, contentElement] of Object.entries(jsonResponse)) {
+        let idElement = document.querySelector(`#c${uid}`);
+
+        // Handle translation mapping
+        if (idElement?.tagName.toLowerCase() === 'a' && contentElement.element.l10n_source) {
+          const l10nElement = document.querySelector(`#c${contentElement.element.l10n_source}`);
+          if (l10nElement) {
+            Logger.log(`Translation mapping: c${uid} → c${contentElement.element.l10n_source}`);
+            uid = contentElement.element.l10n_source;
+            idElement = l10nElement;
+          }
+        }
+
+        if (!idElement) {
+          failed++;
+          Logger.log(`DOM assignment failed: Element c${uid} not found`, null, 'warn');
+          continue;
+        }
+
+        // Resolve actual content element (handles anchor pattern)
+        const targetElement = ElementResolver.resolveContentElement(idElement);
+
+        successful++;
+        this.setupContentElement(targetElement, uid, contentElement, showContextMenu, enableOutline);
+
+        Logger.log(`DOM assignment successful: c${uid}`, {
+          CType: contentElement.element.CType,
+          ctypeLabel: contentElement.element.ctypeLabel,
+          showContextMenu,
+          enableOutline,
+          usedSibling: targetElement !== idElement
+        });
+      }
+
+      Logger.log('DOM assignment summary', {
+        totalProcessed: Object.keys(jsonResponse).length,
+        successfulAssignments: successful,
+        failedAssignments: failed
+      });
+    },
+
+    setupContentElement(targetElement, uid, contentElement, showContextMenu, enableOutline) {
+      const hasMenuChildren = contentElement.menu.children && Object.keys(contentElement.menu.children).length > 0;
+      const effectiveShowContextMenu = showContextMenu && hasMenuChildren && !contentElement.menu.url;
+
+      // Create overlay with toolbar
+      const { toolbar } = OverlayManager.createOverlay(uid, targetElement, contentElement, effectiveShowContextMenu, enableOutline);
+
+      // Create dropdown if needed
+      let dropdown = null;
+      if (effectiveShowContextMenu) {
+        dropdown = UI.createDropdown(uid, contentElement);
+        document.body.appendChild(dropdown);
+        this.setupKebabEvents(toolbar, dropdown);
+      }
+
+      // Setup hover events
+      this.setupHoverEvents(targetElement, dropdown);
+    },
+
+    setupKebabEvents(toolbar, dropdown) {
+      const kebabBtn = toolbar.querySelector('.frontend-edit__btn--kebab');
+      if (!kebabBtn) return;
+
+      kebabBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isVisible = dropdown.style.display === 'block';
+        Dropdown.closeAll();
+
+        if (!isVisible) {
+          dropdown.style.display = 'block';
+          await Dropdown.position(kebabBtn, dropdown);
+        }
+      });
+    },
+
+    setupHoverEvents(targetElement, dropdown) {
+      targetElement.addEventListener('mouseenter', () => {
+        OverlayManager.setActive(targetElement, true);
+      });
+
+      targetElement.addEventListener('mouseleave', (e) => {
+        if (dropdown?.contains(e.relatedTarget)) return;
+
+        const toolbar = OverlayManager.getToolbar(targetElement);
+        if (toolbar?.contains(e.relatedTarget)) return;
+
+        OverlayManager.setActive(targetElement, false);
+        if (dropdown) dropdown.style.display = 'none';
+      });
+
+      // Keep active when hovering toolbar
+      const toolbar = OverlayManager.getToolbar(targetElement);
+      if (toolbar) {
+        toolbar.addEventListener('mouseenter', () => {
+          OverlayManager.setActive(targetElement, true);
+        });
+
+        toolbar.addEventListener('mouseleave', (e) => {
+          if (targetElement.contains(e.relatedTarget)) return;
+          if (dropdown?.contains(e.relatedTarget)) return;
+
+          OverlayManager.setActive(targetElement, false);
+          if (dropdown) dropdown.style.display = 'none';
+        });
+      }
+
+      if (dropdown) {
+        dropdown.addEventListener('mouseleave', (e) => {
+          if (targetElement.contains(e.relatedTarget)) return;
+          if (toolbar?.contains(e.relatedTarget)) return;
+
+          dropdown.style.display = 'none';
+          OverlayManager.setActive(targetElement, false);
+        });
+      }
+    }
+  };
+
+  /**
+   * Main Application
+   */
+  const FrontendEdit = {
+    init() {
+      // Wait for both DOM and FloatingUI to be ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => this.checkAndBootstrap());
+      } else {
+        this.checkAndBootstrap();
+      }
+    },
+
+    checkAndBootstrap() {
+      if (window.FloatingUIDOM) {
+        initFloatingUI();
+        this.bootstrap();
+      } else {
+        window.addEventListener('floatingui:ready', () => {
+          initFloatingUI();
+          this.bootstrap();
+        }, { once: true });
+      }
+    },
+
+    async bootstrap() {
+      try {
+        const startTime = performance.now();
+
+        if (window.FRONTEND_EDIT_DEBUG) {
+          Logger.log('Debug mode enabled');
+        }
+
+        this.initTheme();
+
+        // Only initialize content element editing if not disabled
+        if (!window.FRONTEND_EDIT_DISABLED) {
+          OverlayManager.init();
+
+          const dataItems = DataService.collectDataItems();
+          const contentElements = await DataService.fetchContentElements(dataItems);
+
+          Renderer.render(contentElements);
+          Dropdown.setupGlobalHandler();
+        }
+
+        Logger.log(`Frontend Edit initialization completed in ${Math.round(performance.now() - startTime)}ms`);
+      } catch (error) {
+        Logger.log('Frontend Edit initialization failed', {
+          error: error.message,
+          stack: error.stack
+        }, 'error');
+      }
+    },
+
+    initTheme() {
+      const colorScheme = window.FRONTEND_EDIT_COLOR_SCHEME || 'auto';
+      document.documentElement.setAttribute('data-xfe-theme', colorScheme);
+      Logger.log(`Theme initialized: ${colorScheme}`);
+    }
+  };
+
+  FrontendEdit.init();
+})();

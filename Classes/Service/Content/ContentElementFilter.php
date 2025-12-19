@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Content;
 
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
@@ -25,11 +26,11 @@ use function in_array;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class ContentElementFilter
+final readonly class ContentElementFilter
 {
     public function __construct(
-        private readonly SettingsService $settingsService,
-        private readonly ContentElementRepository $contentElementRepository,
+        private SettingsService $settingsService,
+        private ContentElementRepository $contentElementRepository,
     ) {}
 
     /**
@@ -37,11 +38,14 @@ final class ContentElementFilter
      *
      * @return array<int, array<string, mixed>>
      */
-    public function filterContentElements(array $contentElements, BackendUserAuthentication $backendUser): array
-    {
-        $ignoredCTypes = $this->settingsService->getIgnoredCTypes();
-        $ignoredListTypes = $this->settingsService->getIgnoredListTypes();
-        $ignoredUids = $this->settingsService->getIgnoredUids();
+    public function filterContentElements(
+        array $contentElements,
+        BackendUserAuthentication $backendUser,
+        ServerRequestInterface $request,
+    ): array {
+        $ignoredCTypes = $this->settingsService->getIgnoredCTypes($request);
+        $ignoredListTypes = $this->settingsService->getIgnoredListTypes($request);
+        $ignoredUids = $this->settingsService->getIgnoredUids($request);
 
         $filteredElements = [];
 
@@ -56,11 +60,23 @@ final class ContentElementFilter
         return $filteredElements;
     }
 
-    public function isPageIgnored(int $pid): bool
+    public function isPageIgnored(int $pid, ServerRequestInterface $request): bool
     {
-        $ignoredPids = $this->settingsService->getIgnoredPids();
+        $ignoredPids = $this->settingsService->getIgnoredPids($request);
 
-        return $this->contentElementRepository->isSubpageOfAny($pid, $ignoredPids);
+        if ($this->contentElementRepository->isSubpageOfAny($pid, $ignoredPids)) {
+            return true;
+        }
+
+        $ignoredDoktypes = $this->settingsService->getIgnoredDoktypes($request);
+        if ([] !== $ignoredDoktypes) {
+            $doktype = $this->contentElementRepository->getPageDoktype($pid);
+            if (null !== $doktype && in_array($doktype, $ignoredDoktypes, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

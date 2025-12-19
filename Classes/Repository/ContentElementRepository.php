@@ -18,7 +18,6 @@ use Generator;
 use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, RootlineUtility};
-use Xima\XimaTypo3FrontendEdit\Service\Configuration\VersionCompatibilityService;
 
 use function array_slice;
 
@@ -28,7 +27,7 @@ use function array_slice;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class ContentElementRepository
+final readonly class ContentElementRepository
 {
     private const MAX_CACHE_SIZE = 100;
     private const CACHE_CLEANUP_THRESHOLD = 80;
@@ -44,8 +43,7 @@ final class ContentElementRepository
     private ArrayObject $configCache;
 
     public function __construct(
-        private readonly ConnectionPool $connectionPool,
-        private readonly VersionCompatibilityService $versionCompatibilityService,
+        private ConnectionPool $connectionPool,
     ) {
         $this->rootlineCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
         $this->configCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
@@ -62,51 +60,58 @@ final class ContentElementRepository
         bool $includeMultilingualContent = true,
     ): array {
         try {
-            $queryBuilder = $this->connectionPool->getQueryBuilderForTable('tt_content');
+            $queryBuilder = $this->buildContentQuery($languageUid, $includeMultilingualContent);
 
-            $query = $queryBuilder
-                ->select('*')
-                ->from('tt_content')
-                ->where(
-                    $queryBuilder->expr()->eq(
-                        'hidden',
-                        $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
-                    ),
-                    $queryBuilder->expr()->eq(
-                        'deleted',
-                        $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
-                    ),
-                    $queryBuilder->expr()->eq(
-                        'pid',
-                        $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT),
-                    ),
-                );
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->eq(
+                    'pid',
+                    $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT),
+                ),
+            );
 
-            if ($includeMultilingualContent) {
-                $query->andWhere(
-                    $queryBuilder->expr()->or(
-                        $queryBuilder->expr()->eq(
-                            'sys_language_uid',
-                            $queryBuilder->createNamedParameter(-1, Connection::PARAM_INT),
-                        ),
-                        $queryBuilder->expr()->eq(
-                            'sys_language_uid',
-                            $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
-                        ),
-                    ),
-                );
-            } else {
-                $query->andWhere(
-                    $queryBuilder->expr()->eq(
-                        'sys_language_uid',
-                        $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
-                    ),
-                );
-            }
-
-            return $query->executeQuery()->fetchAllAssociative();
+            return $queryBuilder->executeQuery()->fetchAllAssociative();
         } catch (\Doctrine\DBAL\Exception $exception) {
             throw new Exception('Failed to fetch content elements for page '.$pid.': '.$exception->getMessage(), 1640000010, $exception);
+        }
+    }
+
+    /**
+     * Fetch content elements by UIDs regardless of PID.
+     *
+     * This method is used in onepager scenarios where content from multiple pages
+     * is rendered on a single page. Permission checks are performed per-element
+     * in the ContentElementFilter layer.
+     *
+     * @param array<int> $uids Array of content element UIDs
+     *
+     * @return array<int, array<string, mixed>> Array of content element records
+     *
+     * @throws Exception
+     *
+     * @see ContentElementFilter::shouldIncludeElement() for permission validation
+     */
+    public function fetchContentElementsByUids(
+        array $uids,
+        int $languageUid,
+        bool $includeMultilingualContent = true,
+    ): array {
+        if ([] === $uids) {
+            return [];
+        }
+
+        try {
+            $queryBuilder = $this->buildContentQuery($languageUid, $includeMultilingualContent);
+
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->in(
+                    'uid',
+                    $queryBuilder->createNamedParameter($uids, Connection::PARAM_INT_ARRAY),
+                ),
+            );
+
+            return $queryBuilder->executeQuery()->fetchAllAssociative();
+        } catch (\Doctrine\DBAL\Exception $exception) {
+            throw new Exception('Failed to fetch content elements by UIDs: '.$exception->getMessage(), 1640000011, $exception);
         }
     }
 
@@ -147,26 +152,24 @@ final class ContentElementRepository
         $cacheKey = $cType.':'.$listType;
 
         if ($this->configCache->offsetExists($cacheKey)) {
+            /** @var array<string, mixed>|false|null $cached */
             $cached = $this->configCache->offsetGet($cacheKey);
 
-            return (false !== $cached && null !== $cached) ? $cached : false;
+            return $cached ?? false;
         }
 
         if (!isset($GLOBALS['TCA']['tt_content']['columns'])) {
             return false;
         }
 
-        $valueKey = $this->versionCompatibilityService->getContentElementConfigValueKey();
-
         // Lazy loading: iterate through TCA items using generator to avoid loading entire array
         foreach ($this->getTcaItemsLazily($cType) as $item) {
-            if (('list' === $cType && $item[$valueKey] === $listType)
-                || $item[$valueKey] === $cType) {
-                $config = $this->mapContentElementConfig($item);
+            if (('list' === $cType && $item['value'] === $listType)
+                || $item['value'] === $cType) {
                 $this->manageCacheSize($this->configCache);
-                $this->configCache->offsetSet($cacheKey, $config);
+                $this->configCache->offsetSet($cacheKey, $item);
 
-                return $config;
+                return $item;
             }
         }
 
@@ -174,6 +177,29 @@ final class ContentElementRepository
         $this->configCache->offsetSet($cacheKey, false);
 
         return false;
+    }
+
+    public function getPageDoktype(int $pid): ?int
+    {
+        try {
+            $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
+
+            $result = $queryBuilder
+                ->select('doktype')
+                ->from('pages')
+                ->where(
+                    $queryBuilder->expr()->eq(
+                        'uid',
+                        $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT),
+                    ),
+                )
+                ->executeQuery()
+                ->fetchAssociative();
+
+            return false !== $result ? (int) $result['doktype'] : null;
+        } catch (\Doctrine\DBAL\Exception) {
+            return null;
+        }
     }
 
     public function isSubpageOf(int $subPageId, int $parentPageId): bool
@@ -219,10 +245,58 @@ final class ContentElementRepository
         return false;
     }
 
-    public function clearCache(): void
-    {
-        $this->rootlineCache->exchangeArray([]);
-        $this->configCache->exchangeArray([]);
+    /**
+     * Build base QueryBuilder for tt_content with common filters.
+     *
+     * Creates a QueryBuilder with SELECT * FROM tt_content and applies:
+     * - hidden = 0 and deleted = 0 conditions
+     * - sys_language_uid conditions based on language and multilingual settings
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    private function buildContentQuery(
+        int $languageUid,
+        bool $includeMultilingualContent,
+    ): \Doctrine\DBAL\Query\QueryBuilder {
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('tt_content');
+
+        $queryBuilder
+            ->select('*')
+            ->from('tt_content')
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'hidden',
+                    $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
+                ),
+                $queryBuilder->expr()->eq(
+                    'deleted',
+                    $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
+                ),
+            );
+
+        if ($includeMultilingualContent) {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->or(
+                    $queryBuilder->expr()->eq(
+                        'sys_language_uid',
+                        $queryBuilder->createNamedParameter(-1, Connection::PARAM_INT),
+                    ),
+                    $queryBuilder->expr()->eq(
+                        'sys_language_uid',
+                        $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
+                    ),
+                ),
+            );
+        } else {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->eq(
+                    'sys_language_uid',
+                    $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
+                ),
+            );
+        }
+
+        return $queryBuilder;
     }
 
     /**
@@ -256,30 +330,5 @@ final class ContentElementRepository
                 $cache->offsetUnset($key);
             }
         }
-    }
-
-    /**
-     * @param array<string, mixed> $config
-     *
-     * @return array<string, mixed>
-     */
-    private function mapContentElementConfig(array $config): array
-    {
-        if ($this->versionCompatibilityService->isVersionBelow12()) {
-            for ($i = 0; $i <= 3; ++$i) {
-                if (!isset($config[$i])) {
-                    $config[$i] = '';
-                }
-            }
-
-            return [
-                'label' => $config[0],
-                'value' => $config[1],
-                'icon' => $config[2],
-                'group' => $config[3],
-            ];
-        }
-
-        return $config;
     }
 }

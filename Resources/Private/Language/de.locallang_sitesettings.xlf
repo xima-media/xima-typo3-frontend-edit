@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+	<file source-language="en" target-language="de" datatype="plaintext" original="locallang_sitesettings" product-name="xima_typo3_frontend_edit">
+		<header/>
+		<body>
+			<trans-unit id="label">
+				<source>Frontend Edit</source>
+				<target>Frontend-Bearbeitung</target>
+			</trans-unit>
+
+			<trans-unit id="categories.frontendEdit">
+				<source>Frontend Edit</source>
+				<target>Frontend-Bearbeitung</target>
+			</trans-unit>
+			<trans-unit id="categories.frontendEdit.appearance">
+				<source>Appearance</source>
+				<target>Darstellung</target>
+			</trans-unit>
+			<trans-unit id="categories.frontendEdit.filter">
+				<source>Filter Settings</source>
+				<target>Filtereinstellungen</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.enabled">
+				<source>Enable Frontend Edit</source>
+				<target>Frontend-Bearbeitung aktivieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.enabled">
+				<source>Enable or disable the frontend editing functionality for this site.</source>
+				<target>Aktiviert oder deaktiviert die Frontend-Bearbeitungsfunktion für diese Website.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.colorScheme">
+				<source>Color Scheme</source>
+				<target>Farbschema</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.colorScheme">
+				<source>Choose the color scheme for the frontend editing UI.</source>
+				<target>Wähle das Farbschema für die Frontend-Bearbeitungs-UI.</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.colorScheme.auto">
+				<source>Auto (System)</source>
+				<target>Automatisch (System)</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.colorScheme.light">
+				<source>Light</source>
+				<target>Hell</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.colorScheme.dark">
+				<source>Dark</source>
+				<target>Dunkel</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.showContextMenu">
+				<source>Show Context Menu</source>
+				<target>Kontextmenü anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.showContextMenu">
+				<source>Show the context menu dropdown with additional actions (edit page, hide, move, history). Disable to show only the edit button.</source>
+				<target>Zeigt das Kontextmenü-Dropdown mit zusätzlichen Aktionen (Seite bearbeiten, Verbergen, Verschieben, Verlauf). Deaktivieren, um nur den Bearbeiten-Button anzuzeigen.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.showStickyToolbar">
+				<source>Show Sticky Toolbar</source>
+				<target>Fixierte Toolbar anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.showStickyToolbar">
+				<source>Show the sticky toolbar with page editing options and toggle functionality.</source>
+				<target>Zeigt die fixierte Toolbar mit Seitenbearbeitungsoptionen und Umschaltfunktion.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.toolbarPosition">
+				<source>Toolbar Position</source>
+				<target>Toolbar-Position</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.toolbarPosition">
+				<source>Choose the position for the sticky toolbar.</source>
+				<target>Wähle die Position für die fixierte Toolbar.</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.top-left">
+				<source>Top Left</source>
+				<target>Oben Links</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.top-center">
+				<source>Top Center</source>
+				<target>Oben Mitte</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.top-right">
+				<source>Top Right</source>
+				<target>Oben Rechts</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.bottom-left">
+				<source>Bottom Left</source>
+				<target>Unten Links</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.bottom-center">
+				<source>Bottom Center</source>
+				<target>Unten Mitte</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.bottom-right">
+				<source>Bottom Right</source>
+				<target>Unten Rechts</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.left-top">
+				<source>Left Top</source>
+				<target>Links Oben</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.left-center">
+				<source>Left Center</source>
+				<target>Links Mitte</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.left-bottom">
+				<source>Left Bottom</source>
+				<target>Links Unten</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.right-top">
+				<source>Right Top</source>
+				<target>Rechts Oben</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.right-center">
+				<source>Right Center</source>
+				<target>Rechts Mitte</target>
+			</trans-unit>
+			<trans-unit id="settings.frontendEdit.toolbarPosition.right-bottom">
+				<source>Right Bottom</source>
+				<target>Rechts Unten</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.filter.ignorePids">
+				<source>Ignore PIDs</source>
+				<target>PIDs ignorieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.filter.ignorePids">
+				<source>Comma-separated list of page IDs (and their subpages) where frontend editing should be disabled.</source>
+				<target>Kommagetrennte Liste von Seiten-IDs (und deren Unterseiten), auf denen die Frontend-Bearbeitung deaktiviert werden soll.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.filter.ignoreCTypes">
+				<source>Ignore Content Types</source>
+				<target>Inhaltstypen ignorieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.filter.ignoreCTypes">
+				<source>Comma-separated list of content types (CType) to exclude from frontend editing (e.g., html,div).</source>
+				<target>Kommagetrennte Liste von Inhaltstypen (CType), die von der Frontend-Bearbeitung ausgeschlossen werden sollen (z.B. html,div).</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.filter.ignoreListTypes">
+				<source>Ignore Plugin Types</source>
+				<target>Plugin-Typen ignorieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.filter.ignoreListTypes">
+				<source>Comma-separated list of plugin types (list_type) to exclude from frontend editing.</source>
+				<target>Kommagetrennte Liste von Plugin-Typen (list_type), die von der Frontend-Bearbeitung ausgeschlossen werden sollen.</target>
+			</trans-unit>
+
+			<trans-unit id="settings.frontendEdit.filter.ignoreUids">
+				<source>Ignore UIDs</source>
+				<target>UIDs ignorieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.filter.ignoreUids">
+				<source>Comma-separated list of specific content element UIDs to exclude from frontend editing.</source>
+				<target>Kommagetrennte Liste von spezifischen Inhaltselement-UIDs, die von der Frontend-Bearbeitung ausgeschlossen werden sollen.</target>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

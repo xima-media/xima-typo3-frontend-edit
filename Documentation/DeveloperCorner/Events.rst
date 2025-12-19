@@ -6,10 +6,25 @@
 PSR-14 Events
 =======================
 
-Use the :code:`FrontendEditDropdownModifyEvent` to modify the edit menu to your needs. You can add, remove or modify buttons for specific content elements. See the example below:
+The extension provides two PSR-14 events to customize the Edit Menu and Toolbar.
+
+FrontendEditDropdownModifyEvent
+===============================
+
+Use the :code:`FrontendEditDropdownModifyEvent` to modify the Edit Menu for content elements.
+You can add, remove or modify buttons for specific content elements.
+
+**Available methods:**
+
+- ``getContentElement()`` - Returns the content element data array
+- ``getMenuButton()`` - Returns the current menu button
+- ``setMenuButton()`` - Sets the modified menu button
+- ``getReturnUrl()`` - Returns the return URL for edit links
+
+**Example:**
 
 ..  code-block:: php
-    :caption: Classes/EventListener/ModifyFrontendEditListener.php
+    :caption: Classes/EventListener/ModifyEditMenuListener.php
 
     <?php
 
@@ -18,72 +33,114 @@ Use the :code:`FrontendEditDropdownModifyEvent` to modify the edit menu to your 
     namespace Vendor\Package\EventListener;
 
     use TYPO3\CMS\Backend\Routing\UriBuilder;
+    use TYPO3\CMS\Core\Attribute\AsEventListener;
     use TYPO3\CMS\Core\Imaging\IconFactory;
-    use TYPO3\CMS\Core\Utility\GeneralUtility;
     use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
     use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
     use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 
-    class ModifyFrontendEditListener
+    #[AsEventListener(
+        identifier: 'my-extension/modify-edit-menu',
+    )]
+    class ModifyEditMenuListener
     {
-        public function __construct(protected readonly IconFactory $iconFactory, protected readonly UriBuilder $uriBuilder)
-        {
-        }
+        public function __construct(
+            protected readonly IconFactory $iconFactory,
+            protected readonly UriBuilder $uriBuilder
+        ) {}
 
         public function __invoke(FrontendEditDropdownModifyEvent $event): void
         {
             $contentElement = $event->getContentElement();
             $menuButton = $event->getMenuButton();
 
-            // Example 1
-            // Append a custom button (after the existing edit_page button) for your plugin to e.g. edit the referenced entity
-            if ($contentElement['CType'] === 'list' && $contentElement['list_type'] === 'custom_plugin_name') {
+            // Add a custom button for a specific plugin
+            if ($contentElement['CType'] === 'list' && $contentElement['list_type'] === 'news_pi1') {
                 $menuButton->appendAfterChild(new Button(
-                    'Edit entity',
+                    'Edit news settings',
                     ButtonType::Link,
                     $this->uriBuilder->buildUriFromRoute(
                         'record_edit',
                         [
-                            'edit' => [
-                                'custom_entity' => [
-                                    $contentElement['custom_entity_uid'] => 'edit',
-                                ],
-                            ],
+                            'edit' => ['tt_content' => [$contentElement['uid'] => 'edit']],
                             'returnUrl' => $event->getReturnUrl(),
                         ],
                     )->__toString(),
-                    $this->iconFactory->getIcon('content-idea', 'small')
+                    $this->iconFactory->getIcon('content-news', 'small')
                 ),
                 'edit_page',
-                'edit_custom_entity'
+                'edit_news_settings'
                 );
             }
 
-            // Example 2
-            // Remove existing buttons
+            // Remove a button
             $menuButton->removeChild('div_action');
 
             $event->setMenuButton($menuButton);
         }
     }
 
-Don't forget to register your event listener via PHP attributes (TYPO3 >= 13):
+FrontendEditPageDropdownModifyEvent
+===================================
 
+Use the :code:`FrontendEditPageDropdownModifyEvent` to modify the Toolbar menu for page-level actions.
+
+**Available methods:**
+
+- ``getPageId()`` - Returns the current page ID
+- ``getLanguageUid()`` - Returns the current language UID
+- ``getMenuButton()`` - Returns the current menu button
+- ``setMenuButton()`` - Sets the modified menu button
+- ``getReturnUrl()`` - Returns the return URL for edit links
+
+**Example:**
 
 ..  code-block:: php
-    :caption: Classes/EventListener/ModifyFrontendEditListener.php
+    :caption: Classes/EventListener/ModifyToolbarListener.php
+
+    <?php
+
+    declare(strict_types=1);
+
+    namespace Vendor\Package\EventListener;
+
+    use TYPO3\CMS\Backend\Routing\UriBuilder;
+    use TYPO3\CMS\Core\Attribute\AsEventListener;
+    use TYPO3\CMS\Core\Imaging\IconFactory;
+    use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
+    use Xima\XimaTypo3FrontendEdit\Event\FrontendEditPageDropdownModifyEvent;
+    use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 
     #[AsEventListener(
-        identifier: 'ext-some-extension/modify-frontend-edit-listener',
+        identifier: 'my-extension/modify-toolbar',
     )]
+    class ModifyToolbarListener
+    {
+        public function __construct(
+            protected readonly IconFactory $iconFactory,
+            protected readonly UriBuilder $uriBuilder
+        ) {}
 
-or register the event listener in your :code:`Services.yaml`:
+        public function __invoke(FrontendEditPageDropdownModifyEvent $event): void
+        {
+            $menuButton = $event->getMenuButton();
 
-..  code-block:: yaml
-    :caption: Configuration/Services.yaml
+            // Add a custom page action
+            $menuButton->appendChild(new Button(
+                'Clear page cache',
+                ButtonType::Link,
+                $this->uriBuilder->buildUriFromRoute(
+                    'tce_db',
+                    [
+                        'cacheCmd' => $event->getPageId(),
+                        'redirect' => $event->getReturnUrl(),
+                    ],
+                )->__toString(),
+                $this->iconFactory->getIcon('actions-system-cache-clear', 'small')
+            ),
+            'clear_cache'
+            );
 
-    services:
-    Vendor\Package\EventListener\ModifyFrontendEditListener:
-        tags:
-            - name: event.listener
-                identifier: 'ext-some-extension/modify-frontend-edit-listener'
+            $event->setMenuButton($menuButton);
+        }
+    }

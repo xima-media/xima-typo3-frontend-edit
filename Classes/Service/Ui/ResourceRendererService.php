@@ -13,13 +13,21 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 
+use JsonException;
 use Psr\Http\Message\ServerRequestInterface;
 use Throwable;
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Core\Core\RequestId;
 use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Routing\PageArguments;
+use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, PathUtility};
+use TYPO3\CMS\Core\View\{ViewFactoryData, ViewFactoryInterface};
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
-use Xima\XimaTypo3FrontendEdit\Service\Configuration\{SettingsService, VersionCompatibilityService};
+use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
+use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
 use function sprintf;
@@ -30,11 +38,13 @@ use function sprintf;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class ResourceRendererService
+final readonly class ResourceRendererService
 {
     public function __construct(
-        private readonly VersionCompatibilityService $versionCompatibilityService,
-        private readonly SettingsService $settingsService,
+        private SettingsService $settingsService,
+        private BackendUserService $backendUserService,
+        private UrlBuilderService $urlBuilderService,
+        private PageMenuGenerator $pageMenuGenerator,
     ) {}
 
     /**
@@ -46,63 +56,186 @@ final class ResourceRendererService
     {
         try {
             $nonceValue = $this->resolveNonceValue();
+            $nonceAttribute = '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '';
             $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
 
-            $debugMode = $this->settingsService->isFrontendDebugModeEnabled();
-            if ($debugMode) {
-                $debugScript = sprintf(
-                    '<script%s>window.FRONTEND_EDIT_DEBUG = true;</script>',
-                    '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '',
-                );
-                $resources['debug_config'] = $debugScript;
-            }
+            $this->addFloatingUiResource($resources, $nonceAttribute);
+            $this->addSettingsConfig($resources, $nonceAttribute, $request);
+            $this->addDebugConfig($resources, $nonceAttribute);
+            $this->addToolbarConfig($resources, $request);
+            $this->addStickyToolbarResourcesIfEnabled($resources, $request, $nonceAttribute);
 
             $values = [...$values, 'resources' => $resources];
 
-            if ($this->versionCompatibilityService->isVersion13OrHigher()) {
-                return $this->renderView13($template, $values, $request);
-            }
-
-            return $this->renderView12($template, $values);
+            return $this->renderView($template, $values, $request);
         } catch (Throwable $exception) {
             throw new Exception('Failed to render template "'.$template.'": '.$exception->getMessage(), 1640000001, $exception);
         }
     }
 
     /**
-     * @param array<string, mixed> $values
+     * @param array<string, string> $resources
      */
-    private function renderView12(string $template, array $values): string
+    private function addFloatingUiResource(array &$resources, string $nonceAttribute): void
     {
-        /** @var \TYPO3\CMS\Fluid\View\StandaloneView $view */
-        $view = GeneralUtility::makeInstance(\TYPO3\CMS\Fluid\View\StandaloneView::class); // @phpstan-ignore classConstant.deprecatedClass
-        $view->setFormat('html'); // @phpstan-ignore method.deprecatedClass
-        $view->setTemplateRootPaths(['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Templates/']); // @phpstan-ignore method.deprecatedClass
-        $view->setPartialRootPaths(['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Partials/']); // @phpstan-ignore method.deprecatedClass
-        if (PathUtility::isExtensionPath($template)) {
-            $template = GeneralUtility::getFileAbsFileName($template);
-            $view->setTemplatePathAndFilename($template); // @phpstan-ignore method.deprecatedClass
-        } else {
-            $view->setTemplate($template); // @phpstan-ignore method.deprecatedClass
-        }
-        $view->assignMultiple($values);
+        $floatingUiPath = PathUtility::getAbsoluteWebPath(
+            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/vendor/floating-ui.dom.bundle.js'),
+        );
+        $resources['floating_ui'] = sprintf(
+            '<script%s type="module">import * as FloatingUIDOM from "%s"; window.FloatingUIDOM = FloatingUIDOM; window.dispatchEvent(new Event("floatingui:ready"));</script>',
+            $nonceAttribute,
+            $floatingUiPath,
+        );
+    }
 
-        return $view->render();
+    /**
+     * @param array<string, string> $resources
+     */
+    private function addSettingsConfig(array &$resources, string $nonceAttribute, ?ServerRequestInterface $request): void
+    {
+        $colorScheme = null !== $request ? $this->settingsService->getColorScheme($request) : 'auto';
+        $showContextMenu = (null !== $request && $this->settingsService->isShowContextMenu($request)) ? 'true' : 'false';
+        $enableOutline = (null !== $request && $this->settingsService->isEnableOutline($request)) ? 'true' : 'false';
+        $enableScrollToElement = (null !== $request && $this->settingsService->isEnableScrollToElement($request)) ? 'true' : 'false';
+        $resources['settings_config'] = sprintf(
+            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s;</script>',
+            $nonceAttribute,
+            $colorScheme,
+            $showContextMenu,
+            $enableOutline,
+            $enableScrollToElement,
+        );
+    }
+
+    /**
+     * @param array<string, string> $resources
+     */
+    private function addDebugConfig(array &$resources, string $nonceAttribute): void
+    {
+        if (!$this->settingsService->isFrontendDebugModeEnabled()) {
+            return;
+        }
+
+        $resources['debug_config'] = sprintf(
+            '<script%s>window.FRONTEND_EDIT_DEBUG = true;</script>',
+            $nonceAttribute,
+        );
+    }
+
+    /**
+     * @param array<string, string> $resources
+     *
+     * @throws RouteNotFoundException
+     */
+    private function addToolbarConfig(array &$resources, ?ServerRequestInterface $request): void
+    {
+        $isDisabled = $this->backendUserService->isFrontendEditDisabled();
+        $editInfoUrl = $this->urlBuilderService->buildEditInformationUrl();
+        $pageInfo = $this->getPageInfo($request);
+        $resources['toolbar_config'] = sprintf(
+            '<div id="frontend-edit-toolbar-config" data-disabled="%s" data-edit-info-url="%s" data-pid="%d" data-language="%d" hidden></div>',
+            $isDisabled ? 'true' : 'false',
+            htmlspecialchars($editInfoUrl, \ENT_QUOTES, 'UTF-8'),
+            $pageInfo['pid'],
+            $pageInfo['language'],
+        );
+    }
+
+    /**
+     * @param array<string, string> $resources
+     *
+     * @throws JsonException
+     */
+    private function addStickyToolbarResourcesIfEnabled(array &$resources, ?ServerRequestInterface $request, string $nonceAttribute): void
+    {
+        if (null === $request || !$this->settingsService->isShowStickyToolbar($request)) {
+            return;
+        }
+
+        $this->addStickyToolbarResources($resources, $request, $nonceAttribute);
+    }
+
+    /**
+     * @param array<string, string> $resources
+     *
+     * @throws JsonException
+     */
+    private function addStickyToolbarResources(array &$resources, ServerRequestInterface $request, string $nonceAttribute): void
+    {
+        $toolbarPosition = $this->settingsService->getToolbarPosition($request);
+        $toggleUrl = $this->urlBuilderService->buildToggleUrl();
+
+        // Get translated tooltip strings
+        $tooltipEnable = $this->translate('tooltip.enable', 'Enable frontend editing mode');
+        $tooltipDisable = $this->translate('tooltip.disable', 'Disable frontend editing mode');
+        $tooltipPageOptions = $this->translate('tooltip.pageOptions', 'Page options');
+
+        $resources['sticky_toolbar_config'] = sprintf(
+            '<div id="frontend-edit-sticky-toolbar-config" data-position="%s" data-toggle-url="%s" data-tooltip-enable="%s" data-tooltip-disable="%s" data-tooltip-page-options="%s" hidden></div>',
+            $toolbarPosition,
+            htmlspecialchars($toggleUrl, \ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($tooltipEnable, \ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($tooltipDisable, \ENT_QUOTES, 'UTF-8'),
+            htmlspecialchars($tooltipPageOptions, \ENT_QUOTES, 'UTF-8'),
+        );
+
+        // Add page menu data as JSON (rendered client-side like content element menus)
+        $pageMenuData = $this->pageMenuGenerator->getDropdown($request);
+        if ([] !== $pageMenuData) {
+            $resources['page_menu_data'] = sprintf(
+                '<script%s type="application/json" id="frontend-edit-page-menu-data">%s</script>',
+                $nonceAttribute,
+                json_encode($pageMenuData, \JSON_THROW_ON_ERROR | \JSON_HEX_TAG | \JSON_HEX_AMP),
+            );
+        }
+
+        // Add sticky toolbar script
+        $stickyToolbarPath = PathUtility::getAbsoluteWebPath(
+            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/sticky_toolbar.js'),
+        );
+        $resources['sticky_toolbar'] = sprintf(
+            '<script%s src="%s"></script>',
+            $nonceAttribute,
+            $stickyToolbarPath,
+        );
+    }
+
+    /**
+     * @return array{pid: int, language: int}
+     */
+    private function getPageInfo(?ServerRequestInterface $request): array
+    {
+        $pid = 0;
+        $language = 0;
+
+        if (null !== $request) {
+            $routing = $request->getAttribute('routing');
+            if ($routing instanceof PageArguments) {
+                $pid = $routing->getPageId();
+            }
+
+            $siteLanguage = $request->getAttribute('language');
+            if ($siteLanguage instanceof SiteLanguage) {
+                $language = $siteLanguage->getLanguageId();
+            }
+        }
+
+        return ['pid' => $pid, 'language' => $language];
     }
 
     /**
      * @param array<string, mixed> $values
      */
-    private function renderView13(string $template, array $values, ?ServerRequestInterface $request = null): string
+    private function renderView(string $template, array $values, ?ServerRequestInterface $request = null): string
     {
-        $viewFactoryData = new \TYPO3\CMS\Core\View\ViewFactoryData(
+        $viewFactoryData = new ViewFactoryData(
             templateRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Templates/'],
             partialRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Partials/'],
             layoutRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Layouts/'],
             request: $request,
         );
 
-        $viewFactory = GeneralUtility::makeInstance(\TYPO3\CMS\Core\View\ViewFactoryInterface::class);
+        $viewFactory = GeneralUtility::makeInstance(ViewFactoryInterface::class);
         $view = $viewFactory->create($viewFactoryData);
         $view->assignMultiple($values);
 
@@ -116,15 +249,18 @@ final class ResourceRendererService
     private function resolveNonceValue(): string
     {
         try {
-            if (property_exists(RequestId::class, 'nonce')) {
-                $requestId = GeneralUtility::makeInstance(RequestId::class);
+            $requestId = GeneralUtility::makeInstance(RequestId::class);
 
-                return $requestId->nonce->consume();
-            }
+            return $requestId->nonce->consume();
         } catch (Throwable) {
             // Silently fail and return empty string for nonce
         }
 
         return '';
+    }
+
+    private function translate(string $key, string $fallback): string
+    {
+        return LocalizationUtility::translate($key, 'XimaTypo3FrontendEdit') ?? $fallback;
     }
 }

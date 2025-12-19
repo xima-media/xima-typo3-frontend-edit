@@ -12,7 +12,7 @@ FAQ
 
 .. rst-class:: panel panel-default
 
-Why is the frontend edit menu not displayed on my page / for my content element?
+Why is the Edit Menu not displayed on my page / for my content element?
 =======================================
 
 There may be a number of reasons for this:
@@ -25,9 +25,9 @@ Are you currently logged into the TYPO3 backend? Otherwise the frontend edit wil
 
 Does your user have all permissions to edit the page as well as the content elements?
 
-**TypoScript**
+**Site Set**
 
-Is the TypoScript template "Frontend edit" included in your sitepackage? Do you have declared the constants to restrict the usage of the frontend edit?
+Is the Frontend Edit site set included in your site configuration? Check the Site Settings to verify the extension is enabled.
 
 **Content Element IDs**
 
@@ -39,7 +39,7 @@ For now only all content elements on the current page are "editable". So if you'
 
 **Debug**
 
-Check the network tab for the initial ajax call (something like :code:`/?type=1729341864` with the information about the editable content elements and the according dropdown menus.
+Check the network tab for the initial AJAX call to :code:`/typo3/ajax/xima-frontend-edit/edit-information` with the information about the editable content elements and the according Edit Menus.
 
 
 .. rst-class:: panel panel-default

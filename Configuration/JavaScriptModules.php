@@ -18,5 +18,6 @@ return [
     ],
     'imports' => [
         '@xima/ximatypo3frontendedit/save_close.js' => 'EXT:xima_typo3_frontend_edit/Resources/Public/JavaScript/save_close.js',
+        '@xima/ximatypo3frontendedit/scroll_to_element.js' => 'EXT:xima_typo3_frontend_edit/Resources/Public/JavaScript/scroll_to_element.js',
     ],
 ];

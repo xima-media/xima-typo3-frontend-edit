@@ -7,7 +7,7 @@
 
 TYPO3=${1}
 
-. .ddev/.typo3-setup/scripts/utils.sh
+. .ddev/.setup/scripts/utils.sh
 
 if [ "$TYPO3" == "all" ]; then
     mapfile -t versions < <(get_supported_typo3_versions)

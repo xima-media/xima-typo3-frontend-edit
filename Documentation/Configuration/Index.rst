@@ -8,13 +8,12 @@ Configuration
 
 The extension is ready to use without any further setup.
 
-You can also adapt the extension to your needs, switch single menu entries and also disable the functionality.
+You can also adapt the extension to your needs and disable the functionality for specific pages or content types.
 
 Learn what configuration options are available on the following pages:
 
 ..  toctree::
     :maxdepth: 3
 
-    TypoScript
+    SiteSettings
     ExtensionConfiguration
-    UserSettings

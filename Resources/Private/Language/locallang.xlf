@@ -27,6 +27,9 @@
 			<trans-unit id="move">
 				<source>Move</source>
 			</trans-unit>
+			<trans-unit id="new_content_after">
+				<source>New content after</source>
+			</trans-unit>
 			<trans-unit id="div_info">
 				<source>Info</source>
 			</trans-unit>
@@ -38,6 +41,24 @@
 			</trans-unit>
 			<trans-unit id="div_data">
 				<source>Data</source>
+			</trans-unit>
+			<trans-unit id="page_menu">
+				<source>Page menu</source>
+			</trans-unit>
+			<trans-unit id="edit_page_properties">
+				<source>Edit page properties</source>
+			</trans-unit>
+			<trans-unit id="page_layout">
+				<source>Page layout</source>
+			</trans-unit>
+			<trans-unit id="tooltip.enable">
+				<source>Enable frontend editing mode</source>
+			</trans-unit>
+			<trans-unit id="tooltip.disable">
+				<source>Disable frontend editing mode</source>
+			</trans-unit>
+			<trans-unit id="tooltip.pageOptions">
+				<source>Page options</source>
 			</trans-unit>
 		</body>
 	</file>

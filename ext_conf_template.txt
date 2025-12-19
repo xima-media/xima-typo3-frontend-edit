@@ -4,9 +4,7 @@ enableSaveAndCloseButton = 1
 forceReturnUrlGeneration = 0
 # cat=basic//102; type=boolean; label=Target blank: Enable the target blank option for all dropdown links to open in a new tab
 linkTargetBlank = 0
-# cat=basic//103; type=boolean; label=Simple mode: This mode will disable the menu dropdown and use the edit icon button directly as edit link instead
-simpleMode = 0
-# cat=basic//104; type=boolean; label=Redirect: Use the redirect option to redirect the edit links, so the full TYPO3 backend is loaded instead of only the edit form
+# cat=basic//103; type=boolean; label=Redirect: Use the redirect option to redirect the edit links, so the full TYPO3 backend is loaded instead of only the edit form
 useRedirect = 0
 # cat=debug//200; type=boolean; label=Frontend Debug Mode: Enable debug logging in browser console for content element parsing and assignment
 frontendDebugMode = 0

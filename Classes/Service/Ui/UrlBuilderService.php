@@ -23,9 +23,9 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class UrlBuilderService
+final readonly class UrlBuilderService
 {
-    private readonly UriBuilder $uriBuilder;
+    private UriBuilder $uriBuilder;
 
     public function __construct()
     {
@@ -52,16 +52,23 @@ final class UrlBuilderService
     /**
      * @throws RouteNotFoundException
      */
-    public function buildPageLayoutUrl(int $pageId, int $languageUid, string $returnUrl): string
-    {
-        return $this->uriBuilder->buildUriFromRoute(
-            'web_layout',
-            [
-                'id' => $pageId,
-                'language' => $languageUid,
-                'returnUrl' => $returnUrl,
-            ],
-        )->__toString();
+    public function buildPageLayoutUrl(
+        int $pageId,
+        int $languageUid,
+        string $returnUrl,
+        ?int $contentElementUid = null,
+    ): string {
+        $parameters = [
+            'id' => $pageId,
+            'language' => $languageUid,
+            'returnUrl' => $returnUrl,
+        ];
+
+        if (null !== $contentElementUid) {
+            $parameters['scrollToElement'] = $contentElementUid;
+        }
+
+        return $this->uriBuilder->buildUriFromRoute('web_layout', $parameters)->__toString();
     }
 
     /**
@@ -130,6 +137,19 @@ final class UrlBuilderService
     /**
      * @throws RouteNotFoundException
      */
+    public function buildNewContentAfterUrl(int $uid, string $returnUrl): string
+    {
+        return $this->uriBuilder->buildUriFromRoute(
+            'record_edit',
+            [
+                'edit' => [
+                    'tt_content' => [-$uid => 'new'],
+                ],
+                'returnUrl' => $returnUrl,
+            ],
+        )->__toString();
+    }
+
     /**
      * @param array<string, mixed> $parameters
      *
@@ -138,5 +158,21 @@ final class UrlBuilderService
     public function buildRoute(string $route, array $parameters = []): string
     {
         return $this->uriBuilder->buildUriFromRoute($route, $parameters)->__toString();
+    }
+
+    /**
+     * @throws RouteNotFoundException
+     */
+    public function buildToggleUrl(): string
+    {
+        return $this->buildRoute('ajax_frontendEdit_toggle');
+    }
+
+    /**
+     * @throws RouteNotFoundException
+     */
+    public function buildEditInformationUrl(): string
+    {
+        return $this->buildRoute('ajax_frontendEdit_editInformation');
     }
 }
