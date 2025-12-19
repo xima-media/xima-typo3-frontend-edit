@@ -60,49 +60,16 @@ final readonly class ContentElementRepository
         bool $includeMultilingualContent = true,
     ): array {
         try {
-            $queryBuilder = $this->connectionPool->getQueryBuilderForTable('tt_content');
+            $queryBuilder = $this->buildContentQuery($languageUid, $includeMultilingualContent);
 
-            $query = $queryBuilder
-                ->select('*')
-                ->from('tt_content')
-                ->where(
-                    $queryBuilder->expr()->eq(
-                        'hidden',
-                        $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
-                    ),
-                    $queryBuilder->expr()->eq(
-                        'deleted',
-                        $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
-                    ),
-                    $queryBuilder->expr()->eq(
-                        'pid',
-                        $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT),
-                    ),
-                );
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->eq(
+                    'pid',
+                    $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT),
+                ),
+            );
 
-            if ($includeMultilingualContent) {
-                $query->andWhere(
-                    $queryBuilder->expr()->or(
-                        $queryBuilder->expr()->eq(
-                            'sys_language_uid',
-                            $queryBuilder->createNamedParameter(-1, Connection::PARAM_INT),
-                        ),
-                        $queryBuilder->expr()->eq(
-                            'sys_language_uid',
-                            $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
-                        ),
-                    ),
-                );
-            } else {
-                $query->andWhere(
-                    $queryBuilder->expr()->eq(
-                        'sys_language_uid',
-                        $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
-                    ),
-                );
-            }
-
-            return $query->executeQuery()->fetchAllAssociative();
+            return $queryBuilder->executeQuery()->fetchAllAssociative();
         } catch (\Doctrine\DBAL\Exception $exception) {
             throw new Exception('Failed to fetch content elements for page '.$pid.': '.$exception->getMessage(), 1640000010, $exception);
         }
@@ -133,49 +100,16 @@ final readonly class ContentElementRepository
         }
 
         try {
-            $queryBuilder = $this->connectionPool->getQueryBuilderForTable('tt_content');
+            $queryBuilder = $this->buildContentQuery($languageUid, $includeMultilingualContent);
 
-            $query = $queryBuilder
-                ->select('*')
-                ->from('tt_content')
-                ->where(
-                    $queryBuilder->expr()->eq(
-                        'hidden',
-                        $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
-                    ),
-                    $queryBuilder->expr()->eq(
-                        'deleted',
-                        $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
-                    ),
-                    $queryBuilder->expr()->in(
-                        'uid',
-                        $queryBuilder->createNamedParameter($uids, Connection::PARAM_INT_ARRAY),
-                    ),
-                );
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->in(
+                    'uid',
+                    $queryBuilder->createNamedParameter($uids, Connection::PARAM_INT_ARRAY),
+                ),
+            );
 
-            if ($includeMultilingualContent) {
-                $query->andWhere(
-                    $queryBuilder->expr()->or(
-                        $queryBuilder->expr()->eq(
-                            'sys_language_uid',
-                            $queryBuilder->createNamedParameter(-1, Connection::PARAM_INT),
-                        ),
-                        $queryBuilder->expr()->eq(
-                            'sys_language_uid',
-                            $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
-                        ),
-                    ),
-                );
-            } else {
-                $query->andWhere(
-                    $queryBuilder->expr()->eq(
-                        'sys_language_uid',
-                        $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
-                    ),
-                );
-            }
-
-            return $query->executeQuery()->fetchAllAssociative();
+            return $queryBuilder->executeQuery()->fetchAllAssociative();
         } catch (\Doctrine\DBAL\Exception $exception) {
             throw new Exception('Failed to fetch content elements by UIDs: '.$exception->getMessage(), 1640000011, $exception);
         }
@@ -218,8 +152,10 @@ final readonly class ContentElementRepository
         $cacheKey = $cType.':'.$listType;
 
         if ($this->configCache->offsetExists($cacheKey)) {
-            // @phpstan-ignore-next-line ArrayObject value is guaranteed non-null after offsetExists check
-            return $this->configCache[$cacheKey];
+            /** @var array<string, mixed>|false|null $cached */
+            $cached = $this->configCache->offsetGet($cacheKey);
+
+            return $cached ?? false;
         }
 
         if (!isset($GLOBALS['TCA']['tt_content']['columns'])) {
@@ -307,6 +243,60 @@ final readonly class ContentElementRepository
         }
 
         return false;
+    }
+
+    /**
+     * Build base QueryBuilder for tt_content with common filters.
+     *
+     * Creates a QueryBuilder with SELECT * FROM tt_content and applies:
+     * - hidden = 0 and deleted = 0 conditions
+     * - sys_language_uid conditions based on language and multilingual settings
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    private function buildContentQuery(
+        int $languageUid,
+        bool $includeMultilingualContent,
+    ): \Doctrine\DBAL\Query\QueryBuilder {
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('tt_content');
+
+        $queryBuilder
+            ->select('*')
+            ->from('tt_content')
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'hidden',
+                    $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
+                ),
+                $queryBuilder->expr()->eq(
+                    'deleted',
+                    $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
+                ),
+            );
+
+        if ($includeMultilingualContent) {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->or(
+                    $queryBuilder->expr()->eq(
+                        'sys_language_uid',
+                        $queryBuilder->createNamedParameter(-1, Connection::PARAM_INT),
+                    ),
+                    $queryBuilder->expr()->eq(
+                        'sys_language_uid',
+                        $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
+                    ),
+                ),
+            );
+        } else {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->eq(
+                    'sys_language_uid',
+                    $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
+                ),
+            );
+        }
+
+        return $queryBuilder;
     }
 
     /**

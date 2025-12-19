@@ -23,6 +23,7 @@ use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, PathUtility};
 use TYPO3\CMS\Core\View\{ViewFactoryData, ViewFactoryInterface};
+use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
@@ -260,8 +261,6 @@ final readonly class ResourceRendererService
 
     private function translate(string $key, string $fallback): string
     {
-        $label = $GLOBALS['LANG']->sL('LLL:EXT:'.Configuration::EXT_KEY.'/Resources/Private/Language/locallang.xlf:'.$key);
-
-        return '' !== $label ? $label : $fallback;
+        return LocalizationUtility::translate($key, 'XimaTypo3FrontendEdit') ?? $fallback;
     }
 }
