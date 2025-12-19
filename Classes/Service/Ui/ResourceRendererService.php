@@ -123,6 +123,7 @@ final readonly class ResourceRendererService
 
     /**
      * @param array<string, string> $resources
+     *
      * @throws RouteNotFoundException
      */
     private function addToolbarConfig(array &$resources, ?ServerRequestInterface $request): void
@@ -141,6 +142,7 @@ final readonly class ResourceRendererService
 
     /**
      * @param array<string, string> $resources
+     *
      * @throws JsonException
      */
     private function addStickyToolbarResourcesIfEnabled(array &$resources, ?ServerRequestInterface $request, string $nonceAttribute): void
