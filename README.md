@@ -18,7 +18,7 @@ This extension provides an edit menu for editors within the frontend regarding c
 ![Frontend Edit](./Documentation/Images/screenshot.jpg)
 
 > [!NOTE]
-> This is **not** a further development of the "original" extension [frontend_editing](https://extensions.typo3.org/extension/frontend_editing). It is similar in some ways to the realisation of the [feedit](https://extensions.typo3.org/extension/feedit) extension. This extension is an independent implementation with a different approach.
+> **Delineation and classification**: This is **not** a further development of the "original" extension [frontend_editing](https://extensions.typo3.org/extension/frontend_editing). It is similar in some ways to the realisation of the [feedit](https://extensions.typo3.org/extension/feedit) extension. This extension is an independent implementation with a different approach.
 >
 > Unlike [content_preview](https://github.com/T3-UX/content_preview), which provides a split-view with live frontend preview within the backend Page module, this extension works directly in the frontend and does not modify the backend interface.
 
@@ -81,6 +81,8 @@ Please have a look at [`CONTRIBUTING.md`](CONTRIBUTING.md).
 The extension icon based on  the original
 [`actions-open`](https://typo3.github.io/TYPO3.Icons/icons/actions/actions-open.html) icon from TYPO3 core which is 
 originally licensed under [MIT License](https://github.com/TYPO3/TYPO3.Icons/blob/main/LICENSE).
+
+Thanks to [move:elevator](https://www.move-elevator.de/) and [XIMA](https://www.xima.de/) for supporting the development of this extension.
 
 ## ⭐ License
 
