@@ -28,7 +28,11 @@ Frontend Edit
 
 ----
 
-This extension provides an edit button for editors within frontend content elements.
+..  figure:: /Images/logo.svg
+    :alt: Frontend Edit Logo
+    :align: center
+
+This extension provides an edit menu for editors within the frontend regarding content elements and pages.
 
 ----
 
@@ -45,6 +49,13 @@ This extension provides an edit button for editors within frontend content eleme
         ..  card-footer::   :ref:`Learn more about this extension <introduction>`
             :button-style: btn btn-secondary stretched-link
 
+    ..  card::  How it works
+
+        A detailed explanation of the inner workings of the extension.
+
+        ..  card-footer::   :ref:`Deep dive into concepts <how-it-works>`
+            :button-style: btn btn-secondary stretched-link
+
     ..  card::  Installation
 
         Instructions on how to install this extension and which TYPO3 and PHP versions are currently supported.
@@ -59,11 +70,11 @@ This extension provides an edit button for editors within frontend content eleme
         ..  card-footer::   :ref:`View configuration options <configuration>`
             :button-style: btn btn-secondary stretched-link
 
-    ..  card::  How it works
+    ..  card::  Usage
 
-        A detailed explanation of the inner workings of the extension.
+        Learn how to use the Edit Menu and the Toolbar.
 
-        ..  card-footer::   :ref:`Deep dive into concepts <how-it-works>`
+        ..  card-footer::   :ref:`View usage guide <usage>`
             :button-style: btn btn-secondary stretched-link
 
     ..  card::  Developer corner
@@ -80,16 +91,25 @@ This extension provides an edit button for editors within frontend content eleme
         ..  card-footer::   :ref:`Get answers <faq>`
             :button-style: btn btn-secondary stretched-link
 
+    ..  card::  Migration
+
+        A guide to migrate from version 1.x to version 2.x.
+
+        ..  card-footer::   :ref:`View migration guide <migration>`
+            :button-style: btn btn-secondary stretched-link
+
 
 ..  toctree::
     :hidden:
 
     Introduction/Index
+    HowItWorks/Index
     Installation/Index
     Configuration/Index
-    HowItWorks/Index
+    Usage/Index
     DeveloperCorner/Index
     FAQ/Index
+    Migration/Index
 
 ..  toctree::
     :hidden:

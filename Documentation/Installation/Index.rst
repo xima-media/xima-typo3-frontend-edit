@@ -12,7 +12,7 @@ Requirements
 ============
 
 -   PHP 8.2 - 8.5
--   TYPO3 13.4 LTS
+-   TYPO3 13.4 LTS - 14.x
 
 ..  _steps:
 
