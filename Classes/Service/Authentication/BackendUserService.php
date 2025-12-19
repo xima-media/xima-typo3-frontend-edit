@@ -76,13 +76,6 @@ final class BackendUserService
         return $backendUser->recordEditAccessInternals($table, $record);
     }
 
-    public function isAdmin(): bool
-    {
-        $backendUser = $this->getBackendUser();
-
-        return null !== $backendUser && $backendUser->isAdmin();
-    }
-
     public function isFrontendEditDisabled(): bool
     {
         $backendUser = $this->getBackendUser();

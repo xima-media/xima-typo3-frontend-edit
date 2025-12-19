@@ -46,11 +46,6 @@ final class IconService
         return $this->iconCache[$identifier];
     }
 
-    public function clearCache(): void
-    {
-        $this->iconCache = [];
-    }
-
     /**
      * Get the default icon size based on TYPO3 version.
      */
