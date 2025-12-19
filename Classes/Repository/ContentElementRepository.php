@@ -243,6 +243,29 @@ final readonly class ContentElementRepository
         return false;
     }
 
+    public function getPageDoktype(int $pid): ?int
+    {
+        try {
+            $queryBuilder = $this->connectionPool->getQueryBuilderForTable('pages');
+
+            $result = $queryBuilder
+                ->select('doktype')
+                ->from('pages')
+                ->where(
+                    $queryBuilder->expr()->eq(
+                        'uid',
+                        $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT),
+                    ),
+                )
+                ->executeQuery()
+                ->fetchAssociative();
+
+            return false !== $result ? (int) $result['doktype'] : null;
+        } catch (\Doctrine\DBAL\Exception) {
+            return null;
+        }
+    }
+
     public function isSubpageOf(int $subPageId, int $parentPageId): bool
     {
         $cacheKey = $subPageId.':'.$parentPageId;

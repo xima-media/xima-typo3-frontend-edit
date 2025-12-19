@@ -249,7 +249,7 @@
       window.addEventListener('resize', updatePositions, { passive: true });
     },
 
-    createOverlay(uid, targetElement, contentElement, showContextMenu) {
+    createOverlay(uid, targetElement, contentElement, showContextMenu, enableOutline = true) {
       const overlay = document.createElement('div');
       overlay.className = 'frontend-edit__overlay';
       overlay.dataset.cid = uid;
@@ -260,15 +260,18 @@
         overlay.classList.add('frontend-edit__overlay--nested');
       }
 
-      // Create outline element
-      const outline = document.createElement('div');
-      outline.className = 'frontend-edit__outline';
+      // Create outline element (only if enabled)
+      let outline = null;
+      if (enableOutline) {
+        outline = document.createElement('div');
+        outline.className = 'frontend-edit__outline';
+        overlay.appendChild(outline);
+      }
 
       // Create toolbar
       const toolbar = UI.createToolbar(uid, contentElement, showContextMenu);
       toolbar.style.pointerEvents = 'auto';
 
-      overlay.appendChild(outline);
       overlay.appendChild(toolbar);
       this.container.appendChild(overlay);
 
@@ -294,13 +297,15 @@
       overlay.style.width = `${rect.width}px`;
       overlay.style.height = `${rect.height}px`;
 
-      // Update outline to match
-      outline.style.cssText = `
-        position: absolute;
-        inset: -1px;
-        border-radius: 2px;
-        pointer-events: none;
-      `;
+      // Update outline to match (only if outline exists)
+      if (outline) {
+        outline.style.cssText = `
+          position: absolute;
+          inset: -1px;
+          border-radius: 2px;
+          pointer-events: none;
+        `;
+      }
 
       // Position toolbar at bottom if element is near top of viewport
       const toolbarHeight = 20; // Approximate height of toolbar
@@ -322,6 +327,14 @@
       if (!data) return;
 
       if (active) {
+        // Deactivate all other overlays first (hover priority)
+        this.overlays.forEach((otherData, otherElement) => {
+          if (otherElement !== targetElement) {
+            otherData.overlay.classList.remove('frontend-edit__overlay--active');
+          }
+        });
+        // Close any open dropdowns
+        Dropdown.closeAll();
         data.overlay.classList.add('frontend-edit__overlay--active');
         this.updatePosition(targetElement);
       } else {
@@ -556,6 +569,7 @@
       Logger.log(`Starting DOM assignment for ${Object.keys(jsonResponse).length} content element(s)`);
 
       const showContextMenu = window.FRONTEND_EDIT_SHOW_CONTEXT_MENU !== false;
+      const enableOutline = window.FRONTEND_EDIT_ENABLE_OUTLINE !== false;
       let successful = 0;
       let failed = 0;
 
@@ -582,12 +596,13 @@
         const targetElement = ElementResolver.resolveContentElement(idElement);
 
         successful++;
-        this.setupContentElement(targetElement, uid, contentElement, showContextMenu);
+        this.setupContentElement(targetElement, uid, contentElement, showContextMenu, enableOutline);
 
         Logger.log(`DOM assignment successful: c${uid}`, {
           CType: contentElement.element.CType,
           ctypeLabel: contentElement.element.ctypeLabel,
           showContextMenu,
+          enableOutline,
           usedSibling: targetElement !== idElement
         });
       }
@@ -599,12 +614,12 @@
       });
     },
 
-    setupContentElement(targetElement, uid, contentElement, showContextMenu) {
+    setupContentElement(targetElement, uid, contentElement, showContextMenu, enableOutline) {
       const hasMenuChildren = contentElement.menu.children && Object.keys(contentElement.menu.children).length > 0;
       const effectiveShowContextMenu = showContextMenu && hasMenuChildren && !contentElement.menu.url;
 
       // Create overlay with toolbar
-      const { toolbar } = OverlayManager.createOverlay(uid, targetElement, contentElement, effectiveShowContextMenu);
+      const { toolbar } = OverlayManager.createOverlay(uid, targetElement, contentElement, effectiveShowContextMenu, enableOutline);
 
       // Create dropdown if needed
       let dropdown = null;

@@ -43,6 +43,20 @@ settings:
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.showStickyToolbar
     category: frontendEdit.appearance
 
+  frontendEdit.enableOutline:
+    default: true
+    type: bool
+    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.enableOutline
+    description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.enableOutline
+    category: frontendEdit.appearance
+
+  frontendEdit.enableScrollToElement:
+    default: true
+    type: bool
+    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.enableScrollToElement
+    description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.enableScrollToElement
+    category: frontendEdit.appearance
+
   frontendEdit.toolbarPosition:
     default: 'bottom-right'
     type: string
@@ -68,6 +82,13 @@ settings:
     type: string
     label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.filter.ignorePids
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.filter.ignorePids
+    category: frontendEdit.filter
+
+  frontendEdit.filter.ignoreDoktypes:
+    default: ''
+    type: string
+    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.filter.ignoreDoktypes
+    description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.filter.ignoreDoktypes
     category: frontendEdit.filter
 
   frontendEdit.filter.ignoreCTypes:

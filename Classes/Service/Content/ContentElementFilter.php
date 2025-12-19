@@ -64,7 +64,19 @@ final readonly class ContentElementFilter
     {
         $ignoredPids = $this->settingsService->getIgnoredPids($request);
 
-        return $this->contentElementRepository->isSubpageOfAny($pid, $ignoredPids);
+        if ($this->contentElementRepository->isSubpageOfAny($pid, $ignoredPids)) {
+            return true;
+        }
+
+        $ignoredDoktypes = $this->settingsService->getIgnoredDoktypes($request);
+        if ([] !== $ignoredDoktypes) {
+            $doktype = $this->contentElementRepository->getPageDoktype($pid);
+            if (null !== $doktype && in_array($doktype, $ignoredDoktypes, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

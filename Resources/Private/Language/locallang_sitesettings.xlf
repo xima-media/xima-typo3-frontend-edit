@@ -98,6 +98,20 @@
                 <source>Right Bottom</source>
             </trans-unit>
 
+            <trans-unit id="settings.frontendEdit.enableOutline">
+                <source>Enable Outline</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.enableOutline">
+                <source>Show an outline around content elements when hovering over them.</source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.enableScrollToElement">
+                <source>Enable Scroll to Element</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.enableScrollToElement">
+                <source>Automatically scroll to the edited content element after saving and returning to the frontend.</source>
+            </trans-unit>
+
             <trans-unit id="settings.frontendEdit.filter.ignorePids">
                 <source>Ignore PIDs</source>
             </trans-unit>
@@ -105,6 +119,13 @@
                 <source>Comma-separated list of page IDs (and their subpages) where frontend editing should be
                     disabled.
                 </source>
+            </trans-unit>
+
+            <trans-unit id="settings.frontendEdit.filter.ignoreDoktypes">
+                <source>Ignore Page Types</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.filter.ignoreDoktypes">
+                <source>Comma-separated list of page types (doktypes) where frontend editing should be disabled (e.g., 4 for shortcuts, 199 for spacer).</source>
             </trans-unit>
 
             <trans-unit id="settings.frontendEdit.filter.ignoreCTypes">

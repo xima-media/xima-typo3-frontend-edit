@@ -88,6 +88,30 @@ Appearance Settings
         frontendEdit:
           toolbarPosition: 'bottom-right'
 
+..  confval:: frontendEdit.enableOutline
+
+    :type: bool
+    :Default: true
+
+    Show an outline around content elements when hovering over them.
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          enableOutline: true
+
+..  confval:: frontendEdit.enableScrollToElement
+
+    :type: bool
+    :Default: true
+
+    Automatically scroll to the edited content element after saving and returning to the frontend.
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          enableScrollToElement: true
+
 Filter Settings
 ---------------
 
@@ -103,6 +127,20 @@ Filter Settings
         frontendEdit:
           filter:
             ignorePids: '1,2,3'
+
+..  confval:: frontendEdit.filter.ignoreDoktypes
+
+    :type: string
+    :Default: ''
+
+    Comma-separated list of page types (doktype) where frontend editing should be disabled.
+    Common doktypes: 1 (Standard), 3 (External URL), 4 (Shortcut), 6 (Backend User Section), 7 (Mount Point), 199 (Menu Separator), 254 (Folder), 255 (Recycler).
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          filter:
+            ignoreDoktypes: '4,199,254'
 
 ..  confval:: frontendEdit.filter.ignoreCTypes
 
@@ -157,8 +195,11 @@ Full example with all available options:
       showContextMenu: true
       showStickyToolbar: true
       toolbarPosition: 'bottom-right'
+      enableOutline: true
+      enableScrollToElement: true
       filter:
         ignorePids: '1,2,3'
+        ignoreDoktypes: '4,199,254'
         ignoreCTypes: 'html,div'
         ignoreListTypes: ''
         ignoreUids: ''

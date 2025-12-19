@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
+use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
@@ -60,6 +61,8 @@ final readonly class PageButtonBuilder extends AbstractMenuButtonBuilder
 
     /**
      * Add page edit section (for page dropdown in sticky toolbar).
+     *
+     * @throws RouteNotFoundException
      */
     public function addEditSection(
         Button $menuButton,
@@ -69,8 +72,7 @@ final readonly class PageButtonBuilder extends AbstractMenuButtonBuilder
     ): void {
         $this->addButton($menuButton, 'div_edit', ButtonType::Divider);
 
-        // Edit page properties
-        $editUrl = $this->urlBuilderService->buildEditUrl($pageId, 'pages', $languageUid, $returnUrl);
+        $editUrl = $this->urlBuilderService->buildEditUrl($pageId, 'pages', $languageUid, $returnUrl).'&tx_ximatypo3frontendedit';
         $this->addButton($menuButton, 'edit_page_properties', ButtonType::Link, url: $editUrl, icon: 'actions-page-open');
 
         // Edit page (Backend Page Layout)
@@ -80,6 +82,8 @@ final readonly class PageButtonBuilder extends AbstractMenuButtonBuilder
 
     /**
      * Add page action section (for page dropdown in sticky toolbar).
+     *
+     * @throws RouteNotFoundException
      */
     public function addActionSection(
         Button $menuButton,
