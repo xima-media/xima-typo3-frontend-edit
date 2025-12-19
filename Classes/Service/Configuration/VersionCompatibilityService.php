@@ -15,7 +15,7 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Configuration;
 
 use TYPO3\CMS\Core\Imaging\IconSize;
 use TYPO3\CMS\Core\Information\Typo3Version;
-use TYPO3\CMS\Core\Utility\{GeneralUtility, VersionNumberUtility};
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * VersionCompatibilityService.
@@ -34,11 +34,6 @@ final class VersionCompatibilityService
         }
 
         return $this->majorVersion;
-    }
-
-    public function getCurrentVersion(): string
-    {
-        return VersionNumberUtility::getCurrentTypo3Version();
     }
 
     public function getContentElementConfigValueKey(): string

@@ -220,7 +220,7 @@ final readonly class ContentElementRepository
         $cacheKey = $cType.':'.$listType;
 
         if ($this->configCache->offsetExists($cacheKey)) {
-            // @phpstan-ignore return.type (ArrayObject generic type inference limitation)
+            // @phpstan-ignore-next-line ArrayObject value is guaranteed non-null after offsetExists check
             return $this->configCache[$cacheKey];
         }
 
@@ -234,11 +234,10 @@ final readonly class ContentElementRepository
         foreach ($this->getTcaItemsLazily($cType) as $item) {
             if (('list' === $cType && $item[$valueKey] === $listType)
                 || $item[$valueKey] === $cType) {
-                $config = $this->mapContentElementConfig($item);
                 $this->manageCacheSize($this->configCache);
-                $this->configCache->offsetSet($cacheKey, $config);
+                $this->configCache->offsetSet($cacheKey, $item);
 
-                return $config;
+                return $item;
             }
         }
 
@@ -291,12 +290,6 @@ final readonly class ContentElementRepository
         return false;
     }
 
-    public function clearCache(): void
-    {
-        $this->rootlineCache->exchangeArray([]);
-        $this->configCache->exchangeArray([]);
-    }
-
     /**
      * Generator for lazy loading TCA items to reduce memory consumption.
      *
@@ -328,15 +321,5 @@ final readonly class ContentElementRepository
                 $cache->offsetUnset($key);
             }
         }
-    }
-
-    /**
-     * @param array<string, mixed> $config
-     *
-     * @return array<string, mixed>
-     */
-    private function mapContentElementConfig(array $config): array
-    {
-        return $config;
     }
 }

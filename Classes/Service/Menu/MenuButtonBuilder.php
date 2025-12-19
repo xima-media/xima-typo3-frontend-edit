@@ -18,7 +18,6 @@ use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
 /**
  * MenuButtonBuilder.
@@ -66,36 +65,6 @@ final readonly class MenuButtonBuilder
             'LLL:EXT:'.Configuration::EXT_KEY.'/Resources/Private/Language/locallang.xlf:edit_menu',
             ButtonType::Menu,
             icon: $this->iconService->getIcon('actions-open'),
-        );
-    }
-
-    /**
-     * @param array<string, mixed> $contentElement
-     * @param array<string, mixed> $contentElementConfig
-     */
-    public function addInfoSection(
-        Button $menuButton,
-        array $contentElement,
-        array $contentElementConfig,
-    ): void {
-        $this->addButton($menuButton, 'div_info', ButtonType::Divider);
-
-        $additionalUid = $GLOBALS['BE_USER']->isAdmin()
-            ? ' <code>['.$contentElement['uid'].']</code>'
-            : '';
-
-        $label = $GLOBALS['LANG']->sL($contentElementConfig['label']).
-            '<p><small>'.
-            (null !== $contentElement['header'] ? StringUtility::shortenString($contentElement['header']) : '').
-            $additionalUid.
-            '</small></p>';
-
-        $this->addButton(
-            $menuButton,
-            'header',
-            ButtonType::Info,
-            $label,
-            icon: $contentElementConfig['icon'],
         );
     }
 
