@@ -6,7 +6,7 @@
 Site Settings
 =============
 
-Since version 2.0, all configuration options are managed via TYPO3 Site Settings.
+All configuration options are managed via TYPO3 Site Settings.
 This provides site-specific configuration and better caching behavior.
 
 Configuration is done in your site's :file:`config/sites/<site-identifier>/settings.yaml` file
@@ -50,7 +50,7 @@ Appearance Settings
     :type: bool
     :Default: true
 
-    Show the context menu dropdown with additional actions (edit page, hide, move, history). Disable to show only the edit button.
+    Show the Edit Menu with additional actions (edit page, hide, move, history). Disable to show only the edit button.
 
     ..  code-block:: yaml
 
@@ -62,7 +62,7 @@ Appearance Settings
     :type: bool
     :Default: true
 
-    Show the sticky toolbar with page editing options and toggle functionality.
+    Show the Toolbar with page editing options and toggle functionality.
 
     ..  code-block:: yaml
 
@@ -74,7 +74,14 @@ Appearance Settings
     :type: string
     :Default: 'bottom-right'
 
-    Choose the position for the sticky toolbar. Options: bottom-right, bottom-left, top-right, top-left, bottom, top, left, right.
+    Choose the position for the Toolbar.
+
+    Available options:
+
+    - ``top-left``, ``top-center``, ``top-right``
+    - ``bottom-left``, ``bottom-center``, ``bottom-right``
+    - ``left-top``, ``left-center``, ``left-bottom``
+    - ``right-top``, ``right-center``, ``right-bottom``
 
     ..  code-block:: yaml
 

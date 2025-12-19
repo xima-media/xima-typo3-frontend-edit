@@ -13,14 +13,27 @@
 
 </div>
 
-This extension provides an edit button for editors within frontend content elements.
+This extension provides an edit menu/button for editors within the frontend regarding content elements and pages.
 
-![Frontend Edit](./Documentation/Images/frontendEdit.png)
+![Frontend Edit](./Documentation/Images/screenshot.jpg)
 
 > [!NOTE]
 > This is **not** a further development of the "original" extension [frontend_editing](https://extensions.typo3.org/extension/frontend_editing). It is similar in some ways to the realisation of the [feedit](https://extensions.typo3.org/extension/feedit) extension. This extension is an independent implementation with a different approach.
+>
+> Unlike [content_preview](https://github.com/T3-UX/content_preview), which provides a split-view with live frontend preview within the backend Page module, this extension works directly in the frontend and does not modify the backend interface.
 
 The extension has been developed to provide a simple and lightweight solution to easily start the editing of content elements from the frontend and thus reduce the gap between frontend and backend. Therefore, a simple javascript is injected into the frontend, which generates action links to the TYPO3 backend with the corresponding edit views.
+
+## ✨ Features
+
+- **Edit Menu** - Quick access to edit, hide, delete, and move content elements
+- **Toolbar** - Page-level actions and toggle for frontend editing
+- **Site Settings** - Per-site configuration via YAML
+- **PSR-14 Events** - Customize menus with custom actions
+- **Data ViewHelper** - Add edit links for related records (e.g., news items)
+- **Dark/Light Mode** - Automatic or manual color scheme selection
+- **Configurable Position** - 12 toolbar positions available
+- **Save & Close** - Quick return to frontend after editing
 
 ## 🔥 Installation
 
@@ -50,6 +63,8 @@ Download the zip file from [TYPO3 extension repository (TER)](https://extensions
 Please have a look at the
 [official extension documentation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Index.html).
 
+
+![Frontend Edit Screencast](./Documentation/Images/intro.gif)
 
 > [!NOTE]
 > Facing trouble or issues? You may find help in the following sections:
