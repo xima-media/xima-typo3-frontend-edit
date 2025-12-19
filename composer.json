@@ -44,7 +44,7 @@
 		"saschaegerer/phpstan-typo3": "^1.10 || ^2.0",
 		"spaze/phpstan-disallowed-calls": "^4.0",
 		"ssch/typo3-rector": "^2.10 || ^3.0",
-		"symfony/translation": "^5.0 || ^6.3 || ^7.0",
+		"symfony/translation": "^5.0 || ^6.3 || ^7.0 || ^8.0",
 		"tomasvotruba/type-coverage": "^1.0 || ^2.0",
 		"typo3/cms-base-distribution": "^11.5 || ^12.4 || ^13.4",
 		"typo3/cms-lowlevel": "^11.5 || ^12.4 || ^13.4",
