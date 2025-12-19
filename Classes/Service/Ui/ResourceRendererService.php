@@ -67,14 +67,18 @@ final readonly class ResourceRendererService
                 $floatingUiPath,
             );
 
-            // Add settings configuration (colorScheme and showContextMenu)
+            // Add settings configuration (colorScheme, showContextMenu, enableOutline, enableScrollToElement)
             $colorScheme = null !== $request ? $this->settingsService->getColorScheme($request) : 'auto';
             $showContextMenu = (null !== $request && $this->settingsService->isShowContextMenu($request)) ? 'true' : 'false';
+            $enableOutline = (null !== $request && $this->settingsService->isEnableOutline($request)) ? 'true' : 'false';
+            $enableScrollToElement = (null !== $request && $this->settingsService->isEnableScrollToElement($request)) ? 'true' : 'false';
             $resources['settings_config'] = sprintf(
-                '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s;</script>',
+                '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s;</script>',
                 $nonceAttribute,
                 $colorScheme,
                 $showContextMenu,
+                $enableOutline,
+                $enableScrollToElement,
             );
 
             // Add debug mode if enabled

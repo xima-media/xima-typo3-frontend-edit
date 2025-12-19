@@ -65,7 +65,7 @@ This extension provides an edit menu for editors within the frontend regarding c
 
     ..  card::  Configuration
 
-        Learn how to configure the extension in various ways. This includes extension configuration and the usage of the configuration utility.
+        Learn how to configure the extension in various ways.
 
         ..  card-footer::   :ref:`View configuration options <configuration>`
             :button-style: btn btn-secondary stretched-link

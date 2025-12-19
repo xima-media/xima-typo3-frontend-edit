@@ -60,6 +60,16 @@ final readonly class SettingsService
     }
 
     /**
+     * @return array<int, int>
+     */
+    public function getIgnoredDoktypes(ServerRequestInterface $request): array
+    {
+        $values = $this->parseCommaDelimitedSetting($request, 'frontendEdit.filter.ignoreDoktypes');
+
+        return array_map(intval(...), $values);
+    }
+
+    /**
      * @return array<int, string>
      */
     public function getIgnoredCTypes(ServerRequestInterface $request): array
@@ -134,6 +144,26 @@ final readonly class SettingsService
         $position = (string) $settings->get('frontendEdit.toolbarPosition', 'bottom-right');
 
         return in_array($position, $validPositions, true) ? $position : 'bottom-right';
+    }
+
+    public function isEnableOutline(ServerRequestInterface $request): bool
+    {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
+            return true;
+        }
+
+        return (bool) $settings->get('frontendEdit.enableOutline', true);
+    }
+
+    public function isEnableScrollToElement(ServerRequestInterface $request): bool
+    {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
+            return true;
+        }
+
+        return (bool) $settings->get('frontendEdit.enableScrollToElement', true);
     }
 
     public function isFrontendDebugModeEnabled(): bool

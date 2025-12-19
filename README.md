@@ -69,6 +69,7 @@ Please have a look at the
 > [!NOTE]
 > Facing trouble or issues? You may find help in the following sections:
 > - [How it works](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/HowItWorks/Index.html)
+> - [Migration](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Migration/Index.html)
 > - [FAQ](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/FAQ/Index.html)
 
 ## 🧑‍💻 Contributing

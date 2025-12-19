@@ -88,13 +88,15 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
         $filteredElements = $this->contentElementFilter->filterContentElements($contentElements, $backendUser, $request);
 
+        $enableScrollToElement = $this->settingsService->isEnableScrollToElement($request);
+
         $result = [];
         foreach ($filteredElements as $contentElement) {
             $contentElementConfig = $this->contentElementRepository->getContentElementConfig(
                 $contentElement['CType'],
                 $contentElement['list_type'] ?? '',
             );
-            $returnUrlAnchor = $returnUrl.'#c'.$contentElement['uid'];
+            $returnUrlAnchor = $enableScrollToElement ? $returnUrl.'#c'.$contentElement['uid'] : $returnUrl;
 
             if (false === $contentElementConfig) {
                 continue;
