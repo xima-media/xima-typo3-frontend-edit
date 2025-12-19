@@ -38,6 +38,11 @@
 			"Xima\\XimaTypo3FrontendEdit\\": "Classes/"
 		}
 	},
+	"autoload-dev": {
+		"psr-4": {
+			"Xima\\XimaTypo3FrontendEdit\\Tests\\": "Tests/"
+		}
+	},
 	"config": {
 		"allow-plugins": {
 			"eliashaeussler/version-bumper": true,

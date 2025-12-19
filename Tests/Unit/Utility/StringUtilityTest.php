@@ -13,116 +13,90 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Utility;
 
+use PHPUnit\Framework\Attributes\{DataProvider, Test};
 use PHPUnit\Framework\TestCase;
-use ReflectionClass;
-use ReflectionNamedType;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
 /**
  * StringUtilityTest.
  *
+ * @covers \Xima\XimaTypo3FrontendEdit\Utility\StringUtility
+ *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-class StringUtilityTest extends TestCase
+final class StringUtilityTest extends TestCase
 {
-    public function testShortenStringReturnsOriginalStringWhenShorterThanMaxLength(): void
+    /**
+     * @return array<string, array{input: string, maxLength: int, expected: string}>
+     */
+    public static function shortenStringDataProvider(): array
     {
-        $input = 'Short string';
-        $result = StringUtility::shortenString($input, 30);
-
-        self::assertEquals($input, $result);
+        return [
+            'string shorter than max length' => [
+                'input' => 'Hello',
+                'maxLength' => 30,
+                'expected' => 'Hello',
+            ],
+            'string equal to max length' => [
+                'input' => 'Hello World',
+                'maxLength' => 11,
+                'expected' => 'Hello World',
+            ],
+            'string longer than max length' => [
+                'input' => 'This is a very long string that needs to be shortened',
+                'maxLength' => 20,
+                'expected' => 'This is a very long …',
+            ],
+            'empty string' => [
+                'input' => '',
+                'maxLength' => 30,
+                'expected' => '',
+            ],
+            'single character below max' => [
+                'input' => 'A',
+                'maxLength' => 30,
+                'expected' => 'A',
+            ],
+            'string with unicode characters' => [
+                'input' => 'Hällo Wörld mit Ümlauten',
+                'maxLength' => 10,
+                'expected' => 'Hällo Wörl…',
+            ],
+            'string with emoji' => [
+                'input' => 'Hello 🌍 World',
+                'maxLength' => 8,
+                'expected' => 'Hello 🌍 …',
+            ],
+            'max length of 1 with longer string' => [
+                'input' => 'Hello',
+                'maxLength' => 1,
+                'expected' => 'H…',
+            ],
+            'default max length (30) with long string' => [
+                'input' => 'This string has exactly thirty-five characters!',
+                'maxLength' => 30,
+                'expected' => 'This string has exactly thirty…',
+            ],
+        ];
     }
 
-    public function testShortenStringReturnsOriginalStringWhenEqualToMaxLength(): void
+    #[Test]
+    #[DataProvider('shortenStringDataProvider')]
+    public function shortenStringReturnsExpectedResult(string $input, int $maxLength, string $expected): void
     {
-        $input = str_repeat('a', 30);
-        $result = StringUtility::shortenString($input, 30);
+        $result = StringUtility::shortenString($input, $maxLength);
 
-        self::assertEquals($input, $result);
+        self::assertSame($expected, $result);
     }
 
-    public function testShortenStringTruncatesLongStringWithEllipsis(): void
+    #[Test]
+    public function shortenStringUsesDefaultMaxLength(): void
     {
-        $input = 'This is a very long string that should be truncated';
-        $result = StringUtility::shortenString($input, 20);
+        $shortString = 'Short';
+        $longString = 'This is a string that is longer than thirty characters';
 
-        self::assertEquals('This is a very long …', $result);
-        self::assertEquals(21, mb_strlen($result)); // 20 chars + ellipsis
-    }
-
-    public function testShortenStringUsesDefaultMaxLengthOf30(): void
-    {
-        $input = str_repeat('a', 50);
-        $result = StringUtility::shortenString($input);
-
-        self::assertEquals(str_repeat('a', 30).'…', $result);
-        self::assertEquals(31, mb_strlen($result)); // 30 chars + ellipsis
-    }
-
-    public function testShortenStringHandlesMultibyteCharacters(): void
-    {
-        $input = 'Ä string with ümlaut characters and émojis 😀';
-        $result = StringUtility::shortenString($input, 20);
-
-        self::assertEquals('Ä string with ümlaut…', $result);
-        self::assertEquals(21, mb_strlen($result));
-    }
-
-    public function testShortenStringHandlesEmptyString(): void
-    {
-        $result = StringUtility::shortenString('', 10);
-
-        self::assertEquals('', $result);
-    }
-
-    public function testShortenStringHandlesMaxLengthOfZero(): void
-    {
-        $input = 'Any string';
-        $result = StringUtility::shortenString($input, 0);
-
-        self::assertEquals('…', $result);
-    }
-
-    public function testShortenStringHandlesMaxLengthOfOne(): void
-    {
-        $input = 'Any string';
-        $result = StringUtility::shortenString($input, 1);
-
-        self::assertEquals('A…', $result);
-    }
-
-    public function testStringUtilityMethodIsStatic(): void
-    {
-        $reflection = new ReflectionClass(StringUtility::class);
-        $method = $reflection->getMethod('shortenString');
-
-        self::assertTrue($method->isStatic());
-        self::assertTrue($method->isPublic());
-    }
-
-    public function testStringUtilityMethodParameters(): void
-    {
-        $reflection = new ReflectionClass(StringUtility::class);
-        $method = $reflection->getMethod('shortenString');
-        $parameters = $method->getParameters();
-
-        self::assertCount(2, $parameters);
-
-        // First parameter: string
-        $firstParamType = $parameters[0]->getType();
-        self::assertEquals('string', $parameters[0]->getName());
-        self::assertTrue($parameters[0]->hasType());
-        self::assertInstanceOf(ReflectionNamedType::class, $firstParamType);
-        self::assertEquals('string', $firstParamType->getName());
-
-        // Second parameter: maxLength with default value 30
-        $secondParamType = $parameters[1]->getType();
-        self::assertEquals('maxLength', $parameters[1]->getName());
-        self::assertTrue($parameters[1]->hasType());
-        self::assertInstanceOf(ReflectionNamedType::class, $secondParamType);
-        self::assertEquals('int', $secondParamType->getName());
-        self::assertTrue($parameters[1]->isDefaultValueAvailable());
-        self::assertEquals(30, $parameters[1]->getDefaultValue());
+        self::assertSame($shortString, StringUtility::shortenString($shortString));
+        self::assertSame('This is a string that is longe…', StringUtility::shortenString($longString));
     }
 }
