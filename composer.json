@@ -19,11 +19,11 @@
 		"psr/http-message": "^1.0 || ^2.0",
 		"psr/http-server-handler": "^1.0",
 		"psr/http-server-middleware": "^1.0",
-		"typo3/cms-backend": "^11.0 || ^12.0 || ^13.0",
-		"typo3/cms-beuser": "^11.0 || ^12.0 || ^13.0",
-		"typo3/cms-core": "^11.0 || ^12.0 || ^13.0",
-		"typo3/cms-fluid": "^11.0 || ^12.0 || ^13.0",
-		"typo3/cms-frontend": "^11.0 || ^12.0 || ^13.0",
+		"typo3/cms-backend": "^11.0 || ^12.0 || ^13.0 || ^14.0",
+		"typo3/cms-beuser": "^11.0 || ^12.0 || ^13.0 || ^14.0",
+		"typo3/cms-core": "^11.0 || ^12.0 || ^13.0 || ^14.0",
+		"typo3/cms-fluid": "^11.0 || ^12.0 || ^13.0 || ^14.0",
+		"typo3/cms-frontend": "^11.0 || ^12.0 || ^13.0 || ^14.0",
 		"typo3fluid/fluid": "^2.7 || ^4.2"
 	},
 	"require-dev": {
@@ -46,8 +46,8 @@
 		"ssch/typo3-rector": "^2.10 || ^3.0",
 		"symfony/translation": "^5.0 || ^6.3 || ^7.0",
 		"tomasvotruba/type-coverage": "^1.0 || ^2.0",
-		"typo3/cms-base-distribution": "^11.5 || ^12.4 || ^13.4",
-		"typo3/cms-lowlevel": "^11.5 || ^12.4 || ^13.4",
+		"typo3/cms-base-distribution": "^11.5 || ^12.4 || ^13.4 || ^14.0",
+		"typo3/cms-lowlevel": "^11.5 || ^12.4 || ^13.4 || ^14.0",
 		"typo3/coding-standards": "^0.7 || ^0.8"
 	},
 	"autoload": {
