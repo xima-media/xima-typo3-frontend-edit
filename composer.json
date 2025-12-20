@@ -29,7 +29,7 @@
 	},
 	"require-dev": {
 		"eliashaeussler/version-bumper": "^3.1.1",
-		"helhum/typo3-console": "^8.1",
+		"helhum/typo3-console": "^8.3.1",
 		"phpunit/phpunit": "^11.0 || ^12.0",
 		"typo3/cms-base-distribution": "^13.4 || ^14.0",
 		"typo3/cms-lowlevel": "^13.4 || ^14.0"
