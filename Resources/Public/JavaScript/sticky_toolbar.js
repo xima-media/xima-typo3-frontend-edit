@@ -256,7 +256,7 @@
             element.appendChild(iconWrapper);
           }
           const span = document.createElement('span');
-          span.textContent = item.label || '';
+          span.innerHTML = item.label || '';
           element.appendChild(span);
         } else if (item.type === 'link') {
           element = document.createElement('a');

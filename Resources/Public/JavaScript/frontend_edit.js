@@ -464,9 +464,13 @@
           iconWrapper.innerHTML = action.icon;
           el.appendChild(iconWrapper);
         }
-        // Use textContent for label to prevent XSS
+
         const labelSpan = document.createElement('span');
-        labelSpan.textContent = action.label || '';
+        if (action.type === 'info') {
+          labelSpan.innerHTML = action.label || '';
+        } else {
+          labelSpan.textContent = action.label || '';
+        }
         el.appendChild(labelSpan);
 
         dropdown.appendChild(el);
