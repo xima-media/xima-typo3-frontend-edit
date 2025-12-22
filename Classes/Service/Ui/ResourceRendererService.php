@@ -41,13 +41,11 @@ use function sprintf;
 final readonly class ResourceRendererService
 {
     public function __construct(
-        private SettingsService    $settingsService,
+        private SettingsService $settingsService,
         private BackendUserService $backendUserService,
-        private UrlBuilderService  $urlBuilderService,
-        private PageMenuGenerator  $pageMenuGenerator,
-    )
-    {
-    }
+        private UrlBuilderService $urlBuilderService,
+        private PageMenuGenerator $pageMenuGenerator,
+    ) {}
 
     /**
      * @param array<string, mixed> $values
@@ -58,7 +56,7 @@ final readonly class ResourceRendererService
     {
         try {
             $nonceValue = $this->resolveNonceValue();
-            $nonceAttribute = '' !== $nonceValue ? ' nonce="' . $nonceValue . '"' : '';
+            $nonceAttribute = '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '';
             $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
 
             $this->addFloatingUiResource($resources, $nonceAttribute);
@@ -71,7 +69,7 @@ final readonly class ResourceRendererService
 
             return $this->renderView($template, $values, $request);
         } catch (Throwable $exception) {
-            throw new Exception('Failed to render template "' . $template . '": ' . $exception->getMessage(), 1640000001, $exception);
+            throw new Exception('Failed to render template "'.$template.'": '.$exception->getMessage(), 1640000001, $exception);
         }
     }
 
@@ -81,7 +79,7 @@ final readonly class ResourceRendererService
     private function addFloatingUiResource(array &$resources, string $nonceAttribute): void
     {
         $floatingUiPath = PathUtility::getAbsoluteWebPath(
-            GeneralUtility::getFileAbsFileName('EXT:' . Configuration::EXT_KEY . '/Resources/Public/JavaScript/vendor/floating-ui.dom.bundle.js'),
+            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/vendor/floating-ui.dom.bundle.js'),
         );
         $resources['floating_ui'] = sprintf(
             '<script%s type="module">import * as FloatingUIDOM from "%s"; window.FloatingUIDOM = FloatingUIDOM; window.dispatchEvent(new Event("floatingui:ready"));</script>',
@@ -193,7 +191,7 @@ final readonly class ResourceRendererService
 
         // Add sticky toolbar script
         $stickyToolbarPath = PathUtility::getAbsoluteWebPath(
-            GeneralUtility::getFileAbsFileName('EXT:' . Configuration::EXT_KEY . '/Resources/Public/JavaScript/sticky_toolbar.js'),
+            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/sticky_toolbar.js'),
         );
         $resources['sticky_toolbar'] = sprintf(
             '<script%s src="%s"></script>',
@@ -231,9 +229,9 @@ final readonly class ResourceRendererService
     private function renderView(string $template, array $values, ?ServerRequestInterface $request = null): string
     {
         $viewFactoryData = new ViewFactoryData(
-            templateRootPaths: ['EXT:' . Configuration::EXT_KEY . '/Resources/Private/Templates/'],
-            partialRootPaths: ['EXT:' . Configuration::EXT_KEY . '/Resources/Private/Partials/'],
-            layoutRootPaths: ['EXT:' . Configuration::EXT_KEY . '/Resources/Private/Layouts/'],
+            templateRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Templates/'],
+            partialRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Partials/'],
+            layoutRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Layouts/'],
             request: $request,
         );
 
@@ -272,7 +270,7 @@ final readonly class ResourceRendererService
             sprintf(
                 'LLL:EXT:%s/Resources/Private/Language/locallang.xlf:%s',
                 Configuration::EXT_KEY,
-                $key)
+                $key),
         ) ?: $fallback;
     }
 
