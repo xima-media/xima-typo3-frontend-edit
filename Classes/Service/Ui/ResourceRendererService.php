@@ -19,11 +19,11 @@ use Throwable;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Core\Core\RequestId;
 use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, PathUtility};
 use TYPO3\CMS\Core\View\{ViewFactoryData, ViewFactoryInterface};
-use TYPO3\CMS\Extbase\Utility\LocalizationUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
@@ -261,6 +261,21 @@ final readonly class ResourceRendererService
 
     private function translate(string $key, string $fallback): string
     {
-        return LocalizationUtility::translate($key, 'XimaTypo3FrontendEdit') ?? $fallback;
+        $languageService = $this->getLanguageService();
+        if (null === $languageService) {
+            return $fallback;
+        }
+
+        return $languageService->sL(
+            sprintf(
+                'LLL:EXT:%s/Resources/Private/Language/locallang.xlf:%s',
+                Configuration::EXT_KEY,
+                $key),
+        ) ?: $fallback;
+    }
+
+    private function getLanguageService(): ?LanguageService
+    {
+        return $GLOBALS['LANG'] ?? null;
     }
 }

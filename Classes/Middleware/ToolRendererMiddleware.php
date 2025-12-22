@@ -13,8 +13,10 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Middleware;
 
+use Psr\Container\{ContainerExceptionInterface, NotFoundExceptionInterface};
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
+use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\Stream;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\ResourceRendererService;
@@ -34,6 +36,11 @@ class ToolRendererMiddleware implements MiddlewareInterface
         private readonly SettingsService $settingsService,
     ) {}
 
+    /**
+     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
