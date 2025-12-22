@@ -355,7 +355,7 @@
     align-self: start;
 }
 
-.frontend-edit__info span {
+.frontend-edit__info > span:last-child {
     flex: 1;
 }
 
