@@ -6,4 +6,4 @@ on:
 
 jobs:
   cgl:
-    uses: jackd248/reusable-github-actions/.github/workflows/cgl-test.yml@main
+    uses: konradmichalik/reusable-github-actions/.github/workflows/cgl-test.yml@main
