@@ -166,6 +166,16 @@ final readonly class SettingsService
         return (bool) $settings->get('frontendEdit.enableScrollToElement', true);
     }
 
+    public function isEnableFlashMessages(ServerRequestInterface $request): bool
+    {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
+            return true;
+        }
+
+        return (bool) $settings->get('frontendEdit.enableFlashMessages', true);
+    }
+
     public function isFrontendDebugModeEnabled(): bool
     {
         try {

@@ -48,7 +48,7 @@ final readonly class ResourceRendererService
     ) {}
 
     /**
-     * @param array<string, mixed> $values
+     * @param array<string, mixed>                                           $values
      * @param array<array{title: string, message: string, severity: string}> $flashMessages
      *
      * @throws Exception
@@ -127,7 +127,7 @@ final readonly class ResourceRendererService
     /**
      * Add flash messages configuration for frontend notifications.
      *
-     * @param array<string, string> $resources
+     * @param array<string, string>                                          $resources
      * @param array<array{title: string, message: string, severity: string}> $flashMessages
      */
     private function addFlashMessagesConfig(array &$resources, string $nonceAttribute, array $flashMessages): void

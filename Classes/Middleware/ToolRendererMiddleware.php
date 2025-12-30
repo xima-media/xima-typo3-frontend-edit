@@ -60,8 +60,10 @@ class ToolRendererMiddleware implements MiddlewareInterface
             return $response;
         }
 
-        // Collect flash messages from backend session before rendering
-        $flashMessages = $this->collectFlashMessages();
+        // Collect flash messages from backend session before rendering (if enabled)
+        $flashMessages = $this->settingsService->isEnableFlashMessages($request)
+            ? $this->collectFlashMessages()
+            : [];
 
         $body = $response->getBody();
         $body->rewind();

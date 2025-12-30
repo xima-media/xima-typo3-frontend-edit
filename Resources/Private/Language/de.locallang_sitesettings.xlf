@@ -126,6 +126,15 @@
 				<target>Rechts Unten</target>
 			</trans-unit>
 
+			<trans-unit id="settings.frontendEdit.enableFlashMessages">
+				<source>Enable Flash Messages</source>
+				<target>Flash Messages aktivieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.enableFlashMessages">
+				<source>Show TYPO3 flash messages (e.g., save confirmations) as notifications in the frontend after returning from the backend.</source>
+				<target>Zeigt TYPO3 Flash Messages (z.B. Speicherbestätigungen) als Benachrichtigungen im Frontend nach der Rückkehr aus dem Backend.</target>
+			</trans-unit>
+
 			<trans-unit id="settings.frontendEdit.filter.ignorePids">
 				<source>Ignore PIDs</source>
 				<target>PIDs ignorieren</target>
