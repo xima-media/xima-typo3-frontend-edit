@@ -49,10 +49,11 @@ final readonly class ResourceRendererService
 
     /**
      * @param array<string, mixed> $values
+     * @param array<array{title: string, message: string, severity: string}> $flashMessages
      *
      * @throws Exception
      */
-    public function render(string $template = 'FrontendEdit.html', array $values = [], ?ServerRequestInterface $request = null): string
+    public function render(string $template = 'FrontendEdit.html', array $values = [], ?ServerRequestInterface $request = null, array $flashMessages = []): string
     {
         try {
             $nonceValue = $this->resolveNonceValue();
@@ -64,6 +65,7 @@ final readonly class ResourceRendererService
             $this->addDebugConfig($resources, $nonceAttribute);
             $this->addToolbarConfig($resources, $request);
             $this->addStickyToolbarResourcesIfEnabled($resources, $request, $nonceAttribute);
+            $this->addFlashMessagesConfig($resources, $nonceAttribute, $flashMessages);
 
             $values = [...$values, 'resources' => $resources];
 
@@ -119,6 +121,25 @@ final readonly class ResourceRendererService
         $resources['debug_config'] = sprintf(
             '<script%s>window.FRONTEND_EDIT_DEBUG = true;</script>',
             $nonceAttribute,
+        );
+    }
+
+    /**
+     * Add flash messages configuration for frontend notifications.
+     *
+     * @param array<string, string> $resources
+     * @param array<array{title: string, message: string, severity: string}> $flashMessages
+     */
+    private function addFlashMessagesConfig(array &$resources, string $nonceAttribute, array $flashMessages): void
+    {
+        if ([] === $flashMessages) {
+            return;
+        }
+
+        $resources['flash_messages_config'] = sprintf(
+            '<script%s type="application/json" id="frontend-edit-flash-messages">%s</script>',
+            $nonceAttribute,
+            json_encode($flashMessages, \JSON_THROW_ON_ERROR | \JSON_HEX_TAG | \JSON_HEX_AMP),
         );
     }
 
