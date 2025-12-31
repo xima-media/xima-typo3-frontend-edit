@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Middleware;
 
+use JsonException;
 use Psr\Container\{ContainerExceptionInterface, NotFoundExceptionInterface};
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
@@ -91,7 +92,8 @@ class ToolRendererMiddleware implements MiddlewareInterface
      * - NOTIFICATION_QUEUE: For success messages (e.g., "Record saved")
      *
      * @return array<array{title: string, message: string, severity: string}>
-     * @throws \JsonException
+     *
+     * @throws JsonException
      */
     private function collectFlashMessages(): array
     {
@@ -119,7 +121,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
             $GLOBALS['BE_USER']->setAndSaveSessionData($queueIdentifier, null);
 
             foreach ($sessionData as $messageData) {
-                $data = json_decode((string)$messageData, true, 512, JSON_THROW_ON_ERROR);
+                $data = json_decode((string) $messageData, true, 512, \JSON_THROW_ON_ERROR);
                 if (is_array($data)) {
                     $severityValue = $data['severity'] ?? ContextualFeedbackSeverity::OK->value;
                     $severity = ContextualFeedbackSeverity::tryFrom($severityValue) ?? ContextualFeedbackSeverity::OK;
