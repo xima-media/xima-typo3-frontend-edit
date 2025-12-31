@@ -17,6 +17,7 @@ use JsonException;
 use Psr\Container\{ContainerExceptionInterface, NotFoundExceptionInterface};
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
+use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\Stream;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
@@ -37,6 +38,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
     public function __construct(
         private readonly ResourceRendererService $resourceRendererService,
         private readonly SettingsService $settingsService,
+        private readonly LoggerInterface $logger,
     ) {}
 
     /**
@@ -92,8 +94,6 @@ class ToolRendererMiddleware implements MiddlewareInterface
      * - NOTIFICATION_QUEUE: For success messages (e.g., "Record saved")
      *
      * @return array<array{title: string, message: string, severity: string}>
-     *
-     * @throws JsonException
      */
     private function collectFlashMessages(): array
     {
@@ -117,22 +117,30 @@ class ToolRendererMiddleware implements MiddlewareInterface
                 continue;
             }
 
-            // Clear the session data after reading
-            $GLOBALS['BE_USER']->setAndSaveSessionData($queueIdentifier, null);
-
+            // Process all messages first, only clear session after successful processing
             foreach ($sessionData as $messageData) {
-                $data = json_decode((string) $messageData, true, 512, \JSON_THROW_ON_ERROR);
-                if (is_array($data)) {
-                    $severityValue = $data['severity'] ?? ContextualFeedbackSeverity::OK->value;
-                    $severity = ContextualFeedbackSeverity::tryFrom($severityValue) ?? ContextualFeedbackSeverity::OK;
+                try {
+                    $data = json_decode((string) $messageData, true, 512, \JSON_THROW_ON_ERROR);
+                    if (is_array($data)) {
+                        $severityValue = $data['severity'] ?? ContextualFeedbackSeverity::OK->value;
+                        $severity = ContextualFeedbackSeverity::tryFrom($severityValue) ?? ContextualFeedbackSeverity::OK;
 
-                    $result[] = [
-                        'title' => $data['title'] ?? '',
-                        'message' => $data['message'] ?? '',
-                        'severity' => $severity->name,
-                    ];
+                        $result[] = [
+                            'title' => $data['title'] ?? '',
+                            'message' => $data['message'] ?? '',
+                            'severity' => $severity->name,
+                        ];
+                    }
+                } catch (JsonException $e) {
+                    $this->logger->warning('Failed to decode flash message from session', [
+                        'queue' => $queueIdentifier,
+                        'error' => $e->getMessage(),
+                    ]);
                 }
             }
+
+            // Clear the session data only after processing all messages
+            $GLOBALS['BE_USER']->setAndSaveSessionData($queueIdentifier, null);
         }
 
         return $result;
