@@ -13,17 +13,13 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Middleware;
 
-use JsonException;
 use Psr\Container\{ContainerExceptionInterface, NotFoundExceptionInterface};
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
-use Psr\Log\LoggerInterface;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\Stream;
-use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
-use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
-use Xima\XimaTypo3FrontendEdit\Service\Ui\ResourceRendererService;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\{FlashMessageService, ResourceRendererService};
 
 use function is_array;
 
@@ -38,7 +34,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
     public function __construct(
         private readonly ResourceRendererService $resourceRendererService,
         private readonly SettingsService $settingsService,
-        private readonly LoggerInterface $logger,
+        private readonly FlashMessageService $flashMessageService,
     ) {}
 
     /**
@@ -65,7 +61,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
 
         // Collect flash messages from backend session before rendering (if enabled)
         $flashMessages = $this->settingsService->isEnableFlashMessages($request)
-            ? $this->collectFlashMessages()
+            ? $this->flashMessageService->collectFromSession()
             : [];
 
         $body = $response->getBody();
@@ -80,69 +76,5 @@ class ToolRendererMiddleware implements MiddlewareInterface
         $body->write($content);
 
         return $response->withBody($body);
-    }
-
-    /**
-     * Collect flash messages from the backend user session.
-     *
-     * When using "Save & Close" in the backend, TYPO3 performs a direct redirect
-     * without rendering the backend template. This means flash messages remain
-     * in the session and can be displayed in the frontend.
-     *
-     * TYPO3 uses two queues:
-     * - FLASHMESSAGE_QUEUE: For error/warning messages (e.g., from DataHandler)
-     * - NOTIFICATION_QUEUE: For success messages (e.g., "Record saved")
-     *
-     * @return array<array{title: string, message: string, severity: string}>
-     */
-    private function collectFlashMessages(): array
-    {
-        if (null === $GLOBALS['BE_USER'] || !is_array($GLOBALS['BE_USER']->user)) {
-            return [];
-        }
-
-        $result = [];
-
-        // Collect from both queues - NOTIFICATION_QUEUE has success messages,
-        // FLASHMESSAGE_QUEUE has error/warning messages
-        $queues = [
-            FlashMessageQueue::NOTIFICATION_QUEUE,
-            FlashMessageQueue::FLASHMESSAGE_QUEUE,
-        ];
-
-        foreach ($queues as $queueIdentifier) {
-            $sessionData = $GLOBALS['BE_USER']->getSessionData($queueIdentifier);
-
-            if (!is_array($sessionData) || [] === $sessionData) {
-                continue;
-            }
-
-            // Process all messages first, only clear session after successful processing
-            foreach ($sessionData as $messageData) {
-                try {
-                    $data = json_decode((string) $messageData, true, 512, \JSON_THROW_ON_ERROR);
-                    if (is_array($data)) {
-                        $severityValue = $data['severity'] ?? ContextualFeedbackSeverity::OK->value;
-                        $severity = ContextualFeedbackSeverity::tryFrom($severityValue) ?? ContextualFeedbackSeverity::OK;
-
-                        $result[] = [
-                            'title' => $data['title'] ?? '',
-                            'message' => $data['message'] ?? '',
-                            'severity' => $severity->name,
-                        ];
-                    }
-                } catch (JsonException $e) {
-                    $this->logger->warning('Failed to decode flash message from session', [
-                        'queue' => $queueIdentifier,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
-
-            // Clear the session data only after processing all messages
-            $GLOBALS['BE_USER']->setAndSaveSessionData($queueIdentifier, null);
-        }
-
-        return $result;
     }
 }
