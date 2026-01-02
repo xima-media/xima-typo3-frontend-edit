@@ -61,36 +61,43 @@ final readonly class FlashMessageService
         ];
 
         foreach ($queues as $queueIdentifier) {
-            $sessionData = $GLOBALS['BE_USER']->getSessionData($queueIdentifier);
+            try {
+                $sessionData = $GLOBALS['BE_USER']->getSessionData($queueIdentifier);
 
-            if (!is_array($sessionData) || [] === $sessionData) {
-                continue;
-            }
-
-            // Process all messages first, only clear session after successful processing
-            foreach ($sessionData as $messageData) {
-                try {
-                    $data = json_decode((string) $messageData, true, 512, \JSON_THROW_ON_ERROR);
-                    if (is_array($data)) {
-                        $severityValue = $data['severity'] ?? ContextualFeedbackSeverity::OK->value;
-                        $severity = ContextualFeedbackSeverity::tryFrom($severityValue) ?? ContextualFeedbackSeverity::OK;
-
-                        $result[] = [
-                            'title' => $data['title'] ?? '',
-                            'message' => $data['message'] ?? '',
-                            'severity' => $severity->name,
-                        ];
-                    }
-                } catch (JsonException $e) {
-                    $this->logger->warning('Failed to decode flash message from session', [
-                        'queue' => $queueIdentifier,
-                        'error' => $e->getMessage(),
-                    ]);
+                if (!is_array($sessionData) || [] === $sessionData) {
+                    continue;
                 }
-            }
 
-            // Clear the session data only after processing all messages
-            $GLOBALS['BE_USER']->setAndSaveSessionData($queueIdentifier, null);
+                // Process messages, skipping malformed entries (logged below)
+                foreach ($sessionData as $messageData) {
+                    try {
+                        $data = json_decode((string) $messageData, true, 512, \JSON_THROW_ON_ERROR);
+                        if (is_array($data)) {
+                            $severityValue = $data['severity'] ?? ContextualFeedbackSeverity::OK->value;
+                            $severity = ContextualFeedbackSeverity::tryFrom($severityValue) ?? ContextualFeedbackSeverity::OK;
+
+                            $result[] = [
+                                'title' => $data['title'] ?? '',
+                                'message' => $data['message'] ?? '',
+                                'severity' => $severity->name,
+                            ];
+                        }
+                    } catch (JsonException $e) {
+                        $this->logger->warning('Failed to decode flash message from session', [
+                            'queue' => $queueIdentifier,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+
+                // Clear session after processing (malformed messages are discarded)
+                $GLOBALS['BE_USER']->setAndSaveSessionData($queueIdentifier, null);
+            } catch (\Throwable $e) {
+                $this->logger->error('Failed to process flash message queue', [
+                    'queue' => $queueIdentifier,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
 
         return $result;
