@@ -5,7 +5,7 @@ declare(strict_types=1);
 /*
  * This file is part of the "xima_typo3_frontend_edit" TYPO3 CMS extension.
  *
- * (c) 2024-2025 Konrad Michalik <hej@konradmichalik.dev>
+ * (c) 2024-2026 Konrad Michalik <hej@konradmichalik.dev>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -19,7 +19,7 @@ use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\Stream;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
-use Xima\XimaTypo3FrontendEdit\Service\Ui\ResourceRendererService;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\{FlashMessageService, ResourceRendererService};
 
 use function is_array;
 
@@ -34,6 +34,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
     public function __construct(
         private readonly ResourceRendererService $resourceRendererService,
         private readonly SettingsService $settingsService,
+        private readonly FlashMessageService $flashMessageService,
     ) {}
 
     /**
@@ -58,12 +59,17 @@ class ToolRendererMiddleware implements MiddlewareInterface
             return $response;
         }
 
+        // Collect flash messages from backend session before rendering (if enabled)
+        $flashMessages = $this->settingsService->isEnableFlashMessages($request)
+            ? $this->flashMessageService->collectFromSession()
+            : [];
+
         $body = $response->getBody();
         $body->rewind();
         $contents = $response->getBody()->getContents();
         $content = str_ireplace(
             '</body>',
-            $this->resourceRendererService->render(request: $request).'</body>',
+            $this->resourceRendererService->render(request: $request, flashMessages: $flashMessages).'</body>',
             $contents,
         );
         $body = new Stream('php://temp', 'rw');

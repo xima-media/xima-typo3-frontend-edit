@@ -57,6 +57,13 @@ settings:
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.enableScrollToElement
     category: frontendEdit.appearance
 
+  frontendEdit.enableFlashMessages:
+    default: true
+    type: bool
+    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.enableFlashMessages
+    description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.enableFlashMessages
+    category: frontendEdit.appearance
+
   frontendEdit.toolbarPosition:
     default: 'bottom-right'
     type: string

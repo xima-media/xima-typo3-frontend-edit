@@ -112,6 +112,13 @@
                 <source>Automatically scroll to the edited content element after saving and returning to the frontend.</source>
             </trans-unit>
 
+            <trans-unit id="settings.frontendEdit.enableFlashMessages">
+                <source>Enable Flash Messages</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.enableFlashMessages">
+                <source>Show TYPO3 flash messages (e.g., save confirmations) as notifications in the frontend after returning from the backend.</source>
+            </trans-unit>
+
             <trans-unit id="settings.frontendEdit.filter.ignorePids">
                 <source>Ignore PIDs</source>
             </trans-unit>

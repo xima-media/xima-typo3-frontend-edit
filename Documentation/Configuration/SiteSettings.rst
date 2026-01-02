@@ -112,6 +112,26 @@ Appearance Settings
         frontendEdit:
           enableScrollToElement: true
 
+..  confval:: frontendEdit.enableFlashMessages
+
+    :type: bool
+    :Default: true
+
+    Show TYPO3 flash messages (e.g., save confirmations) as toast notifications in the frontend
+    after returning from the backend. When you use "Save & Close" in the backend, success or
+    error messages will be displayed as notifications in the frontend.
+
+    ..  figure:: /Images/flash-message.jpg
+        :alt: Flash message notification in frontend
+        :class: with-shadow
+
+        Flash message notification after saving a content element
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          enableFlashMessages: true
+
 Filter Settings
 ---------------
 
@@ -197,6 +217,7 @@ Full example with all available options:
       toolbarPosition: 'bottom-right'
       enableOutline: true
       enableScrollToElement: true
+      enableFlashMessages: true
       filter:
         ignorePids: '1,2,3'
         ignoreDoktypes: '4,199,254'

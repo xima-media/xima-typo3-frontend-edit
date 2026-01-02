@@ -17,7 +17,12 @@
   // SVG Icons
   const ICONS = {
     edit: '<svg viewBox="0 0 32 32" fill="currentColor"><path d="M4.834,29.665L25.007,29.665C26.561,29.663 27.839,28.385 27.841,26.831L27.841,16.157C27.841,15.608 27.39,15.157 26.841,15.157C26.292,15.157 25.841,15.608 25.841,16.157L25.841,26.831C25.84,27.288 25.464,27.664 25.007,27.665L4.834,27.665C4.377,27.664 4.001,27.288 4,26.831L4,7.651C4.001,7.194 4.377,6.818 4.834,6.817L16,6.817C16.549,6.817 17,6.366 17,5.817C17,5.268 16.549,4.817 16,4.817L4.834,4.817C3.28,4.819 2.002,6.097 2,7.651L2,26.831C2.002,28.385 3.28,29.663 4.834,29.665Z" fill-rule="nonzero"/><path d="M8.582,19.343L7.912,22.691C7.894,22.781 7.885,22.873 7.885,22.965C7.885,23.726 8.51,24.352 9.271,24.352C9.363,24.352 9.454,24.343 9.544,24.325L12.895,23.655C13.539,23.527 14.131,23.211 14.595,22.747L28.845,8.494C29.473,7.825 29.823,6.941 29.823,6.024C29.823,4.044 28.195,2.416 26.215,2.416C25.298,2.416 24.414,2.766 23.745,3.394L9.49,17.645C9.025,18.108 8.709,18.699 8.582,19.343ZM10.543,19.734C10.594,19.478 10.72,19.244 10.904,19.059L25.157,4.806C25.458,4.509 25.864,4.343 26.286,4.343C27.168,4.343 27.894,5.069 27.894,5.951C27.894,6.373 27.728,6.779 27.431,7.08L13.178,21.332C12.993,21.517 12.758,21.643 12.502,21.694L10.054,22.184L10.543,19.734Z" fill-rule="nonzero"/></svg>',
-    kebab: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="2.5" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13.5" r="1.5"/></svg>'
+    kebab: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="2.5" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13.5" r="1.5"/></svg>',
+    check: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 111.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/></svg>',
+    warning: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>',
+    error: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-1.4A5.6 5.6 0 1 0 8 2.4a5.6 5.6 0 0 0 0 11.2zM7.3 5h1.4v4.2H7.3V5zm0 5.6h1.4V12H7.3v-1.4z"/></svg>',
+    info: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-1.4A5.6 5.6 0 1 0 8 2.4a5.6 5.6 0 0 0 0 11.2zM7.3 7h1.4v4.2H7.3V7zm0-2.1h1.4v1.4H7.3V4.9z"/></svg>',
+    close: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06z"/></svg>'
   };
 
   /**
@@ -144,6 +149,143 @@
           this.closeAll();
         }
       });
+    }
+  };
+
+  /**
+   * Notification Manager - Shows toast notifications for flash messages
+   */
+  const Notification = {
+    container: null,
+    autoDismissDelay: 5000,
+
+    /**
+     * Initialize notifications by reading flash messages from DOM
+     */
+    init() {
+      const dataElement = document.querySelector('.frontend-edit-flash-messages');
+      if (!dataElement) return;
+
+      try {
+        const messages = JSON.parse(dataElement.textContent || '[]');
+        if (messages.length > 0) {
+          Logger.log(`Found ${messages.length} flash message(s) to display`);
+          messages.forEach((msg, index) => {
+            // Stagger notifications slightly for better UX
+            setTimeout(() => this.show(msg), index * 150);
+          });
+        }
+      } catch (error) {
+        Logger.log('Failed to parse flash messages', { error: error.message }, 'error');
+      }
+    },
+
+    /**
+     * Get or create the notification container
+     */
+    getContainer() {
+      if (!this.container) {
+        this.container = document.createElement('div');
+        this.container.className = 'frontend-edit__notification-container';
+        document.body.appendChild(this.container);
+      }
+      return this.container;
+    },
+
+    /**
+     * Get icon for severity
+     */
+    getIcon(severity) {
+      const severityLower = severity.toLowerCase();
+      switch (severityLower) {
+        case 'ok':
+          return ICONS.check;
+        case 'warning':
+          return ICONS.warning;
+        case 'error':
+          return ICONS.error;
+        case 'info':
+        case 'notice':
+        default:
+          return ICONS.info;
+      }
+    },
+
+    /**
+     * Show a notification
+     */
+    show(message) {
+      const container = this.getContainer();
+
+      const notification = document.createElement('div');
+      notification.className = 'frontend-edit__notification';
+      notification.classList.add(`frontend-edit__notification--${message.severity.toLowerCase()}`);
+
+      // Create icon
+      const iconEl = document.createElement('span');
+      iconEl.className = 'frontend-edit__notification-icon';
+      iconEl.innerHTML = this.getIcon(message.severity);
+      notification.appendChild(iconEl);
+
+      // Create content
+      const contentEl = document.createElement('div');
+      contentEl.className = 'frontend-edit__notification-content';
+
+      if (message.title) {
+        const titleEl = document.createElement('div');
+        titleEl.className = 'frontend-edit__notification-title';
+        titleEl.textContent = message.title;
+        contentEl.appendChild(titleEl);
+      }
+
+      if (message.message) {
+        const messageEl = document.createElement('div');
+        messageEl.className = 'frontend-edit__notification-message';
+        messageEl.textContent = message.message;
+        contentEl.appendChild(messageEl);
+      }
+
+      notification.appendChild(contentEl);
+
+      // Create close button
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'frontend-edit__notification-close';
+      closeBtn.type = 'button';
+      closeBtn.innerHTML = ICONS.close;
+      closeBtn.addEventListener('click', () => this.dismiss(notification));
+      notification.appendChild(closeBtn);
+
+      container.appendChild(notification);
+
+      // Trigger animation
+      requestAnimationFrame(() => {
+        notification.classList.add('frontend-edit__notification--visible');
+      });
+
+      // Auto-dismiss
+      setTimeout(() => this.dismiss(notification), this.autoDismissDelay);
+
+      Logger.log('Showing notification', {
+        severity: message.severity,
+        title: message.title,
+        message: message.message
+      });
+    },
+
+    /**
+     * Dismiss a notification
+     */
+    dismiss(notification) {
+      if (!notification || !notification.parentNode) return;
+
+      notification.classList.remove('frontend-edit__notification--visible');
+      notification.classList.add('frontend-edit__notification--hiding');
+
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
     }
   };
 
@@ -775,6 +917,9 @@
         }
 
         this.initTheme();
+
+        // Initialize flash message notifications (always, even when editing is disabled)
+        Notification.init();
 
         // Only initialize content element editing if not disabled
         if (!window.FRONTEND_EDIT_DISABLED) {

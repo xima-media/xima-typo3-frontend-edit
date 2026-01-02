@@ -5,7 +5,7 @@ declare(strict_types=1);
 /*
  * This file is part of the "xima_typo3_frontend_edit" TYPO3 CMS extension.
  *
- * (c) 2024-2025 Konrad Michalik <hej@konradmichalik.dev>
+ * (c) 2024-2026 Konrad Michalik <hej@konradmichalik.dev>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -164,6 +164,16 @@ final readonly class SettingsService
         }
 
         return (bool) $settings->get('frontendEdit.enableScrollToElement', true);
+    }
+
+    public function isEnableFlashMessages(ServerRequestInterface $request): bool
+    {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
+            return true;
+        }
+
+        return (bool) $settings->get('frontendEdit.enableFlashMessages', true);
     }
 
     public function isFrontendDebugModeEnabled(): bool
