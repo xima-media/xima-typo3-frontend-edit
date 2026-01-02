@@ -163,7 +163,7 @@
      * Initialize notifications by reading flash messages from DOM
      */
     init() {
-      const dataElement = document.getElementById('frontend-edit-flash-messages');
+      const dataElement = document.querySelector('.frontend-edit-flash-messages');
       if (!dataElement) return;
 
       try {

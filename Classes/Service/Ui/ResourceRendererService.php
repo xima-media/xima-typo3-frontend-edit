@@ -137,7 +137,7 @@ final readonly class ResourceRendererService
         }
 
         $resources['flash_messages_config'] = sprintf(
-            '<script%s type="application/json" id="frontend-edit-flash-messages">%s</script>',
+            '<script%s type="application/json" class="frontend-edit-flash-messages">%s</script>',
             $nonceAttribute,
             json_encode($flashMessages, \JSON_THROW_ON_ERROR | \JSON_HEX_TAG | \JSON_HEX_AMP),
         );
