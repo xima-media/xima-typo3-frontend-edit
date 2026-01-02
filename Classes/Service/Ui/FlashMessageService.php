@@ -15,6 +15,7 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 
 use JsonException;
 use Psr\Log\LoggerInterface;
+use Throwable;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 
@@ -92,7 +93,7 @@ final readonly class FlashMessageService
 
                 // Clear session after processing (malformed messages are discarded)
                 $GLOBALS['BE_USER']->setAndSaveSessionData($queueIdentifier, null);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $this->logger->error('Failed to process flash message queue', [
                     'queue' => $queueIdentifier,
                     'error' => $e->getMessage(),
