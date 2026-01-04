@@ -54,6 +54,9 @@
 			"typo3/class-alias-loader": true,
 			"typo3/cms-composer-installers": true
 		},
+		"platform": {
+			"php": "8.3"
+		},
 		"sort-packages": true
 	},
 	"extra": {
