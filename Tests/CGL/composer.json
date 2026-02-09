@@ -8,7 +8,7 @@
 	],
 	"require-dev": {
 		"armin/editorconfig-cli": "^2.2.1",
-		"ergebnis/composer-normalize": "^2.48.2",
+		"ergebnis/composer-normalize": "^2.49.0",
 		"helmich/typo3-typoscript-lint": "^3.3.0",
 		"konradmichalik/php-cs-fixer-preset": "^0.1.1",
 		"konradmichalik/php-doc-block-header-fixer": "^0.3.3",
