@@ -37,7 +37,7 @@ use function array_key_exists;
 final class ModifyButtonBarEventListener
 {
     /** @var array<string, mixed> */
-    protected array $configuration;
+    private array $configuration;
 
     /**
      * @throws ExtensionConfigurationPathDoesNotExistException
@@ -85,7 +85,7 @@ final class ModifyButtonBarEventListener
         $event->setButtons($buttons);
     }
 
-    protected function getLanguageService(): LanguageService
+    private function getLanguageService(): LanguageService
     {
         return $GLOBALS['LANG'];
     }

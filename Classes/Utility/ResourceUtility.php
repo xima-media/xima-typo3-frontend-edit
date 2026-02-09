@@ -34,7 +34,7 @@ class ResourceUtility
     public static function getResources(array $attributes = []): array
     {
         $additionalResources = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalFrontendResources'] ?? [];
-        array_walk($additionalResources, function (&$resource) {
+        array_walk($additionalResources, static function (&$resource) {
             if (str_ends_with($resource, '.css')) {
                 $resource = self::getCssTag($resource, []);
             } elseif (str_ends_with($resource, '.js')) {
