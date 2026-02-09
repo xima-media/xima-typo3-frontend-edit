@@ -29,7 +29,7 @@ use function array_key_exists;
  * @license GPL-2.0-or-later
  */
 #[AsEventListener(identifier: 'xima-typo3-frontend-edit/backend/page-layout-scroll')]
-final class PageLayoutScrollEventListener
+final readonly class PageLayoutScrollEventListener
 {
     public function __invoke(ModifyButtonBarEvent $event): void
     {
