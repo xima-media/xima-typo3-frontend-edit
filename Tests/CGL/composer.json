@@ -12,7 +12,7 @@
 		"helmich/typo3-typoscript-lint": "^3.3.0",
 		"konradmichalik/php-cs-fixer-preset": "^0.1.1",
 		"konradmichalik/php-doc-block-header-fixer": "^0.3.3",
-		"konradmichalik/phpstan-typo3-preset": "^0.1",
+		"konradmichalik/phpstan-typo3-preset": "^0.2",
 		"move-elevator/composer-translation-validator": "^1.3.1",
 		"phpstan/phpstan-phpunit": "^1.0 || ^2.0",
 		"psr/http-message": "^1.0 || ^2.0",
