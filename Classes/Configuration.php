@@ -25,5 +25,6 @@ class Configuration
     final public const EXT_NAME = 'XimaTypo3FrontendEdit';
     final public const PLUGIN_NAME = 'FrontendEdit';
     final public const UC_KEY_DISABLED = 'frontendEditDisabled';
-    final public const USER_TSCONFIG_DISABLED = 'tx_ximatypo3frontendedit.disabled';
+    final public const USER_TSCONFIG_KEY = 'tx_ximatypo3frontendedit.';
+    final public const USER_TSCONFIG_DISABLED = 'disabled';
 }

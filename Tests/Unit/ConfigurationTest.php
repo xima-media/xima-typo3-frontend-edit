@@ -51,9 +51,15 @@ final class ConfigurationTest extends TestCase
     }
 
     #[Test]
+    public function userTsconfigKeyConstantHasCorrectValue(): void
+    {
+        self::assertSame('tx_ximatypo3frontendedit.', Configuration::USER_TSCONFIG_KEY);
+    }
+
+    #[Test]
     public function userTsconfigDisabledConstantHasCorrectValue(): void
     {
-        self::assertSame('tx_ximatypo3frontendedit.disabled', Configuration::USER_TSCONFIG_DISABLED);
+        self::assertSame('disabled', Configuration::USER_TSCONFIG_DISABLED);
     }
 
     #[Test]
@@ -63,6 +69,7 @@ final class ConfigurationTest extends TestCase
         self::assertNotEmpty(Configuration::EXT_NAME);
         self::assertNotEmpty(Configuration::PLUGIN_NAME);
         self::assertNotEmpty(Configuration::UC_KEY_DISABLED);
+        self::assertNotEmpty(Configuration::USER_TSCONFIG_KEY);
         self::assertNotEmpty(Configuration::USER_TSCONFIG_DISABLED);
     }
 }

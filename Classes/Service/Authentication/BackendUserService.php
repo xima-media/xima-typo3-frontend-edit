@@ -112,8 +112,9 @@ final class BackendUserService
         }
 
         $tsConfig = $backendUser->getTSConfig();
+        $extConfig = $tsConfig[Configuration::USER_TSCONFIG_KEY] ?? [];
 
-        return !((bool) ($tsConfig[Configuration::USER_TSCONFIG_DISABLED] ?? false));
+        return !((bool) ($extConfig[Configuration::USER_TSCONFIG_DISABLED] ?? false));
     }
 
     private function initializeBackendUser(): void
