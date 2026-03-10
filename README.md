@@ -34,6 +34,7 @@ The extension has been developed to provide a simple and lightweight solution to
 - **Dark/Light Mode** - Automatic or manual color scheme selection
 - **Configurable Position** - 12 toolbar positions available
 - **Save & Close** - Quick return to frontend after editing
+- **UserTSconfig** - Disable frontend editing per user or user group
 
 ## 🔥 Installation
 

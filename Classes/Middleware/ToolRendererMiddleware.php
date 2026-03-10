@@ -18,6 +18,7 @@ use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\Stream;
+use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{FlashMessageService, ResourceRendererService};
 
@@ -35,6 +36,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
         private readonly ResourceRendererService $resourceRendererService,
         private readonly SettingsService $settingsService,
         private readonly FlashMessageService $flashMessageService,
+        private readonly BackendUserService $backendUserService,
     ) {}
 
     /**
@@ -50,12 +52,15 @@ class ToolRendererMiddleware implements MiddlewareInterface
             return $response;
         }
 
-        // Only check if backend user is logged in - the sticky toolbar must be visible
-        // even when frontend edit is disabled so the user can re-enable it
         if (
             null === $GLOBALS['BE_USER']
             || !is_array($GLOBALS['BE_USER']->user)
         ) {
+            return $response;
+        }
+
+        // When disabled via UserTSconfig, hide everything including the sticky toolbar
+        if (!$this->backendUserService->isFrontendEditAllowed()) {
             return $response;
         }
 
