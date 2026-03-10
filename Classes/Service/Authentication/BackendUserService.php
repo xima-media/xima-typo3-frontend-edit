@@ -76,6 +76,12 @@ final class BackendUserService
         return $backendUser->recordEditAccessInternals($table, $record);
     }
 
+    /**
+     * Check if frontend edit is disabled by the user's toggle (UC state).
+     *
+     * This reflects the user's personal on/off toggle and can be changed
+     * via the sticky toolbar. The toolbar remains visible when this is true.
+     */
     public function isFrontendEditDisabled(): bool
     {
         $backendUser = $this->getBackendUser();
@@ -85,6 +91,29 @@ final class BackendUserService
         }
 
         return (bool) ($backendUser->uc[Configuration::UC_KEY_DISABLED] ?? false);
+    }
+
+    /**
+     * Check if frontend edit is allowed for the current backend user via UserTSconfig.
+     *
+     * When disabled via UserTSconfig, the entire frontend edit feature is hidden
+     * including the sticky toolbar — the user cannot re-enable it themselves.
+     *
+     * UserTSconfig: tx_ximatypo3frontendedit.disabled = 1
+     *
+     * Default: allowed (enabled) for all backend users.
+     */
+    public function isFrontendEditAllowed(): bool
+    {
+        $backendUser = $this->getBackendUser();
+
+        if (null === $backendUser || null === $backendUser->user) {
+            return false;
+        }
+
+        $tsConfig = $backendUser->getTSConfig();
+
+        return !((bool) ($tsConfig[Configuration::USER_TSCONFIG_DISABLED] ?? false));
     }
 
     private function initializeBackendUser(): void

@@ -47,6 +47,10 @@ readonly class AjaxController
      */
     public function toggleAction(): JsonResponse
     {
+        if (!$this->backendUserService->isFrontendEditAllowed()) {
+            return new JsonResponse(['success' => false, 'error' => 'Frontend edit is not allowed'], 403);
+        }
+
         $backendUser = $this->getBackendUser();
 
         if (null === $backendUser || null === $backendUser->user) {
@@ -78,6 +82,10 @@ readonly class AjaxController
      */
     public function editInformationAction(ServerRequestInterface $request): JsonResponse
     {
+        if (!$this->backendUserService->isFrontendEditAllowed()) {
+            return new JsonResponse([]);
+        }
+
         $backendUser = $this->backendUserService->getBackendUser();
         if (null === $backendUser || null === $backendUser->user) {
             return new JsonResponse([]);
