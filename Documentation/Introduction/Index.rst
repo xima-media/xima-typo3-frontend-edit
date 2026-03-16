@@ -31,9 +31,7 @@ Features
 - :ref:`Save & Close <extconf-enableSaveAndCloseButton>` - Quick return to frontend after editing
 
 ..  note::
-    This is **not** a further development of the "original" extension `frontend_editing <https://extensions.typo3.org/extension/frontend_editing>`_. It is similar in some ways to the realisation of the `feedit <https://extensions.typo3.org/extension/feedit>`_ extension. This extension is an independent implementation with a different approach.
-
-    Unlike `content_preview <https://github.com/T3-UX/content_preview>`_, which provides a split-view with live frontend preview within the backend Page module, this extension works directly in the frontend and does not modify the backend interface.
+    This is **not** a further development of the "original" extension `frontend_editing <https://extensions.typo3.org/extension/frontend_editing>`_. It is similar in some ways to the realisation of the `feedit <https://extensions.typo3.org/extension/feedit>`_ extension. This extension is an independent implementation with a different approach. See :ref:`Delineation <delineation>` for a detailed comparison with related extensions like `visual_editor <https://github.com/FriendsOfTYPO3/visual_editor>`_ and `content_preview <https://github.com/T3-UX/content_preview>`_.
 
 ..  _support:
 

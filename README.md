@@ -18,9 +18,7 @@ This extension provides an edit menu for editors within the frontend regarding c
 ![Frontend Edit](./Documentation/Images/screenshot.jpg)
 
 > [!NOTE]
-> **Delineation and classification**: This is **not** a further development of the "original" extension [frontend_editing](https://extensions.typo3.org/extension/frontend_editing). It is similar in some ways to the realisation of the [feedit](https://extensions.typo3.org/extension/feedit) extension. This extension is an independent implementation with a different approach.
->
-> Unlike [content_preview](https://github.com/T3-UX/content_preview), which provides a split-view with live frontend preview within the backend Page module, this extension works directly in the frontend and does not modify the backend interface.
+> **Delineation and classification**: This is **not** a further development of the "original" extension [frontend_editing](https://extensions.typo3.org/extension/frontend_editing). It is similar in some ways to the realisation of the [feedit](https://extensions.typo3.org/extension/feedit) extension. This extension is an independent implementation with a different approach. See the [Delineation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Delineation/Index.html) page in the documentation for a detailed comparison with related extensions like [visual_editor](https://github.com/FriendsOfTYPO3/visual_editor) and [content_preview](https://github.com/T3-UX/content_preview).
 
 The extension has been developed to provide a simple and lightweight solution to easily start the editing of content elements from the frontend and thus reduce the gap between frontend and backend. Therefore, a simple javascript is injected into the frontend, which generates action links to the TYPO3 backend with the corresponding edit views.
 

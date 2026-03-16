@@ -84,6 +84,13 @@ This extension provides an edit menu for editors within the frontend regarding c
         ..  card-footer::   :ref:`Extend the functionalities <developer-corner>`
             :button-style: btn btn-secondary stretched-link
 
+    ..  card::  Delineation
+
+        How this extension compares to similar extensions like visual_editor, feedit, and others.
+
+        ..  card-footer::   :ref:`View comparison <delineation>`
+            :button-style: btn btn-secondary stretched-link
+
     ..  card::  FAQ
 
         A collection of frequently asked questions.
@@ -108,6 +115,7 @@ This extension provides an edit menu for editors within the frontend regarding c
     Configuration/Index
     Usage/Index
     DeveloperCorner/Index
+    Delineation/Index
     FAQ/Index
     Migration/Index
 
