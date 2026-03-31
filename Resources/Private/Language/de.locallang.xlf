@@ -79,6 +79,18 @@
 				<source />
 				<target>Seitenoptionen</target>
 			</trans-unit>
+			<trans-unit id="contextual_edit.title">
+				<source />
+				<target>Inhalt bearbeiten</target>
+			</trans-unit>
+			<trans-unit id="contextual_edit.saved">
+				<source />
+				<target>Datensatz erfolgreich gespeichert</target>
+			</trans-unit>
+			<trans-unit id="contextual_edit.close">
+				<source />
+				<target>Editor schließen</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
