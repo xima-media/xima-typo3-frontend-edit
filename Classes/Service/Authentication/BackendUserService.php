@@ -18,6 +18,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use Xima\XimaTypo3FrontendEdit\Configuration;
+use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\BackendUserUtility;
 
 /**
  * BackendUserService.
@@ -73,7 +74,7 @@ final class BackendUserService
             return false;
         }
 
-        return $backendUser->recordEditAccessInternals($table, $record);
+        return BackendUserUtility::hasRecordEditAccess($backendUser, $table, $record);
     }
 
     /**
