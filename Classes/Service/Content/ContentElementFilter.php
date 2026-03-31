@@ -17,6 +17,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
+use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\BackendUserUtility;
 
 use function in_array;
 
@@ -93,7 +94,7 @@ final readonly class ContentElementFilter
         array $ignoredUids,
     ): bool {
         // Check edit permissions
-        if (!$backendUser->recordEditAccessInternals('tt_content', $contentElement)) {
+        if (!BackendUserUtility::hasRecordEditAccess($backendUser, 'tt_content', $contentElement)) {
             return false;
         }
 
