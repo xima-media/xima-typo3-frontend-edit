@@ -938,6 +938,8 @@
     sidebar: null,
     iframe: null,
     backdrop: null,
+    resetTimeout: null,
+    closeTimeout: null,
 
     init() {
       this.createSidebarDOM();
@@ -951,9 +953,12 @@
       this.backdrop.className = 'frontend-edit__sidebar-backdrop';
       this.backdrop.addEventListener('click', () => this.requestClose());
 
-      // Sidebar container
+      // Sidebar container with dialog semantics
       this.sidebar = document.createElement('div');
       this.sidebar.className = 'frontend-edit__sidebar';
+      this.sidebar.setAttribute('role', 'dialog');
+      this.sidebar.setAttribute('aria-modal', 'true');
+      this.sidebar.setAttribute('aria-label', 'Edit content');
 
       // Loading spinner (visible until iframe content loads)
       this.loader = document.createElement('div');
@@ -985,24 +990,28 @@
         this.iframe.classList.add('frontend-edit__sidebar-iframe--loaded');
         try {
           const iframeUrl = this.iframe.contentWindow?.location.href;
-          if (iframeUrl && iframeUrl.includes('justSaved=1')) {
-            this.hasSaved = true;
-            Logger.log('Save detected via iframe URL');
-          }
-          if (iframeUrl && iframeUrl.includes('closed=1')) {
-            Logger.log('Close detected via iframe URL');
-            this.close();
-            return;
+          if (iframeUrl) {
+            const params = new URL(iframeUrl).searchParams;
+            if (params.get('justSaved') === '1') {
+              this.hasSaved = true;
+              Logger.log('Save detected via iframe URL');
+            }
+            if (params.get('closed') === '1') {
+              Logger.log('Close detected via iframe URL');
+              this.close();
+              return;
+            }
           }
           this.enhanceIframeUI();
         } catch (e) {
-          // Cross-origin or access error — ignore
+          // Cross-origin, access error, or invalid URL — ignore
         }
       });
     },
 
     open(contextualUrl, uid, targetBlank) {
       Logger.log(`Opening contextual edit for uid ${uid}`);
+      clearTimeout(this.resetTimeout);
       this.hasSaved = false;
       this.targetBlank = targetBlank || false;
       this.loader.classList.add('frontend-edit__sidebar-loader--visible');
@@ -1011,14 +1020,20 @@
       this.backdrop.classList.add('frontend-edit__sidebar-backdrop--visible');
       this.sidebar.classList.add('frontend-edit__sidebar--open');
       document.body.style.overflow = 'hidden';
+      this.iframe.focus();
     },
 
     close() {
+      clearTimeout(this.closeTimeout);
       this.sidebar.classList.remove('frontend-edit__sidebar--open');
       this.backdrop.classList.remove('frontend-edit__sidebar-backdrop--visible');
       document.body.style.overflow = '';
       // Clear iframe after transition
-      setTimeout(() => { this.iframe.src = 'about:blank'; }, 300);
+      this.resetTimeout = setTimeout(() => {
+        if (!this.sidebar.classList.contains('frontend-edit__sidebar--open')) {
+          this.iframe.src = 'about:blank';
+        }
+      }, 300);
       // Reload page if changes were saved
       if (this.hasSaved) {
         setTimeout(() => window.location.reload(), 350);
@@ -1066,9 +1081,14 @@
         iconEl.setAttribute('size', 'small');
         saveCloseBtn.appendChild(iconEl);
 
+        // Use localized label from TYPO3's Close button, fallback to English
+        const closeBtnLabel = closeBtn?.querySelector('.contextual-record-edit-button-label')?.textContent?.trim();
+        const saveBtnLabel = saveBtn?.querySelector('.contextual-record-edit-button-label')?.textContent?.trim();
+        const saveCloseLabel = (saveBtnLabel && closeBtnLabel) ? `${saveBtnLabel} & ${closeBtnLabel}` : 'Save & Close';
+
         const labelSpan = iframeDoc.createElement('span');
         labelSpan.className = 'contextual-record-edit-button-label';
-        labelSpan.textContent = 'Save & Close';
+        labelSpan.textContent = saveCloseLabel;
         saveCloseBtn.appendChild(labelSpan);
 
         // Insert before close button or append at end
@@ -1103,9 +1123,17 @@
     },
 
     requestClose() {
-      // Close directly - the iframe's TYPO3 backend JS may not be fully functional
-      // in a frontend context, so we can't rely on postMessage for close confirmation
-      this.close();
+      // Try postMessage first (lets iframe handle unsaved-change confirmation)
+      // Fall back to direct close if iframe doesn't respond within 500ms
+      try {
+        this.iframe?.contentWindow?.postMessage(
+          { actionName: 'typo3:editform:requestclose' },
+          window.location.origin
+        );
+        this.closeTimeout = setTimeout(() => this.close(), 500);
+      } catch (e) {
+        this.close();
+      }
     },
 
     handleMessage(event) {
