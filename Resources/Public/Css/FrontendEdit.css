@@ -766,70 +766,69 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: 480px;
-    max-width: 90vw;
+    width: 800px;
+    max-width: calc(100dvw - 1.5rem);
     z-index: 10005;
     display: flex;
     flex-direction: column;
-    background: var(--xfe-bg-primary);
-    box-shadow: var(--xfe-shadow);
+    background: transparent;
+    border-radius: 0.75rem 0 0 0.75rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     transform: translateX(100%);
-    transition: transform 0.3s ease;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    transition: transform 0.3s ease-out;
+    overflow: hidden;
 }
 
 .frontend-edit__sidebar--open {
     transform: translateX(0);
 }
 
-.frontend-edit__sidebar-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background: var(--xfe-toolbar-bg);
-    color: var(--xfe-toolbar-text);
-    border-bottom: 1px solid var(--xfe-border);
-    flex-shrink: 0;
-}
-
-.frontend-edit__sidebar-title {
-    flex: 1;
-    font-size: 14px;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.frontend-edit__sidebar-close {
+.frontend-edit__sidebar-loader {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 800px;
+    max-width: calc(100dvw - 1.5rem);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border: none;
-    border-radius: 4px;
-    background: transparent;
-    color: var(--xfe-toolbar-text);
-    cursor: pointer;
-    flex-shrink: 0;
+    background: #f5f5f5;
+    border-radius: 0.75rem 0 0 0.75rem;
+    z-index: 10005;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
 }
 
-.frontend-edit__sidebar-close:hover {
-    background: var(--xfe-bg-hover);
+.frontend-edit__sidebar-loader--visible {
+    opacity: 1;
+    visibility: visible;
 }
 
-.frontend-edit__sidebar-close svg {
-    width: 16px;
-    height: 16px;
+.frontend-edit__sidebar-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #ddd;
+    border-top-color: #333;
+    border-radius: 50%;
+    animation: frontend-edit-spin 0.8s linear infinite;
+}
+
+@keyframes frontend-edit-spin {
+    to { transform: rotate(360deg); }
 }
 
 .frontend-edit__sidebar-iframe {
     flex: 1;
     width: 100%;
     border: none;
-    background: var(--xfe-bg-primary);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.frontend-edit__sidebar-iframe--loaded {
+    opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

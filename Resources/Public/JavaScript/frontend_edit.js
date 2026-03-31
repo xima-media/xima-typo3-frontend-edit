@@ -938,7 +938,6 @@
     sidebar: null,
     iframe: null,
     backdrop: null,
-    titleEl: null,
 
     init() {
       this.createSidebarDOM();
@@ -956,28 +955,17 @@
       this.sidebar = document.createElement('div');
       this.sidebar.className = 'frontend-edit__sidebar';
 
-      // Header
-      const header = document.createElement('div');
-      header.className = 'frontend-edit__sidebar-header';
+      // Loading spinner (visible until iframe content loads)
+      this.loader = document.createElement('div');
+      this.loader.className = 'frontend-edit__sidebar-loader';
+      this.loader.innerHTML = '<div class="frontend-edit__sidebar-spinner"></div>';
+      this.sidebar.appendChild(this.loader);
 
-      this.titleEl = document.createElement('span');
-      this.titleEl.className = 'frontend-edit__sidebar-title';
-      this.titleEl.textContent = 'Edit content';
-      header.appendChild(this.titleEl);
-
-      const closeBtn = document.createElement('button');
-      closeBtn.className = 'frontend-edit__sidebar-close';
-      closeBtn.type = 'button';
-      closeBtn.innerHTML = ICONS.close;
-      closeBtn.addEventListener('click', () => this.requestClose());
-      header.appendChild(closeBtn);
-
-      // Iframe
+      // Iframe (header with Save/Close is rendered inside by TYPO3's ContextualRecordEditController)
       this.iframe = document.createElement('iframe');
       this.iframe.className = 'frontend-edit__sidebar-iframe';
       this.iframe.setAttribute('title', 'Edit content');
 
-      this.sidebar.appendChild(header);
       this.sidebar.appendChild(this.iframe);
 
       document.body.appendChild(this.backdrop);
@@ -993,6 +981,8 @@
       // Monitor iframe loads for save/close detection and UI enhancements
       this.iframe.addEventListener('load', () => {
         if (!this.sidebar.classList.contains('frontend-edit__sidebar--open')) return;
+        this.loader.classList.remove('frontend-edit__sidebar-loader--visible');
+        this.iframe.classList.add('frontend-edit__sidebar-iframe--loaded');
         try {
           const iframeUrl = this.iframe.contentWindow?.location.href;
           if (iframeUrl && iframeUrl.includes('justSaved=1')) {
@@ -1015,6 +1005,8 @@
       Logger.log(`Opening contextual edit for uid ${uid}`);
       this.hasSaved = false;
       this.targetBlank = targetBlank || false;
+      this.loader.classList.add('frontend-edit__sidebar-loader--visible');
+      this.iframe.classList.remove('frontend-edit__sidebar-iframe--loaded');
       this.iframe.src = contextualUrl;
       this.backdrop.classList.add('frontend-edit__sidebar-backdrop--visible');
       this.sidebar.classList.add('frontend-edit__sidebar--open');
