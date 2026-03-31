@@ -32,6 +32,8 @@ class Button
      */
     protected array $children;
 
+    protected ?string $contextualUrl = null;
+
     public function __construct(protected string $label, protected ButtonType $type, protected ?string $url = null, protected ?Icon $icon = null, protected bool $targetBlank = false)
     {
         $this->children = [];
@@ -75,6 +77,16 @@ class Button
     public function setIcon(?Icon $icon): void
     {
         $this->icon = $icon;
+    }
+
+    public function getContextualUrl(): ?string
+    {
+        return $this->contextualUrl;
+    }
+
+    public function setContextualUrl(?string $contextualUrl): void
+    {
+        $this->contextualUrl = $contextualUrl;
     }
 
     public function isTargetBlank(): bool
@@ -143,6 +155,10 @@ class Button
         if (null !== $this->url && '' !== $this->url) {
             $result['url'] = $this->url;
             $result['targetBlank'] = $this->targetBlank;
+        }
+
+        if (null !== $this->contextualUrl && '' !== $this->contextualUrl) {
+            $result['contextualUrl'] = $this->contextualUrl;
         }
 
         if ($this->icon instanceof Icon) {

@@ -151,6 +151,42 @@ final readonly class UrlBuilderService
     }
 
     /**
+     * Check if the contextual edit route exists (TYPO3 v14.2+).
+     */
+    public function isContextualEditRouteAvailable(): bool
+    {
+        try {
+            $this->uriBuilder->buildUriFromRoute('record_edit_contextual');
+
+            return true;
+        } catch (RouteNotFoundException) {
+            return false;
+        }
+    }
+
+    /**
+     * Build a contextual edit URL for the sidebar editor (TYPO3 v14.2+).
+     *
+     * Returns null if the route does not exist (TYPO3 v13 / v14.0-v14.1).
+     */
+    public function buildContextualEditUrl(int $uid, string $table, int $languageUid): ?string
+    {
+        try {
+            return $this->uriBuilder->buildUriFromRoute(
+                'record_edit_contextual',
+                [
+                    'edit' => [
+                        $table => [$uid => 'edit'],
+                    ],
+                    'language' => $languageUid,
+                ],
+            )->__toString();
+        } catch (RouteNotFoundException) {
+            return null;
+        }
+    }
+
+    /**
      * @param array<string, mixed> $parameters
      *
      * @throws RouteNotFoundException
