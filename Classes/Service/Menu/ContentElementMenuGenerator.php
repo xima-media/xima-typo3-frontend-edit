@@ -104,7 +104,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
                 $contentElement['list_type'] ?? '',
             );
             $returnUrlAnchor = $enableScrollToElement ? $returnUrlWithoutFragment.'#c'.$contentElement['uid'] : $returnUrlWithoutFragment;
-            $contextualUrl = $this->resolveContextualUrl($contextualRouteAvailable, (int) $contentElement['uid'], $languageUid);
+            $contextualUrl = $this->resolveContextualUrl($contextualRouteAvailable, (int) $contentElement['uid'], $languageUid, $returnUrlAnchor);
 
             if (false === $contentElementConfig) {
                 continue;
@@ -259,12 +259,12 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         return array_values($uids);
     }
 
-    private function resolveContextualUrl(bool $contextualEditingEnabled, int $uid, int $languageUid): ?string
+    private function resolveContextualUrl(bool $contextualEditingEnabled, int $uid, int $languageUid, string $returnUrl): ?string
     {
         if (!$contextualEditingEnabled) {
             return null;
         }
 
-        return $this->urlBuilderService->buildContextualEditUrl($uid, 'tt_content', $languageUid);
+        return $this->urlBuilderService->buildContextualEditUrl($uid, 'tt_content', $languageUid, $returnUrl);
     }
 }
