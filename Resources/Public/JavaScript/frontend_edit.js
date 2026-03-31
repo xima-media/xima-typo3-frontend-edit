@@ -548,9 +548,33 @@
       if (editAction?.url && this.isValidUrl(editAction.url)) {
         btn.href = editAction.url;
         if (editAction.targetBlank) btn.target = '_blank';
+
+        // Contextual editing: intercept click to open sidebar
+        if (editAction.contextualUrl && UI.isValidUrl(editAction.contextualUrl)) {
+          const contextualUrl = editAction.contextualUrl;
+          const uid = contentElement.element?.uid;
+          btn.addEventListener('click', (e) => {
+            if (e.ctrlKey || e.metaKey || e.shiftKey) return; // Allow Ctrl+Click to open in new tab
+            if (UI.openContextualEdit(contextualUrl, editAction.url, uid, editAction.targetBlank)) {
+              e.preventDefault();
+            }
+          });
+        }
       } else if (contentElement.menu.url && this.isValidUrl(contentElement.menu.url)) {
         btn.href = contentElement.menu.url;
         if (contentElement.menu.targetBlank) btn.target = '_blank';
+
+        // Contextual editing for simple edit button (no context menu)
+        if (contentElement.menu.contextualUrl && UI.isValidUrl(contentElement.menu.contextualUrl)) {
+          const contextualUrl = contentElement.menu.contextualUrl;
+          const uid = contentElement.element?.uid;
+          btn.addEventListener('click', (e) => {
+            if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+            if (UI.openContextualEdit(contextualUrl, contentElement.menu.url, uid, contentElement.menu.targetBlank)) {
+              e.preventDefault();
+            }
+          });
+        }
       }
 
       return btn;
@@ -584,6 +608,19 @@
             el.href = action.url;
           }
           if (action.targetBlank) el.target = '_blank';
+
+          // Contextual editing for the edit link in dropdown
+          if (name === 'edit' && action.contextualUrl && UI.isValidUrl(action.contextualUrl)) {
+            const contextualUrl = action.contextualUrl;
+            const ceUid = contentElement.element?.uid;
+            el.addEventListener('click', (e) => {
+              if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+              if (UI.openContextualEdit(contextualUrl, action.url, ceUid, action.targetBlank)) {
+                e.preventDefault();
+                Dropdown.closeAll();
+              }
+            });
+          }
         }
 
         if (action.type === 'divider') {
@@ -619,6 +656,17 @@
       }
 
       return dropdown;
+    },
+
+    /**
+     * Opens a contextual edit URL, either in the sidebar (if available) or via direct navigation.
+     */
+    openContextualEdit(contextualUrl, fallbackUrl, uid, targetBlank) {
+      if (window.FRONTEND_EDIT_CONTEXTUAL_EDITING && contextualUrl && ContextualEdit.sidebar) {
+        ContextualEdit.open(contextualUrl, uid, targetBlank);
+        return true;
+      }
+      return false;
     },
 
     /**
@@ -884,6 +932,223 @@
   };
 
   /**
+   * Contextual Edit - Sidebar editing via iframe (experimental, TYPO3 v14.2+)
+   */
+  const ContextualEdit = {
+    sidebar: null,
+    iframe: null,
+    backdrop: null,
+    titleEl: null,
+
+    init() {
+      this.createSidebarDOM();
+      window.addEventListener('message', (e) => this.handleMessage(e));
+      Logger.log('ContextualEdit module initialized');
+    },
+
+    createSidebarDOM() {
+      // Backdrop
+      this.backdrop = document.createElement('div');
+      this.backdrop.className = 'frontend-edit__sidebar-backdrop';
+      this.backdrop.addEventListener('click', () => this.requestClose());
+
+      // Sidebar container
+      this.sidebar = document.createElement('div');
+      this.sidebar.className = 'frontend-edit__sidebar';
+
+      // Header
+      const header = document.createElement('div');
+      header.className = 'frontend-edit__sidebar-header';
+
+      this.titleEl = document.createElement('span');
+      this.titleEl.className = 'frontend-edit__sidebar-title';
+      this.titleEl.textContent = 'Edit content';
+      header.appendChild(this.titleEl);
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'frontend-edit__sidebar-close';
+      closeBtn.type = 'button';
+      closeBtn.innerHTML = ICONS.close;
+      closeBtn.addEventListener('click', () => this.requestClose());
+      header.appendChild(closeBtn);
+
+      // Iframe
+      this.iframe = document.createElement('iframe');
+      this.iframe.className = 'frontend-edit__sidebar-iframe';
+      this.iframe.setAttribute('title', 'Edit content');
+
+      this.sidebar.appendChild(header);
+      this.sidebar.appendChild(this.iframe);
+
+      document.body.appendChild(this.backdrop);
+      document.body.appendChild(this.sidebar);
+
+      // Close on Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.sidebar.classList.contains('frontend-edit__sidebar--open')) {
+          this.requestClose();
+        }
+      });
+
+      // Monitor iframe loads for save/close detection and UI enhancements
+      this.iframe.addEventListener('load', () => {
+        if (!this.sidebar.classList.contains('frontend-edit__sidebar--open')) return;
+        try {
+          const iframeUrl = this.iframe.contentWindow?.location.href;
+          if (iframeUrl && iframeUrl.includes('justSaved=1')) {
+            this.hasSaved = true;
+            Logger.log('Save detected via iframe URL');
+          }
+          if (iframeUrl && iframeUrl.includes('closed=1')) {
+            Logger.log('Close detected via iframe URL');
+            this.close();
+            return;
+          }
+          this.enhanceIframeUI();
+        } catch (e) {
+          // Cross-origin or access error — ignore
+        }
+      });
+    },
+
+    open(contextualUrl, uid, targetBlank) {
+      Logger.log(`Opening contextual edit for uid ${uid}`);
+      this.hasSaved = false;
+      this.targetBlank = targetBlank || false;
+      this.iframe.src = contextualUrl;
+      this.backdrop.classList.add('frontend-edit__sidebar-backdrop--visible');
+      this.sidebar.classList.add('frontend-edit__sidebar--open');
+      document.body.style.overflow = 'hidden';
+    },
+
+    close() {
+      this.sidebar.classList.remove('frontend-edit__sidebar--open');
+      this.backdrop.classList.remove('frontend-edit__sidebar-backdrop--visible');
+      document.body.style.overflow = '';
+      // Clear iframe after transition
+      setTimeout(() => { this.iframe.src = 'about:blank'; }, 300);
+      // Reload page if changes were saved
+      if (this.hasSaved) {
+        setTimeout(() => window.location.reload(), 350);
+      }
+    },
+
+    enhanceIframeUI() {
+      try {
+        const iframeDoc = this.iframe.contentDocument;
+        if (!iframeDoc) return;
+
+        const actionsBar = iframeDoc.querySelector('.contextual-record-edit-actions');
+        if (!actionsBar) {
+          // DOM may not be fully rendered yet — single retry after short delay
+          setTimeout(() => {
+            try {
+              const doc = this.iframe.contentDocument;
+              if (doc?.querySelector('.contextual-record-edit-actions')) {
+                this.enhanceIframeUI();
+              }
+            } catch (e) { /* ignore */ }
+          }, 200);
+          return;
+        }
+
+        if (actionsBar.querySelector('[name="_saveandclosedok"]')) return;
+
+        // Find existing buttons
+        const saveBtn = actionsBar.querySelector('[name="_savedok"]');
+        const closeBtn = actionsBar.querySelector('.t3js-contextual-close');
+        Logger.log('enhanceIframeUI: found elements', { saveBtn: !!saveBtn, closeBtn: !!closeBtn });
+        if (!saveBtn) return;
+
+        // Create "Save & Close" button
+        const saveCloseBtn = iframeDoc.createElement('button');
+        saveCloseBtn.type = 'submit';
+        saveCloseBtn.name = '_saveandclosedok';
+        saveCloseBtn.value = '1';
+        saveCloseBtn.setAttribute('form', 'ContextualRecordEditController');
+        saveCloseBtn.className = 'btn btn-default';
+
+        // Use dedicated save-close icon
+        const iconEl = iframeDoc.createElement('typo3-backend-icon');
+        iconEl.setAttribute('identifier', 'actions-document-save-close');
+        iconEl.setAttribute('size', 'small');
+        saveCloseBtn.appendChild(iconEl);
+
+        const labelSpan = iframeDoc.createElement('span');
+        labelSpan.className = 'contextual-record-edit-button-label';
+        labelSpan.textContent = 'Save & Close';
+        saveCloseBtn.appendChild(labelSpan);
+
+        // Insert before close button or append at end
+        if (closeBtn) {
+          actionsBar.insertBefore(saveCloseBtn, closeBtn);
+        } else {
+          actionsBar.appendChild(saveCloseBtn);
+        }
+
+        // Override fullscreen button to open in parent window
+        const fullscreenBtn = iframeDoc.querySelector('.t3js-contextual-fullscreen');
+        if (fullscreenBtn) {
+          fullscreenBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const href = fullscreenBtn.getAttribute('href');
+            if (href) {
+              this.close();
+              if (this.targetBlank) {
+                window.open(href, '_blank');
+              } else {
+                window.location.href = href;
+              }
+            }
+          });
+        }
+
+        Logger.log('Injected Save & Close button into iframe');
+      } catch (e) {
+        Logger.log('Could not enhance iframe UI', { error: e.message }, 'warn');
+      }
+    },
+
+    requestClose() {
+      // Close directly - the iframe's TYPO3 backend JS may not be fully functional
+      // in a frontend context, so we can't rely on postMessage for close confirmation
+      this.close();
+    },
+
+    handleMessage(event) {
+      // Same-origin validation
+      if (event.origin !== window.location.origin) return;
+
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+
+      // TYPO3 contextual-record-edit.js uses data.actionName
+      switch (data.actionName) {
+        case 'typo3:editform:saved':
+          this.onSaved(data);
+          break;
+        case 'typo3:editform:closed':
+          this.close();
+          break;
+        case 'typo3:editform:navigate':
+          this.onNavigate();
+          break;
+      }
+    },
+
+    onSaved(data) {
+      this.hasSaved = true;
+      const title = data.recordTitle || 'Record';
+      Logger.log(`Record saved: ${title}`);
+    },
+
+    onNavigate() {
+      this.close();
+    }
+  };
+
+  /**
    * Main Application
    */
   const FrontendEdit = {
@@ -920,6 +1185,11 @@
 
         // Initialize flash message notifications (always, even when editing is disabled)
         Notification.init();
+
+        // Initialize contextual editing sidebar if enabled
+        if (window.FRONTEND_EDIT_CONTEXTUAL_EDITING) {
+          ContextualEdit.init();
+        }
 
         // Only initialize content element editing if not disabled
         if (!window.FRONTEND_EDIT_DISABLED) {
