@@ -63,6 +63,7 @@ final readonly class ResourceRendererService
             $this->addFloatingUiResource($resources, $nonceAttribute);
             $this->addSettingsConfig($resources, $nonceAttribute, $request);
             $this->addDebugConfig($resources, $nonceAttribute);
+            $this->addContextualEditResourceIfEnabled($resources, $request, $nonceAttribute);
             $this->addToolbarConfig($resources, $request);
             $this->addStickyToolbarResourcesIfEnabled($resources, $request, $nonceAttribute);
             $this->addFlashMessagesConfig($resources, $nonceAttribute, $flashMessages);
@@ -123,6 +124,25 @@ final readonly class ResourceRendererService
         $resources['debug_config'] = sprintf(
             '<script%s>window.FRONTEND_EDIT_DEBUG = true;</script>',
             $nonceAttribute,
+        );
+    }
+
+    /**
+     * @param array<string, string> $resources
+     */
+    private function addContextualEditResourceIfEnabled(array &$resources, ?ServerRequestInterface $request, string $nonceAttribute): void
+    {
+        if (null === $request || !$this->settingsService->isContextualEditingEnabled($request)) {
+            return;
+        }
+
+        $contextualEditPath = PathUtility::getAbsoluteWebPath(
+            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/contextual_edit.js'),
+        );
+        $resources['contextual_edit'] = sprintf(
+            '<script%s src="%s"></script>',
+            $nonceAttribute,
+            $contextualEditPath,
         );
     }
 
