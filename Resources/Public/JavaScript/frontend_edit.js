@@ -943,8 +943,39 @@
 
     init() {
       this.createSidebarDOM();
+      this.provideTopLevelStubs();
       window.addEventListener('message', (e) => this.handleMessage(e));
       Logger.log('ContextualEdit module initialized');
+    },
+
+    provideTopLevelStubs() {
+      // TYPO3 backend modules in the iframe access top.TYPO3 for various globals.
+      // These stubs must exist on the parent window before the iframe loads.
+      if (!window.TYPO3) window.TYPO3 = {};
+      if (!window.TYPO3.InfoWindow) window.TYPO3.InfoWindow = { showItem: function() {} };
+      if (!window.TYPO3.settings) window.TYPO3.settings = {};
+
+      // DateConfiguration with formats needed by date-time-picker.js
+      if (!window.TYPO3.settings.DateConfiguration) {
+        window.TYPO3.settings.DateConfiguration = {
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+          formats: { date: 'Y-m-d', time: 'HH:mm', datetime: 'HH:mm Y-m-d' }
+        };
+      }
+
+      // consumerScope event system needed by form-engine.js
+      if (!window.TYPO3.Backend) window.TYPO3.Backend = {};
+      if (!window.TYPO3.Backend.consumerScope) {
+        var consumers = {};
+        window.TYPO3.Backend.consumerScope = {
+          attach: function(c) { consumers[c] = true; },
+          detach: function(c) { delete consumers[c]; },
+          invoke: function() {}
+        };
+      }
+      if (!window.TYPO3.Backend.ContentContainer) {
+        window.TYPO3.Backend.ContentContainer = { refresh: function() {}, setUrl: function() {} };
+      }
     },
 
     createSidebarDOM() {
@@ -986,6 +1017,7 @@
       // Monitor iframe loads for save/close detection and UI enhancements
       this.iframe.addEventListener('load', () => {
         if (!this.sidebar.classList.contains('frontend-edit__sidebar--open')) return;
+        this.injectBackendStubs();
         this.loader.classList.remove('frontend-edit__sidebar-loader--visible');
         this.iframe.classList.add('frontend-edit__sidebar-iframe--loaded');
         try {
@@ -1016,10 +1048,10 @@
       this.targetBlank = targetBlank || false;
       this.loader.classList.add('frontend-edit__sidebar-loader--visible');
       this.iframe.classList.remove('frontend-edit__sidebar-iframe--loaded');
-      this.iframe.src = contextualUrl;
       this.backdrop.classList.add('frontend-edit__sidebar-backdrop--visible');
       this.sidebar.classList.add('frontend-edit__sidebar--open');
       document.body.style.overflow = 'hidden';
+      this.iframe.src = contextualUrl;
       this.iframe.focus();
     },
 
@@ -1037,6 +1069,22 @@
       // Reload page if changes were saved
       if (this.hasSaved) {
         setTimeout(() => window.location.reload(), 350);
+      }
+    },
+
+    injectBackendStubs() {
+      try {
+        const iframeWin = this.iframe.contentWindow;
+        if (!iframeWin) return;
+
+        // Provide TYPO3 globals inside the iframe for modules that access window.TYPO3
+        if (!iframeWin.TYPO3) iframeWin.TYPO3 = {};
+        if (!iframeWin.TYPO3.InfoWindow) iframeWin.TYPO3.InfoWindow = { showItem: function() {} };
+        if (!iframeWin.TYPO3.settings) iframeWin.TYPO3.settings = {};
+
+        Logger.log('Injected backend stubs into iframe');
+      } catch (e) {
+        Logger.log('Could not inject backend stubs', { error: e.message }, 'warn');
       }
     },
 
