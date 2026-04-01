@@ -977,6 +977,17 @@
           }
         }
       };
+
+      // Handle top-level module import requests from iframe backend modules.
+      // topLevelModuleImport.js dispatches this event on top.document expecting
+      // a promise to be set on event.detail.importPromise.
+      document.addEventListener('typo3:import-javascript-module', function(e) {
+        var specifier = e.detail && e.detail.specifier;
+        if (specifier) {
+          // Resolve silently — the module won't load but won't throw either
+          e.detail.importPromise = Promise.resolve({});
+        }
+      });
     },
 
     createSidebarDOM() {
