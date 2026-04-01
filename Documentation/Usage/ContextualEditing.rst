@@ -19,6 +19,12 @@ properties directly in the frontend without leaving the page. A sidebar panel
 slides in from the right, displaying the TYPO3 FormEngine edit form inside an
 iframe.
 
+..  figure:: /Images/sidebar.jpg
+    :alt: Contextual editing sidebar showing the edit form for a content element
+    :class: with-shadow
+
+    The contextual editing sidebar opens directly in the frontend
+
 Enabling Contextual Editing
 ============================
 
