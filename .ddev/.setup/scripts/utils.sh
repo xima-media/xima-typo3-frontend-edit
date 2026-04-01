@@ -335,8 +335,9 @@ function setup_site_config() {
         return
     fi
 
-    # Copy template site config
-    cp -r "$TEMPLATE_DIR/sites" "$TARGET_DIR/sites" 2>/dev/null || true
+    # Overwrite site config created by typo3 setup with our templates
+    rm -rf "$TARGET_DIR/sites"
+    cp -r "$TEMPLATE_DIR/sites" "$TARGET_DIR/sites"
 
     # Replace placeholders in all YAML files
     find "$TARGET_DIR/sites" -name "*.yaml" -exec sed -i \
