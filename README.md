@@ -33,6 +33,7 @@ The extension has been developed to provide a simple and lightweight solution to
 - **Configurable Position** - 12 toolbar positions available
 - **Save & Close** - Quick return to frontend after editing
 - **UserTSconfig** - Disable frontend editing per user or user group
+- **Contextual Editing Sidebar** *(experimental, v2.2.0+)* - Edit content elements and page properties in a [sidebar panel](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html) without leaving the frontend (TYPO3 v14.2+)
 
 ## 🔥 Installation
 
