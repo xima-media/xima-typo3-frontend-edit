@@ -1062,7 +1062,8 @@
       this.iframe.classList.remove('frontend-edit__sidebar-iframe--loaded');
       this.backdrop.classList.add('frontend-edit__sidebar-backdrop--visible');
       this.sidebar.classList.add('frontend-edit__sidebar--open');
-      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      document.documentElement.style.scrollbarGutter = 'stable';
       this.iframe.src = contextualUrl;
       this.iframe.focus();
     },
@@ -1071,7 +1072,8 @@
       clearTimeout(this.closeTimeout);
       this.sidebar.classList.remove('frontend-edit__sidebar--open');
       this.backdrop.classList.remove('frontend-edit__sidebar-backdrop--visible');
-      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      document.documentElement.style.scrollbarGutter = '';
       // Clear iframe after transition
       this.resetTimeout = setTimeout(() => {
         if (!this.sidebar.classList.contains('frontend-edit__sidebar--open')) {
