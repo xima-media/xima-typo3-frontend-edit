@@ -1038,7 +1038,7 @@
             const params = new URL(iframeUrl).searchParams;
             if (params.get('justSaved') === '1') {
               this.hasSaved = true;
-              this.showSaveNotification();
+              this.captureSavedRecordTitle();
             }
             if (params.get('closed') === '1') {
               Logger.log('Close detected via iframe URL');
@@ -1080,9 +1080,10 @@
           this.iframe.src = 'about:blank';
         }
       }, 300);
-      // Reload page if changes were saved
+      // Show notification and reload page if changes were saved
       if (this.hasSaved) {
-        setTimeout(() => window.location.reload(), 350);
+        this.showSaveNotification(this.savedRecordTitle);
+        setTimeout(() => window.location.reload(), 2000);
       }
     },
 
@@ -1225,22 +1226,24 @@
 
     onSaved(data) {
       this.hasSaved = true;
-      this.showSaveNotification(data.recordTitle);
+      this.savedRecordTitle = data.recordTitle || null;
+      this.captureSavedRecordTitle();
+    },
+
+    captureSavedRecordTitle() {
+      if (this.savedRecordTitle) return;
+      try {
+        this.savedRecordTitle = this.iframe.contentDocument
+          ?.querySelector('.contextual-record-edit-title')?.textContent?.trim();
+      } catch (e) { /* ignore */ }
     },
 
     showSaveNotification(recordTitle) {
-      // Try to read record title from iframe DOM if not provided via postMessage
-      if (!recordTitle) {
-        try {
-          recordTitle = this.iframe.contentDocument?.querySelector('.contextual-record-edit-title')?.textContent?.trim();
-        } catch (e) { /* ignore */ }
-      }
       Notification.show({
         title: recordTitle || 'Record',
         message: 'Saved',
         severity: 'ok'
       });
-      Logger.log(`Record saved: ${recordTitle || 'unknown'}`);
     },
 
     onNavigate() {
