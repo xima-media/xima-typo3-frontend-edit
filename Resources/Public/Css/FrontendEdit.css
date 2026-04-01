@@ -617,6 +617,12 @@
     gap: 10px;
     pointer-events: none;
     max-width: 400px;
+    transition: right 0.3s ease-out, left 0.3s ease-out;
+}
+
+.frontend-edit__sidebar-active .frontend-edit__notification-container {
+    right: auto;
+    left: 20px;
 }
 
 .frontend-edit__notification {

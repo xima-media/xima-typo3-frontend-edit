@@ -1064,6 +1064,7 @@
       this.sidebar.classList.add('frontend-edit__sidebar--open');
       document.documentElement.style.overflow = 'hidden';
       document.documentElement.style.scrollbarGutter = 'stable';
+      document.body.classList.add('frontend-edit__sidebar-active');
       this.iframe.src = contextualUrl;
       this.iframe.focus();
     },
@@ -1074,6 +1075,7 @@
       this.backdrop.classList.remove('frontend-edit__sidebar-backdrop--visible');
       document.documentElement.style.overflow = '';
       document.documentElement.style.scrollbarGutter = '';
+      document.body.classList.remove('frontend-edit__sidebar-active');
       // Clear iframe after transition
       this.resetTimeout = setTimeout(() => {
         if (!this.sidebar.classList.contains('frontend-edit__sidebar--open')) {
