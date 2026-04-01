@@ -1062,8 +1062,7 @@
       this.iframe.classList.remove('frontend-edit__sidebar-iframe--loaded');
       this.backdrop.classList.add('frontend-edit__sidebar-backdrop--visible');
       this.sidebar.classList.add('frontend-edit__sidebar--open');
-      document.documentElement.style.overflow = 'hidden';
-      document.documentElement.style.scrollbarGutter = 'stable';
+      document.documentElement.style.overflow = 'clip';
       document.body.classList.add('frontend-edit__sidebar-active');
       this.iframe.src = contextualUrl;
       this.iframe.focus();
@@ -1074,7 +1073,6 @@
       this.sidebar.classList.remove('frontend-edit__sidebar--open');
       this.backdrop.classList.remove('frontend-edit__sidebar-backdrop--visible');
       document.documentElement.style.overflow = '';
-      document.documentElement.style.scrollbarGutter = '';
       // Clear iframe after transition
       this.resetTimeout = setTimeout(() => {
         if (!this.sidebar.classList.contains('frontend-edit__sidebar--open')) {
