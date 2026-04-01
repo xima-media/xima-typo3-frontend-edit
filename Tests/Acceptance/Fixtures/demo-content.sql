@@ -1,8 +1,10 @@
 -- Demo content for xima-typo3-frontend-edit development instances
 -- Provides a realistic page tree with various content element types
 
--- Remove default sys_template created by typo3 setup (conflicts with site sets)
+-- Clean slate: remove records from previous installs and default sys_template
 DELETE FROM `sys_template` WHERE `pid` = 1;
+DELETE FROM `tt_content` WHERE `pid` IN (1, 2, 3, 4, 5, 6, 7);
+DELETE FROM `pages` WHERE `uid` IN (1, 2, 3, 4, 5, 6, 7);
 
 -- Pages
 REPLACE INTO `pages` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `title`, `doktype`, `slug`, `is_siteroot`) VALUES

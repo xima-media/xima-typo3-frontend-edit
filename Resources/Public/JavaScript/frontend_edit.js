@@ -949,34 +949,25 @@
     },
 
     provideTopLevelStubs() {
-      // Some TYPO3 backend modules in the iframe access top.TYPO3 (parent window).
-      // Provide minimal stubs to prevent hard crashes. Complex features like
-      // PageBrowser modals or DatePicker require the full backend — use the
-      // fullscreen button for those.
-      if (window.TYPO3) return; // Real backend context — don't override
-
-      window.TYPO3 = {
-        InfoWindow: { showItem: function() {} },
-        settings: {
-          // DateConfiguration fallback (Luxon format tokens). Overwritten with
-          // real values from the iframe's TYPO3.settings once it loads.
-          DateConfiguration: {
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-            formats: { date: 'yyyy-MM-dd', time: 'HH:mm', datetime: 'yyyy-MM-dd HH:mm' }
-          }
-        },
-        Backend: {
-          consumerScope: {
-            attach: function() {},
-            detach: function() {},
-            invoke: function() {}
-          },
-          ContentContainer: {
-            refresh: function() {},
-            setUrl: function() {}
-          }
-        }
-      };
+      // TYPO3 backend modules in the iframe access top.TYPO3 (parent window).
+      // Merge minimal stubs into existing object — window.TYPO3 may already
+      // be partially initialized by frontend plugins or TYPO3 core modules.
+      if (!window.TYPO3) window.TYPO3 = {};
+      if (!window.TYPO3.InfoWindow) window.TYPO3.InfoWindow = { showItem: function() {} };
+      if (!window.TYPO3.settings) window.TYPO3.settings = {};
+      if (!window.TYPO3.settings.DateConfiguration) {
+        window.TYPO3.settings.DateConfiguration = {
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+          formats: { date: 'yyyy-MM-dd', time: 'HH:mm', datetime: 'yyyy-MM-dd HH:mm' }
+        };
+      }
+      if (!window.TYPO3.Backend) window.TYPO3.Backend = {};
+      if (!window.TYPO3.Backend.consumerScope) {
+        window.TYPO3.Backend.consumerScope = { attach: function() {}, detach: function() {}, invoke: function() {} };
+      }
+      if (!window.TYPO3.Backend.ContentContainer) {
+        window.TYPO3.Backend.ContentContainer = { refresh: function() {}, setUrl: function() {} };
+      }
 
       // Handle top-level module import requests from iframe backend modules.
       // topLevelModuleImport.js dispatches this event on top.document expecting
