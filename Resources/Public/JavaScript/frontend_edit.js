@@ -1038,7 +1038,7 @@
             const params = new URL(iframeUrl).searchParams;
             if (params.get('justSaved') === '1') {
               this.hasSaved = true;
-              Logger.log('Save detected via iframe URL');
+              this.showSaveNotification();
             }
             if (params.get('closed') === '1') {
               Logger.log('Close detected via iframe URL');
@@ -1225,8 +1225,22 @@
 
     onSaved(data) {
       this.hasSaved = true;
-      const title = data.recordTitle || 'Record';
-      Logger.log(`Record saved: ${title}`);
+      this.showSaveNotification(data.recordTitle);
+    },
+
+    showSaveNotification(recordTitle) {
+      // Try to read record title from iframe DOM if not provided via postMessage
+      if (!recordTitle) {
+        try {
+          recordTitle = this.iframe.contentDocument?.querySelector('.contextual-record-edit-title')?.textContent?.trim();
+        } catch (e) { /* ignore */ }
+      }
+      Notification.show({
+        title: recordTitle || 'Record',
+        message: 'Saved',
+        severity: 'ok'
+      });
+      Logger.log(`Record saved: ${recordTitle || 'unknown'}`);
     },
 
     onNavigate() {
