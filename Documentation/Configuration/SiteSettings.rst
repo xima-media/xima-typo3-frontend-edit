@@ -112,6 +112,29 @@ Appearance Settings
         frontendEdit:
           enableScrollToElement: true
 
+..  confval:: frontendEdit.enableContextualEditing
+
+    :type: bool
+    :Default: false
+
+    ..  versionadded:: 2.2.0
+
+    ..  note::
+
+        This feature is **experimental** and requires **TYPO3 v14.2+**.
+        It has no effect on TYPO3 v13 or earlier v14 versions.
+
+    Opens content element and page property edit forms in a sidebar panel directly in the
+    frontend instead of navigating to the backend. Uses TYPO3's ``record_edit_contextual``
+    route introduced in v14.2.
+
+    See :ref:`contextual-editing` for details on how to use this feature.
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          enableContextualEditing: true
+
 ..  confval:: frontendEdit.enableFlashMessages
 
     :type: bool
@@ -218,6 +241,7 @@ Full example with all available options:
       enableOutline: true
       enableScrollToElement: true
       enableFlashMessages: true
+      enableContextualEditing: false
       filter:
         ignorePids: '1,2,3'
         ignoreDoktypes: '4,199,254'
