@@ -949,39 +949,26 @@
     },
 
     provideTopLevelStubs() {
-      // TYPO3 backend modules in the iframe access top.TYPO3.settings.*, top.TYPO3.Backend.*,
-      // top.TYPO3.InfoWindow etc. A deep auto-vivifying Proxy prevents TypeError on any
-      // missing nested property without having to enumerate every key individually.
+      // Some TYPO3 backend modules in the iframe access top.TYPO3 (parent window).
+      // Provide minimal stubs to prevent hard crashes. Complex features like
+      // PageBrowser modals or DatePicker require the full backend — use the
+      // fullscreen button for those.
       if (window.TYPO3) return; // Real backend context — don't override
 
-      function deepStub() {
-        var noop = function() { return deepStub(); };
-        return new Proxy(noop, {
-          get: function(target, prop) {
-            if (prop === Symbol.toPrimitive) return function() { return ''; };
-            if (prop === 'then') return undefined; // Prevent Promise detection
-            return deepStub();
+      window.TYPO3 = {
+        InfoWindow: { showItem: function() {} },
+        settings: {},
+        Backend: {
+          consumerScope: {
+            attach: function() {},
+            detach: function() {},
+            invoke: function() {}
           },
-          apply: function() { return deepStub(); }
-        });
-      }
-
-      window.TYPO3 = new Proxy({}, {
-        get: function(target, prop) {
-          if (prop in target) return target[prop];
-          return deepStub();
-        },
-        set: function(target, prop, value) {
-          target[prop] = value;
-          return true;
+          ContentContainer: {
+            refresh: function() {},
+            setUrl: function() {}
+          }
         }
-      });
-
-      // Provide concrete values where backend modules need real data (not just no-crash stubs)
-      window.TYPO3.settings = window.TYPO3.settings || {};
-      window.TYPO3.settings.DateConfiguration = {
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-        formats: { date: 'Y-m-d', time: 'HH:mm', datetime: 'HH:mm Y-m-d' }
       };
     },
 
