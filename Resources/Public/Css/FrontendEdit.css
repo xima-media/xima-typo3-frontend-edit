@@ -623,6 +623,7 @@
 .frontend-edit__sidebar-active .frontend-edit__notification-container {
     right: auto;
     left: 20px;
+    z-index: 10006;
 }
 
 .frontend-edit__notification {
