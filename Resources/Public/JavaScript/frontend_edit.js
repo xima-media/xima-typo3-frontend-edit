@@ -958,11 +958,11 @@
       window.TYPO3 = {
         InfoWindow: { showItem: function() {} },
         settings: {
-          // DateConfiguration is normally set by BackendController but not by
-          // ContextualRecordEditController — provide it for date-time-picker.js
+          // DateConfiguration fallback (Luxon format tokens). Overwritten with
+          // real values from the iframe's TYPO3.settings once it loads.
           DateConfiguration: {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-            formats: { date: 'Y-m-d', time: 'HH:mm', datetime: 'HH:mm Y-m-d' }
+            formats: { date: 'yyyy-MM-dd', time: 'HH:mm', datetime: 'yyyy-MM-dd HH:mm' }
           }
         },
         Backend: {
@@ -1076,14 +1076,18 @@
     injectBackendStubs() {
       try {
         const iframeWin = this.iframe.contentWindow;
-        if (!iframeWin) return;
+        if (!iframeWin || !iframeWin.TYPO3) return;
 
-        // Provide TYPO3 globals inside the iframe for modules that access window.TYPO3
-        if (!iframeWin.TYPO3) iframeWin.TYPO3 = {};
-        if (!iframeWin.TYPO3.InfoWindow) iframeWin.TYPO3.InfoWindow = { showItem: function() {} };
-        if (!iframeWin.TYPO3.settings) iframeWin.TYPO3.settings = {};
-
-        Logger.log('Injected backend stubs into iframe');
+        // Copy real settings from iframe into parent stubs so that modules
+        // reading top.TYPO3.settings.* (ajaxUrls, DateConfiguration, etc.)
+        // get the actual values set by the backend's PageRenderer.
+        const iframeSettings = iframeWin.TYPO3.settings;
+        if (iframeSettings && window.TYPO3 && window.TYPO3.settings) {
+          Object.keys(iframeSettings).forEach(function(key) {
+            window.TYPO3.settings[key] = iframeSettings[key];
+          });
+          Logger.log('Synced iframe TYPO3.settings to parent', { keys: Object.keys(iframeSettings) });
+        }
       } catch (e) {
         Logger.log('Could not inject backend stubs', { error: e.message }, 'warn');
       }
