@@ -1,6 +1,6 @@
 base: 'https://__VERSION__.__EXTENSION_NAME__.ddev.site'
 dependencies:
-  - bk2k/bootstrap-package
+  - bootstrap-package/full
   - xima/xima-typo3-frontend-edit
 languages:
   -
