@@ -60,15 +60,6 @@
 			<trans-unit id="tooltip.pageOptions">
 				<source>Page options</source>
 			</trans-unit>
-			<trans-unit id="contextual_edit.title">
-				<source>Edit content</source>
-			</trans-unit>
-			<trans-unit id="contextual_edit.saved">
-				<source>Record saved successfully</source>
-			</trans-unit>
-			<trans-unit id="contextual_edit.close">
-				<source>Close editor</source>
-			</trans-unit>
 		</body>
 	</file>
 </xliff>
