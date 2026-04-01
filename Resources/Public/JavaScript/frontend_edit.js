@@ -957,7 +957,14 @@
 
       window.TYPO3 = {
         InfoWindow: { showItem: function() {} },
-        settings: {},
+        settings: {
+          // DateConfiguration is normally set by BackendController but not by
+          // ContextualRecordEditController — provide it for date-time-picker.js
+          DateConfiguration: {
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+            formats: { date: 'Y-m-d', time: 'HH:mm', datetime: 'HH:mm Y-m-d' }
+          }
+        },
         Backend: {
           consumerScope: {
             attach: function() {},
