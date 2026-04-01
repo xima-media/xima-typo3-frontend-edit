@@ -275,7 +275,9 @@
               if (e.ctrlKey || e.metaKey || e.shiftKey) return;
               window.ContextualEdit.open(contextualUrl, null, targetBlank);
               e.preventDefault();
-              this.closeDropdown();
+              // Close the sticky toolbar dropdown
+              const dropdown = document.querySelector('.frontend-edit__sticky-dropdown');
+              if (dropdown) dropdown.classList.remove('frontend-edit__sticky-dropdown--visible');
             });
           }
           // Icons are trusted HTML from TYPO3 backend (IconFactory)
