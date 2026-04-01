@@ -31,8 +31,17 @@ in the frontend for logged-in backend users.
         ..  card-footer::   :ref:`Learn more <toolbar>`
             :button-style: btn btn-secondary stretched-link
 
+    ..  card::  Contextual Editing (Sidebar)
+
+        Edit content elements and page properties in a sidebar panel without
+        leaving the frontend. Experimental, requires TYPO3 v14.2+.
+
+        ..  card-footer::   :ref:`Learn more <contextual-editing>`
+            :button-style: btn btn-secondary stretched-link
+
 ..  toctree::
     :hidden:
 
     EditMenu
     Toolbar
+    ContextualEditing

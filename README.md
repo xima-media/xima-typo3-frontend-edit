@@ -34,6 +34,16 @@ The extension has been developed to provide a simple and lightweight solution to
 - **Save & Close** - Quick return to frontend after editing
 - **UserTSconfig** - Disable frontend editing per user or user group
 
+> [!NOTE]
+> **New in v2.2.0 — Contextual Editing Sidebar** *(experimental)*
+>
+> Edit content elements and page properties directly in a sidebar panel without leaving the frontend. Uses TYPO3 v14.2's `record_edit_contextual` route for a streamlined editing experience.
+>
+> ![Contextual Editing Sidebar](./Documentation/Images/sidebar.jpg)
+>
+> Enable via Site Settings: `frontendEdit.enableContextualEditing: true`
+> — [Documentation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)
+
 ## 🔥 Installation
 
 ### Requirements
