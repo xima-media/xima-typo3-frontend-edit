@@ -67,6 +67,8 @@ You can have a look at the `cookieDomain` setting to set a more flexible domain 
 
 See https://docs.typo3.org/m/typo3/reference-coreapi/13.4/en-us/Configuration/Typo3ConfVars/SYS.html#confval-globals-typo3-conf-vars-sys-cookiedomain
 
+Alternatively, you can use the `multisite_belogin <https://extensions.typo3.org/extension/multisite_belogin>`__ extension, which provides backend login support across multiple domains without requiring shared cookie domains.
+
 .. rst-class:: panel panel-default
 
 The edit button is not displayed with `DCE <https://extensions.typo3.org/extension/dce>`__ extension content elements.
