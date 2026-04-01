@@ -949,33 +949,40 @@
     },
 
     provideTopLevelStubs() {
-      // TYPO3 backend modules in the iframe access top.TYPO3 for various globals.
-      // These stubs must exist on the parent window before the iframe loads.
-      if (!window.TYPO3) window.TYPO3 = {};
-      if (!window.TYPO3.InfoWindow) window.TYPO3.InfoWindow = { showItem: function() {} };
-      if (!window.TYPO3.settings) window.TYPO3.settings = {};
+      // TYPO3 backend modules in the iframe access top.TYPO3.settings.*, top.TYPO3.Backend.*,
+      // top.TYPO3.InfoWindow etc. A deep auto-vivifying Proxy prevents TypeError on any
+      // missing nested property without having to enumerate every key individually.
+      if (window.TYPO3) return; // Real backend context — don't override
 
-      // DateConfiguration with formats needed by date-time-picker.js
-      if (!window.TYPO3.settings.DateConfiguration) {
-        window.TYPO3.settings.DateConfiguration = {
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
-          formats: { date: 'Y-m-d', time: 'HH:mm', datetime: 'HH:mm Y-m-d' }
-        };
+      function deepStub() {
+        var noop = function() { return deepStub(); };
+        return new Proxy(noop, {
+          get: function(target, prop) {
+            if (prop === Symbol.toPrimitive) return function() { return ''; };
+            if (prop === 'then') return undefined; // Prevent Promise detection
+            return deepStub();
+          },
+          apply: function() { return deepStub(); }
+        });
       }
 
-      // consumerScope event system needed by form-engine.js
-      if (!window.TYPO3.Backend) window.TYPO3.Backend = {};
-      if (!window.TYPO3.Backend.consumerScope) {
-        var consumers = {};
-        window.TYPO3.Backend.consumerScope = {
-          attach: function(c) { consumers[c] = true; },
-          detach: function(c) { delete consumers[c]; },
-          invoke: function() {}
-        };
-      }
-      if (!window.TYPO3.Backend.ContentContainer) {
-        window.TYPO3.Backend.ContentContainer = { refresh: function() {}, setUrl: function() {} };
-      }
+      window.TYPO3 = new Proxy({}, {
+        get: function(target, prop) {
+          if (prop in target) return target[prop];
+          return deepStub();
+        },
+        set: function(target, prop, value) {
+          target[prop] = value;
+          return true;
+        }
+      });
+
+      // Provide concrete values where backend modules need real data (not just no-crash stubs)
+      window.TYPO3.settings = window.TYPO3.settings || {};
+      window.TYPO3.settings.DateConfiguration = {
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+        formats: { date: 'Y-m-d', time: 'HH:mm', datetime: 'HH:mm Y-m-d' }
+      };
     },
 
     createSidebarDOM() {
