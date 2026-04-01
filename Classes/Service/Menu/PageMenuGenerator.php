@@ -23,6 +23,7 @@ use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditPageDropdownModifyEvent;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 
 /**
@@ -38,6 +39,7 @@ final class PageMenuGenerator extends AbstractMenuGenerator
         private readonly EventDispatcher $eventDispatcher,
         ExtensionConfiguration $extensionConfiguration,
         private readonly ConnectionPool $connectionPool,
+        private readonly UrlBuilderService $urlBuilderService,
     ) {
         parent::__construct($extensionConfiguration);
     }
@@ -72,7 +74,10 @@ final class PageMenuGenerator extends AbstractMenuGenerator
             $this->pageButtonBuilder->addInfoSection($menuButton, $pageRecord);
         }
 
-        $this->pageButtonBuilder->addEditSection($menuButton, $pid, $languageUid, $returnUrl);
+        $contextualUrl = $this->urlBuilderService->isContextualEditRouteAvailable()
+            ? $this->urlBuilderService->buildContextualEditUrl($pid, 'pages', $languageUid, $returnUrl)
+            : null;
+        $this->pageButtonBuilder->addEditSection($menuButton, $pid, $languageUid, $returnUrl, $contextualUrl);
         $this->pageButtonBuilder->addActionSection($menuButton, $pid, $returnUrl);
 
         /** @var FrontendEditPageDropdownModifyEvent $event */

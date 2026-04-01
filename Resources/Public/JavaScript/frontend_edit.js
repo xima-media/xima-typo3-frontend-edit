@@ -1262,6 +1262,8 @@
         // Initialize contextual editing sidebar if enabled
         if (window.FRONTEND_EDIT_CONTEXTUAL_EDITING) {
           ContextualEdit.init();
+          // Expose for sticky_toolbar.js (separate script, outside this IIFE)
+          window.ContextualEdit = ContextualEdit;
         }
 
         // Only initialize content element editing if not disabled
