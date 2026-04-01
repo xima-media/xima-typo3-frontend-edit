@@ -151,6 +151,49 @@ final readonly class UrlBuilderService
     }
 
     /**
+     * Check if the contextual edit route exists (TYPO3 v14.2+).
+     */
+    public function isContextualEditRouteAvailable(): bool
+    {
+        try {
+            $this->uriBuilder->buildUriFromRoute('record_edit_contextual');
+
+            return true;
+        } catch (RouteNotFoundException) {
+            return false;
+        }
+    }
+
+    /**
+     * Build a contextual edit URL for the sidebar editor (TYPO3 v14.2+).
+     *
+     * Returns null if the route does not exist (TYPO3 v13 / v14.0-v14.1).
+     * The returnUrl is passed through so the fullscreen edit link can return to the frontend.
+     */
+    public function buildContextualEditUrl(int $uid, string $table, int $languageUid, string $returnUrl = ''): ?string
+    {
+        try {
+            $parameters = [
+                'edit' => [
+                    $table => [$uid => 'edit'],
+                ],
+                'language' => $languageUid,
+            ];
+
+            if ('' !== $returnUrl) {
+                $parameters['returnUrl'] = $returnUrl;
+            }
+
+            return $this->uriBuilder->buildUriFromRoute(
+                'record_edit_contextual',
+                $parameters,
+            )->__toString();
+        } catch (RouteNotFoundException) {
+            return null;
+        }
+    }
+
+    /**
      * @param array<string, mixed> $parameters
      *
      * @throws RouteNotFoundException

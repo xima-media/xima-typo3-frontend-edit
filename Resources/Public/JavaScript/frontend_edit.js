@@ -548,9 +548,33 @@
       if (editAction?.url && this.isValidUrl(editAction.url)) {
         btn.href = editAction.url;
         if (editAction.targetBlank) btn.target = '_blank';
+
+        // Contextual editing: intercept click to open sidebar
+        if (editAction.contextualUrl && UI.isValidUrl(editAction.contextualUrl)) {
+          const contextualUrl = editAction.contextualUrl;
+          const uid = contentElement.element?.uid;
+          btn.addEventListener('click', (e) => {
+            if (e.ctrlKey || e.metaKey || e.shiftKey) return; // Allow Ctrl+Click to open in new tab
+            if (UI.openContextualEdit(contextualUrl, editAction.url, uid, editAction.targetBlank)) {
+              e.preventDefault();
+            }
+          });
+        }
       } else if (contentElement.menu.url && this.isValidUrl(contentElement.menu.url)) {
         btn.href = contentElement.menu.url;
         if (contentElement.menu.targetBlank) btn.target = '_blank';
+
+        // Contextual editing for simple edit button (no context menu)
+        if (contentElement.menu.contextualUrl && UI.isValidUrl(contentElement.menu.contextualUrl)) {
+          const contextualUrl = contentElement.menu.contextualUrl;
+          const uid = contentElement.element?.uid;
+          btn.addEventListener('click', (e) => {
+            if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+            if (UI.openContextualEdit(contextualUrl, contentElement.menu.url, uid, contentElement.menu.targetBlank)) {
+              e.preventDefault();
+            }
+          });
+        }
       }
 
       return btn;
@@ -584,6 +608,19 @@
             el.href = action.url;
           }
           if (action.targetBlank) el.target = '_blank';
+
+          // Contextual editing for the edit link in dropdown
+          if (name === 'edit' && action.contextualUrl && UI.isValidUrl(action.contextualUrl)) {
+            const contextualUrl = action.contextualUrl;
+            const ceUid = contentElement.element?.uid;
+            el.addEventListener('click', (e) => {
+              if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+              if (UI.openContextualEdit(contextualUrl, action.url, ceUid, action.targetBlank)) {
+                e.preventDefault();
+                Dropdown.closeAll();
+              }
+            });
+          }
         }
 
         if (action.type === 'divider') {
@@ -619,6 +656,17 @@
       }
 
       return dropdown;
+    },
+
+    /**
+     * Opens a contextual edit URL, either in the sidebar (if available) or via direct navigation.
+     */
+    openContextualEdit(contextualUrl, fallbackUrl, uid, targetBlank) {
+      if (window.FRONTEND_EDIT_CONTEXTUAL_EDITING && contextualUrl && window.ContextualEdit && window.ContextualEdit.sidebar) {
+        window.ContextualEdit.open(contextualUrl, uid, targetBlank);
+        return true;
+      }
+      return false;
     },
 
     /**
@@ -920,6 +968,13 @@
 
         // Initialize flash message notifications (always, even when editing is disabled)
         Notification.init();
+        // Expose for contextual_edit.js (separate script, outside this IIFE)
+        window.FrontendEditNotification = Notification;
+
+        // Initialize contextual editing sidebar if loaded
+        if (window.ContextualEdit) {
+          window.ContextualEdit.init();
+        }
 
         // Only initialize content element editing if not disabled
         if (!window.FRONTEND_EDIT_DISABLED) {

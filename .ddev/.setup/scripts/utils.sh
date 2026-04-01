@@ -167,6 +167,9 @@ function post_setup() {
     fi
   _done
 
+  _progress " ├─ Setup site configuration"
+    setup_site_config
+  _done
   _progress " ├─ Import data"
     import_xml_data
     import_sql_data
@@ -286,6 +289,7 @@ function install_composer_packages() {
     composer req typo3/cms-base-distribution:"^$VERSION" \
             typo3/cms-reports:"^$VERSION" \
             typo3/cms-lowlevel:"^$VERSION" \
+            bk2k/bootstrap-package:'*' \
             $PACKAGE_NAME:'*@dev' \
             test/sitepackage:'*@dev' \
             helhum/typo3-console:'*' \
@@ -319,6 +323,27 @@ function prepare_acceptance_testing() {
 
     $BASE_PATH/vendor/bin/codecept build -c $BASE_PATH/codeception.yml
   _done
+}
+
+# Function to set up site configuration from templates.
+# It copies site config templates and replaces placeholders with actual values.
+function setup_site_config() {
+    local TEMPLATE_DIR="/var/www/html/.ddev/.setup/templates/config"
+    local TARGET_DIR="$BASE_PATH/config"
+
+    if [ ! -d "$TEMPLATE_DIR" ]; then
+        return
+    fi
+
+    # Overwrite site config created by typo3 setup with our templates
+    rm -rf "$TARGET_DIR/sites"
+    cp -r "$TEMPLATE_DIR/sites" "$TARGET_DIR/sites"
+
+    # Replace placeholders in all YAML files
+    find "$TARGET_DIR/sites" -name "*.yaml" -exec sed -i \
+        -e "s/__VERSION__/$VERSION/g" \
+        -e "s/__EXTENSION_NAME__/$EXTENSION_NAME/g" \
+        {} +
 }
 
 # Function to import XML data into TYPO3.

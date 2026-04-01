@@ -332,6 +332,59 @@ final class ButtonTest extends TestCase
         self::assertArrayNotHasKey('children', $result);
     }
 
+    #[Test]
+    public function contextualUrlDefaultsToNull(): void
+    {
+        $button = new Button('Label', ButtonType::Link, 'https://example.com');
+
+        self::assertNull($button->getContextualUrl());
+    }
+
+    #[Test]
+    public function setContextualUrlChangesContextualUrl(): void
+    {
+        $button = new Button('Label', ButtonType::Link);
+        $button->setContextualUrl('https://contextual.com/edit');
+
+        self::assertSame('https://contextual.com/edit', $button->getContextualUrl());
+    }
+
+    #[Test]
+    public function renderIncludesContextualUrlWhenSet(): void
+    {
+        $this->setupLanguageServiceStub();
+
+        $button = new Button('Label', ButtonType::Link, 'https://example.com');
+        $button->setContextualUrl('https://contextual.com/edit');
+        $result = $button->render();
+
+        self::assertArrayHasKey('contextualUrl', $result);
+        self::assertSame('https://contextual.com/edit', $result['contextualUrl']);
+    }
+
+    #[Test]
+    public function renderExcludesContextualUrlWhenNull(): void
+    {
+        $this->setupLanguageServiceStub();
+
+        $button = new Button('Label', ButtonType::Link, 'https://example.com');
+        $result = $button->render();
+
+        self::assertArrayNotHasKey('contextualUrl', $result);
+    }
+
+    #[Test]
+    public function renderExcludesContextualUrlWhenEmpty(): void
+    {
+        $this->setupLanguageServiceStub();
+
+        $button = new Button('Label', ButtonType::Link, 'https://example.com');
+        $button->setContextualUrl('');
+        $result = $button->render();
+
+        self::assertArrayNotHasKey('contextualUrl', $result);
+    }
+
     private function setupLanguageServiceStub(): void
     {
         $languageService = $this->createStub(LanguageService::class);

@@ -162,6 +162,15 @@
 				<target>Kommagetrennte Liste von Plugin-Typen (list_type), die von der Frontend-Bearbeitung ausgeschlossen werden sollen.</target>
 			</trans-unit>
 
+			<trans-unit id="settings.frontendEdit.enableContextualEditing">
+				<source>[Experimental] Enable Contextual Editing</source>
+				<target>[Experimentell] Kontextuelles Bearbeiten aktivieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.enableContextualEditing">
+				<source>Opens content element edit forms in a sidebar panel instead of navigating to the backend. Requires TYPO3 v14.2+. This feature is experimental and may change in future versions.</source>
+				<target>Öffnet Inhaltselement-Bearbeitungsformulare in einem Seitenpanel anstatt zum Backend zu navigieren. Erfordert TYPO3 v14.2+. Diese Funktion ist experimentell und kann sich in zukünftigen Versionen ändern.</target>
+			</trans-unit>
+
 			<trans-unit id="settings.frontendEdit.filter.ignoreUids">
 				<source>Ignore UIDs</source>
 				<target>UIDs ignorieren</target>

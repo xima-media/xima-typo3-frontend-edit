@@ -1,6 +1,7 @@
 .idea
 .test/
 config
+!.ddev/.setup/templates/config
 public
 !Resources/Public
 vendor

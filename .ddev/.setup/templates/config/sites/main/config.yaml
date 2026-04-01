@@ -1,0 +1,15 @@
+base: 'https://__VERSION__.__EXTENSION_NAME__.ddev.site'
+dependencies:
+  - bootstrap-package/full
+  - xima/xima-typo3-frontend-edit
+languages:
+  -
+    title: English
+    enabled: true
+    languageId: 0
+    base: /
+    locale: en_US.UTF-8
+    navigationTitle: English
+    flag: us
+rootPageId: 1
+websiteTitle: 'Frontend Edit Demo'

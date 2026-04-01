@@ -166,6 +166,16 @@ final readonly class SettingsService
         return (bool) $settings->get('frontendEdit.enableScrollToElement', true);
     }
 
+    public function isContextualEditingEnabled(ServerRequestInterface $request): bool
+    {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
+            return false;
+        }
+
+        return (bool) $settings->get('frontendEdit.enableContextualEditing', false);
+    }
+
     public function isEnableFlashMessages(ServerRequestInterface $request): bool
     {
         $settings = $this->getSiteSettings($request);

@@ -37,6 +37,7 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         int $languageUid,
         string $returnUrlAnchor,
         bool $linkTargetBlank,
+        ?string $contextualUrl = null,
     ): Button {
         $url = $this->urlBuilderService->buildEditUrl(
             $contentElement['uid'],
@@ -45,13 +46,17 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
             $returnUrlAnchor,
         ).'&tx_ximatypo3frontendedit';
 
-        return new Button(
+        $button = new Button(
             'LLL:EXT:'.Configuration::EXT_KEY.'/Resources/Private/Language/locallang.xlf:edit_menu',
             ButtonType::Link,
             $url,
             $this->iconService->getIcon('actions-open'),
             $linkTargetBlank,
         );
+
+        $button->setContextualUrl($contextualUrl);
+
+        return $button;
     }
 
     public function createFullMenuButton(): Button
@@ -108,6 +113,7 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         int $languageUid,
         int $pid,
         string $returnUrlAnchor,
+        ?string $contextualUrl = null,
     ): void {
         $this->addButton($menuButton, 'div_edit', ButtonType::Divider);
 
@@ -126,6 +132,11 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         $editIcon = 'list' === $contentElement['CType'] ? 'content-plugin' : 'content-textpic';
 
         $this->addButton($menuButton, 'edit', ButtonType::Link, $editLabel, $editUrl, $editIcon);
+
+        // Set contextual URL on the edit button for sidebar editing
+        if (null !== $contextualUrl) {
+            $menuButton->getChildren()['edit']->setContextualUrl($contextualUrl);
+        }
 
         // Edit page button (with anchor to scroll to content element)
         $pageUrl = $this->urlBuilderService->buildPageLayoutUrl(

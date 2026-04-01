@@ -13,6 +13,7 @@ pre_setup 13
 # Add any additional packages you want to install to the command below.
 composer req typo3/cms-base-distribution:'^13.4' \
         helhum/typo3-console:'^8.2.1' \
+        bk2k/bootstrap-package:'*' \
         $PACKAGE_NAME:'*@dev' \
         test/sitepackage:'*@dev' \
         --no-progress -n -d $BASE_PATH

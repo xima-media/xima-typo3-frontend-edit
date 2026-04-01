@@ -98,6 +98,13 @@
                 <source>Right Bottom</source>
             </trans-unit>
 
+            <trans-unit id="settings.frontendEdit.enableContextualEditing">
+                <source>[Experimental] Enable Contextual Editing</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.enableContextualEditing">
+                <source>Opens content element edit forms in a sidebar panel instead of navigating to the backend. Requires TYPO3 v14.2+. This feature is experimental and may change in future versions.</source>
+            </trans-unit>
+
             <trans-unit id="settings.frontendEdit.enableOutline">
                 <source>Enable Outline</source>
             </trans-unit>
