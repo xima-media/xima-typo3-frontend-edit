@@ -35,10 +35,10 @@ class BackendUserUtility
      */
     public static function hasRecordEditAccess(BackendUserAuthentication $backendUser, string $table, array $record): bool
     {
-        if (method_exists($backendUser, 'checkRecordEditAccess')) {
+        if (method_exists($backendUser, 'checkRecordEditAccess')) { // @phpstan-ignore function.alreadyNarrowedType (v13 compat)
             return $backendUser->checkRecordEditAccess($table, $record)->isAllowed;
         }
 
-        return $backendUser->recordEditAccessInternals($table, $record);
+        return $backendUser->recordEditAccessInternals($table, $record); // @phpstan-ignore method.deprecated (v13 compat)
     }
 }
