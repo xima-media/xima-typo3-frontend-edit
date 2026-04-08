@@ -664,13 +664,12 @@
         if (action.type === 'divider') {
           el.className = 'frontend-edit__divider';
           el.setAttribute('role', 'separator');
+        } else if (action.type === 'info') {
+          el.className = 'frontend-edit__info';
+          el.setAttribute('role', 'presentation');
         } else {
           el.setAttribute('role', 'menuitem');
           el.setAttribute('tabindex', '-1');
-        }
-
-        if (action.type === 'info') {
-          el.className = 'frontend-edit__info';
         }
 
         const safeName = this.escapeClassName(name);
@@ -714,6 +713,7 @@
           e.preventDefault();
           items[items.length - 1]?.focus();
         } else if (e.key === 'Enter') {
+          e.preventDefault();
           if (document.activeElement && document.activeElement.click) {
             document.activeElement.click();
           }
@@ -972,7 +972,7 @@
         if (toolbar?.contains(e.relatedTarget)) return;
 
         OverlayManager.setActive(targetElement, false);
-        if (dropdown) dropdown.style.display = 'none';
+        if (dropdown) Dropdown.closeAll();
       });
 
       // Keep active when hovering toolbar
@@ -987,7 +987,7 @@
           if (dropdown?.contains(e.relatedTarget)) return;
 
           OverlayManager.setActive(targetElement, false);
-          if (dropdown) dropdown.style.display = 'none';
+          if (dropdown) Dropdown.closeAll();
         });
       }
 
@@ -996,7 +996,7 @@
           if (targetElement.contains(e.relatedTarget)) return;
           if (toolbar?.contains(e.relatedTarget)) return;
 
-          dropdown.style.display = 'none';
+          Dropdown.closeAll();
           OverlayManager.setActive(targetElement, false);
         });
       }

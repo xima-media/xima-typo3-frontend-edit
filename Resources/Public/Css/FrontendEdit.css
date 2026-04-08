@@ -842,7 +842,7 @@
     position: absolute;
     top: 8px;
     right: 8px;
-    z-index: 2;
+    z-index: 10006;
     width: 32px;
     height: 32px;
     display: flex;
@@ -868,11 +868,17 @@
     .frontend-edit__sidebar--open,
     .frontend-edit__sidebar-backdrop,
     .frontend-edit__sidebar-backdrop--visible,
+    .frontend-edit__sidebar-loader,
+    .frontend-edit__sidebar-iframe,
     .frontend-edit__overlay,
     .frontend-edit__overlay--active,
     .frontend-edit__tooltip,
     .frontend-edit__tooltip--visible {
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
+    }
+
+    .frontend-edit__sidebar-spinner {
+        animation: none !important;
     }
 }
