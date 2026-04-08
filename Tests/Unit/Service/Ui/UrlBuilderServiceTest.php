@@ -47,7 +47,7 @@ final class UrlBuilderServiceTest extends TestCase
     public function buildEditUrlReturnsCorrectUrl(): void
     {
         $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('record_edit', self::callback(static fn(array $params): bool => isset($params['edit']['tt_content'][1]) && 'edit' === $params['edit']['tt_content'][1]))
+            ->with('record_edit', self::callback(static fn (array $params): bool => isset($params['edit']['tt_content'][1]) && 'edit' === $params['edit']['tt_content'][1]))
             ->willReturn(new Uri('/typo3/record/edit'));
 
         $service = new UrlBuilderService();
@@ -60,7 +60,7 @@ final class UrlBuilderServiceTest extends TestCase
     public function buildPageLayoutUrlReturnsCorrectUrl(): void
     {
         $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('web_layout', self::callback(static fn(array $params): bool => 1 === $params['id'] && 0 === $params['language']))
+            ->with('web_layout', self::callback(static fn (array $params): bool => 1 === $params['id'] && 0 === $params['language']))
             ->willReturn(new Uri('/typo3/module/web/layout'));
 
         $service = new UrlBuilderService();
@@ -73,7 +73,7 @@ final class UrlBuilderServiceTest extends TestCase
     public function buildPageLayoutUrlIncludesScrollToElement(): void
     {
         $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('web_layout', self::callback(static fn(array $params): bool => isset($params['scrollToElement']) && 42 === $params['scrollToElement']))
+            ->with('web_layout', self::callback(static fn (array $params): bool => isset($params['scrollToElement']) && 42 === $params['scrollToElement']))
             ->willReturn(new Uri('/typo3/module/web/layout'));
 
         $service = new UrlBuilderService();
@@ -99,7 +99,7 @@ final class UrlBuilderServiceTest extends TestCase
     public function buildInfoUrlReturnsCorrectUrl(): void
     {
         $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('show_item', self::callback(static fn(array $params): bool => 1 === $params['uid'] && 'tt_content' === $params['table']))
+            ->with('show_item', self::callback(static fn (array $params): bool => 1 === $params['uid'] && 'tt_content' === $params['table']))
             ->willReturn(new Uri('/typo3/show_item'));
 
         $service = new UrlBuilderService();
@@ -125,7 +125,7 @@ final class UrlBuilderServiceTest extends TestCase
     public function buildHistoryUrlReturnsCorrectUrl(): void
     {
         $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('record_history', self::callback(static fn(array $params): bool => 'tt_content:1' === $params['element']))
+            ->with('record_history', self::callback(static fn (array $params): bool => 'tt_content:1' === $params['element']))
             ->willReturn(new Uri('/typo3/record_history'));
 
         $service = new UrlBuilderService();
@@ -138,7 +138,7 @@ final class UrlBuilderServiceTest extends TestCase
     public function buildNewContentAfterUrlReturnsCorrectUrl(): void
     {
         $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('record_edit', self::callback(static fn(array $params): bool => isset($params['edit']['tt_content'][-1]) && 'new' === $params['edit']['tt_content'][-1]))
+            ->with('record_edit', self::callback(static fn (array $params): bool => isset($params['edit']['tt_content'][-1]) && 'new' === $params['edit']['tt_content'][-1]))
             ->willReturn(new Uri('/typo3/record/edit'));
 
         $service = new UrlBuilderService();
