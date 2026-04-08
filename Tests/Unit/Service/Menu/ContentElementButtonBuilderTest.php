@@ -53,6 +53,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     protected function tearDown(): void
     {
         GeneralUtility::purgeInstances();
+        unset($GLOBALS['LANG']);
     }
 
     #[Test]

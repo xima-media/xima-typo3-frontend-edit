@@ -819,7 +819,7 @@
       let failed = 0;
 
       for (let [uid, contentElement] of Object.entries(jsonResponse)) {
-        if (!contentElement.menu || !contentElement.element) {
+        if (!contentElement || !contentElement.menu || !contentElement.element) {
           Logger.log(`Skipping content element c${uid}: missing menu or element data`, null, 'warn');
           failed++;
           continue;
