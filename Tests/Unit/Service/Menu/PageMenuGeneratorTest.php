@@ -16,6 +16,7 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
+use stdClass;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
@@ -71,7 +72,7 @@ final class PageMenuGeneratorTest extends TestCase
     {
         $request = $this->createMock(ServerRequestInterface::class);
         $request->method('getAttribute')->willReturnMap([
-            ['routing', null, new \stdClass()],
+            ['routing', null, new stdClass()],
             ['language', null, null],
         ]);
 

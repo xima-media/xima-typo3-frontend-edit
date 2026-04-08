@@ -17,7 +17,7 @@ use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Http\Uri;
-use TYPO3\CMS\Core\Imaging\{Icon, IconFactory, IconSize};
+use TYPO3\CMS\Core\Imaging\{Icon, IconFactory};
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementButtonBuilder;
