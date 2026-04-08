@@ -39,8 +39,6 @@ final class ContentElementButtonBuilderTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-
         $iconMock = $this->createMock(Icon::class);
         $iconFactoryMock = $this->createMock(IconFactory::class);
         $iconFactoryMock->method('getIcon')->willReturn($iconMock);
@@ -55,7 +53,6 @@ final class ContentElementButtonBuilderTest extends TestCase
     protected function tearDown(): void
     {
         GeneralUtility::purgeInstances();
-        parent::tearDown();
     }
 
     #[Test]

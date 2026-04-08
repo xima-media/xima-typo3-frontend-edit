@@ -39,8 +39,6 @@ final class PageMenuGeneratorTest extends TestCase
 {
     protected function setUp(): void
     {
-        parent::setUp();
-
         $uriBuilderMock = $this->createMock(UriBuilder::class);
         $uriBuilderMock->method('buildUriFromRoute')->willReturn(new Uri('/typo3/mock'));
         GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilderMock);
@@ -49,7 +47,6 @@ final class PageMenuGeneratorTest extends TestCase
     protected function tearDown(): void
     {
         GeneralUtility::purgeInstances();
-        parent::tearDown();
     }
 
     #[Test]

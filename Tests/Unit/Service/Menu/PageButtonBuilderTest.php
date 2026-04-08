@@ -38,8 +38,6 @@ final class PageButtonBuilderTest extends TestCase
 
     protected function setUp(): void
     {
-        parent::setUp();
-
         $iconMock = $this->createMock(Icon::class);
         $iconFactoryMock = $this->createMock(IconFactory::class);
         $iconFactoryMock->method('getIcon')->willReturn($iconMock);
@@ -55,7 +53,6 @@ final class PageButtonBuilderTest extends TestCase
     {
         GeneralUtility::purgeInstances();
         unset($GLOBALS['LANG'], $GLOBALS['TCA']);
-        parent::tearDown();
     }
 
     #[Test]

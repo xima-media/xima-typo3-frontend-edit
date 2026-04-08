@@ -43,8 +43,6 @@ final class ContentElementMenuGeneratorTest extends TestCase
 {
     protected function setUp(): void
     {
-        parent::setUp();
-
         $uriBuilderMock = $this->createMock(UriBuilder::class);
         $uriBuilderMock->method('buildUriFromRoute')->willReturn(new Uri('/typo3/mock'));
         GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilderMock);
@@ -54,7 +52,6 @@ final class ContentElementMenuGeneratorTest extends TestCase
     {
         GeneralUtility::purgeInstances();
         unset($GLOBALS['BE_USER'], $GLOBALS['LANG']);
-        parent::tearDown();
     }
 
     #[Test]
