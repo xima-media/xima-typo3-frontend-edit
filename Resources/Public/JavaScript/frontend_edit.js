@@ -772,6 +772,7 @@
    */
   const DataService = {
     getClosestContentElement(element) {
+      if (!element) return null;
       while (element && !element.id.match(/c\d+/)) {
         element = element.parentElement;
       }
@@ -834,7 +835,8 @@
     async fetchContentElements(dataItems) {
       const config = document.getElementById('frontend-edit-toolbar-config');
       if (!config) {
-        throw new Error('Frontend edit configuration not found');
+        Logger.log('Frontend edit configuration element not found', null, 'warn');
+        return {};
       }
 
       const editInfoUrl = config.dataset.editInfoUrl;
@@ -849,21 +851,27 @@
 
       Logger.log('Sending request to backend', { url: url.toString() });
 
-      const response = await fetch(url.toString(), {
-        cache: 'no-cache',
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataItems)
-      });
+      try {
+        const response = await fetch(url.toString(), {
+          cache: 'no-cache',
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dataItems)
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch content elements');
+        if (!response.ok) {
+          throw new Error('Failed to fetch content elements');
+        }
+
+        const data = await response.json();
+        Logger.log(`Backend response received with ${Object.keys(data).length} content element(s)`);
+
+        return data;
+      } catch (error) {
+        Notification.show({ title: 'Frontend Edit', message: 'Failed to load edit information', severity: 'error' });
+        Logger.log('Failed to fetch content elements', { error: error.message }, 'error');
+        return {};
       }
-
-      const data = await response.json();
-      Logger.log(`Backend response received with ${Object.keys(data).length} content element(s)`);
-
-      return data;
     }
   };
 
@@ -880,6 +888,12 @@
       let failed = 0;
 
       for (let [uid, contentElement] of Object.entries(jsonResponse)) {
+        if (!contentElement || !contentElement.menu || !contentElement.element) {
+          Logger.log(`Skipping content element c${uid}: missing menu or element data`, null, 'warn');
+          failed++;
+          continue;
+        }
+
         let idElement = document.querySelector(`#c${uid}`);
 
         // Handle translation mapping
@@ -1065,6 +1079,7 @@
           error: error.message,
           stack: error.stack
         }, 'error');
+        Notification.show({ title: 'Frontend Edit', message: 'Initialization error', severity: 'warning' });
       }
     },
 
