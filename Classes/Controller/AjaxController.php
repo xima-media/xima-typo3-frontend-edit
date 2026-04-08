@@ -93,12 +93,18 @@ readonly class AjaxController
 
         $params = $request->getQueryParams();
 
-        $pid = (int) ($params['pid'] ?? 0);
-        if (0 === $pid) {
-            return new JsonResponse(['error' => 'Missing required parameter: pid'], 400);
+        $pidParam = $params['pid'] ?? null;
+        $pid = filter_var($pidParam, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if (false === $pid) {
+            return new JsonResponse(['error' => 'Missing or invalid parameter: pid must be a positive integer'], 400);
         }
 
-        $languageUid = (int) ($params['language'] ?? 0);
+        $languageParam = $params['language'] ?? 0;
+        $languageUid = filter_var($languageParam, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        if (false === $languageUid) {
+            return new JsonResponse(['error' => 'Invalid parameter: language must be a non-negative integer'], 400);
+        }
+
         $returnUrl = (string) ($params['returnUrl'] ?? '');
         if ('' === $returnUrl) {
             return new JsonResponse(['error' => 'Missing required parameter: returnUrl'], 400);
