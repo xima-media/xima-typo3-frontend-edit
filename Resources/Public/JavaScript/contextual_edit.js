@@ -81,6 +81,15 @@
       this.sidebar.setAttribute('aria-modal', 'true');
       this.sidebar.setAttribute('aria-label', 'Edit content');
 
+      // Close button
+      var closeButton = document.createElement('button');
+      closeButton.type = 'button';
+      closeButton.className = 'frontend-edit__sidebar-close';
+      closeButton.setAttribute('aria-label', 'Close editor');
+      closeButton.innerHTML = CLOSE_ICON;
+      closeButton.addEventListener('click', this.requestClose.bind(this));
+      this.sidebar.appendChild(closeButton);
+
       // Loading spinner
       this.loader = document.createElement('div');
       this.loader.className = 'frontend-edit__sidebar-loader';
@@ -92,6 +101,27 @@
       this.iframe.className = 'frontend-edit__sidebar-iframe';
       this.iframe.setAttribute('title', 'Edit content');
       this.sidebar.appendChild(this.iframe);
+
+      // Focus trap
+      var sidebar = this.sidebar;
+      sidebar.addEventListener('keydown', function (e) {
+        if (e.key !== 'Tab') return;
+        var focusable = sidebar.querySelectorAll('button, [href], iframe, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (focusable.length === 0) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      });
 
       document.body.appendChild(this.backdrop);
       document.body.appendChild(this.sidebar);
@@ -133,6 +163,7 @@
 
     open: function (contextualUrl, uid, targetBlank) {
       log('Opening contextual edit for uid ' + uid);
+      this._triggerElement = document.activeElement;
       clearTimeout(this.resetTimeout);
       this.hasSaved = false;
       this.savedRecordTitle = null;
@@ -161,6 +192,10 @@
         setTimeout(function () { window.location.reload(); }, 2000);
       } else {
         document.body.classList.remove('frontend-edit__sidebar-active');
+      }
+      if (this._triggerElement && this._triggerElement.focus) {
+        this._triggerElement.focus();
+        this._triggerElement = null;
       }
     },
 
