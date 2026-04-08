@@ -87,7 +87,6 @@
       closeButton.className = 'frontend-edit__sidebar-close';
       closeButton.setAttribute('aria-label', 'Close editor');
       closeButton.innerHTML = CLOSE_ICON;
-      closeButton.style.cssText = 'position:absolute;top:8px;right:8px;z-index:2;width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.1);border:none;border-radius:4px;cursor:pointer;color:inherit;padding:0;';
       closeButton.addEventListener('click', this.requestClose.bind(this));
       this.sidebar.appendChild(closeButton);
 
