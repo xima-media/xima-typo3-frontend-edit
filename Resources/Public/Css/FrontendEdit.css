@@ -839,8 +839,18 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .frontend-edit__notification,
+    .frontend-edit__notification--visible,
+    .frontend-edit__notification--hiding,
     .frontend-edit__sidebar,
-    .frontend-edit__sidebar-backdrop {
-        transition: none;
+    .frontend-edit__sidebar--open,
+    .frontend-edit__sidebar-backdrop,
+    .frontend-edit__sidebar-backdrop--visible,
+    .frontend-edit__overlay,
+    .frontend-edit__overlay--active,
+    .frontend-edit__tooltip,
+    .frontend-edit__tooltip--visible {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
     }
 }

@@ -140,12 +140,20 @@
       document.querySelectorAll('.frontend-edit__dropdown').forEach(d => {
         d.style.display = 'none';
       });
+      document.querySelectorAll('.frontend-edit__btn--kebab').forEach(btn => {
+        btn.setAttribute('aria-expanded', 'false');
+      });
     },
 
     setupGlobalHandler() {
       document.addEventListener('click', (e) => {
         if (!e.target.closest('.frontend-edit__btn--kebab') &&
             !e.target.closest('.frontend-edit__dropdown')) {
+          this.closeAll();
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
           this.closeAll();
         }
       });
@@ -187,6 +195,8 @@
       if (!this.container) {
         this.container = document.createElement('div');
         this.container.className = 'frontend-edit__notification-container';
+        this.container.setAttribute('role', 'status');
+        this.container.setAttribute('aria-live', 'polite');
         document.body.appendChild(this.container);
       }
       return this.container;
@@ -220,6 +230,9 @@
       const notification = document.createElement('div');
       notification.className = 'frontend-edit__notification';
       notification.classList.add(`frontend-edit__notification--${message.severity.toLowerCase()}`);
+      if (message.severity.toLowerCase() === 'error') {
+        notification.setAttribute('role', 'alert');
+      }
 
       // Create icon
       const iconEl = document.createElement('span');
@@ -252,6 +265,7 @@
       closeBtn.className = 'frontend-edit__notification-close';
       closeBtn.type = 'button';
       closeBtn.innerHTML = ICONS.close;
+      closeBtn.setAttribute('aria-label', 'Dismiss notification');
       closeBtn.addEventListener('click', () => this.dismiss(notification));
       notification.appendChild(closeBtn);
 
@@ -490,9 +504,29 @@
       const toolbar = document.createElement('div');
       toolbar.className = 'frontend-edit__toolbar';
       toolbar.dataset.cid = uid;
+      toolbar.setAttribute('role', 'toolbar');
+      toolbar.setAttribute('aria-label', 'Edit content element ' + uid);
 
       toolbar.appendChild(this.createLabel(uid, contentElement));
       toolbar.appendChild(this.createActions(uid, contentElement, showContextMenu));
+
+      const buttons = toolbar.querySelectorAll('.frontend-edit__btn');
+      buttons.forEach((btn, i) => {
+        btn.setAttribute('tabindex', i === 0 ? '0' : '-1');
+      });
+      toolbar.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        const btns = Array.from(toolbar.querySelectorAll('.frontend-edit__btn'));
+        const idx = btns.indexOf(document.activeElement);
+        if (idx === -1) return;
+        e.preventDefault();
+        const next = e.key === 'ArrowRight'
+          ? (idx + 1) % btns.length
+          : (idx - 1 + btns.length) % btns.length;
+        btns[idx].setAttribute('tabindex', '-1');
+        btns[next].setAttribute('tabindex', '0');
+        btns[next].focus();
+      });
 
       return toolbar;
     },
@@ -543,6 +577,8 @@
       btn.className = 'frontend-edit__btn frontend-edit__btn--edit';
       btn.dataset.tooltip = 'Edit';
       btn.innerHTML = ICONS.edit;
+      const ctypeLabel = contentElement.element.ctypeLabel || contentElement.element.CType || 'Content';
+      btn.setAttribute('aria-label', 'Edit ' + ctypeLabel + ' ' + (contentElement.element.uid || ''));
 
       const editAction = contentElement.menu.children?.edit;
       if (editAction?.url && this.isValidUrl(editAction.url)) {
@@ -587,6 +623,9 @@
       btn.type = 'button';
       btn.dataset.cid = uid;
       btn.innerHTML = ICONS.kebab;
+      btn.setAttribute('aria-haspopup', 'menu');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-label', 'More actions for ' + uid);
       return btn;
     },
 
@@ -594,6 +633,7 @@
       const dropdown = document.createElement('div');
       dropdown.className = 'frontend-edit__dropdown';
       dropdown.dataset.cid = uid;
+      dropdown.setAttribute('role', 'menu');
 
       const skipActions = ['header'];
 
@@ -603,13 +643,11 @@
         const el = document.createElement(action.type === 'link' ? 'a' : 'div');
 
         if (action.type === 'link') {
-          // Validate URL to prevent javascript: protocol attacks
           if (action.url && this.isValidUrl(action.url)) {
             el.href = action.url;
           }
           if (action.targetBlank) el.target = '_blank';
 
-          // Contextual editing for the edit link in dropdown
           if (name === 'edit' && action.contextualUrl && UI.isValidUrl(action.contextualUrl)) {
             const contextualUrl = action.contextualUrl;
             const ceUid = contentElement.element?.uid;
@@ -625,19 +663,21 @@
 
         if (action.type === 'divider') {
           el.className = 'frontend-edit__divider';
+          el.setAttribute('role', 'separator');
+        } else {
+          el.setAttribute('role', 'menuitem');
+          el.setAttribute('tabindex', '-1');
         }
 
         if (action.type === 'info') {
           el.className = 'frontend-edit__info';
         }
 
-        // Sanitize class name to prevent injection
         const safeName = this.escapeClassName(name);
         if (safeName) {
           el.classList.add(safeName);
         }
 
-        // Icons are trusted HTML from TYPO3 backend (IconFactory)
         if (action.icon) {
           const iconWrapper = document.createElement('span');
           iconWrapper.innerHTML = action.icon;
@@ -654,6 +694,35 @@
 
         dropdown.appendChild(el);
       }
+
+      dropdown.addEventListener('keydown', (e) => {
+        const items = Array.from(dropdown.querySelectorAll('[role="menuitem"]'));
+        const idx = items.indexOf(document.activeElement);
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const next = idx < items.length - 1 ? idx + 1 : 0;
+          items[next].focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const prev = idx > 0 ? idx - 1 : items.length - 1;
+          items[prev].focus();
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          items[0]?.focus();
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          items[items.length - 1]?.focus();
+        } else if (e.key === 'Enter') {
+          if (document.activeElement && document.activeElement.click) {
+            document.activeElement.click();
+          }
+        } else if (e.key === 'Escape') {
+          Dropdown.closeAll();
+          const kebab = document.querySelector('.frontend-edit__btn--kebab[data-cid="' + uid + '"]');
+          if (kebab) kebab.focus();
+        }
+      });
 
       return dropdown;
     },
@@ -883,7 +952,10 @@
 
         if (!isVisible) {
           dropdown.style.display = 'block';
+          kebabBtn.setAttribute('aria-expanded', 'true');
           await Dropdown.position(kebabBtn, dropdown);
+          const firstItem = dropdown.querySelector('[role="menuitem"]');
+          if (firstItem) firstItem.focus();
         }
       });
     },
