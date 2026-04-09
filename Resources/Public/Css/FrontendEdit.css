@@ -630,14 +630,14 @@
     display: flex;
     align-items: flex-start;
     gap: 12px;
-    padding: 14px 16px;
+    padding: 16px 18px;
     background: var(--xfe-bg-primary);
     border: 1px solid var(--xfe-border-color);
-    border-radius: 8px;
-    box-shadow: var(--xfe-shadow);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     font-size: 14px;
-    color: var(--xfe-text-primary);
+    color: #212121;
     opacity: 0;
     transform: translateX(20px);
     transition: opacity 0.3s ease, transform 0.3s ease;
@@ -654,53 +654,64 @@
     transform: translateX(20px);
 }
 
-/* Severity variants */
+/* Severity variants — TYPO3 backend style */
 .frontend-edit__notification--ok {
-    border-left: 4px solid #22c55e;
+    border-left: 5px solid #629755;
+    background: #f0f5ec;
 }
 
 .frontend-edit__notification--ok .frontend-edit__notification-icon {
-    color: #22c55e;
+    background: #4c7a34;
+    color: #fff;
 }
 
 .frontend-edit__notification--warning {
-    border-left: 4px solid #f59e0b;
+    border-left: 5px solid #e8a33d;
+    background: #fcf4e4;
 }
 
 .frontend-edit__notification--warning .frontend-edit__notification-icon {
-    color: #f59e0b;
+    background: #e8a33d;
+    color: #fff;
 }
 
 .frontend-edit__notification--error {
-    border-left: 4px solid #ef4444;
+    border-left: 5px solid #c83c3c;
+    background: #f8e5e5;
 }
 
 .frontend-edit__notification--error .frontend-edit__notification-icon {
-    color: #ef4444;
+    background: #c83c3c;
+    color: #fff;
 }
 
 .frontend-edit__notification--info,
 .frontend-edit__notification--notice {
-    border-left: 4px solid #3b82f6;
+    border-left: 5px solid #6daae0;
+    background: #e5eff8;
 }
 
 .frontend-edit__notification--info .frontend-edit__notification-icon,
 .frontend-edit__notification--notice .frontend-edit__notification-icon {
-    color: #3b82f6;
+    background: #6daae0;
+    color: #fff;
 }
 
-/* Notification icon */
+/* Notification icon — filled circle like TYPO3 backend */
 .frontend-edit__notification-icon {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     margin-top: 1px;
 }
 
 .frontend-edit__notification-icon svg {
-    width: 20px;
-    height: 20px;
+    width: 14px;
+    height: 14px;
 }
 
 /* Notification content */
@@ -710,15 +721,18 @@
 }
 
 .frontend-edit__notification-title {
-    font-weight: 600;
+    font-weight: 700;
     margin-bottom: 2px;
     line-height: 1.4;
+    color: #212121;
 }
 
 .frontend-edit__notification-message {
-    color: var(--xfe-text-secondary);
-    line-height: 1.4;
+    color: #525252;
+    font-size: 13px;
+    line-height: 1.5;
     word-wrap: break-word;
+    white-space: pre-line;
 }
 
 /* Notification close button */
@@ -726,27 +740,28 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     background: transparent;
     border: none;
     border-radius: 4px;
-    color: var(--xfe-text-secondary);
+    color: #737373;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: color 0.15s ease;
     padding: 0;
     flex-shrink: 0;
-    margin: -4px -6px -4px 0;
+    margin: -2px -4px -2px 0;
+    font-size: 18px;
+    line-height: 1;
 }
 
 .frontend-edit__notification-close:hover {
-    background: var(--xfe-bg-hover);
-    color: var(--xfe-text-primary);
+    color: #212121;
 }
 
 .frontend-edit__notification-close svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
 }
 
 /* ==========================================================================
