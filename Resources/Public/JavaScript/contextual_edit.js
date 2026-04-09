@@ -357,9 +357,10 @@
     showSaveNotification: function (recordTitle) {
       // Use the Notification module exposed by frontend_edit.js
       if (window.FrontendEditNotification) {
+        var name = recordTitle || 'Record';
         window.FrontendEditNotification.show({
-          title: recordTitle || 'Record',
-          message: 'Saved',
+          title: 'Record updated',
+          message: 'Record "' + name + '" has been updated.\nThe view is being refreshed.',
           severity: 'ok'
         });
       }
