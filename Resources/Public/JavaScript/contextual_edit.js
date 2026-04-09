@@ -82,13 +82,13 @@
       this.sidebar.setAttribute('aria-label', 'Edit content');
 
       // Close button
-      var closeButton = document.createElement('button');
-      closeButton.type = 'button';
-      closeButton.className = 'frontend-edit__sidebar-close';
-      closeButton.setAttribute('aria-label', 'Close editor');
-      closeButton.innerHTML = CLOSE_ICON;
-      closeButton.addEventListener('click', this.requestClose.bind(this));
-      this.sidebar.appendChild(closeButton);
+      this.closeButton = document.createElement('button');
+      this.closeButton.type = 'button';
+      this.closeButton.className = 'frontend-edit__sidebar-close';
+      this.closeButton.setAttribute('aria-label', 'Close editor');
+      this.closeButton.innerHTML = CLOSE_ICON;
+      this.closeButton.addEventListener('click', this.requestClose.bind(this));
+      this.sidebar.appendChild(this.closeButton);
 
       // Loading spinner
       this.loader = document.createElement('div');
@@ -168,6 +168,7 @@
       this.hasSaved = false;
       this.savedRecordTitle = null;
       this.targetBlank = targetBlank || false;
+      this.closeButton.style.display = '';
       this.loader.classList.add('frontend-edit__sidebar-loader--visible');
       this.iframe.classList.remove('frontend-edit__sidebar-iframe--loaded');
       this.backdrop.classList.add('frontend-edit__sidebar-backdrop--visible');
@@ -268,6 +269,16 @@
 
         if (closeBtn) {
           actionsBar.insertBefore(saveCloseBtn, closeBtn);
+
+          // Wire backend close button to close the sidebar
+          closeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            self.requestClose();
+          });
+
+          // Hide extension's own close button to avoid overlap
+          self.closeButton.style.display = 'none';
         } else {
           actionsBar.appendChild(saveCloseBtn);
         }
