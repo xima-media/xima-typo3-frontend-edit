@@ -157,8 +157,10 @@
     font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
     font-size: 11px;
     background: rgba(255, 255, 255, 0.15);
+    color: inherit;
     padding: 1px 4px;
     border-radius: 3px;
+    opacity: 0.75;
 }
 
 .frontend-edit__toolbar-label svg {
