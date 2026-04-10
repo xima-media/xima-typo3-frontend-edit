@@ -339,6 +339,10 @@
         const menuBtn = this.container.querySelector('.frontend-edit__sticky-btn--menu');
         const dropdown = this.container.querySelector('.frontend-edit__sticky-dropdown');
 
+        // Move dropdown to document.body so position:fixed works correctly
+        // (toolbar may have CSS transform which creates a new containing block)
+        document.body.appendChild(dropdown);
+
         menuBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
           const isVisible = dropdown.classList.contains('frontend-edit__sticky-dropdown--visible');
@@ -351,7 +355,7 @@
         });
 
         document.addEventListener('click', (e) => {
-          if (!dropdownContainer.contains(e.target)) {
+          if (!dropdownContainer.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.classList.remove('frontend-edit__sticky-dropdown--visible');
           }
         });
