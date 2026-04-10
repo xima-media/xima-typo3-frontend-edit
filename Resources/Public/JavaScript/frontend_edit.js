@@ -161,6 +161,127 @@
   };
 
   /**
+   * Delete Handler - Confirmation dialog + fetch-based deletion
+   * Labels are provided by ResourceRendererService via window.FRONTEND_EDIT_DELETE_LABELS
+   */
+  const DeleteHandler = {
+    labels() {
+      return window.FRONTEND_EDIT_DELETE_LABELS || {};
+    },
+
+    init() {
+      document.addEventListener('click', (e) => {
+        const link = e.target.closest('.frontend-edit__dropdown a.delete');
+        if (!link?.href) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        Dropdown.closeAll();
+
+        // Read record info from data attributes (set in createDropdown)
+        const recordTitle = link.dataset.recordTitle || '';
+        const table = link.dataset.recordTable || 'tt_content';
+        const uid = link.dataset.recordUid || '';
+
+        this.confirm(uid, table, recordTitle).then((confirmed) => {
+          if (confirmed) this.execute(link.href);
+        });
+      });
+    },
+
+    confirm(uid, table, recordTitle) {
+      const l = this.labels();
+      return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'frontend-edit__dialog-overlay';
+
+        const modalDialog = document.createElement('div');
+        modalDialog.className = 'frontend-edit__dialog modal-dialog';
+        modalDialog.setAttribute('role', 'alertdialog');
+        modalDialog.setAttribute('aria-modal', 'true');
+        modalDialog.setAttribute('aria-labelledby', 'fe-dialog-title');
+
+        const modalContent = document.createElement('div');
+        modalContent.className = 'modal-content';
+
+        // Header — .modal-header
+        const modalHeader = document.createElement('div');
+        modalHeader.className = 'modal-header';
+        const title = document.createElement('h4');
+        title.id = 'fe-dialog-title';
+        title.className = 'modal-title';
+        title.textContent = l.title || 'Delete this record?';
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'close btn-close';
+        closeBtn.type = 'button';
+        closeBtn.innerHTML = ICONS.close;
+        closeBtn.setAttribute('aria-label', 'Close');
+        modalHeader.appendChild(title);
+        modalHeader.appendChild(closeBtn);
+
+        // Body — .modal-body, matches TYPO3 format: "Are you sure you want to delete the record 'Title [table:uid]'?"
+        const modalBody = document.createElement('div');
+        modalBody.className = 'modal-body';
+        const p = document.createElement('p');
+        const recordInfo = recordTitle
+          ? `${recordTitle} [${table}:${uid}]`
+          : `[${table}:${uid}]`;
+        const fallbackMessage = "Are you sure you want to delete the record '%s'?";
+        const baseMessage = l.message || fallbackMessage;
+        p.textContent = baseMessage.replace('%s', recordInfo);
+        modalBody.appendChild(p);
+
+        // Footer — .modal-footer with TYPO3 btn classes
+        const modalFooter = document.createElement('div');
+        modalFooter.className = 'modal-footer';
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-default';
+        cancelBtn.type = 'button';
+        cancelBtn.textContent = l.cancel || 'Cancel';
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-warning';
+        deleteBtn.type = 'button';
+        deleteBtn.textContent = l.delete || 'Delete record (!)';
+        modalFooter.appendChild(cancelBtn);
+        modalFooter.appendChild(deleteBtn);
+
+        modalContent.appendChild(modalHeader);
+        modalContent.appendChild(modalBody);
+        modalContent.appendChild(modalFooter);
+        modalDialog.appendChild(modalContent);
+        overlay.appendChild(modalDialog);
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('frontend-edit__dialog-overlay--show'));
+
+        const close = (result) => {
+          overlay.classList.remove('frontend-edit__dialog-overlay--show');
+          setTimeout(() => overlay.remove(), 200);
+          resolve(result);
+        };
+
+        closeBtn.addEventListener('click', () => close(false));
+        cancelBtn.addEventListener('click', () => close(false));
+        deleteBtn.addEventListener('click', () => close(true));
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close(false); });
+        document.addEventListener('keydown', function onEsc(e) {
+          if (e.key === 'Escape') {
+            document.removeEventListener('keydown', onEsc);
+            close(false);
+          }
+        });
+
+        deleteBtn.focus();
+      });
+    },
+
+    execute(url) {
+      // Navigate to the tce_db URL same as hide, move, and other actions.
+      // TYPO3 processes the delete and redirects back to the returnUrl.
+      window.location.href = url;
+    }
+  };
+
+  /**
    * Notification Manager - Shows toast notifications for flash messages
    */
   const Notification = {
@@ -677,6 +798,14 @@
           el.classList.add(safeName);
         }
 
+        // Store record title on delete link for the confirmation dialog
+        if (name === 'delete' && action.type === 'link') {
+          const recordTitle = (contentElement.element?.header || '').replace(/<[^>]*>/g, '');
+          el.dataset.recordTitle = recordTitle;
+          el.dataset.recordTable = 'tt_content';
+          el.dataset.recordUid = contentElement.element?.uid || uid;
+        }
+
         if (action.icon) {
           const iconWrapper = document.createElement('span');
           iconWrapper.innerHTML = action.icon;
@@ -1071,6 +1200,7 @@
 
           Renderer.render(contentElements);
           Dropdown.setupGlobalHandler();
+          DeleteHandler.init();
         }
 
         Logger.log(`Frontend Edit initialization completed in ${Math.round(performance.now() - startTime)}ms`);

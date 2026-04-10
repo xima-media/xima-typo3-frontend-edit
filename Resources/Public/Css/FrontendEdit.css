@@ -767,6 +767,151 @@
 }
 
 /* ==========================================================================
+   Delete Confirmation Dialog
+   Uses TYPO3 backend modal class names (.modal-header, .modal-body, etc.)
+   so styles are inherited when backend/Bootstrap CSS is available.
+   These rules are scoped under .frontend-edit__dialog-overlay and serve as
+   fallback styles matching the TYPO3 backend dark theme.
+   ========================================================================== */
+.frontend-edit__dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.frontend-edit__dialog-overlay--show {
+    opacity: 1;
+}
+
+.frontend-edit__dialog-overlay .modal-dialog {
+    min-width: 500px;
+    max-width: 600px;
+    transform: scale(0.9);
+    transition: transform 0.2s ease;
+}
+
+.frontend-edit__dialog-overlay--show .modal-dialog {
+    transform: scale(1);
+}
+
+.frontend-edit__dialog-overlay .modal-content {
+    background: #2b2b2b;
+    border-radius: 2px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border: none;
+}
+
+.frontend-edit__dialog-overlay .modal-header {
+    padding: 12px 16px;
+    background: #8b7a4a;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: none;
+    border-radius: 2px 2px 0 0;
+}
+
+.frontend-edit__dialog-overlay .modal-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+    flex: 1;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.frontend-edit__dialog-overlay .close,
+.frontend-edit__dialog-overlay .btn-close {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.frontend-edit__dialog-overlay .close:hover,
+.frontend-edit__dialog-overlay .btn-close:hover {
+    opacity: 1;
+}
+
+.frontend-edit__dialog-overlay .close svg,
+.frontend-edit__dialog-overlay .btn-close svg {
+    width: 14px;
+    height: 14px;
+}
+
+.frontend-edit__dialog-overlay .modal-body {
+    padding: 20px;
+}
+
+.frontend-edit__dialog-overlay .modal-body p {
+    margin: 0;
+    color: #e0e0e0;
+    line-height: 1.5;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.frontend-edit__dialog-overlay .modal-footer {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: none;
+}
+
+.frontend-edit__dialog-overlay .btn {
+    padding: 6px 16px;
+    border: 1px solid #555;
+    border-radius: 2px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.frontend-edit__dialog-overlay .btn-default {
+    background: #3a3a3a;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+.frontend-edit__dialog-overlay .btn-default:hover {
+    background: #4a4a4a;
+    border-color: #666;
+}
+
+.frontend-edit__dialog-overlay .btn-warning {
+    background: #8b7a4a;
+    border-color: #8b7a4a;
+    color: #fff;
+}
+
+.frontend-edit__dialog-overlay .btn-warning:hover {
+    background: #9d8a5a;
+    border-color: #9d8a5a;
+}
+
+/* ==========================================================================
    Contextual Edit Sidebar (Experimental)
    ========================================================================== */
 
@@ -890,7 +1035,9 @@
     .frontend-edit__overlay,
     .frontend-edit__overlay--active,
     .frontend-edit__tooltip,
-    .frontend-edit__tooltip--visible {
+    .frontend-edit__tooltip--visible,
+    .frontend-edit__dialog-overlay,
+    .frontend-edit__dialog-overlay .modal-dialog {
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
     }

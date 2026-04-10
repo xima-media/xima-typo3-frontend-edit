@@ -79,6 +79,34 @@
 				<source />
 				<target>Seitenoptionen</target>
 			</trans-unit>
+			<trans-unit id="delete">
+				<source />
+				<target>Löschen</target>
+			</trans-unit>
+			<trans-unit id="delete.confirm.title">
+				<source />
+				<target>Diesen Datensatz tatsächlich löschen?</target>
+			</trans-unit>
+			<trans-unit id="delete.confirm.message">
+				<source />
+				<target>Bist du sicher, dass du den Datensatz '%s' löschen möchtest?</target>
+			</trans-unit>
+			<trans-unit id="delete.confirm.cancel">
+				<source />
+				<target>Abbrechen</target>
+			</trans-unit>
+			<trans-unit id="delete.confirm.delete">
+				<source />
+				<target>Datensatz löschen(!)</target>
+			</trans-unit>
+			<trans-unit id="delete.success">
+				<source />
+				<target>Datensatz gelöscht</target>
+			</trans-unit>
+			<trans-unit id="delete.error">
+				<source />
+				<target>Der Datensatz konnte nicht gelöscht werden</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
