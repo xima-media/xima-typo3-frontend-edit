@@ -60,6 +60,9 @@
 			<trans-unit id="tooltip.pageOptions">
 				<source>Page options</source>
 			</trans-unit>
+			<trans-unit id="column.createContent">
+				<source>Create new content</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

@@ -79,6 +79,10 @@
 				<source />
 				<target>Seitenoptionen</target>
 			</trans-unit>
+			<trans-unit id="column.createContent">
+				<source />
+				<target>Neuen Inhalt erstellen</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
