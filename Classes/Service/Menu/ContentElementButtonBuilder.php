@@ -181,8 +181,13 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         $historyUrl = $this->urlBuilderService->buildHistoryUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
         $this->addButton($menuButton, 'history', ButtonType::Link, url: $historyUrl, icon: 'actions-history');
 
-        // New content after button
-        $newContentUrl = $this->urlBuilderService->buildNewContentAfterUrl($contentElement['uid'], $returnUrlAnchor);
+        // New content after button - opens page layout with wizard via iframe_edit.js
+        $newContentUrl = $this->urlBuilderService->buildNewContentAfterUrl(
+            (int) $contentElement['uid'],
+            (int) ($contentElement['pid'] ?? 0),
+            (int) ($contentElement['colPos'] ?? 0),
+            $returnUrlAnchor,
+        );
         $this->addButton($menuButton, 'new_content_after', ButtonType::Link, url: $newContentUrl, icon: 'actions-add');
 
         // Delete button

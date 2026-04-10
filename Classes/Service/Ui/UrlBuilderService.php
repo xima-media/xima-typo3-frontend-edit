@@ -137,17 +137,30 @@ final readonly class UrlBuilderService
     /**
      * @throws RouteNotFoundException
      */
-    public function buildNewContentAfterUrl(int $uid, string $returnUrl): string
+    public function buildNewContentAfterUrl(int $uid, int $pid, int $colPos, string $returnUrl): string
     {
-        return $this->uriBuilder->buildUriFromRoute(
-            'record_edit',
-            [
-                'edit' => [
-                    'tt_content' => [-$uid => 'new'],
-                ],
-                'returnUrl' => $returnUrl,
-            ],
-        )->__toString();
+        // Hash params instruct iframe_edit.js which wizard button to auto-click
+        return $this->buildPageLayoutUrlWithHash($pid, $returnUrl, 'colPos='.$colPos.'&afterUid='.$uid);
+    }
+
+    /**
+     * Build URL to open the page layout wizard for a specific column (colPos).
+     *
+     * @throws RouteNotFoundException
+     */
+    public function buildNewContentInColumnUrl(int $pid, int $colPos, string $returnUrl): string
+    {
+        return $this->buildPageLayoutUrlWithHash($pid, $returnUrl, 'colPos='.$colPos);
+    }
+
+    /**
+     * Build URL to open the page layout wizard for a container column.
+     *
+     * @throws RouteNotFoundException
+     */
+    public function buildContainerNewContentUrl(int $pid, int $containerUid, int $colPos, string $returnUrl): string
+    {
+        return $this->buildPageLayoutUrlWithHash($pid, $returnUrl, 'container='.$containerUid.'&colPos='.$colPos);
     }
 
     /**
@@ -235,5 +248,27 @@ final readonly class UrlBuilderService
     private function buildRoute(string $route, array $parameters = []): string
     {
         return $this->uriBuilder->buildUriFromRoute($route, $parameters)->__toString();
+    }
+
+    /**
+     * Build a web_layout URL with a hash fragment for iframe_edit.js wizard auto-click.
+     *
+     * TYPO3's UriBuilder doesn't support hash fragments (they're client-side only),
+     * so we append them manually. The hash is parsed by iframe_edit.js to determine
+     * which "new content" wizard button to auto-click inside the iframe.
+     *
+     * @throws RouteNotFoundException
+     */
+    private function buildPageLayoutUrlWithHash(int $pid, string $returnUrl, string $hash): string
+    {
+        $url = $this->uriBuilder->buildUriFromRoute(
+            'web_layout',
+            [
+                'id' => $pid,
+                'returnUrl' => $returnUrl,
+            ],
+        )->__toString();
+
+        return $url.'#'.$hash;
     }
 }
