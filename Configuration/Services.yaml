@@ -7,3 +7,32 @@ services:
     Xima\XimaTypo3FrontendEdit\:
         resource: '../Classes/*'
         exclude: '../Classes/Domain/Model/*'
+
+    # Explicit wiring for non-composer mode compatibility
+    Xima\XimaTypo3FrontendEdit\Middleware\ToolRendererMiddleware:
+        arguments:
+            $resourceRendererService: '@Xima\XimaTypo3FrontendEdit\Service\Ui\ResourceRendererService'
+            $settingsService: '@Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService'
+            $flashMessageService: '@Xima\XimaTypo3FrontendEdit\Service\Ui\FlashMessageService'
+            $backendUserService: '@Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService'
+
+    Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator:
+        arguments:
+            $pageButtonBuilder: '@Xima\XimaTypo3FrontendEdit\Service\Menu\PageButtonBuilder'
+            $eventDispatcher: '@TYPO3\CMS\Core\EventDispatcher\EventDispatcher'
+            $extensionConfiguration: '@TYPO3\CMS\Core\Configuration\ExtensionConfiguration'
+            $connectionPool: '@TYPO3\CMS\Core\Database\ConnectionPool'
+            $urlBuilderService: '@Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService'
+
+    Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator:
+        arguments:
+            $eventDispatcher: '@TYPO3\CMS\Core\EventDispatcher\EventDispatcher'
+            $backendUserService: '@Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService'
+            $contentElementFilter: '@Xima\XimaTypo3FrontendEdit\Service\Content\ContentElementFilter'
+            $contentElementButtonBuilder: '@Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementButtonBuilder'
+            $contentElementRepository: '@Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository'
+            $additionalDataHandler: '@Xima\XimaTypo3FrontendEdit\Service\Menu\AdditionalDataHandler'
+            $iconService: '@Xima\XimaTypo3FrontendEdit\Service\Ui\IconService'
+            $settingsService: '@Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService'
+            $urlBuilderService: '@Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService'
+            $extensionConfiguration: '@TYPO3\CMS\Core\Configuration\ExtensionConfiguration'
