@@ -1,5 +1,11 @@
 presets:
   - name: typo3-extension
 
+filesToModify:
+  - path: composer.json
+    patterns:
+      - '"version": "{%version%}"'
+    reportUnmatched: true
+
 releaseOptions:
   commitMessage: 'release: version {%version%}'
