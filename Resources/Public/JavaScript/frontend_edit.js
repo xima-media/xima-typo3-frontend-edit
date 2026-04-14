@@ -268,9 +268,9 @@
 
     execute(url) {
       const l = this.labels();
-      fetch(url, { method: 'GET', credentials: 'include' })
+      fetch(url, { method: 'GET', credentials: 'include', redirect: 'manual' })
         .then((response) => {
-          if (response.ok) {
+          if (response.type === 'opaqueredirect' || response.ok) {
             Notification.show({ title: l.success || 'Record deleted', message: '', severity: 'ok' });
             setTimeout(() => window.location.reload(), 1500);
           } else {
