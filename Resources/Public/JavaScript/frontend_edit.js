@@ -184,7 +184,7 @@
         const uid = link.dataset.recordUid || '';
 
         this.confirm(uid, table, recordTitle).then((confirmed) => {
-          if (confirmed) window.location.href = link.href;
+          if (confirmed) this.execute(link.href);
         });
       });
     },
@@ -264,6 +264,22 @@
 
         deleteBtn.focus();
       });
+    },
+
+    execute(url) {
+      const l = this.labels();
+      fetch(url, { method: 'GET', credentials: 'include' })
+        .then((response) => {
+          if (response.ok) {
+            Notification.show({ title: l.success || 'Record deleted', message: '', severity: 'ok' });
+            setTimeout(() => window.location.reload(), 1500);
+          } else {
+            Notification.show({ title: l.error || 'Could not delete the record', message: '', severity: 'error' });
+          }
+        })
+        .catch(() => {
+          Notification.show({ title: l.error || 'Could not delete the record', message: '', severity: 'error' });
+        });
     }
   };
 
