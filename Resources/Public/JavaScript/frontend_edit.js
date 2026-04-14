@@ -184,7 +184,7 @@
         const uid = link.dataset.recordUid || '';
 
         this.confirm(uid, table, recordTitle).then((confirmed) => {
-          if (confirmed) this.execute(link.href);
+          if (confirmed) window.location.href = link.href;
         });
       });
     },
@@ -204,7 +204,6 @@
         const modalContent = document.createElement('div');
         modalContent.className = 'modal-content';
 
-        // Header — .modal-header
         const modalHeader = document.createElement('div');
         modalHeader.className = 'modal-header';
         const title = document.createElement('h4');
@@ -212,26 +211,22 @@
         title.className = 'modal-title';
         title.textContent = l.title || 'Delete this record?';
         const closeBtn = document.createElement('button');
-        closeBtn.className = 'close btn-close';
+        closeBtn.className = 'btn-close';
         closeBtn.type = 'button';
         closeBtn.innerHTML = ICONS.close;
         closeBtn.setAttribute('aria-label', 'Close');
         modalHeader.appendChild(title);
         modalHeader.appendChild(closeBtn);
 
-        // Body — .modal-body, matches TYPO3 format: "Are you sure you want to delete the record 'Title [table:uid]'?"
         const modalBody = document.createElement('div');
         modalBody.className = 'modal-body';
         const p = document.createElement('p');
         const recordInfo = recordTitle
           ? `${recordTitle} [${table}:${uid}]`
           : `[${table}:${uid}]`;
-        const fallbackMessage = "Are you sure you want to delete the record '%s'?";
-        const baseMessage = l.message || fallbackMessage;
-        p.textContent = baseMessage.replace('%s', recordInfo);
+        p.textContent = (l.message || "Are you sure you want to delete the record '%s'?").replace('%s', recordInfo);
         modalBody.appendChild(p);
 
-        // Footer — .modal-footer with TYPO3 btn classes
         const modalFooter = document.createElement('div');
         modalFooter.className = 'modal-footer';
         const cancelBtn = document.createElement('button');
@@ -253,7 +248,9 @@
         document.body.appendChild(overlay);
         requestAnimationFrame(() => overlay.classList.add('frontend-edit__dialog-overlay--show'));
 
+        const onEsc = (e) => { if (e.key === 'Escape') close(false); };
         const close = (result) => {
+          document.removeEventListener('keydown', onEsc);
           overlay.classList.remove('frontend-edit__dialog-overlay--show');
           setTimeout(() => overlay.remove(), 200);
           resolve(result);
@@ -263,21 +260,10 @@
         cancelBtn.addEventListener('click', () => close(false));
         deleteBtn.addEventListener('click', () => close(true));
         overlay.addEventListener('click', (e) => { if (e.target === overlay) close(false); });
-        document.addEventListener('keydown', function onEsc(e) {
-          if (e.key === 'Escape') {
-            document.removeEventListener('keydown', onEsc);
-            close(false);
-          }
-        });
+        document.addEventListener('keydown', onEsc);
 
         deleteBtn.focus();
       });
-    },
-
-    execute(url) {
-      // Navigate to the tce_db URL same as hide, move, and other actions.
-      // TYPO3 processes the delete and redirects back to the returnUrl.
-      window.location.href = url;
     }
   };
 

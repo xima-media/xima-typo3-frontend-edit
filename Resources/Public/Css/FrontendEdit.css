@@ -10,6 +10,21 @@
     --xfe-border-color: #e0e0e0;
     --xfe-outline-color: #aaaaaa;
     --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --xfe-dialog-overlay-bg: rgba(0, 0, 0, 0.5);
+    --xfe-dialog-bg: #ffffff;
+    --xfe-dialog-text: #1a1a1a;
+    --xfe-dialog-header-bg: #7a6a3f;
+    --xfe-dialog-header-text: #ffffff;
+    --xfe-dialog-btn-bg: #e8e8e8;
+    --xfe-dialog-btn-text: #1a1a1a;
+    --xfe-dialog-btn-border: #cccccc;
+    --xfe-dialog-btn-hover-bg: #d8d8d8;
+    --xfe-dialog-btn-hover-border: #bbbbbb;
+    --xfe-dialog-warning-bg: #7a6a3f;
+    --xfe-dialog-warning-border: #7a6a3f;
+    --xfe-dialog-warning-text: #ffffff;
+    --xfe-dialog-warning-hover-bg: #8d7c4e;
+    --xfe-dialog-warning-hover-border: #8d7c4e;
 }
 
 /* Light theme (explicit) */
@@ -24,6 +39,21 @@
     --xfe-border-color: #e0e0e0;
     --xfe-outline-color: #aaaaaa;
     --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --xfe-dialog-overlay-bg: rgba(0, 0, 0, 0.5);
+    --xfe-dialog-bg: #ffffff;
+    --xfe-dialog-text: #1a1a1a;
+    --xfe-dialog-header-bg: #7a6a3f;
+    --xfe-dialog-header-text: #ffffff;
+    --xfe-dialog-btn-bg: #e8e8e8;
+    --xfe-dialog-btn-text: #1a1a1a;
+    --xfe-dialog-btn-border: #cccccc;
+    --xfe-dialog-btn-hover-bg: #d8d8d8;
+    --xfe-dialog-btn-hover-border: #bbbbbb;
+    --xfe-dialog-warning-bg: #7a6a3f;
+    --xfe-dialog-warning-border: #7a6a3f;
+    --xfe-dialog-warning-text: #ffffff;
+    --xfe-dialog-warning-hover-bg: #8d7c4e;
+    --xfe-dialog-warning-hover-border: #8d7c4e;
 }
 
 /* Dark theme (explicit) */
@@ -38,6 +68,21 @@
     --xfe-border-color: #444444;
     --xfe-outline-color: #666666;
     --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --xfe-dialog-overlay-bg: rgba(0, 0, 0, 0.7);
+    --xfe-dialog-bg: #2b2b2b;
+    --xfe-dialog-text: #e0e0e0;
+    --xfe-dialog-header-bg: #7a6a3f;
+    --xfe-dialog-header-text: #ffffff;
+    --xfe-dialog-btn-bg: #3a3a3a;
+    --xfe-dialog-btn-text: #e0e0e0;
+    --xfe-dialog-btn-border: #555555;
+    --xfe-dialog-btn-hover-bg: #4a4a4a;
+    --xfe-dialog-btn-hover-border: #666666;
+    --xfe-dialog-warning-bg: #7a6a3f;
+    --xfe-dialog-warning-border: #7a6a3f;
+    --xfe-dialog-warning-text: #ffffff;
+    --xfe-dialog-warning-hover-bg: #8d7c4e;
+    --xfe-dialog-warning-hover-border: #8d7c4e;
 }
 
 /* Auto theme - follows system preference */
@@ -53,6 +98,21 @@
         --xfe-border-color: #444444;
         --xfe-outline-color: #666666;
         --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        --xfe-dialog-overlay-bg: rgba(0, 0, 0, 0.7);
+        --xfe-dialog-bg: #2b2b2b;
+        --xfe-dialog-text: #e0e0e0;
+        --xfe-dialog-header-bg: #7a6a3f;
+        --xfe-dialog-header-text: #ffffff;
+        --xfe-dialog-btn-bg: #3a3a3a;
+        --xfe-dialog-btn-text: #e0e0e0;
+        --xfe-dialog-btn-border: #555555;
+        --xfe-dialog-btn-hover-bg: #4a4a4a;
+        --xfe-dialog-btn-hover-border: #666666;
+        --xfe-dialog-warning-bg: #7a6a3f;
+        --xfe-dialog-warning-border: #7a6a3f;
+        --xfe-dialog-warning-text: #ffffff;
+        --xfe-dialog-warning-hover-bg: #8d7c4e;
+        --xfe-dialog-warning-hover-border: #8d7c4e;
     }
 }
 
@@ -770,8 +830,8 @@
    Delete Confirmation Dialog
    Uses TYPO3 backend modal class names (.modal-header, .modal-body, etc.)
    so styles are inherited when backend/Bootstrap CSS is available.
-   These rules are scoped under .frontend-edit__dialog-overlay and serve as
-   fallback styles matching the TYPO3 backend dark theme.
+   These rules are scoped under .frontend-edit__dialog-overlay and use
+   --xfe-dialog-* custom properties to respect the active theme.
    ========================================================================== */
 .frontend-edit__dialog-overlay {
     position: fixed;
@@ -779,7 +839,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--xfe-dialog-overlay-bg);
     z-index: 100001;
     display: flex;
     align-items: center;
@@ -793,8 +853,8 @@
 }
 
 .frontend-edit__dialog-overlay .modal-dialog {
-    min-width: 500px;
-    max-width: 600px;
+    width: 500px;
+    max-width: calc(100vw - 32px);
     transform: scale(0.9);
     transition: transform 0.2s ease;
 }
@@ -804,7 +864,7 @@
 }
 
 .frontend-edit__dialog-overlay .modal-content {
-    background: #2b2b2b;
+    background: var(--xfe-dialog-bg);
     border-radius: 2px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     border: none;
@@ -812,8 +872,8 @@
 
 .frontend-edit__dialog-overlay .modal-header {
     padding: 12px 16px;
-    background: #8b7a4a;
-    color: #fff;
+    background: var(--xfe-dialog-header-bg);
+    color: var(--xfe-dialog-header-text);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -825,16 +885,15 @@
     margin: 0;
     font-size: 14px;
     font-weight: 500;
-    color: #fff;
+    color: var(--xfe-dialog-header-text);
     flex: 1;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-.frontend-edit__dialog-overlay .close,
 .frontend-edit__dialog-overlay .btn-close {
     background: transparent;
     border: none;
-    color: #fff;
+    color: var(--xfe-dialog-header-text);
     font-size: 24px;
     line-height: 1;
     cursor: pointer;
@@ -848,12 +907,10 @@
     transition: opacity 0.2s ease;
 }
 
-.frontend-edit__dialog-overlay .close:hover,
 .frontend-edit__dialog-overlay .btn-close:hover {
     opacity: 1;
 }
 
-.frontend-edit__dialog-overlay .close svg,
 .frontend-edit__dialog-overlay .btn-close svg {
     width: 14px;
     height: 14px;
@@ -865,7 +922,7 @@
 
 .frontend-edit__dialog-overlay .modal-body p {
     margin: 0;
-    color: #e0e0e0;
+    color: var(--xfe-dialog-text);
     line-height: 1.5;
     font-size: 14px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -881,7 +938,6 @@
 
 .frontend-edit__dialog-overlay .btn {
     padding: 6px 16px;
-    border: 1px solid #555;
     border-radius: 2px;
     font-size: 13px;
     cursor: pointer;
@@ -890,25 +946,25 @@
 }
 
 .frontend-edit__dialog-overlay .btn-default {
-    background: #3a3a3a;
-    color: #e0e0e0;
-    border-color: #555;
+    background: var(--xfe-dialog-btn-bg);
+    color: var(--xfe-dialog-btn-text);
+    border: 1px solid var(--xfe-dialog-btn-border);
 }
 
 .frontend-edit__dialog-overlay .btn-default:hover {
-    background: #4a4a4a;
-    border-color: #666;
+    background: var(--xfe-dialog-btn-hover-bg);
+    border-color: var(--xfe-dialog-btn-hover-border);
 }
 
 .frontend-edit__dialog-overlay .btn-warning {
-    background: #8b7a4a;
-    border-color: #8b7a4a;
-    color: #fff;
+    background: var(--xfe-dialog-warning-bg);
+    border: 1px solid var(--xfe-dialog-warning-border);
+    color: var(--xfe-dialog-warning-text);
 }
 
 .frontend-edit__dialog-overlay .btn-warning:hover {
-    background: #9d8a5a;
-    border-color: #9d8a5a;
+    background: var(--xfe-dialog-warning-hover-bg);
+    border-color: var(--xfe-dialog-warning-hover-border);
 }
 
 /* ==========================================================================

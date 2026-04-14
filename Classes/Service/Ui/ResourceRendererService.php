@@ -106,7 +106,7 @@ final readonly class ResourceRendererService
             'message' => $this->translate('delete.confirm.message', "Are you sure you want to delete the record '%s'?"),
             'cancel' => $this->translate('delete.confirm.cancel', 'Cancel'),
             'delete' => $this->translate('delete.confirm.delete', 'Delete record (!)'),
-        ], \JSON_HEX_TAG | \JSON_HEX_AMP);
+        ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $resources['settings_config'] = sprintf(
             '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s;</script>',
             $nonceAttribute,
