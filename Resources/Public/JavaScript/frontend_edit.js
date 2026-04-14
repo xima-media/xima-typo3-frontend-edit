@@ -192,6 +192,7 @@
     confirm(uid, table, recordTitle) {
       const l = this.labels();
       return new Promise((resolve) => {
+        const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         const overlay = document.createElement('div');
         overlay.className = 'frontend-edit__dialog-overlay';
 
@@ -253,6 +254,9 @@
           document.removeEventListener('keydown', onEsc);
           overlay.classList.remove('frontend-edit__dialog-overlay--show');
           setTimeout(() => overlay.remove(), 200);
+          if (previousFocus && document.contains(previousFocus)) {
+            previousFocus.focus();
+          }
           resolve(result);
         };
 
