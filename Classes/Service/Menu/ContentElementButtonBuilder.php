@@ -184,5 +184,9 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         // New content after button
         $newContentUrl = $this->urlBuilderService->buildNewContentAfterUrl($contentElement['uid'], $returnUrlAnchor);
         $this->addButton($menuButton, 'new_content_after', ButtonType::Link, url: $newContentUrl, icon: 'actions-add');
+
+        // Delete button
+        $deleteUrl = $this->urlBuilderService->buildDeleteUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
+        $this->addButton($menuButton, 'delete', ButtonType::Link, url: $deleteUrl, icon: 'actions-delete');
     }
 }

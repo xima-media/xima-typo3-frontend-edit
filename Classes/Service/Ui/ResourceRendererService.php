@@ -101,14 +101,23 @@ final readonly class ResourceRendererService
         $enableOutline = (null !== $request && $this->settingsService->isEnableOutline($request)) ? 'true' : 'false';
         $enableScrollToElement = (null !== $request && $this->settingsService->isEnableScrollToElement($request)) ? 'true' : 'false';
         $contextualEditing = (null !== $request && $this->settingsService->isContextualEditingEnabled($request)) ? 'true' : 'false';
+        $deleteLabels = json_encode([
+            'title' => $this->translate('delete.confirm.title', 'Delete this record?'),
+            'message' => $this->translate('delete.confirm.message', "Are you sure you want to delete the record '%s'?"),
+            'cancel' => $this->translate('delete.confirm.cancel', 'Cancel'),
+            'delete' => $this->translate('delete.confirm.delete', 'Delete record (!)'),
+            'success' => $this->translate('delete.success', 'Record deleted'),
+            'error' => $this->translate('delete.error', 'Could not delete the record'),
+        ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $resources['settings_config'] = sprintf(
-            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s;</script>',
+            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s;</script>',
             $nonceAttribute,
             $colorScheme,
             $showContextMenu,
             $enableOutline,
             $enableScrollToElement,
             $contextualEditing,
+            $deleteLabels,
         );
     }
 

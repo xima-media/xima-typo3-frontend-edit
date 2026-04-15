@@ -60,6 +60,27 @@
 			<trans-unit id="tooltip.pageOptions">
 				<source>Page options</source>
 			</trans-unit>
+			<trans-unit id="delete">
+				<source>Delete</source>
+			</trans-unit>
+			<trans-unit id="delete.confirm.title">
+				<source>Delete this record?</source>
+			</trans-unit>
+			<trans-unit id="delete.confirm.message">
+				<source>Are you sure you want to delete the record '%s'?</source>
+			</trans-unit>
+			<trans-unit id="delete.confirm.cancel">
+				<source>Cancel</source>
+			</trans-unit>
+			<trans-unit id="delete.confirm.delete">
+				<source>Delete record (!)</source>
+			</trans-unit>
+			<trans-unit id="delete.success">
+				<source>Record deleted</source>
+			</trans-unit>
+			<trans-unit id="delete.error">
+				<source>Could not delete the record</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

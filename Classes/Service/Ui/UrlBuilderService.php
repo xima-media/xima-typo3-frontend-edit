@@ -194,6 +194,24 @@ final readonly class UrlBuilderService
     }
 
     /**
+     * @throws RouteNotFoundException
+     */
+    public function buildDeleteUrl(int $uid, string $table, string $returnUrl): string
+    {
+        return $this->uriBuilder->buildUriFromRoute(
+            'tce_db',
+            [
+                'cmd' => [
+                    $table => [
+                        $uid => ['delete' => 1],
+                    ],
+                ],
+                'redirect' => $returnUrl,
+            ],
+        )->__toString();
+    }
+
+    /**
      * @param array<string, mixed> $parameters
      *
      * @throws RouteNotFoundException

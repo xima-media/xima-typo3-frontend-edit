@@ -10,6 +10,21 @@
     --xfe-border-color: #e0e0e0;
     --xfe-outline-color: #aaaaaa;
     --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --xfe-dialog-overlay-bg: rgba(0, 0, 0, 0.5);
+    --xfe-dialog-bg: #ffffff;
+    --xfe-dialog-text: #1a1a1a;
+    --xfe-dialog-header-bg: #7a6a3f;
+    --xfe-dialog-header-text: #ffffff;
+    --xfe-dialog-btn-bg: #e8e8e8;
+    --xfe-dialog-btn-text: #1a1a1a;
+    --xfe-dialog-btn-border: #cccccc;
+    --xfe-dialog-btn-hover-bg: #d8d8d8;
+    --xfe-dialog-btn-hover-border: #bbbbbb;
+    --xfe-dialog-warning-bg: #7a6a3f;
+    --xfe-dialog-warning-border: #7a6a3f;
+    --xfe-dialog-warning-text: #ffffff;
+    --xfe-dialog-warning-hover-bg: #8d7c4e;
+    --xfe-dialog-warning-hover-border: #8d7c4e;
 }
 
 /* Light theme (explicit) */
@@ -24,6 +39,21 @@
     --xfe-border-color: #e0e0e0;
     --xfe-outline-color: #aaaaaa;
     --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --xfe-dialog-overlay-bg: rgba(0, 0, 0, 0.5);
+    --xfe-dialog-bg: #ffffff;
+    --xfe-dialog-text: #1a1a1a;
+    --xfe-dialog-header-bg: #7a6a3f;
+    --xfe-dialog-header-text: #ffffff;
+    --xfe-dialog-btn-bg: #e8e8e8;
+    --xfe-dialog-btn-text: #1a1a1a;
+    --xfe-dialog-btn-border: #cccccc;
+    --xfe-dialog-btn-hover-bg: #d8d8d8;
+    --xfe-dialog-btn-hover-border: #bbbbbb;
+    --xfe-dialog-warning-bg: #7a6a3f;
+    --xfe-dialog-warning-border: #7a6a3f;
+    --xfe-dialog-warning-text: #ffffff;
+    --xfe-dialog-warning-hover-bg: #8d7c4e;
+    --xfe-dialog-warning-hover-border: #8d7c4e;
 }
 
 /* Dark theme (explicit) */
@@ -38,6 +68,21 @@
     --xfe-border-color: #444444;
     --xfe-outline-color: #666666;
     --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --xfe-dialog-overlay-bg: rgba(0, 0, 0, 0.7);
+    --xfe-dialog-bg: #2b2b2b;
+    --xfe-dialog-text: #e0e0e0;
+    --xfe-dialog-header-bg: #7a6a3f;
+    --xfe-dialog-header-text: #ffffff;
+    --xfe-dialog-btn-bg: #3a3a3a;
+    --xfe-dialog-btn-text: #e0e0e0;
+    --xfe-dialog-btn-border: #555555;
+    --xfe-dialog-btn-hover-bg: #4a4a4a;
+    --xfe-dialog-btn-hover-border: #666666;
+    --xfe-dialog-warning-bg: #7a6a3f;
+    --xfe-dialog-warning-border: #7a6a3f;
+    --xfe-dialog-warning-text: #ffffff;
+    --xfe-dialog-warning-hover-bg: #8d7c4e;
+    --xfe-dialog-warning-hover-border: #8d7c4e;
 }
 
 /* Auto theme - follows system preference */
@@ -53,6 +98,21 @@
         --xfe-border-color: #444444;
         --xfe-outline-color: #666666;
         --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        --xfe-dialog-overlay-bg: rgba(0, 0, 0, 0.7);
+        --xfe-dialog-bg: #2b2b2b;
+        --xfe-dialog-text: #e0e0e0;
+        --xfe-dialog-header-bg: #7a6a3f;
+        --xfe-dialog-header-text: #ffffff;
+        --xfe-dialog-btn-bg: #3a3a3a;
+        --xfe-dialog-btn-text: #e0e0e0;
+        --xfe-dialog-btn-border: #555555;
+        --xfe-dialog-btn-hover-bg: #4a4a4a;
+        --xfe-dialog-btn-hover-border: #666666;
+        --xfe-dialog-warning-bg: #7a6a3f;
+        --xfe-dialog-warning-border: #7a6a3f;
+        --xfe-dialog-warning-text: #ffffff;
+        --xfe-dialog-warning-hover-bg: #8d7c4e;
+        --xfe-dialog-warning-hover-border: #8d7c4e;
     }
 }
 
@@ -767,6 +827,147 @@
 }
 
 /* ==========================================================================
+   Delete Confirmation Dialog
+   Uses TYPO3 backend modal class names (.modal-header, .modal-body, etc.)
+   so styles are inherited when backend/Bootstrap CSS is available.
+   These rules are scoped under .frontend-edit__dialog-overlay and use
+   --xfe-dialog-* custom properties to respect the active theme.
+   ========================================================================== */
+.frontend-edit__dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--xfe-dialog-overlay-bg);
+    z-index: 100001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.frontend-edit__dialog-overlay--show {
+    opacity: 1;
+}
+
+.frontend-edit__dialog-overlay .modal-dialog {
+    width: 500px;
+    max-width: calc(100vw - 32px);
+    transform: scale(0.9);
+    transition: transform 0.2s ease;
+}
+
+.frontend-edit__dialog-overlay--show .modal-dialog {
+    transform: scale(1);
+}
+
+.frontend-edit__dialog-overlay .modal-content {
+    background: var(--xfe-dialog-bg);
+    border-radius: 2px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    border: none;
+}
+
+.frontend-edit__dialog-overlay .modal-header {
+    padding: 12px 16px;
+    background: var(--xfe-dialog-header-bg);
+    color: var(--xfe-dialog-header-text);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: none;
+    border-radius: 2px 2px 0 0;
+}
+
+.frontend-edit__dialog-overlay .modal-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--xfe-dialog-header-text);
+    flex: 1;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.frontend-edit__dialog-overlay .btn-close {
+    background: transparent;
+    border: none;
+    color: var(--xfe-dialog-header-text);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.frontend-edit__dialog-overlay .btn-close:hover {
+    opacity: 1;
+}
+
+.frontend-edit__dialog-overlay .btn-close svg {
+    width: 14px;
+    height: 14px;
+}
+
+.frontend-edit__dialog-overlay .modal-body {
+    padding: 20px;
+}
+
+.frontend-edit__dialog-overlay .modal-body p {
+    margin: 0;
+    color: var(--xfe-dialog-text);
+    line-height: 1.5;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.frontend-edit__dialog-overlay .modal-footer {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: none;
+}
+
+.frontend-edit__dialog-overlay .btn {
+    padding: 6px 16px;
+    border-radius: 2px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.frontend-edit__dialog-overlay .btn-default {
+    background: var(--xfe-dialog-btn-bg);
+    color: var(--xfe-dialog-btn-text);
+    border: 1px solid var(--xfe-dialog-btn-border);
+}
+
+.frontend-edit__dialog-overlay .btn-default:hover {
+    background: var(--xfe-dialog-btn-hover-bg);
+    border-color: var(--xfe-dialog-btn-hover-border);
+}
+
+.frontend-edit__dialog-overlay .btn-warning {
+    background: var(--xfe-dialog-warning-bg);
+    border: 1px solid var(--xfe-dialog-warning-border);
+    color: var(--xfe-dialog-warning-text);
+}
+
+.frontend-edit__dialog-overlay .btn-warning:hover {
+    background: var(--xfe-dialog-warning-hover-bg);
+    border-color: var(--xfe-dialog-warning-hover-border);
+}
+
+/* ==========================================================================
    Contextual Edit Sidebar (Experimental)
    ========================================================================== */
 
@@ -890,7 +1091,9 @@
     .frontend-edit__overlay,
     .frontend-edit__overlay--active,
     .frontend-edit__tooltip,
-    .frontend-edit__tooltip--visible {
+    .frontend-edit__tooltip--visible,
+    .frontend-edit__dialog-overlay,
+    .frontend-edit__dialog-overlay .modal-dialog {
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
     }
