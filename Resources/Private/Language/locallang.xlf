@@ -81,6 +81,9 @@
 			<trans-unit id="delete.error">
 				<source>Could not delete the record</source>
 			</trans-unit>
+			<trans-unit id="column.createContent">
+				<source>Create new content</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

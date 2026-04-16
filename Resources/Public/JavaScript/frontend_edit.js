@@ -960,6 +960,33 @@
       // Add UIDs array for backend to fetch content elements
       dataItems._uids = Array.from(allUids).sort((a, b) => a - b);
 
+      // Scan for empty column markers (placed by integrator in Fluid templates)
+      // Collect per-container colPos info so the backend knows which columns to check
+      const containerMarkers = {};
+      const pageColPositions = [];
+      document.querySelectorAll('[data-xfe-colpos]').forEach(marker => {
+        const colPos = parseInt(marker.dataset.xfeColpos, 10);
+        const containerUid = marker.dataset.xfeContainer;
+        if (containerUid) {
+          const uid = parseInt(containerUid, 10);
+          if (uid > 0) {
+            if (!containerMarkers[uid]) containerMarkers[uid] = [];
+            containerMarkers[uid].push(colPos);
+          }
+        } else {
+          pageColPositions.push(colPos);
+        }
+      });
+
+      if (Object.keys(containerMarkers).length > 0) {
+        dataItems._containerMarkers = containerMarkers;
+        Logger.log(`Found container markers`, containerMarkers);
+      }
+      if (pageColPositions.length > 0) {
+        dataItems._pageColPositions = pageColPositions;
+        Logger.log(`Found page column markers`, pageColPositions);
+      }
+
       Logger.log(`Collected ${allUids.size} unique content element UIDs for backend request`, {
         uids: dataItems._uids
       });
@@ -999,9 +1026,16 @@
         }
 
         const data = await response.json();
-        Logger.log(`Backend response received with ${Object.keys(data).length} content element(s)`);
 
-        return data;
+        // Handle wrapped response { contentElements, emptyColumns }
+        if (data.contentElements !== undefined) {
+          Logger.log(`Backend response received with ${Object.keys(data.contentElements).length} content element(s) and ${(data.emptyColumns || []).length} empty column(s)`);
+          return data;
+        }
+
+        // Fallback for legacy response (plain content elements object)
+        Logger.log(`Backend response received with ${Object.keys(data).length} content element(s)`);
+        return { contentElements: data, emptyColumns: [] };
       } catch (error) {
         Notification.show({ title: 'Frontend Edit', message: 'Failed to load edit information', severity: 'error' });
         Logger.log('Failed to fetch content elements', { error: error.message }, 'error');
@@ -1153,6 +1187,62 @@
   };
 
   /**
+   * Empty Column Renderer - Matches AJAX emptyColumns data against
+   * [data-xfe-colpos] markers placed by the integrator in Fluid templates
+   * and injects "+" buttons client-side.
+   */
+  const EmptyColumnRenderer = {
+    render(emptyColumns) {
+      if (!emptyColumns || emptyColumns.length === 0) return;
+
+      Logger.log(`Processing ${emptyColumns.length} empty column(s)`);
+      let rendered = 0;
+
+      emptyColumns.forEach(col => {
+        let selector = `[data-xfe-colpos="${col.colPos}"]`;
+        if (col.containerUid) {
+          selector += `[data-xfe-container="${col.containerUid}"]`;
+        }
+
+        const marker = document.querySelector(selector);
+        if (!marker) {
+          Logger.log(`No marker found for colPos ${col.colPos}` + (col.containerUid ? ` container ${col.containerUid}` : ''), null, 'warn');
+          return;
+        }
+
+        if (!col.newContentUrl || !UI.isValidUrl(col.newContentUrl)) {
+          Logger.log(`Invalid URL for colPos ${col.colPos}`, null, 'warn');
+          return;
+        }
+
+        const link = document.createElement('a');
+        link.href = col.newContentUrl;
+        link.className = 'frontend-edit__column-btn frontend-edit__open-modal';
+        link.setAttribute('aria-label', col.name || 'Create new content');
+
+        const icon = document.createElement('span');
+        icon.className = 'frontend-edit__column-btn-icon';
+        icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+        link.appendChild(icon);
+
+        const label = document.createElement('span');
+        label.className = 'frontend-edit__column-btn-label';
+        label.textContent = col.name || 'Create new content';
+        link.appendChild(label);
+
+        marker.innerHTML = '';
+        marker.appendChild(link);
+        marker.hidden = false;
+
+        rendered++;
+        Logger.log(`Empty column button rendered for colPos ${col.colPos}`, { name: col.name, url: col.newContentUrl });
+      });
+
+      Logger.log(`Empty column rendering complete: ${rendered}/${emptyColumns.length} buttons placed`);
+    }
+  };
+
+  /**
    * Main Application
    */
   const FrontendEdit = {
@@ -1202,9 +1292,10 @@
           OverlayManager.init();
 
           const dataItems = DataService.collectDataItems();
-          const contentElements = await DataService.fetchContentElements(dataItems);
+          const response = await DataService.fetchContentElements(dataItems);
 
-          Renderer.render(contentElements);
+          Renderer.render(response.contentElements || {});
+          EmptyColumnRenderer.render(response.emptyColumns || []);
           Dropdown.setupGlobalHandler();
           DeleteHandler.init();
         }
