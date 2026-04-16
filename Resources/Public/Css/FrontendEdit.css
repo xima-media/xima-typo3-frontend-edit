@@ -1010,6 +1010,14 @@
     color: var(--xfe-text-primary);
 }
 
+.frontend-edit__column-btn:focus-visible {
+    background: var(--xfe-bg-hover);
+    border-color: var(--xfe-outline-color);
+    color: var(--xfe-text-primary);
+    outline: 2px solid var(--xfe-outline-color);
+    outline-offset: 2px;
+}
+
 .frontend-edit__column-btn-icon {
     display: flex;
     align-items: center;

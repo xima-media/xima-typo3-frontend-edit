@@ -187,11 +187,12 @@ final readonly class EmptyColumnService
                 $qb->createNamedParameter($languageUid, Connection::PARAM_INT),
                 $qb->createNamedParameter(-1, Connection::PARAM_INT),
             ]),
-            $qb->expr()->eq('deleted', 0),
+            $qb->expr()->eq('deleted', $qb->createNamedParameter(0, Connection::PARAM_INT)),
+            $qb->expr()->eq('hidden', $qb->createNamedParameter(0, Connection::PARAM_INT)),
         ];
 
         if ($this->containerFieldExists) {
-            $conditions[] = $qb->expr()->eq('tx_container_parent', 0);
+            $conditions[] = $qb->expr()->eq('tx_container_parent', $qb->createNamedParameter(0, Connection::PARAM_INT));
         }
 
         return 0 === (int) $qb->count('uid')->from('tt_content')->where(...$conditions)->executeQuery()->fetchOne();
@@ -211,7 +212,8 @@ final readonly class EmptyColumnService
                     $qb->createNamedParameter($languageUid, Connection::PARAM_INT),
                     $qb->createNamedParameter(-1, Connection::PARAM_INT),
                 ]),
-                $qb->expr()->eq('deleted', 0),
+                $qb->expr()->eq('deleted', $qb->createNamedParameter(0, Connection::PARAM_INT)),
+                $qb->expr()->eq('hidden', $qb->createNamedParameter(0, Connection::PARAM_INT)),
             )
             ->executeQuery()
             ->fetchOne();
