@@ -19,27 +19,10 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use function sprintf;
 
 /**
- * Renders a lightweight DOM marker for empty column detection.
- *
- * Outputs a hidden `<div>` with `data-xfe-colpos` (and optionally
- * `data-xfe-container`) attributes. The actual "Create new content"
- * button is injected client-side by frontend_edit.js after it receives
- * empty-column data from the AJAX endpoint.
- *
- * Only rendered when a backend user is logged in and frontend editing
- * is allowed and not disabled.
- *
- * Usage:
- *
- *     {namespace xfe=Xima\XimaTypo3FrontendEdit\ViewHelpers}
- *
- *     <!-- Page column marker -->
- *     <xfe:columnTarget colPos="0" />
- *
- *     <!-- Container column marker -->
- *     <xfe:columnTarget colPos="201" containerUid="{data.uid}" />
+ * ColumnTargetViewHelper.
  *
  * @license GPL-2.0-or-later
+ * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 class ColumnTargetViewHelper extends AbstractViewHelper
 {

@@ -13,22 +13,21 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Content;
 
+use Throwable;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
-use TYPO3\CMS\Core\Database\Connection;
-use TYPO3\CMS\Core\Database\ConnectionPool;
+use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+use function is_array;
+
 /**
- * Detects empty backend layout columns and builds new-content URLs.
- *
- * Called by AjaxController to extend the editInformation response.
- * The frontend JS matches the result against [data-xfe-colpos] DOM
- * markers and injects "Create new content" buttons client-side.
+ * EmptyColumnService.
  *
  * @license GPL-2.0-or-later
+ * @author Konrad Michalik <hej@konradmichalik.dev>
  */
 final readonly class EmptyColumnService
 {
@@ -43,10 +42,10 @@ final readonly class EmptyColumnService
     }
 
     /**
-     * @param int           $pid         Page UID
-     * @param int           $languageUid sys_language_uid
-     * @param string        $returnUrl   Frontend URL to return to after editing
-     * @param array<mixed>  $requestData Raw request data from the AJAX call
+     * @param int          $pid         Page UID
+     * @param int          $languageUid sys_language_uid
+     * @param string       $returnUrl   Frontend URL to return to after editing
+     * @param array<mixed> $requestData Raw request data from the AJAX call
      *
      * @return list<array{colPos: int, newContentUrl: string, name?: string, containerUid?: int}>
      */
@@ -66,7 +65,7 @@ final readonly class EmptyColumnService
         $result = [];
 
         foreach ($this->resolvePageColumns($pid) as $column) {
-            $colPos = (int) $column['colPos'];
+            $colPos = $column['colPos'];
             if (!$this->isPageColumnEmpty($pid, $colPos, $languageUid)) {
                 continue;
             }
@@ -97,12 +96,10 @@ final readonly class EmptyColumnService
         $result = [];
 
         foreach ($containerMarkers as $containerUid => $colPositions) {
-            $containerUid = (int) $containerUid;
             if ($containerUid <= 0) {
                 continue;
             }
             foreach ($colPositions as $colPos) {
-                $colPos = (int) $colPos;
                 if (!$this->isContainerColumnEmpty($containerUid, $colPos, $languageUid)) {
                     continue;
                 }
@@ -130,11 +127,6 @@ final readonly class EmptyColumnService
         try {
             $backendLayoutView = GeneralUtility::makeInstance(BackendLayoutView::class);
             $backendLayout = $backendLayoutView->getBackendLayoutForPage($pid);
-
-            if (null === $backendLayout) {
-                return $default;
-            }
-
             $columns = $this->extractColumnsFromStructure($backendLayout->getStructure());
 
             if ([] === $columns) {
@@ -147,7 +139,7 @@ final readonly class EmptyColumnService
             }
 
             return [] !== $columns ? $columns : $default;
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return $default;
         }
     }
@@ -255,7 +247,7 @@ final readonly class EmptyColumnService
         foreach ((array) ($requestData['_containerMarkers'] ?? []) as $uid => $colPositions) {
             $uid = (int) $uid;
             if ($uid > 0 && is_array($colPositions)) {
-                $markers[$uid] = array_filter(array_map('intval', $colPositions));
+                $markers[$uid] = array_filter(array_map(intval(...), $colPositions), static fn (int $v): bool => $v > 0);
             }
         }
 
@@ -271,7 +263,7 @@ final readonly class EmptyColumnService
                 ->listTableColumns('tt_content');
 
             return isset($columns['tx_container_parent']);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return false;
         }
     }
@@ -288,7 +280,7 @@ final readonly class EmptyColumnService
                     ->createFromUserPreferences($GLOBALS['BE_USER'])
                     ->sL($label) ?: $label;
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
         }
 
         return $label;
