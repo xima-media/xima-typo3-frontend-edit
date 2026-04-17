@@ -21,6 +21,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
+use Xima\XimaTypo3FrontendEdit\Service\Content\EmptyColumnService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator;
 
 use function is_array;
@@ -38,6 +39,7 @@ readonly class AjaxController
     public function __construct(
         private ContentElementMenuGenerator $contentElementMenuGenerator,
         private BackendUserService $backendUserService,
+        private EmptyColumnService $emptyColumnService,
     ) {}
 
     /**
@@ -122,7 +124,12 @@ readonly class AjaxController
 
         $dropdown = $this->contentElementMenuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
 
-        return new JsonResponse(mb_convert_encoding($dropdown, 'UTF-8'));
+        $emptyColumns = $this->emptyColumnService->getEmptyColumns($pid, $languageUid, $returnUrl, $data);
+
+        return new JsonResponse(mb_convert_encoding([
+            'contentElements' => $dropdown,
+            'emptyColumns' => $emptyColumns,
+        ], 'UTF-8'));
     }
 
     protected function getBackendUser(): ?BackendUserAuthentication
