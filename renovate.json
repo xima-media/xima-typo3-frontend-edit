@@ -6,5 +6,8 @@
 	],
 	"ignorePaths": [
 		"package-lock.json"
-	]
+	],
+	"constraints": {
+		"php": ">=8.2"
+	}
 }
