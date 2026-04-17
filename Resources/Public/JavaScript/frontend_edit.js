@@ -966,6 +966,8 @@
       const pageColPositions = [];
       document.querySelectorAll('[data-xfe-colpos]').forEach(marker => {
         const colPos = parseInt(marker.dataset.xfeColpos, 10);
+        if (!Number.isFinite(colPos)) return;
+
         const containerUid = marker.dataset.xfeContainer;
         if (containerUid) {
           const uid = parseInt(containerUid, 10);
@@ -1217,7 +1219,7 @@
 
         const link = document.createElement('a');
         link.href = col.newContentUrl;
-        link.className = 'frontend-edit__column-btn frontend-edit__open-modal';
+        link.className = 'frontend-edit__column-btn';
         link.setAttribute('aria-label', col.name || 'Create new content');
 
         const icon = document.createElement('span');
