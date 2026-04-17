@@ -2,7 +2,8 @@ name: CGL
 on:
   push:
     branches:
-      - '**'
+      - main
+  pull_request: ~
 
 jobs:
   cgl:
