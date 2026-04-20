@@ -15,7 +15,7 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\ViewHelpers;
 
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
-use stdClass;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\ViewHelpers\DataViewHelper;
 
@@ -61,7 +61,7 @@ final class DataViewHelperTest extends TestCase
     #[Test]
     public function renderReturnsEmptyStringWhenFrontendEditDisabled(): void
     {
-        $GLOBALS['BE_USER'] = new stdClass();
+        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->uc = [Configuration::UC_KEY_DISABLED => true];
 
         $this->viewHelper->setArguments([
@@ -79,7 +79,7 @@ final class DataViewHelperTest extends TestCase
     #[Test]
     public function renderReturnsEmptyStringWhenNoUidAndNoUrl(): void
     {
-        $GLOBALS['BE_USER'] = new stdClass();
+        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->uc = [];
 
         $this->viewHelper->setArguments([
@@ -97,7 +97,7 @@ final class DataViewHelperTest extends TestCase
     #[Test]
     public function renderReturnsHiddenInputWithUid(): void
     {
-        $GLOBALS['BE_USER'] = new stdClass();
+        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->uc = [];
 
         $this->viewHelper->setArguments([
@@ -121,7 +121,7 @@ final class DataViewHelperTest extends TestCase
     #[Test]
     public function renderReturnsHiddenInputWithUrl(): void
     {
-        $GLOBALS['BE_USER'] = new stdClass();
+        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->uc = [];
 
         $this->viewHelper->setArguments([
@@ -143,7 +143,7 @@ final class DataViewHelperTest extends TestCase
     #[Test]
     public function renderIncludesAdditionalClass(): void
     {
-        $GLOBALS['BE_USER'] = new stdClass();
+        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->uc = [];
 
         $this->viewHelper->setArguments([
@@ -163,7 +163,7 @@ final class DataViewHelperTest extends TestCase
     #[Test]
     public function renderOutputIsValidJson(): void
     {
-        $GLOBALS['BE_USER'] = new stdClass();
+        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->uc = [];
 
         $this->viewHelper->setArguments([

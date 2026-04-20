@@ -115,7 +115,7 @@ final readonly class PageButtonBuilder extends AbstractMenuButtonBuilder
 
         foreach ($items as $item) {
             if (isset($item['value']) && (int) $item['value'] === $doktype) {
-                return $GLOBALS['LANG']->sL($item['label'] ?? '') ?: 'Page';
+                return $this->getLanguageService()->sL($item['label'] ?? '') ?: 'Page';
             }
         }
 

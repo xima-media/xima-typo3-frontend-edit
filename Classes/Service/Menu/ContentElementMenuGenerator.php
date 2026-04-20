@@ -18,6 +18,7 @@ use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Exception;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
@@ -117,7 +118,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
             $event = $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrlAnchor));
 
             // Add ctypeLabel and ctypeIcon for frontend display
-            $ctypeLabel = $GLOBALS['LANG']->sL($contentElementConfig['label'] ?? '');
+            $ctypeLabel = $this->getLanguageService()->sL($contentElementConfig['label'] ?? '');
             $contentElement['ctypeLabel'] = '' !== $ctypeLabel ? $ctypeLabel : $contentElement['CType'];
 
             // Render CType icon as HTML
@@ -266,5 +267,10 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         }
 
         return $this->urlBuilderService->buildContextualEditUrl($uid, 'tt_content', $languageUid, $returnUrl);
+    }
+
+    private function getLanguageService(): LanguageService
+    {
+        return $GLOBALS['LANG'];
     }
 }

@@ -81,7 +81,7 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
     ): void {
         $this->addButton($menuButton, 'div_info', ButtonType::Divider);
 
-        $typeLabel = $GLOBALS['LANG']->sL($contentElementConfig['label'] ?? '') ?: $contentElement['CType'];
+        $typeLabel = $this->getLanguageService()->sL($contentElementConfig['label'] ?? '') ?: $contentElement['CType'];
         $header = isset($contentElement['header']) && '' !== $contentElement['header']
             ? htmlspecialchars(StringUtility::shortenString((string) $contentElement['header']), \ENT_QUOTES, 'UTF-8')
             : '';

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Template\Component;
 
 use TYPO3\CMS\Core\Imaging\Icon;
+use TYPO3\CMS\Core\Localization\LanguageService;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 
 use function array_key_exists;
@@ -148,7 +149,7 @@ class Button
     public function render(): array
     {
         $result = [
-            'label' => $GLOBALS['LANG']->sL($this->label),
+            'label' => $this->getLanguageService()->sL($this->label),
             'type' => $this->type->value,
         ];
 
@@ -170,5 +171,10 @@ class Button
         }
 
         return $result;
+    }
+
+    private function getLanguageService(): LanguageService
+    {
+        return $GLOBALS['LANG'];
     }
 }

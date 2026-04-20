@@ -212,16 +212,6 @@ final readonly class UrlBuilderService
     }
 
     /**
-     * @param array<string, mixed> $parameters
-     *
-     * @throws RouteNotFoundException
-     */
-    public function buildRoute(string $route, array $parameters = []): string
-    {
-        return $this->uriBuilder->buildUriFromRoute($route, $parameters)->__toString();
-    }
-
-    /**
      * @throws RouteNotFoundException
      */
     public function buildToggleUrl(): string
@@ -235,5 +225,15 @@ final readonly class UrlBuilderService
     public function buildEditInformationUrl(): string
     {
         return $this->buildRoute('ajax_frontendEdit_editInformation');
+    }
+
+    /**
+     * @param array<string, mixed> $parameters
+     *
+     * @throws RouteNotFoundException
+     */
+    private function buildRoute(string $route, array $parameters = []): string
+    {
+        return $this->uriBuilder->buildUriFromRoute($route, $parameters)->__toString();
     }
 }

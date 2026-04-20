@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\EventListener;
 
+use Psr\Http\Message\ServerRequestInterface;
+use TYPO3\CMS\Backend\Routing\Route;
 use TYPO3\CMS\Backend\Template\Components\ModifyButtonBarEvent;
 use TYPO3\CMS\Core\Attribute\AsEventListener;
 use TYPO3\CMS\Core\Page\PageRenderer;
@@ -34,7 +36,7 @@ final readonly class PageLayoutScrollEventListener
     public function __invoke(ModifyButtonBarEvent $event): void
     {
         $request = $GLOBALS['TYPO3_REQUEST'] ?? null;
-        if (null === $request) {
+        if (!$request instanceof ServerRequestInterface) {
             return;
         }
 
@@ -47,7 +49,7 @@ final readonly class PageLayoutScrollEventListener
 
         // Verify we're on the web_layout route
         $route = $request->getAttribute('route');
-        if (null === $route || 'web_layout' !== $route->getOption('_identifier')) {
+        if (!$route instanceof Route || 'web_layout' !== $route->getOption('_identifier')) {
             return;
         }
 
