@@ -66,8 +66,13 @@ class ToolRendererMiddleware implements MiddlewareInterface
             return $response;
         }
 
-        // Collect flash messages from backend session before rendering (if enabled)
-        $flashMessages = $this->settingsService->isEnableFlashMessages($request)
+        // Collect flash messages from backend session before rendering (if enabled).
+        //
+        // The iframe modal editor appends ?tx_ximatypo3frontendedit_iframe=1 to the
+        // save returnUrl so this follow-up request doesn't consume the flash queue —
+        // messages are left in the session for the parent page reload to pick up.
+        $isIframeRequest = isset($request->getQueryParams()['tx_ximatypo3frontendedit_iframe']);
+        $flashMessages = !$isIframeRequest && $this->settingsService->isEnableFlashMessages($request)
             ? $this->flashMessageService->collectFromSession()
             : [];
 

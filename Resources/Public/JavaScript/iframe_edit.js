@@ -9,17 +9,63 @@
   'use strict';
 
   // ── Constants ──────────────────────────────────────────────────────
+  //
+  // POLLING / MONKEY-PATCH POLICY (TYPO3 v13 only)
+  // ──────────────────────────────────────────────
+  // TYPO3 v13 does not expose a stable hook for embedded backend forms,
+  // so we poll for internal objects (ContentContainer, wizard components)
+  // and monkey-patch their methods to keep navigation inside our iframe.
+  //
+  // This is fragile by nature: any TYPO3 v13 patch release that renames
+  // or refactors these internals silently breaks the feature. The
+  // tradeoff is intentional and bounded by TYPO3 v13's lifetime — the
+  // entire iframe modal is gated to v13 only (see ResourceRendererService).
+  // On v14.2+ the contextual sidebar handles this natively, no polling.
+  //
+  // All timeouts/intervals are tuned to be just generous enough for slow
+  // dev environments without burning CPU. We use waitFor() with a single
+  // setTimeout-recursion + cap, not setInterval, so failed waits stop
+  // cleanly instead of accumulating handles.
 
   const MODAL_ID = 'xima-typo3-frontend-edit-modal';
   const IFRAME_ID = 'xima-typo3-frontend-edit-modal-iframe';
   const ANIMATION_DELAY_MS = 10;
   const ANIMATION_DURATION_MS = 300;
-  const WIZARD_CLICK_DELAY_MS = 1000;
-  const CONTENT_CONTAINER_POLL_MS = 5;
-  const CONTENT_CONTAINER_MAX_POLLS = 1000;
-  const WIZARD_PATCH_POLL_MS = 50;
-  const WIZARD_PATCH_MAX_POLLS = 200;
+
+  // ContentContainer is created by TYPO3 backend modules during iframe
+  // boot. We need to override setUrl before any backend code calls it
+  // (typically within ~50-200ms on a normal machine).
+  const CONTENT_CONTAINER_POLL_MS = 25;       // every 25ms
+  const CONTENT_CONTAINER_TIMEOUT_MS = 3000;  // give up after 3s
+
+  // Wizard custom elements (<typo3-backend-new-content-element-wizard>)
+  // are upgraded asynchronously after the iframe page renders.
+  const WIZARD_PATCH_POLL_MS = 100;           // every 100ms
+  const WIZARD_PATCH_TIMEOUT_MS = 5000;       // give up after 5s
+
+  // Fixed wait before auto-clicking a wizard button (give the wizard
+  // time to render its items after the page loads).
+  const WIZARD_CLICK_DELAY_MS = 800;
+
   const WIZARD_SELECTORS = 'typo3-backend-new-record-wizard, typo3-backend-new-content-element-wizard';
+
+  /**
+   * Poll until predicate() returns truthy or timeout elapses.
+   * Cleaner than raw setInterval — single timeout chain, no leaked
+   * handles, automatic stop on success or timeout.
+   *
+   * @param {() => *} predicate Called repeatedly; truthy return = done.
+   * @param {number} intervalMs Delay between attempts.
+   * @param {number} timeoutMs  Total budget before giving up.
+   */
+  function waitFor(predicate, intervalMs, timeoutMs) {
+    const deadline = Date.now() + timeoutMs;
+    function tick() {
+      try { if (predicate()) return; } catch (_) { /* ignore */ }
+      if (Date.now() < deadline) setTimeout(tick, intervalMs);
+    }
+    tick();
+  }
 
   // ── Helpers ─────────────────────────────────────────────────────────
 
@@ -58,15 +104,32 @@
   /**
    * Ensure a backend URL has:
    * 1. A returnUrl pointing to our frontend page (not a backend route)
+   *    with tx_ximatypo3frontendedit_iframe=1 marker so the post-save
+   *    redirect does not consume the flash queue inside the iframe
    * 2. The tx_ximatypo3frontendedit marker so the Save & Close button is added
+   *
+   * Delegates to the shared implementation in backend_stubs.js.
+   * Kept as a local fallback in case backend_stubs.js didn't load.
    */
   function ensureReturnUrl(url) {
+    if (window.XimaFrontendEdit?.ensureReturnUrl) {
+      return window.XimaFrontendEdit.ensureReturnUrl(url);
+    }
     try {
       const u = new URL(url, window.location.origin);
       const existing = u.searchParams.get('returnUrl') || '';
-      if (!existing || existing.includes('/typo3/')) {
-        u.searchParams.set('returnUrl', window.location.href);
+
+      // Rebuild returnUrl: use existing if it's a frontend URL, otherwise
+      // default to current page. Always add the iframe marker.
+      let returnUrl;
+      if (existing && !existing.includes('/typo3/')) {
+        returnUrl = new URL(existing, window.location.origin);
+      } else {
+        returnUrl = new URL(window.location.href);
       }
+      returnUrl.searchParams.set('tx_ximatypo3frontendedit_iframe', '1');
+      u.searchParams.set('returnUrl', returnUrl.toString());
+
       if (!u.searchParams.has('tx_ximatypo3frontendedit')) {
         u.searchParams.set('tx_ximatypo3frontendedit', '');
       }
@@ -116,6 +179,12 @@
     },
 
     open(url) {
+      // Ensure the returnUrl carries tx_ximatypo3frontendedit_iframe=1
+      // so the post-save redirect to the frontend URL does not consume the
+      // flash message queue inside the iframe — the parent reload picks
+      // them up instead.
+      url = ensureReturnUrl(url);
+
       this.getOrCreate();
       IframeHandler._wizardAutoClicked = false;
       const { iframe } = this;
@@ -127,10 +196,12 @@
       IframeHandler.overrideContentContainer(iframe);
       iframe.src = url;
 
-      // Only show header for info modals
+      // Show header only for views without a native close button
+      // (info, move, history). Edit forms have their own Save/Close UI.
+      const needsHeader = /record\/(info|history)|move_element/.test(url);
       const header = this.element.querySelector('.frontend-edit__modal-header');
       if (header) {
-        header.style.display = url.includes('record/info') ? 'flex' : 'none';
+        header.style.display = needsHeader ? 'flex' : 'none';
       }
 
       setTimeout(() => this.element.classList.add('frontend-edit__modal--open'), ANIMATION_DELAY_MS);
@@ -205,38 +276,36 @@
     /**
      * Override ContentContainer.setUrl inside the iframe so backend navigation
      * stays within our modal iframe instead of targeting the parent window.
+     *
+     * ContentContainer is created asynchronously by TYPO3 backend modules
+     * during iframe boot, so we have to wait for it before patching.
      */
     overrideContentContainer(iframe) {
-      let attempts = 0;
-      const interval = setInterval(() => {
-        attempts++;
-        try {
-          const cc = iframe.contentWindow?.TYPO3?.Backend?.ContentContainer;
-          if (!cc || cc._overridden) { if (cc?._overridden) clearInterval(interval); return; }
-          cc._overridden = true;
-          const setUrl = (url) => {
-            if (isFrontendUrl(url)) {
-              IframeHandler.closeAndReload();
-              return Promise.resolve();
-            }
-            if (isWizardUrl(url)) {
-              Logger.log('Wizard URL in ContentContainer.setUrl — opening overlay', { url });
-              IframeHandler.openWizardOverlay(iframe, url);
-              return Promise.resolve();
-            }
-            iframe.src = ensureReturnUrl(url);
+      waitFor(() => {
+        const cc = iframe.contentWindow?.TYPO3?.Backend?.ContentContainer;
+        if (!cc || cc._overridden) return cc?._overridden === true;
+        cc._overridden = true;
+        const setUrl = (url) => {
+          if (isFrontendUrl(url)) {
+            IframeHandler.closeAndReload();
             return Promise.resolve();
-          };
-          try {
-            Object.defineProperty(cc, 'setUrl', { value: setUrl, writable: true, configurable: true });
-          } catch (_) {
-            cc.setUrl = setUrl;
           }
-          Logger.log('ContentContainer.setUrl overridden');
-          clearInterval(interval);
-        } catch (_) { /* cross-origin */ }
-        if (attempts >= CONTENT_CONTAINER_MAX_POLLS) clearInterval(interval);
-      }, CONTENT_CONTAINER_POLL_MS);
+          if (isWizardUrl(url)) {
+            Logger.log('Wizard URL in ContentContainer.setUrl — opening overlay', { url });
+            IframeHandler.openWizardOverlay(iframe, url);
+            return Promise.resolve();
+          }
+          iframe.src = ensureReturnUrl(url);
+          return Promise.resolve();
+        };
+        try {
+          Object.defineProperty(cc, 'setUrl', { value: setUrl, writable: true, configurable: true });
+        } catch (_) {
+          cc.setUrl = setUrl;
+        }
+        Logger.log('ContentContainer.setUrl overridden');
+        return true;
+      }, CONTENT_CONTAINER_POLL_MS, CONTENT_CONTAINER_TIMEOUT_MS);
     },
 
     // ── Wizard auto-click ──────────────────────────────────────────
@@ -292,28 +361,31 @@
 
     // ── Wizard component patching ──────────────────────────────────
 
+    /**
+     * Patch wizard custom elements inside the iframe so they don't escape
+     * our iframe context. Wizards are upgraded asynchronously, so we poll.
+     */
     patchWizardComponents(iframe) {
       try {
         const win = iframe.contentWindow;
         if (!win) return;
 
-        let attempts = 0;
-        const interval = setInterval(() => {
-          attempts++;
-          try {
-            for (const wizard of win.document.querySelectorAll(WIZARD_SELECTORS)) {
-              if (wizard._frontendEditPatched) continue;
-              wizard._frontendEditPatched = true;
-              const original = wizard.handleItemClick;
-              wizard.handleItemClick = function (item) {
-                if (item?.url) { win.location.href = ensureReturnUrl(item.url); return; }
-                if (original) return original.call(this, item);
-              };
-              Logger.log('Wizard component patched');
-            }
-          } catch (_) { /* ignore */ }
-          if (attempts >= WIZARD_PATCH_MAX_POLLS) clearInterval(interval);
-        }, WIZARD_PATCH_POLL_MS);
+        // Poll for wizard components and patch any we haven't seen yet.
+        // Returns false (keep polling) until the timeout elapses — wizards
+        // can appear at different times as the form renders.
+        waitFor(() => {
+          for (const wizard of win.document.querySelectorAll(WIZARD_SELECTORS)) {
+            if (wizard._frontendEditPatched) continue;
+            wizard._frontendEditPatched = true;
+            const original = wizard.handleItemClick;
+            wizard.handleItemClick = function (item) {
+              if (item?.url) { win.location.href = ensureReturnUrl(item.url); return; }
+              if (original) return original.call(this, item);
+            };
+            Logger.log('Wizard component patched');
+          }
+          return false; // keep polling until timeout
+        }, WIZARD_PATCH_POLL_MS, WIZARD_PATCH_TIMEOUT_MS);
 
         this.installWizardClickInterception(win);
       } catch (_) { /* ignore */ }
@@ -350,10 +422,9 @@
           }
         }, true);
 
-        if (doc.body) {
-          new MutationObserver(() => this.installWizardClickInterception(win))
-            .observe(doc.body, { childList: true, subtree: true });
-        }
+        // Click handler is delegated at document level, so it catches wizards
+        // rendered later (no MutationObserver needed — the observer re-fired
+        // on every DOM mutation which was wasted work on big forms).
         Logger.log('Wizard click interception installed');
       } catch (_) { /* ignore */ }
     },
@@ -361,92 +432,124 @@
     // ── Iframe click routing ───────────────────────────────────────
 
     /**
-     * Route clicks inside the iframe:
-     *   1. File selector        → popup window
-     *   2. Edit form close      → close modal, reload frontend
-     *   3. Page layout nav      → close modal, reload frontend
-     *   4. Frontend link        → close modal, reload frontend
-     *   5. Any other backend <a>→ navigate iframe directly
-     *      (bypasses TYPO3's content-container.js which breaks in nested iframes)
+     * Route clicks inside the iframe through an ordered list of handlers.
+     * Each handler returns `true` if it fully handled the event (stop),
+     * or `false` to let the next handler try.
      */
     interceptIframeClicks(iframe) {
       try {
         const doc = iframe.contentWindow?.document;
         if (!doc) return;
 
+        const handlers = [
+          this._handleSaveCloseClick.bind(this),
+          this._handleSaveClick.bind(this),
+          this._handleFileSelectorClick.bind(this),
+          this._handleNativeBrowserModalClick.bind(this),
+          this._handleEditFormCloseClick.bind(this),
+          this._handlePageLayoutNavClick.bind(this),
+          this._handleFrontendLinkClick.bind(this),
+          this._handleWizardLinkClick.bind(this),
+          this._handleBackendLinkClick.bind(this),
+        ];
+
         doc.addEventListener('click', (e) => {
-          // 0. Save & close button → show loader (modal will close after save)
-          const saveCloseBtn = e.target.closest('[data-js="save-close"], [name="_saveandclosedok"]');
-          if (saveCloseBtn) {
-            Logger.log('Save & Close button clicked, showing modal loader');
-            this.showModalLoader();
-            return; // Let the click through — TYPO3 handles the form submit
-          }
-
-          // 0b. Regular Save button → let TYPO3 handle without hiding the iframe
-          const saveBtn = e.target.closest('[data-js="save"], [name="_savedok"]');
-          if (saveBtn) {
-            Logger.log('Save button clicked');
-            return; // Let the click through — TYPO3 handles the form submit
-          }
-
-          // 1. File selector → popup
-          const fileTarget = e.target.closest(
-            'button[data-file-irre-object], a[href*="wizard/element/browser"], button[title*="Select"]'
-          );
-          if (fileTarget) { this.handleFileSelector(e, fileTarget); return; }
-
-          // 1b. TYPO3 form engine controls (link popup, element browser, etc.) open
-          //     their own Modal — skip so TYPO3's JS handles the click natively
-          if (e.target.closest('.t3js-element-browser, a[href*="wizard/link"]')) return;
-
-          const link = e.target.closest('a[href]');
-          if (!link) return;
-          const href = link.getAttribute('href') || '';
-
-          // 2. Edit form close button
-          if (link.matches('.t3js-editform-close')) {
-            e.preventDefault();
-            e.stopPropagation();
-            Logger.log('Close button clicked');
-            this.closeAndReload();
-            return;
-          }
-
-          // 3. Direct navigation to page layout → return to frontend
-          if (isPageLayoutPath(href, iframe.contentWindow.location.origin)) {
-            e.preventDefault();
-            e.stopPropagation();
-            Logger.log('Page layout link clicked');
-            this.closeAndReload();
-            return;
-          }
-
-          // 4. Frontend link
-          if (isFrontendUrl(href) && !href.includes('about:blank')) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.closeAndReload();
-            return;
-          }
-
-          // 5. Wizard links (link browser, etc.) → open in wizard overlay
-          if (isWizardUrl(href)) {
-            e.preventDefault();
-            e.stopPropagation();
-            IframeHandler.openWizardOverlay(iframe, link.href);
-            return;
-          }
-
-          // 6. Backend link → navigate iframe directly
-          if (isBackendUrl(href)) {
-            e.preventDefault();
-            e.stopPropagation();
-            Logger.log('Backend link → navigating iframe', { href });
-            iframe.contentWindow.location.href = ensureReturnUrl(link.href);
+          for (const handler of handlers) {
+            if (handler(e, iframe)) return;
           }
         }, true);
       } catch (_) { /* cross-origin */ }
+    },
+
+    // ── Click handlers (return true if handled) ─────────────────────
+
+    _handleSaveCloseClick(e) {
+      if (!e.target.closest('[data-js="save-close"], [name="_saveandclosedok"]')) return false;
+      Logger.log('Save & Close button clicked, showing modal loader');
+      this.showModalLoader();
+      return true; // click passes through — TYPO3 handles the form submit
+    },
+
+    _handleSaveClick(e) {
+      if (!e.target.closest('[data-js="save"], [name="_savedok"]')) return false;
+      Logger.log('Save button clicked');
+      // Don't show the loader here — it covers the iframe while TYPO3
+      // re-initializes CKEditor on the new form, and CKEditor's
+      // _removeDomSelection crashes when the iframe isn't visible/focused
+      // (window.getSelection() returns null).
+      return true; // click passes through — TYPO3 handles the form submit
+    },
+
+    _handleFileSelectorClick(e) {
+      // Structural selectors only — no i18n-fragile title matching
+      const fileTarget = e.target.closest(
+        'button[data-file-irre-object], a[href*="wizard/element/browser"], [data-mode="file"], [data-toggle="formengine-inline"]'
+      );
+      if (!fileTarget) return false;
+      this.handleFileSelector(e, fileTarget);
+      return true;
+    },
+
+    _handleNativeBrowserModalClick(e) {
+      // TYPO3 form engine controls (link popup, element browser, etc.) open
+      // their own Modal natively — don't interfere.
+      return !!e.target.closest('.t3js-element-browser, a[href*="wizard/link"]');
+    },
+
+    _handleEditFormCloseClick(e) {
+      const link = e.target.closest('a[href]');
+      if (!link || !link.matches('.t3js-editform-close')) return false;
+      e.preventDefault();
+      e.stopPropagation();
+      Logger.log('Close button clicked');
+      this.closeAndReload();
+      return true;
+    },
+
+    _handlePageLayoutNavClick(e, iframe) {
+      const link = e.target.closest('a[href]');
+      if (!link) return false;
+      const href = link.getAttribute('href') || '';
+      if (!isPageLayoutPath(href, iframe.contentWindow.location.origin)) return false;
+      e.preventDefault();
+      e.stopPropagation();
+      Logger.log('Page layout link clicked');
+      this.closeAndReload();
+      return true;
+    },
+
+    _handleFrontendLinkClick(e) {
+      const link = e.target.closest('a[href]');
+      if (!link) return false;
+      const href = link.getAttribute('href') || '';
+      if (!isFrontendUrl(href) || href.includes('about:blank')) return false;
+      e.preventDefault();
+      e.stopPropagation();
+      this.closeAndReload();
+      return true;
+    },
+
+    _handleWizardLinkClick(e, iframe) {
+      const link = e.target.closest('a[href]');
+      if (!link) return false;
+      const href = link.getAttribute('href') || '';
+      if (!isWizardUrl(href)) return false;
+      e.preventDefault();
+      e.stopPropagation();
+      IframeHandler.openWizardOverlay(iframe, link.href);
+      return true;
+    },
+
+    _handleBackendLinkClick(e, iframe) {
+      const link = e.target.closest('a[href]');
+      if (!link) return false;
+      const href = link.getAttribute('href') || '';
+      if (!isBackendUrl(href)) return false;
+      e.preventDefault();
+      e.stopPropagation();
+      Logger.log('Backend link → navigating iframe', { href });
+      iframe.contentWindow.location.href = ensureReturnUrl(link.href);
+      return true;
     },
 
     handleFileSelector(e, target) {
@@ -557,17 +660,13 @@
       wizIframe.addEventListener('load', () => {
         try {
           const wizWin = wizIframe.contentWindow;
-          // Try to patch immediately, then poll briefly
-          const tryPatch = () => {
-            if (wizWin.TYPO3?.Modal) { patchDismiss(wizWin.TYPO3.Modal); return true; }
-            return false;
-          };
-          if (!tryPatch()) {
-            let attempts = 0;
-            const interval = setInterval(() => {
-              if (tryPatch() || ++attempts > 40) clearInterval(interval);
-            }, 100);
-          }
+          // Patch wizWin.TYPO3.Modal.dismiss as soon as it's available
+          // (wait up to 4s for the wizard's TYPO3 namespace to boot).
+          waitFor(() => {
+            if (!wizWin.TYPO3?.Modal) return false;
+            patchDismiss(wizWin.TYPO3.Modal);
+            return true;
+          }, 100, 4000);
         } catch (_) { /* cross-origin */ }
       });
     },
@@ -623,6 +722,10 @@
 
     /**
      * Reload the page. The modal loader is already visible at this point.
+     *
+     * Fully destroys the iframe before reloading — otherwise the live iframe
+     * can consume session-based flash messages (or trigger other side effects)
+     * in the brief window between reload trigger and parent navigation.
      */
     closeAndReload(scrollToEdited = false) {
       let uid = null;
@@ -631,10 +734,14 @@
       // Show modal loader in case it wasn't shown yet (e.g. close without save)
       this.showModalLoader();
 
-      // Stop the iframe immediately to prevent the frontend page from loading
-      // inside it (GSAP, CKEditor, etc. break when running in an iframe context)
+      // Fully remove the iframe from the DOM so it can no longer execute or
+      // consume shared session state (flash messages, csrf tokens, etc.).
       if (Modal.iframe) {
         Modal.iframe.src = 'about:blank';
+        if (Modal.iframe.parentNode) {
+          Modal.iframe.parentNode.removeChild(Modal.iframe);
+        }
+        Modal.iframe = null;
       }
 
       if (uid) {
@@ -673,6 +780,14 @@
 
   window.addEventListener('message', (event) => {
     if (typeof event.data !== 'object' || !event.data) return;
+
+    // Only accept same-origin messages while a modal is active.
+    // Prevents third-party iframes from triggering a reload, while still
+    // allowing the TYPO3 backend iframe to dispatch messages even during
+    // navigation (when event.source / contentWindow may be transient).
+    if (!Modal.iframe) return;
+    if (event.origin !== window.location.origin) return;
+
     const action = event.data.actionName;
     if (action === 'typo3:formengine:save-close') {
       Logger.log('Save & close triggered from iframe');

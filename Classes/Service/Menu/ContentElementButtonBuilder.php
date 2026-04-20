@@ -181,7 +181,10 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         $historyUrl = $this->urlBuilderService->buildHistoryUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
         $this->addButton($menuButton, 'history', ButtonType::Link, url: $historyUrl, icon: 'actions-history');
 
-        // New content after button - opens page layout with wizard via iframe_edit.js
+        // New content after button.
+        // URL builder returns a version-aware URL:
+        //  - v13.4: web_layout URL with hash for iframe_edit.js to auto-click the wizard
+        //  - v14.2+: record_edit URL with negative UID (standard backend new-after-element flow)
         $newContentUrl = $this->urlBuilderService->buildNewContentAfterUrl(
             (int) $contentElement['uid'],
             (int) ($contentElement['pid'] ?? 0),

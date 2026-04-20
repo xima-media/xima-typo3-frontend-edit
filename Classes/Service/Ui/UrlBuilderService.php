@@ -16,6 +16,7 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\VersionUtility;
 
 /**
  * UrlBuilderService.
@@ -135,11 +136,30 @@ final readonly class UrlBuilderService
     }
 
     /**
+     * Build URL to create a new content element after an existing one.
+     *
+     * - On TYPO3 v13.4: returns a web_layout URL with a hash fragment so
+     *   iframe_edit.js can auto-click the correct wizard button.
+     * - On TYPO3 v14.2+: returns the native record_edit URL since the
+     *   contextual sidebar handles the new-content flow directly.
+     *
      * @throws RouteNotFoundException
      */
     public function buildNewContentAfterUrl(int $uid, int $pid, int $colPos, string $returnUrl): string
     {
-        // Hash params instruct iframe_edit.js which wizard button to auto-click
+        if (VersionUtility::is14OrHigher()) {
+            return $this->uriBuilder->buildUriFromRoute(
+                'record_edit',
+                [
+                    'edit' => [
+                        'tt_content' => [-$uid => 'new'],
+                    ],
+                    'returnUrl' => $returnUrl,
+                ],
+            )->__toString();
+        }
+
+        // v13: hash params tell iframe_edit.js which wizard button to auto-click
         return $this->buildPageLayoutUrlWithHash($pid, $returnUrl, 'colPos='.$colPos.'&afterUid='.$uid);
     }
 

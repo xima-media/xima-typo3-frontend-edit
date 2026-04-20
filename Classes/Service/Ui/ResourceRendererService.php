@@ -28,6 +28,7 @@ use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
+use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\VersionUtility;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
 use function sprintf;
@@ -62,11 +63,19 @@ final readonly class ResourceRendererService
             $nonceAttribute = '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '';
             $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
 
-            $this->addBackendStubs($resources, $nonceValue);
+            // Iframe modal editor is a TYPO3 v13-only fallback.
+            // On v14.2+, the contextual sidebar handles inline editing natively.
+            $isIframeModalEnabled = !VersionUtility::is14OrHigher();
+
+            if ($isIframeModalEnabled) {
+                $this->addBackendStubs($resources, $nonceValue);
+            }
             $this->addFloatingUiResource($resources, $nonceAttribute);
             $this->addSettingsConfig($resources, $nonceAttribute, $request);
             $this->addDebugConfig($resources, $nonceAttribute);
-            $this->addIframeEditResource($resources, $nonceAttribute);
+            if ($isIframeModalEnabled) {
+                $this->addIframeEditResource($resources, $nonceAttribute);
+            }
             $this->addContextualEditResourceIfEnabled($resources, $request, $nonceAttribute);
             $this->addToolbarConfig($resources, $request);
             $this->addStickyToolbarResourcesIfEnabled($resources, $request, $nonceAttribute);
