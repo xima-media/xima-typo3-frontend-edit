@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
+use TYPO3\CMS\Core\Localization\LanguageService;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
@@ -51,5 +52,10 @@ abstract readonly class AbstractMenuButtonBuilder
         );
 
         $menuButton->appendChild($button, $identifier);
+    }
+
+    protected function getLanguageService(): LanguageService
+    {
+        return $GLOBALS['LANG'];
     }
 }

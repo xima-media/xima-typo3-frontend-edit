@@ -150,12 +150,9 @@ final class PageButtonBuilderTest extends TestCase
 
     private function setUpGlobals(): void
     {
-        $GLOBALS['LANG'] = new class {
-            public function sL(string $key): string
-            {
-                return 'Translated';
-            }
-        };
+        $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
+        $languageService->method('sL')->willReturn('Translated');
+        $GLOBALS['LANG'] = $languageService;
         $GLOBALS['TCA']['pages']['columns']['doktype']['config']['items'] = [
             ['label' => 'Standard', 'value' => 1],
         ];

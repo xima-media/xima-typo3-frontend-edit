@@ -48,13 +48,14 @@ final readonly class ResourceRendererService
     ) {}
 
     /**
-     * @param array<string, mixed>                                           $values
      * @param array<array{title: string, message: string, severity: string}> $flashMessages
      *
      * @throws Exception
      */
-    public function render(string $template = 'FrontendEdit.html', array $values = [], ?ServerRequestInterface $request = null, array $flashMessages = []): string
+    public function render(ServerRequestInterface $request, array $flashMessages = []): string
     {
+        $template = 'FrontendEdit.html';
+
         try {
             $nonceValue = $this->resolveNonceValue();
             $nonceAttribute = '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '';
@@ -68,9 +69,7 @@ final readonly class ResourceRendererService
             $this->addStickyToolbarResourcesIfEnabled($resources, $request, $nonceAttribute);
             $this->addFlashMessagesConfig($resources, $nonceAttribute, $flashMessages);
 
-            $values = [...$values, 'resources' => $resources];
-
-            return $this->renderView($template, $values, $request);
+            return $this->renderView($template, ['resources' => $resources], $request);
         } catch (Throwable $exception) {
             throw new Exception('Failed to render template "'.$template.'": '.$exception->getMessage(), 1640000001, $exception);
         }

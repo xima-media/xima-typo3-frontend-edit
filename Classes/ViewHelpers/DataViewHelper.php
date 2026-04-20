@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\ViewHelpers;
 
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 
@@ -70,9 +71,10 @@ class DataViewHelper extends AbstractViewHelper
 
     public function render(): string
     {
+        $backendUser = $GLOBALS['BE_USER'] ?? null;
         if (
-            null === $GLOBALS['BE_USER']
-            || ($GLOBALS['BE_USER']->uc[Configuration::UC_KEY_DISABLED] ?? false)
+            !$backendUser instanceof BackendUserAuthentication
+            || ($backendUser->uc[Configuration::UC_KEY_DISABLED] ?? false)
         ) {
             return '';
         }

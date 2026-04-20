@@ -120,12 +120,9 @@ final class ContentElementButtonBuilderTest extends TestCase
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
         $menuButton = new Button('Menu', ButtonType::Menu);
 
-        $GLOBALS['LANG'] = new class {
-            public function sL(string $key): string
-            {
-                return 'Translated';
-            }
-        };
+        $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
+        $languageService->method('sL')->willReturn('Translated');
+        $GLOBALS['LANG'] = $languageService;
 
         $builder->addInfoSection($menuButton, ['uid' => 1, 'CType' => 'text', 'header' => 'Test'], ['label' => 'Text', 'icon' => 'content-text']);
 
@@ -142,12 +139,9 @@ final class ContentElementButtonBuilderTest extends TestCase
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
         $menuButton = new Button('Menu', ButtonType::Menu);
 
-        $GLOBALS['LANG'] = new class {
-            public function sL(string $key): string
-            {
-                return 'Translated';
-            }
-        };
+        $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
+        $languageService->method('sL')->willReturn('Translated');
+        $GLOBALS['LANG'] = $languageService;
 
         $builder->addInfoSection($menuButton, ['uid' => 1, 'CType' => 'text', 'header' => ''], ['label' => 'Text']);
 
@@ -162,12 +156,9 @@ final class ContentElementButtonBuilderTest extends TestCase
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
         $menuButton = new Button('Menu', ButtonType::Menu);
 
-        $GLOBALS['LANG'] = new class {
-            public function sL(string $key): string
-            {
-                return 'Translated';
-            }
-        };
+        $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
+        $languageService->method('sL')->willReturn('Translated');
+        $GLOBALS['LANG'] = $languageService;
 
         $builder->addInfoSection($menuButton, ['uid' => 1, 'CType' => 'text'], ['label' => 'Text']);
 

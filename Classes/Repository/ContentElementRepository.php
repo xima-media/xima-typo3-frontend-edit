@@ -57,10 +57,9 @@ final readonly class ContentElementRepository
     public function fetchContentElements(
         int $pid,
         int $languageUid,
-        bool $includeMultilingualContent = true,
     ): array {
         try {
-            $queryBuilder = $this->buildContentQuery($languageUid, $includeMultilingualContent);
+            $queryBuilder = $this->buildContentQuery($languageUid, true);
 
             $queryBuilder->andWhere(
                 $queryBuilder->expr()->eq(

@@ -16,6 +16,7 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 use JsonException;
 use Psr\Log\LoggerInterface;
 use Throwable;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 
@@ -48,7 +49,8 @@ final readonly class FlashMessageService
      */
     public function collectFromSession(): array
     {
-        if (null === $GLOBALS['BE_USER'] || !is_array($GLOBALS['BE_USER']->user)) {
+        $backendUser = $GLOBALS['BE_USER'] ?? null;
+        if (!$backendUser instanceof BackendUserAuthentication || !is_array($backendUser->user)) {
             return [];
         }
 
@@ -63,7 +65,7 @@ final readonly class FlashMessageService
 
         foreach ($queues as $queueIdentifier) {
             try {
-                $sessionData = $GLOBALS['BE_USER']->getSessionData($queueIdentifier);
+                $sessionData = $backendUser->getSessionData($queueIdentifier);
 
                 if (!is_array($sessionData) || [] === $sessionData) {
                     continue;
@@ -92,7 +94,7 @@ final readonly class FlashMessageService
                 }
 
                 // Clear session after processing (malformed messages are discarded)
-                $GLOBALS['BE_USER']->setAndSaveSessionData($queueIdentifier, null);
+                $backendUser->setAndSaveSessionData($queueIdentifier, null);
             } catch (Throwable $e) {
                 $this->logger->error('Failed to process flash message queue', [
                     'queue' => $queueIdentifier,

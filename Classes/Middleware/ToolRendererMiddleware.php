@@ -16,6 +16,7 @@ namespace Xima\XimaTypo3FrontendEdit\Middleware;
 use Psr\Container\{ContainerExceptionInterface, NotFoundExceptionInterface};
 use Psr\Http\Message\{ResponseInterface, ServerRequestInterface};
 use Psr\Http\Server\{MiddlewareInterface, RequestHandlerInterface};
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\Stream;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
@@ -52,9 +53,10 @@ class ToolRendererMiddleware implements MiddlewareInterface
             return $response;
         }
 
+        $backendUser = $GLOBALS['BE_USER'] ?? null;
         if (
-            null === $GLOBALS['BE_USER']
-            || !is_array($GLOBALS['BE_USER']->user)
+            !$backendUser instanceof BackendUserAuthentication
+            || !is_array($backendUser->user)
         ) {
             return $response;
         }

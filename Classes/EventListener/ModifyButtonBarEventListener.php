@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\EventListener;
 
+use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Backend\Template\Components\{ButtonBar, ModifyButtonBarEvent};
 use TYPO3\CMS\Backend\Template\Components\Buttons\InputButton;
 use TYPO3\CMS\Core\Attribute\AsEventListener;
@@ -55,7 +56,8 @@ final class ModifyButtonBarEventListener
             return;
         }
 
-        if (!array_key_exists('tx_ximatypo3frontendedit', $GLOBALS['TYPO3_REQUEST']->getQueryParams())) {
+        $request = $GLOBALS['TYPO3_REQUEST'] ?? null;
+        if (!$request instanceof ServerRequestInterface || !array_key_exists('tx_ximatypo3frontendedit', $request->getQueryParams())) {
             return;
         }
 

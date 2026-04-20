@@ -16,5 +16,9 @@ parameters:
 	excludePaths:
 		- ../../.Build (?)
 
+	typo3:
+		requestGetAttributeMapping:
+			route: 'TYPO3\CMS\Backend\Routing\Route|null'
+
 	type_coverage:
 		constant: 0 # TODO: Set to 100, when PHP 8.3 is minimum requirement
