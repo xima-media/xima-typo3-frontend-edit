@@ -156,6 +156,7 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
     public function addActionSection(
         Button $menuButton,
         array $contentElement,
+        int $languageUid,
         string $returnUrlAnchor,
     ): void {
         $this->addButton($menuButton, 'div_action', ButtonType::Divider);
@@ -189,6 +190,7 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
             (int) $contentElement['uid'],
             (int) ($contentElement['pid'] ?? 0),
             (int) ($contentElement['colPos'] ?? 0),
+            $languageUid,
             $returnUrlAnchor,
         );
         $this->addButton($menuButton, 'new_content_after', ButtonType::Link, url: $newContentUrl, icon: 'actions-add');

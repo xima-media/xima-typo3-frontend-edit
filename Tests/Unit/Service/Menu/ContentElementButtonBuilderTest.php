@@ -198,7 +198,7 @@ final class ContentElementButtonBuilderTest extends TestCase
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
         $menuButton = new Button('Menu', ButtonType::Menu);
 
-        $builder->addActionSection($menuButton, ['uid' => 1, 'pid' => 1], '/return');
+        $builder->addActionSection($menuButton, ['uid' => 1, 'pid' => 1], 0, '/return');
 
         $children = $menuButton->getChildren();
         self::assertArrayHasKey('div_action', $children);

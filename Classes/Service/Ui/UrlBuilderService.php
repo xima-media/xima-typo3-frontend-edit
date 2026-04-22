@@ -145,7 +145,7 @@ final readonly class UrlBuilderService
      *
      * @throws RouteNotFoundException
      */
-    public function buildNewContentAfterUrl(int $uid, int $pid, int $colPos, string $returnUrl): string
+    public function buildNewContentAfterUrl(int $uid, int $pid, int $colPos, int $languageUid, string $returnUrl): string
     {
         if (VersionUtility::is14OrHigher()) {
             return $this->uriBuilder->buildUriFromRoute(
@@ -153,6 +153,7 @@ final readonly class UrlBuilderService
                 [
                     'edit' => [
                         'tt_content' => [-$uid => 'new'],
+                        'language' => $languageUid,
                     ],
                     'returnUrl' => $returnUrl,
                 ],
@@ -160,27 +161,7 @@ final readonly class UrlBuilderService
         }
 
         // v13: hash params tell iframe_edit.js which wizard button to auto-click
-        return $this->buildPageLayoutUrlWithHash($pid, $returnUrl, 'colPos='.$colPos.'&afterUid='.$uid);
-    }
-
-    /**
-     * Build URL to open the page layout wizard for a specific column (colPos).
-     *
-     * @throws RouteNotFoundException
-     */
-    public function buildNewContentInColumnUrl(int $pid, int $colPos, string $returnUrl): string
-    {
-        return $this->buildPageLayoutUrlWithHash($pid, $returnUrl, 'colPos='.$colPos);
-    }
-
-    /**
-     * Build URL to open the page layout wizard for a container column.
-     *
-     * @throws RouteNotFoundException
-     */
-    public function buildContainerNewContentUrl(int $pid, int $containerUid, int $colPos, string $returnUrl): string
-    {
-        return $this->buildPageLayoutUrlWithHash($pid, $returnUrl, 'container='.$containerUid.'&colPos='.$colPos);
+        return $this->buildPageLayoutUrlWithHash($pid, $languageUid, $returnUrl, 'colPos='.$colPos.'&afterUid='.$uid);
     }
 
     /**
@@ -279,12 +260,13 @@ final readonly class UrlBuilderService
      *
      * @throws RouteNotFoundException
      */
-    private function buildPageLayoutUrlWithHash(int $pid, string $returnUrl, string $hash): string
+    private function buildPageLayoutUrlWithHash(int $pid, int $languageUid, string $returnUrl, string $hash): string
     {
         $url = $this->uriBuilder->buildUriFromRoute(
             'web_layout',
             [
                 'id' => $pid,
+                'language' => $languageUid,
                 'returnUrl' => $returnUrl,
             ],
         )->__toString();

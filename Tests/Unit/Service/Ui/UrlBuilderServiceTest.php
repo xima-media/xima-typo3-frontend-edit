@@ -147,7 +147,7 @@ final class UrlBuilderServiceTest extends TestCase
             ->willReturn(new Uri('/typo3/record/edit'));
 
         $service = new UrlBuilderService();
-        $result = $service->buildNewContentAfterUrl(1, 5, 0, '/return');
+        $result = $service->buildNewContentAfterUrl(1, 5, 0, 2, '/return');
 
         self::assertSame('/typo3/record/edit', $result);
     }
@@ -160,11 +160,11 @@ final class UrlBuilderServiceTest extends TestCase
         }
 
         $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('web_layout', self::callback(static fn (array $params): bool => 5 === ($params['id'] ?? null) && '/return' === ($params['returnUrl'] ?? null)))
+            ->with('web_layout', self::callback(static fn (array $params): bool => 5 === ($params['id'] ?? null) && 2 === ($params['language'] ?? null) && '/return' === ($params['returnUrl'] ?? null)))
             ->willReturn(new Uri('/typo3/module/web/layout'));
 
         $service = new UrlBuilderService();
-        $result = $service->buildNewContentAfterUrl(1, 5, 0, '/return');
+        $result = $service->buildNewContentAfterUrl(1, 5, 0, 2, '/return');
 
         // Hash fragment carries colPos + afterUid for the iframe wizard auto-click
         self::assertSame('/typo3/module/web/layout#colPos=0&afterUid=1', $result);
