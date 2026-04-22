@@ -126,6 +126,7 @@
   const Modal = {
     element: null,
     iframe: null,
+    closeTimer: null,
 
     getOrCreate() {
       if (this.element) return this.element;
@@ -166,6 +167,13 @@
       // flash message queue inside the iframe — the parent reload picks
       // them up instead.
       url = ensureReturnUrl(url);
+
+      // Cancel any pending close-timeout from a prior close() so it can't
+      // clobber the fresh iframe we're about to open.
+      if (this.closeTimer) {
+        clearTimeout(this.closeTimer);
+        this.closeTimer = null;
+      }
 
       this.getOrCreate();
       IframeHandler._wizardAutoClicked = false;
@@ -221,7 +229,17 @@
       if (!this.element) return;
       Logger.log('Closing modal');
       this.element.classList.remove('frontend-edit__modal--open');
-      setTimeout(() => {
+
+      // Replace any previous pending cleanup with a fresh one so we never
+      // have two racing timeouts. The callback also double-checks that the
+      // modal is still closed before wiping the iframe, so a re-open()
+      // between schedule and fire is safe.
+      if (this.closeTimer) {
+        clearTimeout(this.closeTimer);
+      }
+      this.closeTimer = setTimeout(() => {
+        this.closeTimer = null;
+        if (!this.element || this.element.classList.contains('frontend-edit__modal--open')) return;
         if (this.iframe) {
           this.iframe.src = 'about:blank';
           this.iframe.style.opacity = '0.5';
