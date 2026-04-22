@@ -1159,7 +1159,13 @@
     .frontend-edit__tooltip,
     .frontend-edit__tooltip--visible,
     .frontend-edit__dialog-overlay,
-    .frontend-edit__dialog-overlay .modal-dialog {
+    .frontend-edit__dialog-overlay .modal-dialog,
+    .frontend-edit__modal,
+    .frontend-edit__modal--open,
+    .frontend-edit__modal-overlay,
+    .frontend-edit__modal-panel,
+    .frontend-edit__modal-loader,
+    .frontend-edit__modal-iframe {
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
     }
@@ -1255,6 +1261,12 @@
 }
 
 .frontend-edit__modal-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.frontend-edit__modal-close:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
     background: rgba(255, 255, 255, 0.1);
 }
 

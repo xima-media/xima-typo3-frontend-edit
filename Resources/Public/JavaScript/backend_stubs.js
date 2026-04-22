@@ -100,6 +100,43 @@
     }
 
     /**
+     * Patch TYPO3.Modal.dismiss on parent, main iframe, and wizard iframe
+     * windows so the link browser can close the overlay after selecting.
+     */
+    function patchDismissForOverlay(iframe, overlay, wizIframe) {
+        const patchDismiss = function (modalObj) {
+            if (!modalObj) return;
+            const orig = modalObj.dismiss;
+            modalObj.dismiss = function () {
+                if (overlay.parentNode) overlay.remove();
+                modalObj.dismiss = orig || function () {};
+                if (typeof orig === 'function') orig.call(this);
+            };
+        };
+
+        // Parent window (for top.TYPO3.Modal.dismiss calls)
+        patchDismiss(window.TYPO3 && window.TYPO3.Modal);
+
+        // Main iframe (for parent.TYPO3.Modal.dismiss calls from wizard)
+        try { patchDismiss(iframe.contentWindow && iframe.contentWindow.TYPO3 && iframe.contentWindow.TYPO3.Modal); } catch (_) { /* cross-origin */ }
+
+        // Wizard iframe after it loads: poll briefly for its TYPO3.Modal to appear
+        wizIframe.addEventListener('load', function () {
+            try {
+                const wizWin = wizIframe.contentWindow;
+                const deadline = Date.now() + 4000;
+                (function tick() {
+                    if (wizWin.TYPO3 && wizWin.TYPO3.Modal) {
+                        patchDismiss(wizWin.TYPO3.Modal);
+                        return;
+                    }
+                    if (Date.now() < deadline) setTimeout(tick, 100);
+                })();
+            } catch (_) { /* cross-origin */ }
+        });
+    }
+
+    /**
      * Open a wizard URL inside a nested overlay within the edit iframe.
      * Used for link browser, file picker, and other wizards that TYPO3 normally
      * opens via Modal.advanced().
@@ -108,35 +145,43 @@
         const iframe = getIframe();
         if (!iframe || !iframe.contentWindow || !iframe.contentWindow.document) return;
 
-        const doc = iframe.contentWindow.document;
-        const existing = doc.getElementById(WIZARD_OVERLAY_ID);
-        if (existing) existing.remove();
+        try {
+            const doc = iframe.contentWindow.document;
+            const existing = doc.getElementById(WIZARD_OVERLAY_ID);
+            if (existing) existing.remove();
 
-        const overlay = doc.createElement('div');
-        overlay.id = WIZARD_OVERLAY_ID;
-        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;';
+            const overlay = doc.createElement('div');
+            overlay.id = WIZARD_OVERLAY_ID;
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;';
 
-        const panel = doc.createElement('div');
-        panel.style.cssText = 'width:80%;max-width:900px;height:80%;background:#fff;border-radius:4px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,0.3);';
+            const panel = doc.createElement('div');
+            panel.style.cssText = 'width:80%;max-width:900px;height:80%;background:#fff;border-radius:4px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 4px 24px rgba(0,0,0,0.3);';
 
-        const header = doc.createElement('div');
-        header.style.cssText = 'display:flex;justify-content:flex-end;padding:4px 8px;background:#eee;flex-shrink:0;';
+            const header = doc.createElement('div');
+            header.style.cssText = 'display:flex;justify-content:flex-end;padding:4px 8px;background:#eee;flex-shrink:0;';
 
-        const closeBtn = doc.createElement('button');
-        closeBtn.innerHTML = '&times;';
-        closeBtn.style.cssText = 'font-size:22px;background:none;border:none;cursor:pointer;padding:2px 8px;line-height:1;';
-        closeBtn.onclick = function () { overlay.remove(); };
+            const closeBtn = doc.createElement('button');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.style.cssText = 'font-size:22px;background:none;border:none;cursor:pointer;padding:2px 8px;line-height:1;';
+            closeBtn.onclick = function () { overlay.remove(); };
 
-        const wizIframe = doc.createElement('iframe');
-        wizIframe.src = url;
-        wizIframe.style.cssText = 'flex:1;border:none;width:100%;';
+            const wizIframe = doc.createElement('iframe');
+            wizIframe.src = url;
+            wizIframe.style.cssText = 'flex:1;border:none;width:100%;';
 
-        header.appendChild(closeBtn);
-        panel.appendChild(header);
-        panel.appendChild(wizIframe);
-        overlay.appendChild(panel);
-        overlay.addEventListener('click', function (ev) { if (ev.target === overlay) overlay.remove(); });
-        doc.body.appendChild(overlay);
+            header.appendChild(closeBtn);
+            panel.appendChild(header);
+            panel.appendChild(wizIframe);
+            overlay.appendChild(panel);
+            overlay.addEventListener('click', function (ev) { if (ev.target === overlay) overlay.remove(); });
+            doc.body.appendChild(overlay);
+
+            // Patch Modal.dismiss so link browser / file picker close the overlay
+            patchDismissForOverlay(iframe, overlay, wizIframe);
+        } catch (err) {
+            // Cross-origin access to iframe failed, fall back to popup
+            try { iframe.contentWindow.open(url, '_blank', 'width=1000,height=700'); } catch (_) { /* ignore */ }
+        }
     }
 
     // Expose helpers used by iframe_edit.js

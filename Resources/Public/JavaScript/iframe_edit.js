@@ -108,35 +108,17 @@
    *    redirect does not consume the flash queue inside the iframe
    * 2. The tx_ximatypo3frontendedit marker so the Save & Close button is added
    *
-   * Delegates to the shared implementation in backend_stubs.js.
-   * Kept as a local fallback in case backend_stubs.js didn't load.
+   * Single source of truth in backend_stubs.js. Both files are v13-only
+   * and backend_stubs.js loads first, so window.XimaFrontendEdit is always
+   * available. If it isn't, that's a real loading bug we want to surface
+   * loudly rather than silently branch into a drift-prone copy.
    */
   function ensureReturnUrl(url) {
     if (window.XimaFrontendEdit?.ensureReturnUrl) {
       return window.XimaFrontendEdit.ensureReturnUrl(url);
     }
-    try {
-      const u = new URL(url, window.location.origin);
-      const existing = u.searchParams.get('returnUrl') || '';
-
-      // Rebuild returnUrl: use existing if it's a frontend URL, otherwise
-      // default to current page. Always add the iframe marker.
-      let returnUrl;
-      if (existing && !existing.includes('/typo3/')) {
-        returnUrl = new URL(existing, window.location.origin);
-      } else {
-        returnUrl = new URL(window.location.href);
-      }
-      returnUrl.searchParams.set('tx_ximatypo3frontendedit_iframe', '1');
-      u.searchParams.set('returnUrl', returnUrl.toString());
-
-      if (!u.searchParams.has('tx_ximatypo3frontendedit')) {
-        u.searchParams.set('tx_ximatypo3frontendedit', '');
-      }
-      return u.toString();
-    } catch (_) {
-      return url;
-    }
+    Logger.log('window.XimaFrontendEdit.ensureReturnUrl missing — backend_stubs.js did not load', null, 'error');
+    return url;
   }
 
   // ── Modal ──────────────────────────────────────────────────────────
@@ -196,12 +178,14 @@
       IframeHandler.overrideContentContainer(iframe);
       iframe.src = url;
 
-      // Show header only for views without a native close button
-      // (info, move, history). Edit forms have their own Save/Close UI.
-      const needsHeader = /record\/(info|history)|move_element/.test(url);
-      const header = this.element.querySelector('.frontend-edit__modal-header');
-      if (header) {
-        header.style.display = needsHeader ? 'flex' : 'none';
+      // Keep the close button always reachable as an escape route (ESC and
+      // backdrop click aren't discoverable if the TYPO3-native close fails
+      // to render). Only hide the title text for edit forms, where the
+      // record title lives inside the iframe's own header.
+      const showTitle = /record\/(info|history)|move_element/.test(url);
+      const title = this.element.querySelector('.frontend-edit__modal-title');
+      if (title) {
+        title.style.display = showTitle ? '' : 'none';
       }
 
       setTimeout(() => this.element.classList.add('frontend-edit__modal--open'), ANIMATION_DELAY_MS);
@@ -573,102 +557,18 @@
     // ── Wizard overlay ────────────────────────────────────────────
 
     /**
-     * Open a wizard URL (e.g. link browser) in an overlay inside the
-     * iframe's document. This keeps `parent` pointing at the edit form
-     * so TYPO3's callbacks (field value updates) work correctly.
+     * Open a wizard URL (e.g. link browser) in a nested overlay inside
+     * the iframe. Delegates to the single shared implementation in
+     * backend_stubs.js (window.XimaFrontendEdit.openWizardOverlay) so
+     * there's no divergent duplicate.
      */
     openWizardOverlay(iframe, wizardUrl) {
-      try {
-        const doc = iframe.contentWindow.document;
-
-        // Remove existing overlay
-        const existing = doc.getElementById('fe-wizard-overlay');
-        if (existing) existing.remove();
-
-        const overlay = doc.createElement('div');
-        overlay.id = 'fe-wizard-overlay';
-        overlay.style.cssText =
-          'position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;' +
-          'background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;';
-
-        const panel = doc.createElement('div');
-        panel.style.cssText =
-          'width:80%;max-width:900px;height:80%;background:#fff;border-radius:4px;' +
-          'overflow:hidden;position:relative;display:flex;flex-direction:column;' +
-          'box-shadow:0 4px 24px rgba(0,0,0,0.3);';
-
-        const header = doc.createElement('div');
-        header.style.cssText =
-          'display:flex;justify-content:flex-end;padding:4px 8px;background:#eee;flex-shrink:0;';
-
-        const closeBtn = doc.createElement('button');
-        closeBtn.innerHTML = '&times;';
-        closeBtn.style.cssText =
-          'font-size:22px;background:none;border:none;cursor:pointer;padding:2px 8px;line-height:1;';
-        closeBtn.onclick = () => overlay.remove();
-
-        const wizIframe = doc.createElement('iframe');
-        wizIframe.src = wizardUrl;
-        wizIframe.style.cssText = 'flex:1;border:none;width:100%;';
-
-        header.appendChild(closeBtn);
-        panel.appendChild(header);
-        panel.appendChild(wizIframe);
-        overlay.appendChild(panel);
-
-        // Close on backdrop click
-        overlay.addEventListener('click', (e) => {
-          if (e.target === overlay) overlay.remove();
-        });
-
-        doc.body.appendChild(overlay);
+      if (window.XimaFrontendEdit?.openWizardOverlay) {
+        window.XimaFrontendEdit.openWizardOverlay(wizardUrl);
         Logger.log('Wizard overlay opened', { url: wizardUrl });
-
-        // Patch Modal.dismiss so the link browser can close the overlay
-        this._patchDismissForOverlay(iframe, overlay, wizIframe);
-
-      } catch (err) {
-        Logger.log('Failed to create wizard overlay — falling back to popup', err, 'error');
-        try {
-          iframe.contentWindow.open(wizardUrl, '_blank', 'width=1000,height=700');
-        } catch (_) { /* ignore */ }
+        return;
       }
-    },
-
-    /**
-     * Patch TYPO3.Modal.dismiss on parent and iframe windows so the
-     * link browser can close the wizard overlay after selecting a link.
-     */
-    _patchDismissForOverlay(iframe, overlay, wizIframe) {
-      const patchDismiss = (modalObj) => {
-        if (!modalObj) return;
-        const orig = modalObj.dismiss;
-        modalObj.dismiss = function () {
-          if (overlay.parentNode) overlay.remove();
-          modalObj.dismiss = orig || function () {};
-          if (typeof orig === 'function') orig.call(this);
-        };
-      };
-
-      // Parent window (for top.TYPO3.Modal.dismiss calls)
-      patchDismiss(window.TYPO3?.Modal);
-
-      // Main iframe (for parent.TYPO3.Modal.dismiss calls from wizard)
-      try { patchDismiss(iframe.contentWindow?.TYPO3?.Modal); } catch (_) {}
-
-      // Wizard iframe after it loads (for local Modal.dismiss calls)
-      wizIframe.addEventListener('load', () => {
-        try {
-          const wizWin = wizIframe.contentWindow;
-          // Patch wizWin.TYPO3.Modal.dismiss as soon as it's available
-          // (wait up to 4s for the wizard's TYPO3 namespace to boot).
-          waitFor(() => {
-            if (!wizWin.TYPO3?.Modal) return false;
-            patchDismiss(wizWin.TYPO3.Modal);
-            return true;
-          }, 100, 4000);
-        } catch (_) { /* cross-origin */ }
-      });
+      Logger.log('window.XimaFrontendEdit.openWizardOverlay missing — backend_stubs.js did not load', null, 'error');
     },
 
     // ── Navigation detection ───────────────────────────────────────
@@ -781,12 +681,18 @@
   window.addEventListener('message', (event) => {
     if (typeof event.data !== 'object' || !event.data) return;
 
-    // Only accept same-origin messages while a modal is active.
-    // Prevents third-party iframes from triggering a reload, while still
-    // allowing the TYPO3 backend iframe to dispatch messages even during
-    // navigation (when event.source / contentWindow may be transient).
+    // Only accept messages from the active modal iframe's origin.
+    // Compare against the iframe's src origin (not window.location.origin)
+    // so setups where backend and frontend live on different domains still
+    // work correctly (e.g. backend.example.com vs www.example.com).
     if (!Modal.iframe) return;
-    if (event.origin !== window.location.origin) return;
+    let iframeOrigin;
+    try {
+      iframeOrigin = new URL(Modal.iframe.src, window.location.href).origin;
+    } catch (_) {
+      return;
+    }
+    if (event.origin !== iframeOrigin) return;
 
     const action = event.data.actionName;
     if (action === 'typo3:formengine:save-close') {
