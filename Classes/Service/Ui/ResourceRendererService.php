@@ -108,10 +108,11 @@ final readonly class ResourceRendererService
     private function addSettingsConfig(array &$resources, string $nonceAttribute, ?ServerRequestInterface $request): void
     {
         $colorScheme = null !== $request ? $this->settingsService->getColorScheme($request) : 'auto';
-        $showContextMenu = (null !== $request && $this->settingsService->isShowContextMenu($request)) ? 'true' : 'false';
-        $enableOutline = (null !== $request && $this->settingsService->isEnableOutline($request)) ? 'true' : 'false';
-        $enableScrollToElement = (null !== $request && $this->settingsService->isEnableScrollToElement($request)) ? 'true' : 'false';
-        $contextualEditing = (null !== $request && $this->settingsService->isContextualEditingEnabled($request)) ? 'true' : 'false';
+        $showContextMenu = $this->jsBool($request, $this->settingsService->isShowContextMenu(...));
+        $enableOutline = $this->jsBool($request, $this->settingsService->isEnableOutline(...));
+        $enableScrollToElement = $this->jsBool($request, $this->settingsService->isEnableScrollToElement(...));
+        $contextualEditing = $this->jsBool($request, $this->settingsService->isContextualEditingEnabled(...));
+        $isDisabled = $this->backendUserService->isFrontendEditDisabled() ? 'true' : 'false';
         $deleteLabels = json_encode([
             'title' => $this->translate('delete.confirm.title', 'Delete this record?'),
             'message' => $this->translate('delete.confirm.message', "Are you sure you want to delete the record '%s'?"),
@@ -120,16 +121,30 @@ final readonly class ResourceRendererService
             'success' => $this->translate('delete.success', 'Record deleted'),
             'error' => $this->translate('delete.error', 'Could not delete the record'),
         ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
+        $columnLabels = json_encode([
+            'createContent' => $this->translate('column.createContent', 'Create new content'),
+            'createContentIn' => $this->translate('column.createContentIn', 'Create new content in "%s" column'),
+        ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $resources['settings_config'] = sprintf(
-            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s;</script>',
+            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s;</script>',
             $nonceAttribute,
             $colorScheme,
             $showContextMenu,
             $enableOutline,
             $enableScrollToElement,
             $contextualEditing,
+            $isDisabled,
             $deleteLabels,
+            $columnLabels,
         );
+    }
+
+    /**
+     * @param callable(ServerRequestInterface): bool $check
+     */
+    private function jsBool(?ServerRequestInterface $request, callable $check): string
+    {
+        return (null !== $request && $check($request)) ? 'true' : 'false';
     }
 
     /**
