@@ -3,8 +3,8 @@
 
 -- Clean slate: remove records from previous installs and default sys_template
 DELETE FROM `sys_template` WHERE `pid` = 1;
-DELETE FROM `tt_content` WHERE `pid` IN (1, 2, 3, 4, 5, 6, 7);
-DELETE FROM `pages` WHERE `uid` IN (1, 2, 3, 4, 5, 6, 7);
+DELETE FROM `tt_content` WHERE `pid` IN (1, 2, 3, 4, 5, 6, 7, 8, 9);
+DELETE FROM `pages` WHERE `uid` IN (1, 2, 3, 4, 5, 6, 7, 8, 9);
 
 -- Pages
 REPLACE INTO `pages` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `title`, `doktype`, `slug`, `is_siteroot`) VALUES
@@ -14,7 +14,9 @@ REPLACE INTO `pages` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `so
 (4, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 768, 'Blog', 1, '/blog', 0),
 (5, 4, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 256, 'Getting Started with TYPO3', 1, '/blog/getting-started', 0),
 (6, 4, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 512, 'Frontend Editing Tips', 1, '/blog/frontend-editing-tips', 0),
-(7, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1024, 'Contact', 1, '/contact', 0);
+(7, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1024, 'Contact', 1, '/contact', 0),
+(8, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1280, 'Two Columns (Empty Column Test)', 1, '/two-columns', 0),
+(9, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1536, 'Default Layout (Empty Columns)', 1, '/empty-columns', 0);
 
 -- Content Elements: Home (pid=1)
 REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `CType`, `colPos`, `header`, `header_layout`, `bodytext`, `starttime`, `endtime`) VALUES
@@ -73,3 +75,24 @@ REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`
 '<p>Have questions about the frontend editing extension? We would love to hear from you.</p>\n<p>Visit our <a href="https://github.com/xima-media/xima-typo3-frontend-edit">GitHub repository</a> to report issues, suggest features, or contribute to the project.</p>'),
 (23, 7, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 768, 'text', 0, 'Support', 0,
 '<p>For support, please open an issue on GitHub. We aim to respond within a few business days.</p>');
+
+-- Content Elements: Two Columns page (pid=8) — only left column has content, right (colPos=2) is empty
+REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `CType`, `colPos`, `header`, `header_layout`, `bodytext`) VALUES
+(24, 8, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 256, 'header', 0, 'Two Column Layout', 1, ''),
+(25, 8, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 512, 'text', 0, 'Left Column Content', 0,
+'<p>This content is in the main column (colPos 0). The right column (colPos 2) is intentionally empty to demonstrate the empty column marker feature.</p>'),
+(26, 8, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 768, 'text', 0, 'More Left Content', 0,
+'<p>Add more content here to see how the empty column button appears in the right sidebar area.</p>');
+
+-- Content Elements: Default Layout empty columns page (pid=9) — only colPos 0 has content, colPos 3/8/9 are empty
+REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `CType`, `colPos`, `header`, `header_layout`, `bodytext`) VALUES
+(27, 9, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 256, 'text', 0, 'Main Content Only', 0,
+'<p>This page uses the default layout. Only the main content column (colPos 0) has content. The border (colPos 3), content-before (colPos 8), and content-after (colPos 9) columns are empty.</p>\n<p>You should see "Create new content" buttons in the empty column areas when frontend editing is enabled.</p>');
+
+-- Assign backend layout "2 Columns 50/50" to page 8
+UPDATE `pages` SET `backend_layout` = 'pagets__2_columns_50_50' WHERE `uid` = 8;
+
+-- sys_template: add sitepackage template override for page templates with <xfe:columnTarget> markers
+REPLACE INTO `sys_template` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `title`, `root`, `clear`, `config`) VALUES
+(2, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 512, 'Sitepackage Override', 0, 0,
+'page.10.templateRootPaths.100 = EXT:sitepackage/Resources/Private/Templates/Page/\n');

@@ -84,6 +84,9 @@
 			<trans-unit id="column.createContent">
 				<source>Create new content</source>
 			</trans-unit>
+			<trans-unit id="column.createContentIn">
+				<source>Create new content in "%s" column</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

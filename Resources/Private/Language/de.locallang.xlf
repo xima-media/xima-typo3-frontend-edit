@@ -111,6 +111,10 @@
 				<source />
 				<target>Neuen Inhalt erstellen</target>
 			</trans-unit>
+			<trans-unit id="column.createContentIn">
+				<source />
+				<target>Neuen Inhalt in Spalte "%s" erstellen</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

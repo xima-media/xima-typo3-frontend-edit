@@ -1,0 +1,40 @@
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      xmlns:xfe="http://typo3.org/ns/Xima/XimaTypo3FrontendEdit/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+<f:layout name="Default" />
+<f:section name="Border">
+
+    <xfe:columnTarget colPos="3" />
+    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: '{data.uid}', colPos: '3', slide: '{theme.pagelayout.{pagelayout}.colPos.3.slide}'}" />
+
+</f:section>
+<f:section name="Main">
+
+    <xfe:columnTarget colPos="8" />
+    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: '{data.uid}', colPos: '8', slide: '{theme.pagelayout.{pagelayout}.colPos.8.slide}'}" />
+
+    <div class="section section-default">
+        <div class="container">
+            <div class="section-row">
+                <div class="section-column maincontent-wrap">
+                    <xfe:columnTarget colPos="0" />
+                    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: '{data.uid}', colPos: '0', slide: '{theme.pagelayout.{pagelayout}.colPos.0.slide}'}" />
+                </div>
+                <div class="section-column subcontent-wrap">
+                    <xfe:columnTarget colPos="2" />
+                    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: '{data.uid}', colPos: '2', slide: '{theme.pagelayout.{pagelayout}.colPos.2.slide}'}" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <xfe:columnTarget colPos="9" />
+    <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: '{data.uid}', colPos: '9', slide: '{theme.pagelayout.{pagelayout}.colPos.9.slide}'}" />
+
+</f:section>
+<f:section name="Footer">
+
+    <f:render partial="Structure/FooterContent" arguments="{_all}" />
+
+</f:section>
+</html>
