@@ -8,11 +8,17 @@ Contextual Editing (Sidebar)
 
 ..  versionadded:: 2.2.0
 
+..  versionchanged:: 2.3.0
+    On TYPO3 v13, an iframe modal editor is now used automatically — no
+    configuration required. The previous fallback (navigating to the backend)
+    no longer applies.
+
 ..  note::
 
-    This feature is **experimental** and requires **TYPO3 v14.2+**.
-    On TYPO3 v13 or earlier v14 versions, the extension falls back to its
-    standard behavior (navigating to the backend for editing).
+    All inline editing features (sidebar and iframe modal) are
+    **experimental**. The contextual editing sidebar requires
+    **TYPO3 v14.2+**. On TYPO3 v13, the extension provides a slide-in
+    iframe modal as an alternative inline editing experience.
 
 The contextual editing sidebar allows editors to edit content elements and page
 properties directly in the frontend without leaving the page. A sidebar panel
@@ -93,11 +99,12 @@ intended context, some advanced form features may have limited functionality:
 Fallback Behavior
 =================
 
-The contextual editing feature degrades gracefully:
+The inline editing features degrade gracefully:
 
 - **TYPO3 v13 / v14.0-v14.1**: The ``record_edit_contextual`` route does not
-  exist. The extension falls back to standard URL navigation.
-- **Setting disabled**: When ``enableContextualEditing`` is ``false`` (default),
-  all edit links behave as before.
+  exist. The extension uses a slide-in iframe modal that loads the standard
+  backend edit form. This works automatically without any configuration.
+- **TYPO3 v14.2+ with setting disabled**: When ``enableContextualEditing`` is
+  ``false`` (default), all edit links navigate to the backend as before.
 - **JavaScript disabled**: The ``href`` attribute on edit links still points to
   the standard backend URL, ensuring basic functionality.

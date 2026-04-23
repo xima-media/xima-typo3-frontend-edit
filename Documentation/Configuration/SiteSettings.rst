@@ -122,7 +122,9 @@ Appearance Settings
     ..  note::
 
         This feature is **experimental** and requires **TYPO3 v14.2+**.
-        It has no effect on TYPO3 v13 or earlier v14 versions.
+        It has no effect on TYPO3 v13 or earlier v14 versions, where the
+        extension uses an experimental slide-in iframe modal for inline
+        editing instead (enabled automatically, no configuration needed).
 
     Opens content element and page property edit forms in a sidebar panel directly in the
     frontend instead of navigating to the backend. Uses TYPO3's ``record_edit_contextual``

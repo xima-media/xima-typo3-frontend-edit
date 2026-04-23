@@ -33,16 +33,18 @@ The extension has been developed to provide a simple and lightweight solution to
 - **Configurable Position** - 12 toolbar positions available
 - **Save & Close** - Quick return to frontend after editing
 - **UserTSconfig** - Disable frontend editing per user or user group
+- **Inline Editing** *(experimental)* - Edit content directly in the frontend (v13: iframe modal, v14.2+: contextual sidebar)
 
 > [!NOTE]
-> **New in v2.2.0 — Contextual Editing Sidebar** *(experimental)*
+> **New in v2.3.0 — Inline Editing on TYPO3 v13** *(experimental)*
 >
-> Edit content elements and page properties directly in a sidebar panel without leaving the frontend. Uses TYPO3 v14.2's `record_edit_contextual` route for a streamlined editing experience.
+> Content elements can now be edited in a slide-in iframe modal directly in the frontend — no backend navigation required. This works automatically on TYPO3 v13 without any configuration.
+>
+> On TYPO3 v14.2+, the contextual editing sidebar (introduced in v2.2.0) remains the recommended editing experience. Enable via Site Settings: `frontendEdit.enableContextualEditing: true`
 >
 > ![Contextual Editing Sidebar](./Documentation/Images/sidebar.jpg)
 >
-> Enable via Site Settings: `frontendEdit.enableContextualEditing: true`
-> — [Documentation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)
+> [Documentation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)
 
 ## 🔥 Installation
 
