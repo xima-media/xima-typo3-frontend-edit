@@ -20,6 +20,7 @@ Clicking this button opens the Edit Menu with various actions:
 - **Move** - Reorder the content element
 - **History** - View the content element's history
 - **New content after** - Add a new content element after this one
+- **Delete** - Delete the content element (with confirmation dialog)
 
 ..  figure:: /Images/edit-dropdown.jpg
     :alt: Edit Menu
@@ -27,6 +28,21 @@ Clicking this button opens the Edit Menu with various actions:
 ..  note::
     The Edit Menu is only displayed if the backend user has the necessary
     permissions to edit the content element.
+
+.. _delete-confirmation:
+
+Delete Confirmation
+===================
+
+..  versionadded:: 2.3.0
+
+Clicking **Delete** opens a confirmation dialog before the record is removed.
+The dialog shows the record title and identifier (e.g. ``My Element [tt_content:42]``)
+so editors can verify they are deleting the correct element.
+
+- **Escape**, the close button, or clicking the backdrop cancels the action
+- Focus returns to the previously focused element after closing
+- On success, a notification is shown and the page reloads automatically
 
 Requirements
 ============
