@@ -161,8 +161,11 @@ final class EmptyColumnServiceTest extends TestCase
         $connection->method('createSchemaManager')->willReturn($schemaManager);
         $connectionPool->method('getConnectionForTable')->willReturn($connection);
 
-        // All columns have content (count > 0)
+        // Keep page columns non-empty, but make any unexpected container lookup observable
         $this->mockQueryBuilderWithCountForPool($connectionPool, 1);
+        $this->uriBuilder
+            ->expects(self::never())
+            ->method('buildUriFromRoute');
 
         $service = new EmptyColumnService(
             $connectionPool,
