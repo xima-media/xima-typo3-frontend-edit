@@ -29,11 +29,11 @@ Features
 - Dark/Light Mode - Automatic or manual color scheme selection
 - Configurable Position - 12 toolbar positions available
 - :ref:`Save & Close <extconf-enableSaveAndCloseButton>` - Quick return to frontend after editing
-- :ref:`Contextual Editing Sidebar <contextual-editing>` *(experimental)* - Edit content directly in a sidebar panel without leaving the frontend (TYPO3 v14.2+)
+- :ref:`Inline Editing <contextual-editing>` *(experimental)* - Edit content directly in the frontend without navigating to the backend (TYPO3 v13: iframe modal, TYPO3 v14.2+: contextual sidebar)
 
 ..  versionadded:: 2.2.0
 
-    **Contextual Editing Sidebar** — A new experimental feature that allows editors
+    **Contextual Editing Sidebar** — An experimental feature that allows editors
     to edit content elements and page properties in a sidebar panel directly in the
     frontend. Leverages TYPO3 v14.2's ``record_edit_contextual`` route.
     See :ref:`contextual-editing` for details.
@@ -41,6 +41,13 @@ Features
     ..  figure:: /Images/sidebar.jpg
         :alt: Contextual editing sidebar
         :class: with-shadow
+
+..  versionadded:: 2.3.0
+
+    **Iframe Modal Editor** — An experimental slide-in iframe modal that brings
+    inline editing to TYPO3 v13. Opens the backend edit form in a panel directly
+    in the frontend — no configuration required.
+    See :ref:`contextual-editing` for details.
 
 ..  note::
     This is **not** a further development of the "original" extension `frontend_editing <https://extensions.typo3.org/extension/frontend_editing>`_. It is similar in some ways to the realisation of the `feedit <https://extensions.typo3.org/extension/feedit>`_ extension. This extension is an independent implementation with a different approach. See :ref:`Delineation <delineation>` for a detailed comparison with related extensions like `visual_editor <https://github.com/FriendsOfTYPO3/visual_editor>`_ and `content_preview <https://github.com/T3-UX/content_preview>`_.

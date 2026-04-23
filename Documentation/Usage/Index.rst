@@ -31,10 +31,10 @@ in the frontend for logged-in backend users.
         ..  card-footer::   :ref:`Learn more <toolbar>`
             :button-style: btn btn-secondary stretched-link
 
-    ..  card::  Contextual Editing (Sidebar)
+    ..  card::  Inline Editing (experimental)
 
-        Edit content elements and page properties in a sidebar panel without
-        leaving the frontend. Experimental, requires TYPO3 v14.2+.
+        Edit content elements directly in the frontend. Uses a contextual
+        sidebar on TYPO3 v14.2+ or a slide-in iframe modal on TYPO3 v13.
 
         ..  card-footer::   :ref:`Learn more <contextual-editing>`
             :button-style: btn btn-secondary stretched-link
