@@ -679,12 +679,10 @@
     gap: 10px;
     pointer-events: none;
     max-width: 400px;
-    transition: right 0.3s ease-out, left 0.3s ease-out;
+    transition: none;
 }
 
 .frontend-edit__sidebar-active .frontend-edit__notification-container {
-    right: auto;
-    left: 20px;
     z-index: 10006;
 }
 
@@ -1193,11 +1191,15 @@
     right: 0;
     bottom: 0;
     z-index: 99999;
-    display: none;
+    pointer-events: none;
+    visibility: hidden;
+    transition: visibility 0s 0.3s;
 }
 
 .frontend-edit__modal--open {
-    display: block;
+    pointer-events: auto;
+    visibility: visible;
+    transition: visibility 0s;
 }
 
 .frontend-edit__modal-overlay {
@@ -1206,7 +1208,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.3);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -1220,14 +1222,16 @@
     top: 0;
     right: 0;
     bottom: 0;
-    width: 90%;
-    max-width: 1200px;
-    background: white;
-    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+    width: 800px;
+    max-width: calc(100dvw - 1.5rem);
+    background: #f5f5f5;
+    border-radius: 0.75rem 0 0 0.75rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     transform: translateX(100%);
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease-out;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .frontend-edit__modal--open .frontend-edit__modal-panel {
@@ -1235,13 +1239,7 @@
 }
 
 .frontend-edit__modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 16px;
-    background: #1e1e1e;
-    border-bottom: 1px solid #3a3a3a;
-    flex-shrink: 0;
+    display: none;
 }
 
 .frontend-edit__modal-title {
@@ -1290,15 +1288,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #1e1e1e;
+    background: #f5f5f5;
     z-index: 1;
 }
 
 .frontend-edit__modal-spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid rgba(255, 255, 255, 0.15);
-    border-top-color: #fff;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: #666;
     border-radius: 50%;
     animation: frontend-edit-spin 0.7s linear infinite;
 }
@@ -1308,6 +1306,6 @@
     height: 100%;
     border: none;
     display: block;
-    background: #1e1e1e;
+    background: #f5f5f5;
     pointer-events: auto;
 }
