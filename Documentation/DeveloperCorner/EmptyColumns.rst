@@ -8,6 +8,12 @@ Empty Columns
 
 The extension can display "Create new content" buttons for empty columns directly in the frontend. This allows editors to add content without switching to the TYPO3 backend.
 
+..  figure:: /Images/empty-column.jpg
+    :alt: Empty column marker showing a "Create new content" button in the frontend
+    :class: with-shadow
+
+    A "Create new content" button appears in empty columns when frontend editing is enabled
+
 It works in two steps:
 
 1. The integrator places a lightweight marker in their Fluid templates
