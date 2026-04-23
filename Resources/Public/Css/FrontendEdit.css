@@ -1170,7 +1170,8 @@
     .frontend-edit__modal-overlay,
     .frontend-edit__modal-panel,
     .frontend-edit__modal-loader,
-    .frontend-edit__modal-iframe {
+    .frontend-edit__modal-iframe,
+    .frontend-edit__column-btn {
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
     }
