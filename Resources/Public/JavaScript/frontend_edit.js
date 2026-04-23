@@ -1200,6 +1200,9 @@
       Logger.log(`Processing ${emptyColumns.length} empty column(s)`);
       let rendered = 0;
 
+      const columnLabels = window.FRONTEND_EDIT_COLUMN_LABELS || {};
+      const buttonLabel = columnLabels.createContent || 'Create new content';
+
       emptyColumns.forEach(col => {
         let selector = `[data-xfe-colpos="${col.colPos}"]`;
         if (col.containerUid) {
@@ -1216,11 +1219,15 @@
           Logger.log(`Invalid URL for colPos ${col.colPos}`, null, 'warn');
           return;
         }
+        const tooltipText = col.name
+          ? (columnLabels.createContentIn || 'Create new content in "%s" column').replace('%s', col.name)
+          : buttonLabel;
 
         const link = document.createElement('a');
         link.href = col.newContentUrl;
         link.className = 'frontend-edit__column-btn';
-        link.setAttribute('aria-label', col.name || 'Create new content');
+        link.setAttribute('aria-label', tooltipText);
+        link.dataset.tooltip = tooltipText;
 
         const icon = document.createElement('span');
         icon.className = 'frontend-edit__column-btn-icon';
@@ -1229,12 +1236,13 @@
 
         const label = document.createElement('span');
         label.className = 'frontend-edit__column-btn-label';
-        label.textContent = col.name || 'Create new content';
+        label.textContent = col.name || buttonLabel;
         link.appendChild(label);
 
         marker.innerHTML = '';
         marker.appendChild(link);
         marker.hidden = false;
+        Tooltip.attach(link);
 
         rendered++;
         Logger.log(`Empty column button rendered for colPos ${col.colPos}`, { name: col.name, url: col.newContentUrl });
