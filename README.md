@@ -1,6 +1,6 @@
 <div align="center">
 
-![Extension icon](Resources/Public/Icons/Extension.svg)
+![Extension.jpg](Resources/Public/Icons/Extension.jpg)
 
 # TYPO3 extension `xima_typo3_frontend_edit`
 
@@ -13,27 +13,27 @@
 
 </div>
 
-This extension provides an edit menu for editors within the frontend regarding content elements and pages.
+This TYPO3 extension adds lightweight editing tools to the frontend, allowing backend users to edit, hide, delete, and reorder content elements and pages without leaving the site.
 
 ![Frontend Edit](./Documentation/Images/screenshot.jpg)
 
 > [!NOTE]
 > **Delineation and classification**: This is **not** a further development of the "original" extension [frontend_editing](https://extensions.typo3.org/extension/frontend_editing). It is similar in some ways to the realisation of the [feedit](https://extensions.typo3.org/extension/feedit) extension. This extension is an independent implementation with a different approach. See the [Delineation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Delineation/Index.html) page in the documentation for a detailed comparison with related extensions like [visual_editor](https://github.com/FriendsOfTYPO3/visual_editor) and [content_preview](https://github.com/T3-UX/content_preview).
 
-The extension has been developed to provide a simple and lightweight solution to easily start the editing of content elements from the frontend and thus reduce the gap between frontend and backend. Therefore, a simple javascript is injected into the frontend, which generates action links to the TYPO3 backend with the corresponding edit views.
+The extension injects a small JavaScript into the frontend that generates action links to the TYPO3 backend, bridging the gap between frontend preview and backend editing.
 
 ## ✨ Features
 
-- **Edit Menu** - Quick access to edit, hide, delete, and move content elements
-- **Toolbar** - Page-level actions and toggle for frontend editing
-- **Site Settings** - Per-site configuration via YAML
-- **PSR-14 Events** - Customize menus with custom actions
-- **Data ViewHelper** - Add edit links for related records (e.g., news items)
+- **[Edit Menu](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html)** - Quick access to edit, hide, delete, and move content elements
+- **[Toolbar](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/Toolbar.html)** - Page-level actions and toggle for frontend editing
+- **[Delete Confirmation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html#delete-confirmation)** - Confirmation dialog before deleting records *(new in v2.3)*
+- **ViewHelpers** - [Data attributes](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/DataAttributes.html) for related records, [empty column buttons](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/EmptyColumns.html) for new content *(new in v2.3)*
+- **[Site Settings](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Configuration/SiteSettings.html)** - Per-site configuration via YAML
+- **[PSR-14 Events](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/Events.html)** - Customize menus with custom actions
 - **Dark/Light Mode** - Automatic or manual color scheme selection
 - **Configurable Position** - 12 toolbar positions available
-- **Save & Close** - Quick return to frontend after editing
-- **UserTSconfig** - Disable frontend editing per user or user group
-- **Inline Editing** *(experimental)* - Edit content directly in the frontend (v13: iframe modal, v14.2+: contextual sidebar)
+- **[UserTSconfig](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Configuration/UserTSconfig.html)** - Disable frontend editing per user or user group
+- **[Inline Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)** *(experimental)* - Edit content directly in the frontend (v13: iframe modal, v14.2+: contextual sidebar)
 
 > [!NOTE]
 > **New in v2.3.0 — Inline Editing on TYPO3 v13** *(experimental)*
@@ -92,13 +92,9 @@ Please have a look at the
 
 ## 🧑‍💻 Contributing
 
-Please have a look at [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Please have a look at [Contributing](CONTRIBUTING.md).
 
 ## 💎 Credits
-
-The extension icon based on  the original
-[`actions-open`](https://typo3.github.io/TYPO3.Icons/icons/actions/actions-open.html) icon from TYPO3 core which is 
-originally licensed under [MIT License](https://github.com/TYPO3/TYPO3.Icons/blob/main/LICENSE).
 
 Thanks to [move:elevator](https://www.move-elevator.de/) and [XIMA](https://www.xima.de/) for supporting the development of this extension.
 
