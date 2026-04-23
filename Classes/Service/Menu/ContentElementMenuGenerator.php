@@ -164,7 +164,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
         $this->contentElementButtonBuilder->addInfoSection($menuButton, $contentElement, $contentElementConfig);
         $this->contentElementButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor, $contextualUrl);
-        $this->contentElementButtonBuilder->addActionSection($menuButton, $contentElement, $returnUrlAnchor);
+        $this->contentElementButtonBuilder->addActionSection($menuButton, $contentElement, $languageUid, $returnUrlAnchor);
 
         return $menuButton;
     }

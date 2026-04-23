@@ -28,6 +28,7 @@ use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
+use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\VersionUtility;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
 use function sprintf;
@@ -45,6 +46,7 @@ final readonly class ResourceRendererService
         private BackendUserService $backendUserService,
         private UrlBuilderService $urlBuilderService,
         private PageMenuGenerator $pageMenuGenerator,
+        private BackendSettingsService $backendSettingsService,
     ) {}
 
     /**
@@ -61,9 +63,19 @@ final readonly class ResourceRendererService
             $nonceAttribute = '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '';
             $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
 
+            // Iframe modal editor is a TYPO3 v13-only fallback.
+            // On v14.2+, the contextual sidebar handles inline editing natively.
+            $isIframeModalEnabled = !VersionUtility::is14OrHigher();
+
+            if ($isIframeModalEnabled) {
+                $this->addBackendStubs($resources, $nonceValue);
+            }
             $this->addFloatingUiResource($resources, $nonceAttribute);
             $this->addSettingsConfig($resources, $nonceAttribute, $request);
             $this->addDebugConfig($resources, $nonceAttribute);
+            if ($isIframeModalEnabled) {
+                $this->addIframeEditResource($resources, $nonceAttribute);
+            }
             $this->addContextualEditResourceIfEnabled($resources, $request, $nonceAttribute);
             $this->addToolbarConfig($resources, $request);
             $this->addStickyToolbarResourcesIfEnabled($resources, $request, $nonceAttribute);
@@ -151,6 +163,34 @@ final readonly class ResourceRendererService
             '<script%s src="%s"></script>',
             $nonceAttribute,
             $contextualEditPath,
+        );
+    }
+
+    /**
+     * Add TYPO3 backend stubs as the FIRST resource.
+     *
+     * Delegates to BackendSettingsService which generates all required global
+     * stubs, AJAX URLs, and language labels for the editing iframe.
+     *
+     * @param array<string, string> $resources
+     */
+    private function addBackendStubs(array &$resources, string $nonceValue): void
+    {
+        $resources = ['backend_stubs' => $this->backendSettingsService->getSettingsScript($nonceValue)] + $resources;
+    }
+
+    /**
+     * @param array<string, string> $resources
+     */
+    private function addIframeEditResource(array &$resources, string $nonceAttribute): void
+    {
+        $iframeEditPath = PathUtility::getAbsoluteWebPath(
+            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/iframe_edit.js'),
+        );
+        $resources['iframe_edit'] = sprintf(
+            '<script%s src="%s"></script>',
+            $nonceAttribute,
+            $iframeEditPath,
         );
     }
 

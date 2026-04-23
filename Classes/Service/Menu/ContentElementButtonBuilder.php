@@ -156,6 +156,7 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
     public function addActionSection(
         Button $menuButton,
         array $contentElement,
+        int $languageUid,
         string $returnUrlAnchor,
     ): void {
         $this->addButton($menuButton, 'div_action', ButtonType::Divider);
@@ -181,8 +182,17 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         $historyUrl = $this->urlBuilderService->buildHistoryUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
         $this->addButton($menuButton, 'history', ButtonType::Link, url: $historyUrl, icon: 'actions-history');
 
-        // New content after button
-        $newContentUrl = $this->urlBuilderService->buildNewContentAfterUrl($contentElement['uid'], $returnUrlAnchor);
+        // New content after button.
+        // URL builder returns a version-aware URL:
+        //  - v13.4: web_layout URL with hash for iframe_edit.js to auto-click the wizard
+        //  - v14.2+: record_edit URL with negative UID (standard backend new-after-element flow)
+        $newContentUrl = $this->urlBuilderService->buildNewContentAfterUrl(
+            (int) $contentElement['uid'],
+            (int) ($contentElement['pid'] ?? 0),
+            (int) ($contentElement['colPos'] ?? 0),
+            $languageUid,
+            $returnUrlAnchor,
+        );
         $this->addButton($menuButton, 'new_content_after', ButtonType::Link, url: $newContentUrl, icon: 'actions-add');
 
         // Delete button
