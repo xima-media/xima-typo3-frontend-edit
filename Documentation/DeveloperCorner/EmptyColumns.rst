@@ -104,7 +104,7 @@ For container elements (e.g. two-column layouts, tabs, accordions using `b13/con
 
 ..  important::
 
-    Make sure the marker is always rendered, even when the container column is empty. If your template wraps the column content in a condition like ``<f:if condition="{children_201}">``, the marker will not be in the DOM when the column is empty and the button cannot appear.
+    The marker must always be rendered, even when the column is empty. Do not wrap it in a condition like ``<f:if condition="{children_201}">`` — otherwise the marker is missing from the DOM when the column is empty and the button cannot appear.
 
 
 How it works

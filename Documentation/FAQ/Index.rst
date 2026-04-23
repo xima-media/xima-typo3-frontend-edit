@@ -19,7 +19,7 @@ There may be a number of reasons for this:
 
 **Backend user session**
 
-Are you currently logged into the TYPO3 backend? Otherwise the frontend edit will not working.
+Are you currently logged into the TYPO3 backend? Otherwise, frontend editing will not work.
 
 **Backend user permission**
 
@@ -35,7 +35,7 @@ Make sure that the content element "c-ids" (Content Element IDs) are available w
 
 **Content Element on current Page**
 
-For now only all content elements on the current page are "editable". So if you're using some kind of inheritance, e.g. for your footer, this content can't be edited. Maybe I will find a smarter solution for this in the future.
+Currently, only content elements that belong to the current page are editable. Inherited content (e.g. shared footer elements) cannot be edited from the inheriting page.
 
 **Debug**
 
@@ -44,7 +44,7 @@ Check the network tab for the initial AJAX call to :code:`/typo3/ajax/xima-front
 
 .. rst-class:: panel panel-default
 
-After closing the edit form will I redirected to the wrong frontend location, e.g. to the root page
+After closing the edit form, I am redirected to the wrong frontend location (e.g. the root page)
 =======================================
 
 This could be caused by a strict referer header in your request. If the return url could not be determined correctly, you can force the url generation by pid and language in the extension setting: :code:`forceReturnUrlGeneration`.
