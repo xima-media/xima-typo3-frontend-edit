@@ -135,30 +135,32 @@
       });
 
       // Monitor iframe loads
-      this.iframe.addEventListener('load', function () {
-        if (!self.sidebar.classList.contains('frontend-edit__sidebar--open')) return;
-        self.injectBackendStubs();
-        self.loader.classList.remove('frontend-edit__sidebar-loader--visible');
-        self.iframe.classList.add('frontend-edit__sidebar-iframe--loaded');
-        try {
-          var iframeUrl = self.iframe.contentWindow && self.iframe.contentWindow.location.href;
-          if (iframeUrl) {
-            var params = new URL(iframeUrl).searchParams;
-            if (params.get('justSaved') === '1') {
-              self.hasSaved = true;
-              self.captureSavedRecordTitle();
-            }
-            if (params.get('closed') === '1') {
-              log('Close detected via iframe URL');
-              self.close();
-              return;
-            }
+      this.iframe.addEventListener('load', this._onIframeLoad.bind(this));
+    },
+
+    _onIframeLoad: function () {
+      if (!this.sidebar.classList.contains('frontend-edit__sidebar--open')) return;
+      this.injectBackendStubs();
+      this.loader.classList.remove('frontend-edit__sidebar-loader--visible');
+      this.iframe.classList.add('frontend-edit__sidebar-iframe--loaded');
+      try {
+        var iframeUrl = this.iframe.contentWindow && this.iframe.contentWindow.location.href;
+        if (iframeUrl) {
+          var params = new URL(iframeUrl).searchParams;
+          if (params.get('justSaved') === '1') {
+            this.hasSaved = true;
+            this.captureSavedRecordTitle();
           }
-          self.enhanceIframeUI();
-        } catch (e) {
-          // Cross-origin, access error, or invalid URL
+          if (params.get('closed') === '1') {
+            log('Close detected via iframe URL');
+            this.close();
+            return;
+          }
         }
-      });
+        this.enhanceIframeUI();
+      } catch (e) {
+        // Cross-origin, access error, or invalid URL
+      }
     },
 
     open: function (contextualUrl, uid, targetBlank) {
@@ -182,21 +184,35 @@
       clearTimeout(this.closeTimeout);
       this.sidebar.classList.remove('frontend-edit__sidebar--open');
       this.backdrop.classList.remove('frontend-edit__sidebar-backdrop--visible');
-      var self = this;
-      this.resetTimeout = setTimeout(function () {
-        if (!self.sidebar.classList.contains('frontend-edit__sidebar--open')) {
-          self.iframe.src = 'about:blank';
+
+      // Capture UID before destroying iframe
+      var uid = this.hasSaved ? this.getEditedElementUid() : null;
+
+      // Destroy iframe immediately to prevent flash message consumption
+      if (this.iframe) {
+        this.iframe.src = 'about:blank';
+        if (this.iframe.parentNode) {
+          this.iframe.parentNode.removeChild(this.iframe);
         }
-      }, 300);
+      }
+
       if (this.hasSaved) {
-        this.showSaveNotification(this.savedRecordTitle);
-        setTimeout(function () { window.location.reload(); }, 2000);
+        this.queueNotification(this.savedRecordTitle);
+        if (uid) {
+          var url = new URL(window.location.href);
+          url.searchParams.set('scrollToContent', uid);
+          url.hash = '';
+          window.location.href = url.toString();
+        } else {
+          window.location.reload();
+        }
       } else {
         document.body.classList.remove('frontend-edit__sidebar-active');
-      }
-      if (this._triggerElement && this._triggerElement.focus) {
-        this._triggerElement.focus();
-        this._triggerElement = null;
+        this.recreateIframe();
+        if (this._triggerElement && this._triggerElement.focus) {
+          this._triggerElement.focus();
+          this._triggerElement = null;
+        }
       }
     },
 
@@ -354,16 +370,35 @@
       } catch (e) { /* ignore */ }
     },
 
-    showSaveNotification: function (recordTitle) {
-      // Use the Notification module exposed by frontend_edit.js
-      if (window.FrontendEditNotification) {
+    queueNotification: function (recordTitle) {
+      try {
         var name = recordTitle || 'Record';
-        window.FrontendEditNotification.show({
+        sessionStorage.setItem('xfe-pending-notification', JSON.stringify({
           title: 'Record updated',
-          message: 'Record "' + name + '" has been updated.\nThe view is being refreshed.',
+          message: '"' + name + '" has been saved.',
           severity: 'ok'
-        });
+        }));
+      } catch (e) { /* sessionStorage unavailable */ }
+    },
+
+    getEditedElementUid: function () {
+      try {
+        var iframeUrl = this.iframe && this.iframe.src;
+        if (!iframeUrl) return null;
+        var match = iframeUrl.match(/edit%5Btt_content%5D%5B(\d+)%5D|edit\[tt_content\]\[(\d+)\]/);
+        return match ? (match[1] || match[2]) : null;
+      } catch (e) {
+        return null;
       }
+    },
+
+    recreateIframe: function () {
+      var newIframe = document.createElement('iframe');
+      newIframe.className = 'frontend-edit__sidebar-iframe';
+      newIframe.setAttribute('title', 'Edit content');
+      this.sidebar.appendChild(newIframe);
+      this.iframe = newIframe;
+      this.iframe.addEventListener('load', this._onIframeLoad.bind(this));
     }
   };
 

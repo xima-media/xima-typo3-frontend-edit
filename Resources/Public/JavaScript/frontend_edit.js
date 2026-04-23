@@ -1284,6 +1284,15 @@
         // Expose for contextual_edit.js (separate script, outside this IIFE)
         window.FrontendEditNotification = Notification;
 
+        // Show queued notification from previous page (e.g. contextual sidebar save)
+        try {
+          const pending = sessionStorage.getItem('xfe-pending-notification');
+          if (pending) {
+            sessionStorage.removeItem('xfe-pending-notification');
+            Notification.show(JSON.parse(pending));
+          }
+        } catch (_) { /* ignore */ }
+
         // Initialize contextual editing sidebar if loaded
         if (window.ContextualEdit) {
           window.ContextualEdit.init();
