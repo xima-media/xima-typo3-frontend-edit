@@ -1,6 +1,6 @@
 <div align="center">
 
-![Extension.svg](Resources/Public/Icons/Extension.svg)
+<img src="Resources/Public/Icons/Extension.svg" alt="Extension Logo" width="200">
 
 # TYPO3 extension `xima_typo3_frontend_edit`
 
@@ -78,7 +78,7 @@ Download the zip file from [TYPO3 extension repository (TER)](https://extensions
 
 ## 📙 Documentation
 
-Please take a look at the
+Please have a look at the
 [official extension documentation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Index.html).
 
 
