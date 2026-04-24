@@ -1,6 +1,6 @@
 <div align="center">
 
-![Extension.jpg](Resources/Public/Icons/Extension.jpg)
+![Extension.svg](Resources/Public/Icons/Extension.svg)
 
 # TYPO3 extension `xima_typo3_frontend_edit`
 
@@ -78,7 +78,7 @@ Download the zip file from [TYPO3 extension repository (TER)](https://extensions
 
 ## 📙 Documentation
 
-Please have a look at the
+Please take a look at the
 [official extension documentation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Index.html).
 
 
@@ -92,7 +92,7 @@ Please have a look at the
 
 ## 🧑‍💻 Contributing
 
-Please have a look at [Contributing](CONTRIBUTING.md).
+Please take a look at [Contributing](CONTRIBUTING.md).
 
 ## 💎 Credits
 

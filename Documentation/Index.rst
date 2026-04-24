@@ -28,7 +28,7 @@ Frontend Edit
 
 ----
 
-..  figure:: /Images/logo.jpg
+..  figure:: /Images/logo.svg
     :alt: Frontend Edit Logo
     :align: center
 
