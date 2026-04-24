@@ -11,12 +11,12 @@ Introduction
 What does it do?
 ================
 
-This extension provides an edit menu for editors within the frontend regarding content elements and pages.
+This extension adds editing tools to the frontend, allowing backend users to edit, hide, delete, and reorder content elements and pages without leaving the site.
 
 ..  figure:: /Images/screenshot.jpg
     :alt: Frontend Edit Preview
 
-The extension has been developed to provide a simple and lightweight solution to easily start the editing of content elements from the frontend and thus reduce the gap between frontend and backend. Therefore a simple javascript is injected into the frontend, which generates action links to the TYPO3 backend with the corresponding edit views.
+The extension injects a small JavaScript into the frontend that generates action links to the TYPO3 backend, bridging the gap between frontend preview and backend editing.
 
 Features
 ========
