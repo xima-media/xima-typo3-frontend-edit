@@ -63,9 +63,10 @@ final readonly class ResourceRendererService
             $nonceAttribute = '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '';
             $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
 
-            // Iframe modal editor is a TYPO3 v13-only fallback.
-            // On v14.2+, the contextual sidebar handles inline editing natively.
-            $isIframeModalEnabled = !VersionUtility::is14OrHigher();
+            // Iframe modal editor is a TYPO3 v13-only fallback, gated behind
+            // the same enableContextualEditing setting as the v14 sidebar.
+            $isIframeModalEnabled = !VersionUtility::is14OrHigher()
+                && $this->settingsService->isContextualEditingEnabled($request);
 
             if ($isIframeModalEnabled) {
                 $this->addBackendStubs($resources, $nonceValue);

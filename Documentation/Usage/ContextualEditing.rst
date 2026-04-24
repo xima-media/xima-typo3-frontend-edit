@@ -2,37 +2,29 @@
 
 ..  _contextual-editing:
 
-==============================
-Contextual Editing (Sidebar)
-==============================
+====================
+Contextual Editing
+====================
 
 ..  versionadded:: 2.2.0
 
-..  versionchanged:: 2.3.0
-    On TYPO3 v13, an iframe modal editor is now used automatically — no
-    configuration required. The previous fallback (navigating to the backend)
-    no longer applies.
-
 ..  note::
 
-    All inline editing features (sidebar and iframe modal) are
-    **experimental**. The contextual editing sidebar requires
-    **TYPO3 v14.2+**. On TYPO3 v13, the extension provides a slide-in
-    iframe modal as an alternative inline editing experience.
+    Contextual editing is **experimental**.
 
-The contextual editing sidebar allows editors to edit content elements and page
-properties directly in the frontend without leaving the page. A sidebar panel
-slides in from the right, displaying the TYPO3 FormEngine edit form inside an
-iframe.
+Contextual editing lets editors modify content elements and page properties
+directly in the frontend. Clicking an edit button opens a sidebar panel that
+slides in from the right, displaying the TYPO3 FormEngine edit form — no
+detour through the backend required.
 
-..  figure:: /Images/sidebar.jpg
-    :alt: Contextual editing sidebar showing the edit form for a content element
+..  figure:: /Images/contextual-sidebar.gif
+    :alt: Screencast of the contextual editing sidebar
     :class: with-shadow
 
-    The contextual editing sidebar opens directly in the frontend
+    Editing a content element via the contextual sidebar
 
-Enabling Contextual Editing
-============================
+Setup
+=====
 
 Enable the feature in your site settings:
 
@@ -42,73 +34,60 @@ Enable the feature in your site settings:
     frontendEdit:
       enableContextualEditing: true
 
-Or via the TYPO3 backend in
+Or via the TYPO3 backend:
 :guilabel:`Site Management > Sites > Edit site > Settings > Frontend Edit > Appearance`.
 
-How It Works
-============
+Usage
+=====
 
-When contextual editing is enabled:
+With contextual editing enabled:
 
-- Clicking the **edit button** on a content element opens the sidebar instead
-  of navigating to the backend.
+- Clicking an **edit button** opens the sidebar instead of navigating to the
+  backend.
 - The **page properties** link in the sticky toolbar also opens in the sidebar.
-- The sidebar loads the TYPO3 ``record_edit_contextual`` route in an iframe.
+- **Ctrl+Click** (or **Cmd+Click** on macOS) bypasses the sidebar and opens
+  the full backend editor directly.
 
-Sidebar Controls
-----------------
-
-The sidebar provides the following controls (rendered by TYPO3's backend):
+Controls
+--------
 
 Save
-    Saves the record and keeps the sidebar open for further editing.
+    Saves the record and keeps the sidebar open.
 
 Save & Close
-    Saves the record and closes the sidebar. The page reloads automatically
-    to reflect the changes.
+    Saves and closes the sidebar. The page reloads to reflect changes.
 
 Close
-    Closes the sidebar. If there are unsaved changes, TYPO3 prompts for
-    confirmation.
+    Closes the sidebar. Unsaved changes trigger a confirmation prompt.
 
-Expand (fullscreen icon)
-    Opens the full backend editor. Respects the ``linkTargetBlank`` extension
-    setting (same window or new tab).
+Expand
+    Opens the full backend editor. Respects the ``linkTargetBlank`` setting
+    (same window or new tab).
 
-Keyboard & Mouse Shortcuts
---------------------------
+**Escape** and clicking the **backdrop** also close the sidebar.
 
-- **Escape** closes the sidebar.
-- **Ctrl+Click** (or **Cmd+Click** on macOS) on an edit button opens the full
-  backend editor directly, bypassing the sidebar.
-- Clicking the **backdrop** (darkened area) closes the sidebar.
+Limitations
+===========
 
-Known Limitations
-=================
+The FormEngine runs inside an iframe outside its intended context. Some
+advanced features may not work fully:
 
-Since the sidebar runs the TYPO3 backend FormEngine in an iframe outside its
-intended context, some advanced form features may have limited functionality:
+- **IRRE / relation browsers** may have limited functionality.
+- **Context menus** (three-dot menu) are not available inside the iframe.
+  Primary actions (edit, hide, delete) are accessible as direct buttons.
+- **Console errors** from backend JavaScript modules are expected and harmless.
 
-- **Complex field types** like inline relational record editing (IRRE) or
-  relation browsers may not fully work in all cases.
-- **Context menus** in the page module (three-dot menu on content elements)
-  do not work inside the iframe. The context menu system relies on the TYPO3
-  backend scaffold which is not available in the iframe context. The primary
-  actions (edit, hide, delete) are available as direct buttons.
-- **Browser console errors** from TYPO3 backend JavaScript modules are expected
-  and do not affect core editing functionality.
-- For full editing capabilities, use the **expand button** to open the complete
-  backend editor.
+For full editing capabilities, use the **expand button**.
 
 Fallback Behavior
 =================
 
-The inline editing features degrade gracefully:
+- **Setting disabled**: All edit links navigate to the backend as before.
+- **JavaScript disabled**: Edit links fall back to their ``href`` attribute,
+  pointing to the standard backend URL.
 
-- **TYPO3 v13 / v14.0-v14.1**: The ``record_edit_contextual`` route does not
-  exist. The extension uses a slide-in iframe modal that loads the standard
-  backend edit form. This works automatically without any configuration.
-- **TYPO3 v14.2+ with setting disabled**: When ``enableContextualEditing`` is
-  ``false`` (default), all edit links navigate to the backend as before.
-- **JavaScript disabled**: The ``href`` attribute on edit links still points to
-  the standard backend URL, ensuring basic functionality.
+..  tip::
+
+    On TYPO3 v14.2+ the sidebar uses the native ``record_edit_contextual``
+    route. On TYPO3 v13 the same sidebar loads the standard backend edit form
+    in an iframe. The behavior is identical from an editor's perspective.
