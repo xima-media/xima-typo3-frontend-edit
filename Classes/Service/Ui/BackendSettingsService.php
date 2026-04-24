@@ -101,7 +101,7 @@ final readonly class BackendSettingsService
             'settings' => [
                 'ajaxUrls' => $this->buildAjaxUrls(),
                 'DateTimePicker' => [
-                    'DateFormat' => ['d.m.Y', 'Y-m-d'],
+                    'DateFormat' => $GLOBALS['TYPO3_CONF_VARS']['SYS']['ddmmyy'] ?? 'Y-m-d',
                 ],
             ],
             'lang' => $this->buildLangLabels(),
