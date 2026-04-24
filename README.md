@@ -30,7 +30,7 @@ The extension injects a small JavaScript into the frontend that generates action
 - **Content Element Editing**
   - **[Edit Menu](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html)** - Quick access to edit, hide, delete, and move content elements
   - **[Delete Confirmation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html#delete-confirmation)** - Confirmation dialog before deleting records *(new in v2.3)*
-  - **[Inline Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)** *(experimental)* - Edit content directly in the frontend (v13: iframe modal, v14.2+: contextual sidebar)
+  - **[Inline Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)** *(experimental)* - Edit content directly in the frontend
 - **Page Toolbar**
   - **[Toolbar](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/Toolbar.html)** - Page-level actions and toggle for frontend editing
   - **Dark/Light Mode** - Automatic or manual color scheme selection
@@ -47,7 +47,7 @@ The extension injects a small JavaScript into the frontend that generates action
 >
 > Edit content elements directly in the frontend without navigating to the backend. Enable via Site Settings: `frontendEdit.enableContextualEditing: true`
 >
-> - **TYPO3 v13**: Opens a slide-in iframe modal
+> - **TYPO3 v13**: Opens a slide-in iframe modal (thanks to [Violetta](https://www.violetta.ch/) for developing this feature)
 > - **TYPO3 v14.2+**: Uses the native contextual editing sidebar (introduced in v2.2.0)
 >
 > ![Contextual Editing Sidebar](./Documentation/Images/contextual-sidebar.gif)
