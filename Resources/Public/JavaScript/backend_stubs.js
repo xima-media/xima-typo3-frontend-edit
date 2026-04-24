@@ -228,16 +228,16 @@
                     if (window.TYPO3.Modal && window.TYPO3.Modal.advanced) {
                         window.TYPO3.Modal.advanced({ content: url });
                     }
-                    return Promise.resolve();
+                    return Promise.resolve({});
                 }
                 const iframe = getIframe();
                 if (iframe) iframe.src = ensureReturnUrl(url);
-                return Promise.resolve();
+                return Promise.resolve({});
             },
             refresh: function () {
                 const iframe = getIframe();
                 if (iframe && iframe.contentWindow) iframe.contentWindow.location.reload();
-                return Promise.resolve();
+                return Promise.resolve({});
             },
             get: function () {
                 return getIframe();
@@ -296,8 +296,32 @@
     //   waits for us to resolve `e.detail.importPromise`.
     // Without this listener: the module silently never loads (no error, but
     //   broken UI — e.g. CKEditor plugins, date pickers, tree components).
+    //
+    // The import MUST resolve via the iframe's context because only the
+    // iframe's document carries the TYPO3 backend importmap. Using the
+    // parent's import() would silently fail for every @typo3/* specifier
+    // (no importmap → network 404 → catch returns {}).
+    //
+    // Strategy: inject a <script type="module"> into the iframe that performs
+    // the import. This is CSP-safe (no eval/Function) and resolves via the
+    // iframe's importmap. The module's side effects (event handlers, custom
+    // elements) execute in the iframe's context where they belong.
     document.addEventListener('typo3:import-javascript-module', function (e) {
         if (e.detail && e.detail.specifier) {
+            var iframe = getIframe();
+            if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
+                try {
+                    var doc = iframe.contentWindow.document;
+                    var script = doc.createElement('script');
+                    script.type = 'module';
+                    script.textContent = 'import ' + JSON.stringify(e.detail.specifier) + ';';
+                    doc.head.appendChild(script);
+                    e.detail.importPromise = Promise.resolve({});
+                    return;
+                } catch (_) {
+                    // iframe not accessible — fall through to parent import
+                }
+            }
             e.detail.importPromise = import(e.detail.specifier).catch(function () { return {}; });
         }
     });

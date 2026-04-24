@@ -91,6 +91,10 @@ intended context, some advanced form features may have limited functionality:
 
 - **Complex field types** like inline relational record editing (IRRE) or
   relation browsers may not fully work in all cases.
+- **Context menus** in the page module (three-dot menu on content elements)
+  do not work inside the iframe. The context menu system relies on the TYPO3
+  backend scaffold which is not available in the iframe context. The primary
+  actions (edit, hide, delete) are available as direct buttons.
 - **Browser console errors** from TYPO3 backend JavaScript modules are expected
   and do not affect core editing functionality.
 - For full editing capabilities, use the **expand button** to open the complete

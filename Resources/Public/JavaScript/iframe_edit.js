@@ -256,11 +256,46 @@
 
     onLoad(iframe) {
       this.overrideContentContainer(iframe);
+      this.ensureBackendModules(iframe);
       this.autoClickWizardButton(iframe);
       this.patchWizardComponents(iframe);
       this.interceptIframeClicks(iframe);
       this.detectFrontendNavigation(iframe);
       this.hideUnnecessaryButtons(iframe);
+    },
+
+    /**
+     * Ensure critical backend modules are loaded inside the iframe.
+     *
+     * In the standard TYPO3 backend, the scaffold (top frame) loads shared
+     * modules like Bootstrap. Our iframe has no scaffold — the top frame is
+     * the frontend page. Modules that the scaffold normally provides must
+     * be imported explicitly. ES modules are idempotent, so duplicate
+     * imports are harmless (resolved from cache immediately).
+     *
+     * Uses the page's CSP nonce so the injected script passes Content
+     * Security Policy checks.
+     */
+    ensureBackendModules(iframe) {
+      try {
+        const doc = iframe.contentWindow?.document;
+        if (!doc) return;
+
+        // Read the importmap to resolve the actual Bootstrap URL.
+        // Loading via src (not inline content) avoids CSP unsafe-inline
+        // restrictions — the URL is same-origin so script-src 'self' allows it.
+        const mapEl = doc.querySelector('script[type="importmap"]');
+        if (!mapEl) return;
+        const map = JSON.parse(mapEl.textContent || '{}');
+        const bootstrapUrl = map.imports?.bootstrap;
+        if (!bootstrapUrl) return;
+
+        const script = doc.createElement('script');
+        script.type = 'module';
+        script.src = bootstrapUrl;
+        doc.head.appendChild(script);
+        Logger.log('Bootstrap loaded from importmap', { url: bootstrapUrl });
+      } catch (_) { /* cross-origin */ }
     },
 
     /**
@@ -290,15 +325,15 @@
         const setUrl = (url) => {
           if (isFrontendUrl(url)) {
             IframeHandler.closeAndReload();
-            return Promise.resolve();
+            return Promise.resolve({});
           }
           if (isWizardUrl(url)) {
             Logger.log('Wizard URL in ContentContainer.setUrl — opening overlay', { url });
             IframeHandler.openWizardOverlay(iframe, url);
-            return Promise.resolve();
+            return Promise.resolve({});
           }
           iframe.src = ensureReturnUrl(url);
-          return Promise.resolve();
+          return Promise.resolve({});
         };
         try {
           Object.defineProperty(cc, 'setUrl', { value: setUrl, writable: true, configurable: true });
