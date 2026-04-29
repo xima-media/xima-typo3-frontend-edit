@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Service\Content;
 
+use Doctrine\DBAL\Schema\Column;
 use Throwable;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -21,6 +22,7 @@ use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+use function in_array;
 use function is_array;
 
 /**
@@ -260,9 +262,11 @@ final readonly class EmptyColumnService
             $columns = $this->connectionPool
                 ->getConnectionForTable('tt_content')
                 ->createSchemaManager()
-                ->introspectTableColumns('tt_content');
+                ->introspectTableColumnsByUnquotedName('tt_content');
 
-            return isset($columns['tx_container_parent']);
+            $columnNames = array_map(static fn (Column $column): string => $column->getObjectName()->toString(), $columns);
+
+            return in_array('tx_container_parent', $columnNames, true);
         } catch (Throwable) {
             return false;
         }
