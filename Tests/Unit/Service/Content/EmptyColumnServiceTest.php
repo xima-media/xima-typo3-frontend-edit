@@ -47,7 +47,7 @@ final class EmptyColumnServiceTest extends TestCase
         // Mock schema manager to simulate missing tx_container_parent field
         $connection = $this->createMock(Connection::class);
         $schemaManager = $this->createMock(\Doctrine\DBAL\Schema\AbstractSchemaManager::class);
-        $schemaManager->method('introspectTableColumnsByUnquotedName')->willReturn([]);
+        $schemaManager->method('listTableColumns')->willReturn([]);
         $connection->method('createSchemaManager')->willReturn($schemaManager);
         $this->connectionPool->method('getConnectionForTable')->willReturn($connection);
     }
@@ -119,7 +119,7 @@ final class EmptyColumnServiceTest extends TestCase
         $connectionPool = $this->createMock(ConnectionPool::class);
         $connection = $this->createMock(Connection::class);
         $schemaManager = $this->createMock(\Doctrine\DBAL\Schema\AbstractSchemaManager::class);
-        $schemaManager->method('introspectTableColumnsByUnquotedName')->willReturn([$this->createColumnMock('tx_container_parent')]);
+        $schemaManager->method('listTableColumns')->willReturn(['tx_container_parent' => $this->createMock(\Doctrine\DBAL\Schema\Column::class)]);
         $connection->method('createSchemaManager')->willReturn($schemaManager);
         $connectionPool->method('getConnectionForTable')->willReturn($connection);
 
@@ -155,7 +155,7 @@ final class EmptyColumnServiceTest extends TestCase
         $connectionPool = $this->createMock(ConnectionPool::class);
         $connection = $this->createMock(Connection::class);
         $schemaManager = $this->createMock(\Doctrine\DBAL\Schema\AbstractSchemaManager::class);
-        $schemaManager->method('introspectTableColumnsByUnquotedName')->willReturn([$this->createColumnMock('tx_container_parent')]);
+        $schemaManager->method('listTableColumns')->willReturn(['tx_container_parent' => $this->createMock(\Doctrine\DBAL\Schema\Column::class)]);
         $connection->method('createSchemaManager')->willReturn($schemaManager);
         $connectionPool->method('getConnectionForTable')->willReturn($connection);
 
@@ -183,17 +183,6 @@ final class EmptyColumnServiceTest extends TestCase
 
         $containerResults = array_filter($result, static fn (array $r): bool => isset($r['containerUid']));
         self::assertEmpty($containerResults);
-    }
-
-    private function createColumnMock(string $name): \Doctrine\DBAL\Schema\Column
-    {
-        $nameObject = $this->createMock(\Doctrine\DBAL\Schema\Name::class);
-        $nameObject->method('toString')->willReturn($name);
-
-        $column = $this->createMock(\Doctrine\DBAL\Schema\Column::class);
-        $column->method('getObjectName')->willReturn($nameObject);
-
-        return $column;
     }
 
     private function mockQueryBuilderWithCount(int $count): void
