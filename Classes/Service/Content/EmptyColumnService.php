@@ -260,7 +260,7 @@ final readonly class EmptyColumnService
             $columns = $this->connectionPool
                 ->getConnectionForTable('tt_content')
                 ->createSchemaManager()
-                ->listTableColumns('tt_content');
+                ->introspectTableColumns('tt_content');
 
             return isset($columns['tx_container_parent']);
         } catch (Throwable) {
