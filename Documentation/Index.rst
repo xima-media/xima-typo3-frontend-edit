@@ -28,10 +28,9 @@ Frontend Edit
 
 ----
 
-..  figure:: /Images/logo.svg
+..  figure:: /Images/logo.png
     :alt: Frontend Edit Logo
     :align: center
-    :width: 200px
 
 This TYPO3 extension adds lightweight editing tools to the frontend, allowing backend users to edit, hide, delete, and reorder content elements and pages without leaving the site.
 

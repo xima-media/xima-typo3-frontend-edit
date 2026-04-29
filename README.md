@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="Resources/Public/Icons/Extension.svg" alt="Extension Logo" width="200">
+![Extension icon](Resources/Public/Icons/Extension.png)
 
 # TYPO3 extension `xima_typo3_frontend_edit`
 
