@@ -257,6 +257,7 @@ final readonly class EmptyColumnService
     private function detectContainerField(): bool
     {
         try {
+            /* @phpstan-ignore-next-line method.deprecated */
             $columns = $this->connectionPool
                 ->getConnectionForTable('tt_content')
                 ->createSchemaManager()
