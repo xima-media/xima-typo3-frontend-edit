@@ -47,7 +47,7 @@ The extension injects a small JavaScript into the frontend that generates action
 >
 > Edit content elements directly in the frontend without navigating to the backend. Enable via Site Settings: `frontendEdit.enableContextualEditing: true`
 >
-> - **TYPO3 v13**: Opens a slide-in iframe modal (thanks to [Violetta](https://www.violetta.ch/) for developing this feature)
+> - **TYPO3 v13**: Opens a slide-in iframe modal (thanks to [Violetta Digital Craft](https://www.violetta.ch/) for developing this feature)
 > - **TYPO3 v14.2+**: Uses the native contextual editing sidebar (introduced in v2.2.0)
 >
 > ![Contextual Editing Sidebar](./Documentation/Images/contextual-sidebar.gif)
