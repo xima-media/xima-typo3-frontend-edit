@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "663f956e5dc31a5c86b767caa0eeabf1",
+    "content-hash": "7cdaf153628f3124f3c7a36dce4f0164",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4458,16 +4458,16 @@
         },
         {
             "name": "symfony/yaml",
-            "version": "v7.4.8",
+            "version": "v7.4.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "c58fdf7b3d6c2995368264c49e4e8b05bcff2883"
+                "reference": "8b6952b56ca6417f25f7a65758cadd0ce02edc51"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/c58fdf7b3d6c2995368264c49e4e8b05bcff2883",
-                "reference": "c58fdf7b3d6c2995368264c49e4e8b05bcff2883",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/8b6952b56ca6417f25f7a65758cadd0ce02edc51",
+                "reference": "8b6952b56ca6417f25f7a65758cadd0ce02edc51",
                 "shasum": ""
             },
             "require": {
@@ -4510,7 +4510,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v7.4.8"
+                "source": "https://github.com/symfony/yaml/tree/v7.4.12"
             },
             "funding": [
                 {
@@ -4530,7 +4530,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-03-24T13:12:05+00:00"
+            "time": "2026-05-20T07:20:23+00:00"
         },
         {
             "name": "typo3/class-alias-loader",
@@ -5331,16 +5331,16 @@
         },
         {
             "name": "eliashaeussler/version-bumper",
-            "version": "3.3.0",
+            "version": "4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/eliashaeussler/version-bumper.git",
-                "reference": "c07e35754ce1c156427f9a75e170fc90a32ef681"
+                "reference": "e096b64068ba36864580d36c96d8d13c46f93441"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/eliashaeussler/version-bumper/zipball/c07e35754ce1c156427f9a75e170fc90a32ef681",
-                "reference": "c07e35754ce1c156427f9a75e170fc90a32ef681",
+                "url": "https://api.github.com/repos/eliashaeussler/version-bumper/zipball/e096b64068ba36864580d36c96d8d13c46f93441",
+                "reference": "e096b64068ba36864580d36c96d8d13c46f93441",
                 "shasum": ""
             },
             "require": {
@@ -5396,9 +5396,9 @@
             "description": "Composer plugin to bump project versions during release preparations",
             "support": {
                 "issues": "https://github.com/eliashaeussler/version-bumper/issues",
-                "source": "https://github.com/eliashaeussler/version-bumper/tree/3.3.0"
+                "source": "https://github.com/eliashaeussler/version-bumper/tree/4.0.0"
             },
-            "time": "2026-05-12T07:59:30+00:00"
+            "time": "2026-05-23T12:03:56+00:00"
         },
         {
             "name": "helhum/config-loader",
