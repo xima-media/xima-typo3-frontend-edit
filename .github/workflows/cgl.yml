@@ -7,4 +7,4 @@ on:
 
 jobs:
   cgl:
-    uses: konradmichalik/reusable-github-actions/.github/workflows/cgl-test.yml@main
+    uses: konradmichalik/reusable-github-actions/.github/workflows/cgl-test.yml@7e9510ad26b6bc039a13aa4bd9fa44a1a0b723bc # main
