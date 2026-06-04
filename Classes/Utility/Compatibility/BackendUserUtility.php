@@ -36,10 +36,10 @@ class BackendUserUtility
     public static function hasRecordEditAccess(BackendUserAuthentication $backendUser, string $table, array $record): bool
     {
         if (VersionUtility::is14OrHigher()) {
+            // @phpstan-ignore method.notFound, typePerfect.noMixedPropertyFetcher (checkRecordEditAccess only exists in TYPO3 v14.2+)
             return $backendUser->checkRecordEditAccess($table, $record)->isAllowed;
         }
 
-        /* @phpstan-ignore method.deprecated (Required for TYPO3 v13 compatibility) */
         return $backendUser->recordEditAccessInternals($table, $record);
     }
 }
