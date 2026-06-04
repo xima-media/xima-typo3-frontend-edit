@@ -717,6 +717,7 @@
           e.target.closest('.frontend-edit__btn--edit') ||
           e.target.closest('.frontend-edit__dropdown a:not(.hide):not(.delete)') ||
           e.target.closest('.frontend-edit__sticky-dropdown a') ||
+          e.target.closest('.frontend-edit__column-btn') ||
           e.target.closest('.frontend-edit__open-modal');
 
         if (target?.href && isBackendUrl(target.href)) {
