@@ -32,14 +32,13 @@ class ButtonFactoryUtility
             return self::getComponentFactory()->createInputButton();
         }
 
-        // @phpstan-ignore method.deprecated (Required for TYPO3 v13 compatibility)
         return $buttonBar->makeInputButton();
     }
 
     private static function getComponentFactory(): object
     {
         /** @var class-string $factoryClass */
-        $factoryClass = 'TYPO3\\CMS\\Backend\\Template\\Components\\ComponentFactory';
+        $factoryClass = 'TYPO3\\CMS\\Backend\\Template\\Components\\ComponentFactory'; // @phpstan-ignore varTag.nativeType
 
         return GeneralUtility::makeInstance($factoryClass);
     }

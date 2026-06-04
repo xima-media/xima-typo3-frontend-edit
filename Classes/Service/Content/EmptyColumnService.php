@@ -127,6 +127,11 @@ final readonly class EmptyColumnService
         try {
             $backendLayoutView = GeneralUtility::makeInstance(BackendLayoutView::class);
             $backendLayout = $backendLayoutView->getBackendLayoutForPage($pid);
+
+            if (null === $backendLayout) {
+                return $default;
+            }
+
             $columns = $this->extractColumnsFromStructure($backendLayout->getStructure());
 
             if ([] === $columns) {
@@ -257,7 +262,6 @@ final readonly class EmptyColumnService
     private function detectContainerField(): bool
     {
         try {
-            /* @phpstan-ignore-next-line method.deprecated */
             $columns = $this->connectionPool
                 ->getConnectionForTable('tt_content')
                 ->createSchemaManager()
