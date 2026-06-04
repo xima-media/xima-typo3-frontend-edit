@@ -38,7 +38,9 @@ class ButtonFactoryUtility
 
     private static function getComponentFactory(): object
     {
-        // Use dynamic class name to avoid autoload issues on TYPO3 13
-        return GeneralUtility::makeInstance('TYPO3\\CMS\\Backend\\Template\\Components\\ComponentFactory');
+        /** @var class-string $factoryClass */
+        $factoryClass = 'TYPO3\\CMS\\Backend\\Template\\Components\\ComponentFactory';
+
+        return GeneralUtility::makeInstance($factoryClass);
     }
 }
