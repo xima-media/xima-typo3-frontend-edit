@@ -1,6 +1,6 @@
 {
 	"name": "xima/xima-typo3-frontend-edit",
-	"description": "This extension provides an edit button for editors within frontend content elements.",
+	"description": "Frontend Edit - This extension provides an edit button for editors within frontend content elements.",
 	"license": [
 		"GPL-2.0-or-later"
 	],
