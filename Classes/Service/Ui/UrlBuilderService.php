@@ -165,6 +165,41 @@ final readonly class UrlBuilderService
     }
 
     /**
+     * Build URL to TYPO3's native New Content Element Wizard.
+     *
+     * Version-agnostic: the same backend route renders the wizard on v13 (inside
+     * the iframe modal) and v14 (inside the contextual sidebar). Passing a colPos
+     * skips the wizard's position-selection step and goes straight to the type grid.
+     *
+     * @param int|null $uidAfter Insert after this content element (uid_pid = -uid);
+     *                           null appends to the end of the column (uid_pid = pid).
+     *
+     * @throws RouteNotFoundException
+     */
+    public function buildNewContentWizardUrl(
+        int $pid,
+        int $colPos,
+        int $languageUid,
+        string $returnUrl,
+        ?int $uidAfter = null,
+        ?int $containerUid = null,
+    ): string {
+        $parameters = [
+            'id' => $pid,
+            'colPos' => $colPos,
+            'sys_language_uid' => $languageUid,
+            'uid_pid' => null !== $uidAfter ? -$uidAfter : $pid,
+            'returnUrl' => $returnUrl,
+        ];
+
+        if (null !== $containerUid) {
+            $parameters['tx_container_parent'] = $containerUid;
+        }
+
+        return $this->uriBuilder->buildUriFromRoute('new_content_element_wizard', $parameters)->__toString();
+    }
+
+    /**
      * Check if the contextual edit route exists (TYPO3 v14.2+).
      */
     public function isContextualEditRouteAvailable(): bool

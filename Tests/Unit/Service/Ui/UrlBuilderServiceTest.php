@@ -244,4 +244,51 @@ final class UrlBuilderServiceTest extends TestCase
 
         self::assertSame('/typo3/ajax/frontend-edit/edit-information', $result);
     }
+
+    #[Test]
+    public function buildNewContentWizardUrlAppendsToColumnWhenNoUidAfter(): void
+    {
+        $this->uriBuilderMock->method('buildUriFromRoute')
+            ->with('new_content_element_wizard', self::callback(static fn (array $p): bool =>
+                5 === $p['id']
+                && 0 === $p['colPos']
+                && 2 === $p['sys_language_uid']
+                && 5 === $p['uid_pid']
+                && '/return' === $p['returnUrl']
+                && !isset($p['tx_container_parent'])))
+            ->willReturn(new Uri('/typo3/record/content/wizard/new'));
+
+        $service = new UrlBuilderService();
+        $result = $service->buildNewContentWizardUrl(5, 0, 2, '/return');
+
+        self::assertSame('/typo3/record/content/wizard/new', $result);
+    }
+
+    #[Test]
+    public function buildNewContentWizardUrlUsesNegativeUidPidWhenInsertingAfterElement(): void
+    {
+        $this->uriBuilderMock->method('buildUriFromRoute')
+            ->with('new_content_element_wizard', self::callback(static fn (array $p): bool =>
+                -42 === $p['uid_pid'] && 3 === $p['colPos']))
+            ->willReturn(new Uri('/typo3/record/content/wizard/new'));
+
+        $service = new UrlBuilderService();
+        $result = $service->buildNewContentWizardUrl(5, 3, 0, '/return', uidAfter: 42);
+
+        self::assertSame('/typo3/record/content/wizard/new', $result);
+    }
+
+    #[Test]
+    public function buildNewContentWizardUrlAddsContainerParentWhenGiven(): void
+    {
+        $this->uriBuilderMock->method('buildUriFromRoute')
+            ->with('new_content_element_wizard', self::callback(static fn (array $p): bool =>
+                200 === ($p['tx_container_parent'] ?? null)))
+            ->willReturn(new Uri('/typo3/record/content/wizard/new'));
+
+        $service = new UrlBuilderService();
+        $result = $service->buildNewContentWizardUrl(5, 1, 0, '/return', containerUid: 200);
+
+        self::assertSame('/typo3/record/content/wizard/new', $result);
+    }
 }
