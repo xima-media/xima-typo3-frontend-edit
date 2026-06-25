@@ -298,11 +298,29 @@
      * Initialize notifications by reading flash messages from DOM
      */
     init() {
+      // If the previous action was a "new content" create flow, relabel the
+      // backend's generic success flash ("Record saved") to a create-specific
+      // message. Consumed unconditionally so the flag never leaks to a later load.
+      // Only OK-severity messages are relabelled; warnings/errors pass through.
+      let createdFlow = false;
+      try {
+        if (sessionStorage.getItem('xfe-content-created')) {
+          sessionStorage.removeItem('xfe-content-created');
+          createdFlow = true;
+        }
+      } catch (_) { /* sessionStorage unavailable */ }
+
       const dataElement = document.querySelector('.frontend-edit-flash-messages');
       if (!dataElement) return;
 
       try {
-        const messages = JSON.parse(dataElement.textContent || '[]');
+        let messages = JSON.parse(dataElement.textContent || '[]');
+        if (createdFlow) {
+          const labels = window.FRONTEND_EDIT_NOTIFICATION_LABELS || {};
+          messages = messages.map(msg => String(msg.severity || '').toUpperCase() === 'OK'
+            ? { title: labels.contentCreated || 'Content element created', message: msg.message, severity: msg.severity }
+            : msg);
+        }
         if (messages.length > 0) {
           Logger.log(`Found ${messages.length} flash message(s) to display`);
           messages.forEach((msg, index) => {

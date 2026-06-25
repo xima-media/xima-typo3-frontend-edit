@@ -133,8 +133,11 @@ final readonly class ResourceRendererService
             'createContent' => $this->translate('column.createContent', 'Create new content'),
             'createContentIn' => $this->translate('column.createContentIn', 'Create new content in "%s" column'),
         ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
+        $notificationLabels = json_encode([
+            'contentCreated' => $this->translate('notification.contentCreated', 'Content element created'),
+        ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $resources['settings_config'] = sprintf(
-            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_SIDEBAR_EDIT = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s;</script>',
+            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_SIDEBAR_EDIT = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s; window.FRONTEND_EDIT_NOTIFICATION_LABELS = %s;</script>',
             $nonceAttribute,
             $colorScheme,
             $showContextMenu,
@@ -145,6 +148,7 @@ final readonly class ResourceRendererService
             $isDisabled,
             $deleteLabels,
             $columnLabels,
+            $notificationLabels,
         );
     }
 

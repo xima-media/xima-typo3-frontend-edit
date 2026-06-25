@@ -115,6 +115,10 @@
 				<source />
 				<target>Neuen Inhalt in Spalte "%s" erstellen</target>
 			</trans-unit>
+			<trans-unit id="notification.contentCreated">
+				<source />
+				<target>Inhaltselement angelegt</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

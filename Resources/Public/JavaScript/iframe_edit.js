@@ -177,6 +177,9 @@
 
       this.getOrCreate();
       IframeHandler._wizardAutoClicked = false;
+      // A modal opened with a #colPos hash is a "new content" (create) flow;
+      // remembered so the post-save success flash can be relabelled "created".
+      IframeHandler._createFlow = url.includes('#colPos=');
       const { iframe } = this;
       const loader = this.element.querySelector('.frontend-edit__modal-loader');
 
@@ -348,6 +351,7 @@
     // ── Wizard auto-click ──────────────────────────────────────────
 
     _wizardAutoClicked: false,
+    _createFlow: false,
 
     autoClickWizardButton(iframe) {
       try {
@@ -683,6 +687,14 @@
     closeAndReload(scrollToEdited = false) {
       let uid = null;
       if (scrollToEdited) uid = this.getEditedElementUid();
+
+      // Carry the create-flow intent across the reload. If a save actually
+      // happened, the backend's "Record saved" success flash will be present
+      // on the next load and Notification.init() relabels it to "created".
+      // On cancel there is no success flash, so nothing is relabelled.
+      if (this._createFlow) {
+        try { sessionStorage.setItem('xfe-content-created', '1'); } catch (_) { /* unavailable */ }
+      }
 
       // Show modal loader in case it wasn't shown yet (e.g. close without save)
       this.showModalLoader();
