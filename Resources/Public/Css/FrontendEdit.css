@@ -982,6 +982,11 @@
     justify-content: center;
     gap: 5px;
     padding: 16px 8px;
+}
+
+/* Dashed outline only appears on hover/focus, not permanently. */
+[data-xfe-colpos]:not([hidden]):hover,
+[data-xfe-colpos]:not([hidden]):focus-within {
     background:
         repeating-linear-gradient(to right, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) top/100% 1px no-repeat,
         repeating-linear-gradient(to right, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) bottom/100% 1px no-repeat,
@@ -989,6 +994,10 @@
         repeating-linear-gradient(to bottom, var(--xfe-outline-color) 0, var(--xfe-outline-color) 5px, transparent 5px, transparent 13px) right/1px 100% no-repeat;
 }
 
+/* Resting state: a quiet "ghost chip". The near-opaque adaptive toolbar background
+   paired with its matching toolbar text colour guarantees readable contrast in every
+   colour scheme and on ANY page background (white, grey, image). It stays visually
+   calm through its compact size and thin border, not through a low-contrast colour. */
 .frontend-edit__column-btn {
     display: flex;
     align-items: center;
@@ -1001,24 +1010,10 @@
     font-size: 11px;
     font-weight: 400;
     line-height: 1;
-    transition: all 0.2s ease;
+    transition: background 0.15s ease, border-color 0.15s ease;
     border-radius: 4px;
-    border: 1px solid transparent;
+    border: 1px solid var(--xfe-outline-color);
     background: var(--xfe-toolbar-bg);
-}
-
-.frontend-edit__column-btn:hover {
-    background: var(--xfe-toolbar-bg);
-    border-color: var(--xfe-toolbar-text);
-    color: var(--xfe-toolbar-text);
-}
-
-.frontend-edit__column-btn:focus-visible {
-    background: var(--xfe-toolbar-bg);
-    border-color: var(--xfe-toolbar-text);
-    color: var(--xfe-toolbar-text);
-    outline: 2px solid var(--xfe-outline-color);
-    outline-offset: 2px;
 }
 
 .frontend-edit__column-btn-icon {
@@ -1034,6 +1029,20 @@
 
 .frontend-edit__column-btn-label {
     font-weight: 400;
+}
+
+/* On column hover / keyboard focus the chip gets the same subtle overlay as the
+   content element toolbar buttons (.frontend-edit__btn) and the dashed outline appears. */
+[data-xfe-colpos]:hover .frontend-edit__column-btn,
+[data-xfe-colpos]:focus-within .frontend-edit__column-btn {
+    color: var(--xfe-toolbar-text);
+    background: linear-gradient(var(--xfe-toolbar-btn-hover), var(--xfe-toolbar-btn-hover)), var(--xfe-toolbar-bg);
+    border-color: var(--xfe-toolbar-text);
+}
+
+.frontend-edit__column-btn:focus-visible {
+    outline: 2px solid var(--xfe-outline-color);
+    outline-offset: 2px;
 }
 
 /* ==========================================================================
