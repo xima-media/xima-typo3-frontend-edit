@@ -31,7 +31,7 @@ The extension injects a small JavaScript into the frontend that generates action
   - **[Edit Menu](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html)** - Quick access to edit, hide, delete, and move content elements
   - **[Delete Confirmation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html#delete-confirmation)** - Confirmation dialog before deleting records *(new in v2.3)*
   - **[Inline Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)** *(experimental)* - Edit content directly in the frontend
-  - **New Content Wizard** - Create new content elements via TYPO3's native New Content Element Wizard (v13: iframe modal, v14: contextual sidebar)
+  - **New Content Wizard** - Create new content elements via TYPO3's native New Content Element Wizard, hosted in the slide-in iframe modal on both v13 and v14 (requires `frontendEdit.enableContextualEditing`)
 - **Page Toolbar**
   - **[Toolbar](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/Toolbar.html)** - Page-level actions and toggle for frontend editing
   - **Dark/Light Mode** - Automatic or manual color scheme selection
