@@ -190,6 +190,9 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
             $languageUid,
             $returnUrlAnchor,
             uidAfter: (int) $contentElement['uid'],
+            containerUid: (int) ($contentElement['tx_container_parent'] ?? 0) > 0
+                ? (int) $contentElement['tx_container_parent']
+                : null,
         );
         $this->addButton($menuButton, 'new_content_after', ButtonType::Link, url: $newContentUrl, icon: 'actions-add');
 
