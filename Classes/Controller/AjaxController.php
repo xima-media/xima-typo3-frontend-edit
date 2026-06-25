@@ -124,11 +124,11 @@ readonly class AjaxController
 
         $dropdown = $this->contentElementMenuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
 
-        $emptyColumns = $this->emptyColumnService->getEmptyColumns($pid, $languageUid, $returnUrl, $data);
+        $columnTargets = $this->emptyColumnService->getColumnTargets($pid, $languageUid, $returnUrl, $data);
 
         return new JsonResponse(mb_convert_encoding([
             'contentElements' => $dropdown,
-            'emptyColumns' => $emptyColumns,
+            'columnTargets' => $columnTargets,
         ], 'UTF-8'));
     }
 

@@ -16,12 +16,11 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Content;
 use Doctrine\DBAL\Result;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
 use TYPO3\CMS\Core\Database\Query\{Expression\ExpressionBuilder, QueryBuilder};
-use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use Xima\XimaTypo3FrontendEdit\Service\Content\EmptyColumnService;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
 
 /**
  * EmptyColumnServiceTest.
@@ -34,14 +33,14 @@ final class EmptyColumnServiceTest extends TestCase
 {
     private ConnectionPool $connectionPool;
 
-    private UriBuilder $uriBuilder;
+    private UrlBuilderService $urlBuilderService;
 
     private LanguageServiceFactory $languageServiceFactory;
 
     protected function setUp(): void
     {
         $this->connectionPool = $this->createMock(ConnectionPool::class);
-        $this->uriBuilder = $this->createMock(UriBuilder::class);
+        $this->urlBuilderService = $this->createMock(UrlBuilderService::class);
         $this->languageServiceFactory = $this->createMock(LanguageServiceFactory::class);
 
         // Mock schema manager to simulate missing tx_container_parent field
@@ -53,50 +52,51 @@ final class EmptyColumnServiceTest extends TestCase
     }
 
     #[Test]
-    public function getEmptyColumnsReturnsEmptyArrayWhenAllColumnsHaveContent(): void
+    public function getColumnTargetsMarksFilledColumnsAsNotEmpty(): void
     {
-        $this->mockQueryBuilderWithCount(1);
+        $this->mockQueryBuilderWithCount(3);
+        $this->urlBuilderService->method('buildNewContentWizardUrl')->willReturn('/typo3/record/content/wizard/new');
 
         $service = new EmptyColumnService(
             $this->connectionPool,
-            $this->uriBuilder,
+            $this->urlBuilderService,
             $this->languageServiceFactory,
         );
 
-        $result = $service->getEmptyColumns(1, 0, '/return');
-
-        self::assertSame([], $result);
-    }
-
-    #[Test]
-    public function getEmptyColumnsReturnsColumnsWithNewContentUrl(): void
-    {
-        $this->mockQueryBuilderWithCount(0);
-        $this->uriBuilder->method('buildUriFromRoute')->willReturn(new Uri('/typo3/record/edit'));
-
-        $service = new EmptyColumnService(
-            $this->connectionPool,
-            $this->uriBuilder,
-            $this->languageServiceFactory,
-        );
-
-        $result = $service->getEmptyColumns(1, 0, '/return');
+        $result = $service->getColumnTargets(1, 0, '/return');
 
         self::assertNotEmpty($result);
-        self::assertArrayHasKey('colPos', $result[0]);
+        self::assertFalse($result[0]['isEmpty']);
         self::assertArrayHasKey('newContentUrl', $result[0]);
-        self::assertArrayHasKey('name', $result[0]);
-        self::assertSame('/typo3/record/edit', $result[0]['newContentUrl']);
     }
 
     #[Test]
-    public function getEmptyColumnsIgnoresContainerMarkersWithoutContainerField(): void
+    public function getColumnTargetsMarksEmptyColumnsAsEmpty(): void
     {
-        $this->mockQueryBuilderWithCount(1);
+        $this->mockQueryBuilderWithCount(0);
+        $this->urlBuilderService->method('buildNewContentWizardUrl')->willReturn('/typo3/record/content/wizard/new');
 
         $service = new EmptyColumnService(
             $this->connectionPool,
-            $this->uriBuilder,
+            $this->urlBuilderService,
+            $this->languageServiceFactory,
+        );
+
+        $result = $service->getColumnTargets(1, 0, '/return');
+
+        self::assertNotEmpty($result);
+        self::assertTrue($result[0]['isEmpty']);
+    }
+
+    #[Test]
+    public function getColumnTargetsIgnoresContainerMarkersWithoutContainerField(): void
+    {
+        $this->mockQueryBuilderWithCount(1);
+        $this->urlBuilderService->method('buildNewContentWizardUrl')->willReturn('/typo3/record/content/wizard/new');
+
+        $service = new EmptyColumnService(
+            $this->connectionPool,
+            $this->urlBuilderService,
             $this->languageServiceFactory,
         );
 
@@ -106,14 +106,15 @@ final class EmptyColumnServiceTest extends TestCase
             ],
         ];
 
-        $result = $service->getEmptyColumns(1, 0, '/return', $requestData);
+        $result = $service->getColumnTargets(1, 0, '/return', $requestData);
 
         // Container markers should be ignored since tx_container_parent field does not exist
-        self::assertSame([], $result);
+        $containerResults = array_filter($result, static fn (array $r): bool => isset($r['containerUid']));
+        self::assertEmpty($containerResults);
     }
 
     #[Test]
-    public function getEmptyColumnsHandlesContainerMarkersWhenFieldExists(): void
+    public function getColumnTargetsHandlesContainerMarkersWhenFieldExists(): void
     {
         // Mock schema manager to simulate tx_container_parent field exists
         $connectionPool = $this->createMock(ConnectionPool::class);
@@ -125,11 +126,11 @@ final class EmptyColumnServiceTest extends TestCase
 
         // All columns empty
         $this->mockQueryBuilderWithCountForPool($connectionPool, 0);
-        $this->uriBuilder->method('buildUriFromRoute')->willReturn(new Uri('/typo3/record/edit'));
+        $this->urlBuilderService->method('buildNewContentWizardUrl')->willReturn('/typo3/record/content/wizard/new');
 
         $service = new EmptyColumnService(
             $connectionPool,
-            $this->uriBuilder,
+            $this->urlBuilderService,
             $this->languageServiceFactory,
         );
 
@@ -139,17 +140,18 @@ final class EmptyColumnServiceTest extends TestCase
             ],
         ];
 
-        $result = $service->getEmptyColumns(1, 0, '/return', $requestData);
+        $result = $service->getColumnTargets(1, 0, '/return', $requestData);
 
         $containerResults = array_filter($result, static fn (array $r): bool => isset($r['containerUid']));
         self::assertNotEmpty($containerResults);
         $first = array_values($containerResults)[0];
         self::assertSame(200, $first['colPos']);
         self::assertSame(42, $first['containerUid']);
+        self::assertTrue($first['isEmpty']);
     }
 
     #[Test]
-    public function getEmptyColumnsFiltersInvalidContainerMarkers(): void
+    public function getColumnTargetsFiltersInvalidContainerMarkers(): void
     {
         // Mock schema manager with container field
         $connectionPool = $this->createMock(ConnectionPool::class);
@@ -159,15 +161,12 @@ final class EmptyColumnServiceTest extends TestCase
         $connection->method('createSchemaManager')->willReturn($schemaManager);
         $connectionPool->method('getConnectionForTable')->willReturn($connection);
 
-        // Keep page columns non-empty, but make any unexpected container lookup observable
+        // Keep page columns non-empty
         $this->mockQueryBuilderWithCountForPool($connectionPool, 1);
-        $this->uriBuilder
-            ->expects(self::never())
-            ->method('buildUriFromRoute');
 
         $service = new EmptyColumnService(
             $connectionPool,
-            $this->uriBuilder,
+            $this->urlBuilderService,
             $this->languageServiceFactory,
         );
 
@@ -179,7 +178,7 @@ final class EmptyColumnServiceTest extends TestCase
             ],
         ];
 
-        $result = $service->getEmptyColumns(1, 0, '/return', $requestData);
+        $result = $service->getColumnTargets(1, 0, '/return', $requestData);
 
         $containerResults = array_filter($result, static fn (array $r): bool => isset($r['containerUid']));
         self::assertEmpty($containerResults);

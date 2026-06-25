@@ -24,7 +24,7 @@ use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\VersionUtility;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final readonly class UrlBuilderService
+readonly class UrlBuilderService
 {
     private UriBuilder $uriBuilder;
 
