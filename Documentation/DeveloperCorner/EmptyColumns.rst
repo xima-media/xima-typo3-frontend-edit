@@ -2,17 +2,17 @@
 
 ..  _empty-columns:
 
-=============
-Empty Columns
-=============
+==============
+Column Targets
+==============
 
-The extension can display "Create new content" buttons for empty columns directly in the frontend. This allows editors to add content without switching to the TYPO3 backend.
+The extension can display "Create new content" buttons for columns directly in the frontend — both for empty columns and at the end of columns that already contain content. This allows editors to add content without switching to the TYPO3 backend.
 
 ..  figure:: /Images/empty-column.jpg
     :alt: Empty column marker showing a "Create new content" button in the frontend
     :class: with-shadow
 
-    A "Create new content" button appears in empty columns when frontend editing is enabled
+    A "Create new content" button appears in empty columns and at the end of filled columns when frontend editing is enabled
 
 It works in two steps:
 
@@ -74,9 +74,10 @@ Place the marker after the content rendering for each column:
     <f:cObject typoscriptObjectPath="lib.dynamicContent" data="{pageUid: '{data.uid}', colPos: '1'}" />
     <xfe:columnTarget colPos="1" />
 
-When colPos 0 or 1 is empty, a "+" button appears at the marker position. Clicking it opens the TYPO3 record editor to create a new content element in that column.
+A "+" button always appears at the marker position — whether the column is empty or already contains content. Clicking it opens TYPO3's native **New Content Element Wizard** to choose a content type, then creates the new element in that column.
 
-When the column has content, the marker stays hidden and has no effect on the page.
+- **TYPO3 v13**: The wizard opens in a slide-in iframe modal.
+- **TYPO3 v14**: The wizard opens in the native contextual sidebar.
 
 Container columns
 -----------------
@@ -112,9 +113,9 @@ How it works
 
 1. The ViewHelper renders :html:`<div data-xfe-colpos="0" hidden></div>` (invisible, no layout impact)
 2. The extension's JavaScript scans the page for these markers after loading
-3. An AJAX request to the backend checks which columns are empty
-4. For each empty column that has a matching marker, a "+" button is injected
-5. The button opens the TYPO3 record editor with the correct colPos pre-filled
+3. A "+" button is injected at each marker position, regardless of whether the column already contains content
+4. Clicking the button opens TYPO3's native New Content Element Wizard with the correct colPos pre-filled
+5. The wizard lets the editor choose a content type before the record editor opens (v13: iframe modal, v14: contextual sidebar)
 
 Container support requires the `b13/container <https://github.com/b13/container>`__ extension. The service automatically detects whether it is installed. Without it, only page columns are supported and container markers are silently ignored.
 
@@ -129,4 +130,3 @@ Container support requires the `b13/container <https://github.com/b13/container>
     View the sources on GitHub:
 
     -   `ColumnTargetViewHelper <https://github.com/xima-media/xima-typo3-frontend-edit/blob/main/Classes/ViewHelpers/ColumnTargetViewHelper.php>`__
-    -   `EmptyColumnService <https://github.com/xima-media/xima-typo3-frontend-edit/blob/main/Classes/Service/Content/EmptyColumnService.php>`__
