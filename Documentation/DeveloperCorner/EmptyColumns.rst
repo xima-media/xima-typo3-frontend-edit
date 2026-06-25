@@ -130,3 +130,4 @@ Container support requires the `b13/container <https://github.com/b13/container>
     View the sources on GitHub:
 
     -   `ColumnTargetViewHelper <https://github.com/xima-media/xima-typo3-frontend-edit/blob/main/Classes/ViewHelpers/ColumnTargetViewHelper.php>`__
+    -   `EmptyColumnService <https://github.com/xima-media/xima-typo3-frontend-edit/blob/main/Classes/Service/Content/EmptyColumnService.php>`__
