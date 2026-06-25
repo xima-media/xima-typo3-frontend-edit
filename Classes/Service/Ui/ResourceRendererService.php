@@ -113,6 +113,7 @@ final readonly class ResourceRendererService
         $showContextMenu = $this->jsBool($request, $this->settingsService->isShowContextMenu(...));
         $enableOutline = $this->jsBool($request, $this->settingsService->isEnableOutline(...));
         $enableScrollToElement = $this->jsBool($request, $this->settingsService->isEnableScrollToElement(...));
+        $showInsertButtons = $this->jsBool($request, $this->settingsService->isShowInsertButtons(...));
         $contextualEditing = $this->jsBool($request, $this->settingsService->isContextualEditingEnabled(...));
         // True only when edits are routed to the contextual sidebar (v14.2+ with the
         // route available). iframe_edit.js then restricts the modal to new-content
@@ -132,12 +133,14 @@ final readonly class ResourceRendererService
         $columnLabels = json_encode([
             'createContent' => $this->translate('column.createContent', 'Create new content'),
             'createContentIn' => $this->translate('column.createContentIn', 'Create new content in "%s" column'),
+            'insertBefore' => $this->translate('column.insertBefore', 'Create new content before'),
+            'insertAfter' => $this->translate('column.insertAfter', 'Create new content after'),
         ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $notificationLabels = json_encode([
             'contentCreated' => $this->translate('notification.contentCreated', 'Content element created'),
         ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $resources['settings_config'] = sprintf(
-            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_SIDEBAR_EDIT = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s; window.FRONTEND_EDIT_NOTIFICATION_LABELS = %s;</script>',
+            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_SIDEBAR_EDIT = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s; window.FRONTEND_EDIT_NOTIFICATION_LABELS = %s; window.FRONTEND_EDIT_SHOW_INSERT_BUTTONS = %s;</script>',
             $nonceAttribute,
             $colorScheme,
             $showContextMenu,
@@ -149,6 +152,7 @@ final readonly class ResourceRendererService
             $deleteLabels,
             $columnLabels,
             $notificationLabels,
+            $showInsertButtons,
         );
     }
 

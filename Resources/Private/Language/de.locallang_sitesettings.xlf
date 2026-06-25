@@ -171,6 +171,15 @@
 				<target>Öffnet Inhaltselement-Bearbeitungsformulare in einem Seitenpanel anstatt zum Backend zu navigieren. Erfordert TYPO3 v14.2+. Diese Funktion ist experimentell und kann sich in zukünftigen Versionen ändern.</target>
 			</trans-unit>
 
+			<trans-unit id="settings.frontendEdit.showInsertButtons">
+				<source>Show insert buttons on hover</source>
+				<target>Einfügen-Buttons beim Hover anzeigen</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.showInsertButtons">
+				<source>Shows "+" buttons above and below each content element on hover to insert a new element before or after it via the New Content Element Wizard.</source>
+				<target>Zeigt beim Hover über jedem Inhaltselement "+"-Buttons oben und unten an, um per New Content Element Wizard ein neues Element davor oder danach einzufügen.</target>
+			</trans-unit>
+
 			<trans-unit id="settings.frontendEdit.filter.ignoreUids">
 				<source>Ignore UIDs</source>
 				<target>UIDs ignorieren</target>

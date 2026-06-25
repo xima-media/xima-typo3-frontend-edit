@@ -18,6 +18,7 @@
   const ICONS = {
     edit: '<svg viewBox="0 0 32 32" fill="currentColor"><path d="M4.834,29.665L25.007,29.665C26.561,29.663 27.839,28.385 27.841,26.831L27.841,16.157C27.841,15.608 27.39,15.157 26.841,15.157C26.292,15.157 25.841,15.608 25.841,16.157L25.841,26.831C25.84,27.288 25.464,27.664 25.007,27.665L4.834,27.665C4.377,27.664 4.001,27.288 4,26.831L4,7.651C4.001,7.194 4.377,6.818 4.834,6.817L16,6.817C16.549,6.817 17,6.366 17,5.817C17,5.268 16.549,4.817 16,4.817L4.834,4.817C3.28,4.819 2.002,6.097 2,7.651L2,26.831C2.002,28.385 3.28,29.663 4.834,29.665Z" fill-rule="nonzero"/><path d="M8.582,19.343L7.912,22.691C7.894,22.781 7.885,22.873 7.885,22.965C7.885,23.726 8.51,24.352 9.271,24.352C9.363,24.352 9.454,24.343 9.544,24.325L12.895,23.655C13.539,23.527 14.131,23.211 14.595,22.747L28.845,8.494C29.473,7.825 29.823,6.941 29.823,6.024C29.823,4.044 28.195,2.416 26.215,2.416C25.298,2.416 24.414,2.766 23.745,3.394L9.49,17.645C9.025,18.108 8.709,18.699 8.582,19.343ZM10.543,19.734C10.594,19.478 10.72,19.244 10.904,19.059L25.157,4.806C25.458,4.509 25.864,4.343 26.286,4.343C27.168,4.343 27.894,5.069 27.894,5.951C27.894,6.373 27.728,6.779 27.431,7.08L13.178,21.332C12.993,21.517 12.758,21.643 12.502,21.694L10.054,22.184L10.543,19.734Z" fill-rule="nonzero"/></svg>',
     kebab: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="2.5" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="8" cy="13.5" r="1.5"/></svg>',
+    add: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
     check: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 111.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/></svg>',
     warning: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>',
     error: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-1.4A5.6 5.6 0 1 0 8 2.4a5.6 5.6 0 0 0 0 11.2zM7.3 5h1.4v4.2H7.3V5zm0 5.6h1.4V12H7.3v-1.4z"/></svg>',
@@ -505,6 +506,9 @@
     container: null,
     overlays: new Map(), // Map<targetElement, {toolbar, outline}>
     scrollRAF: null,
+    activeElement: null,
+    pointerRAF: null,
+    lastPointer: { x: 0, y: 0 },
 
     /**
      * Check if a content element is nested inside another content element
@@ -535,6 +539,75 @@
 
       // Setup scroll/resize handlers
       this.setupEventHandlers();
+
+      // Single source of truth for which element is highlighted: the element the
+      // cursor is geometrically inside. This avoids mouseenter/leave races between
+      // adjacent elements and their overlay buttons — the highlight stays put
+      // until the cursor actually crosses into another element's box.
+      this.setupPointerTracking();
+    },
+
+    setupPointerTracking() {
+      const onMove = (e) => {
+        this.lastPointer = { x: e.clientX, y: e.clientY };
+        if (this.pointerRAF) return;
+        this.pointerRAF = requestAnimationFrame(() => {
+          this.pointerRAF = null;
+          this.updateActiveFromPointer();
+        });
+      };
+      document.addEventListener('mousemove', onMove, { passive: true });
+    },
+
+    updateActiveFromPointer() {
+      const { x, y } = this.lastPointer;
+      const el = document.elementFromPoint(x, y);
+
+      // While the cursor is over an overlay control (toolbar, insert button) or
+      // an open dropdown, keep the current highlight — same as Edit/More Actions.
+      if (el && el.closest('.frontend-edit__toolbar, .frontend-edit__insert-btn, .frontend-edit__dropdown')) {
+        return;
+      }
+
+      const next = this.resolveRegisteredElement(el);
+      if (next === this.activeElement) return;
+
+      // Hysteresis: keep the current element highlighted while the cursor is
+      // still within its box (≈ the dashed outline), so the highlight only
+      // switches when the cursor actually crosses the outline — symmetrically in
+      // every direction. (Without this, the wide top toolbar bridges upward hover
+      // but the narrow bottom button does not, so downward switched too early.)
+      // Moving into a nested child element still takes over immediately.
+      const enteringNested = next && this.activeElement && this.activeElement.contains(next);
+      if (!enteringNested && this.activeElement && this.rectContains(this.activeElement, x, y)) {
+        return;
+      }
+
+      if (this.activeElement) {
+        this.setActive(this.activeElement, false);
+        Dropdown.closeAll();
+      }
+      if (next) {
+        this.setActive(next, true);
+      }
+      this.activeElement = next;
+    },
+
+    rectContains(el, x, y, margin = 2) {
+      const r = el.getBoundingClientRect();
+      return x >= r.left - margin && x <= r.right + margin && y >= r.top - margin && y <= r.bottom + margin;
+    },
+
+    /**
+     * Walk up from a node to the nearest registered content element (innermost
+     * first, so nested elements highlight correctly). Returns null if none.
+     */
+    resolveRegisteredElement(node) {
+      while (node) {
+        if (this.overlays.has(node)) return node;
+        node = node.parentElement;
+      }
+      return null;
     },
 
     setupEventHandlers() {
@@ -574,10 +647,16 @@
       toolbar.style.pointerEvents = 'auto';
 
       overlay.appendChild(toolbar);
+
+      // Hover insert buttons (before/after), placed in the overlay layer so they
+      // render above the dashed outline and stay reachable via the hover bridge.
+      const insertButtons = UI.createInsertButtons(contentElement);
+      insertButtons.forEach(btn => overlay.appendChild(btn));
+
       this.container.appendChild(overlay);
 
       // Store reference
-      this.overlays.set(targetElement, { overlay, toolbar, outline, uid });
+      this.overlays.set(targetElement, { overlay, toolbar, outline, uid, insertButtons });
 
       // Initial position
       this.updatePosition(targetElement);
@@ -633,11 +712,6 @@
       } else {
         data.overlay.classList.remove('frontend-edit__overlay--active');
       }
-    },
-
-    getToolbar(targetElement) {
-      const data = this.overlays.get(targetElement);
-      return data?.toolbar;
     }
   };
 
@@ -759,6 +833,41 @@
       }
 
       return btn;
+    },
+
+    /**
+     * Build the hover "insert" buttons (before/after) for a content element,
+     * to be placed in the overlay layer. Returns [] when the feature is off or
+     * the backend supplied no URLs.
+     *
+     * @returns {HTMLAnchorElement[]}
+     */
+    createInsertButtons(contentElement) {
+      if (window.FRONTEND_EDIT_SHOW_INSERT_BUTTONS === false) return [];
+      const data = contentElement.element || {};
+      const labels = window.FRONTEND_EDIT_COLUMN_LABELS || {};
+      const tooltips = {
+        before: labels.insertBefore || 'Create new content before',
+        after: labels.insertAfter || 'Create new content after',
+      };
+
+      const make = (url, position) => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.className = `frontend-edit__insert-btn frontend-edit__insert-btn--${position}`;
+        // pointer-events are gated by CSS (none when the overlay is inactive,
+        // auto when active) so hidden buttons of other elements aren't hoverable.
+        link.setAttribute('aria-label', tooltips[position]);
+        link.dataset.tooltip = tooltips[position];
+        link.innerHTML = ICONS.add;
+        Tooltip.attach(link);
+        return link;
+      };
+
+      const buttons = [];
+      if (data.newBeforeUrl && this.isValidUrl(data.newBeforeUrl)) buttons.push(make(data.newBeforeUrl, 'before'));
+      if (data.newAfterUrl && this.isValidUrl(data.newAfterUrl)) buttons.push(make(data.newAfterUrl, 'after'));
+      return buttons;
     },
 
     createKebabButton(uid) {
@@ -1123,6 +1232,7 @@
       });
     },
 
+
     setupContentElement(targetElement, uid, contentElement, showContextMenu, enableOutline) {
       const hasMenuChildren = contentElement.menu.children && Object.keys(contentElement.menu.children).length > 0;
       const effectiveShowContextMenu = showContextMenu && hasMenuChildren && !contentElement.menu.url;
@@ -1137,9 +1247,8 @@
         document.body.appendChild(dropdown);
         this.setupKebabEvents(toolbar, dropdown);
       }
-
-      // Setup hover events
-      this.setupHoverEvents(targetElement, dropdown);
+      // Hover highlighting is handled centrally by OverlayManager's pointer
+      // tracking (no per-element mouseenter/leave needed).
     },
 
     setupKebabEvents(toolbar, dropdown) {
@@ -1161,48 +1270,6 @@
           if (firstItem) firstItem.focus();
         }
       });
-    },
-
-    setupHoverEvents(targetElement, dropdown) {
-      targetElement.addEventListener('mouseenter', () => {
-        OverlayManager.setActive(targetElement, true);
-      });
-
-      targetElement.addEventListener('mouseleave', (e) => {
-        if (dropdown?.contains(e.relatedTarget)) return;
-
-        const toolbar = OverlayManager.getToolbar(targetElement);
-        if (toolbar?.contains(e.relatedTarget)) return;
-
-        OverlayManager.setActive(targetElement, false);
-        if (dropdown) Dropdown.closeAll();
-      });
-
-      // Keep active when hovering toolbar
-      const toolbar = OverlayManager.getToolbar(targetElement);
-      if (toolbar) {
-        toolbar.addEventListener('mouseenter', () => {
-          OverlayManager.setActive(targetElement, true);
-        });
-
-        toolbar.addEventListener('mouseleave', (e) => {
-          if (targetElement.contains(e.relatedTarget)) return;
-          if (dropdown?.contains(e.relatedTarget)) return;
-
-          OverlayManager.setActive(targetElement, false);
-          if (dropdown) Dropdown.closeAll();
-        });
-      }
-
-      if (dropdown) {
-        dropdown.addEventListener('mouseleave', (e) => {
-          if (targetElement.contains(e.relatedTarget)) return;
-          if (toolbar?.contains(e.relatedTarget)) return;
-
-          Dropdown.closeAll();
-          OverlayManager.setActive(targetElement, false);
-        });
-      }
     }
   };
 
@@ -1252,7 +1319,7 @@
 
         const icon = document.createElement('span');
         icon.className = 'frontend-edit__column-btn-icon';
-        icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+        icon.innerHTML = ICONS.add;
         link.appendChild(icon);
 
         if (col.isEmpty) {
