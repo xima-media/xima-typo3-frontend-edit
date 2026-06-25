@@ -234,12 +234,11 @@ final readonly class EmptyColumnService
     private function detectContainerField(): bool
     {
         try {
-            $columns = $this->connectionPool
+            return $this->connectionPool
                 ->getConnectionForTable('tt_content')
                 ->createSchemaManager()
-                ->listTableColumns('tt_content');
-
-            return isset($columns['tx_container_parent']);
+                ->introspectTableByUnquotedName('tt_content')
+                ->hasColumn('tx_container_parent');
         } catch (Throwable) {
             return false;
         }

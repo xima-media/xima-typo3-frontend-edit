@@ -1325,7 +1325,7 @@
         if (col.isEmpty) {
           const label = document.createElement('span');
           label.className = 'frontend-edit__column-btn-label';
-          label.textContent = col.name || buttonLabel;
+          label.textContent = buttonLabel;
           link.appendChild(label);
         }
 

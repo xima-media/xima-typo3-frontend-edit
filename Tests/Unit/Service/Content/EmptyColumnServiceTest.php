@@ -55,7 +55,9 @@ final class EmptyColumnServiceTest extends TestCase
         // Mock schema manager to simulate missing tx_container_parent field
         $connection = $this->createMock(Connection::class);
         $schemaManager = $this->createMock(\Doctrine\DBAL\Schema\AbstractSchemaManager::class);
-        $schemaManager->method('listTableColumns')->willReturn([]);
+        $table = $this->createMock(\Doctrine\DBAL\Schema\Table::class);
+        $table->method('hasColumn')->willReturn(false);
+        $schemaManager->method('introspectTableByUnquotedName')->willReturn($table);
         $connection->method('createSchemaManager')->willReturn($schemaManager);
         $this->connectionPool->method('getConnectionForTable')->willReturn($connection);
     }
@@ -131,7 +133,9 @@ final class EmptyColumnServiceTest extends TestCase
         $connectionPool = $this->createMock(ConnectionPool::class);
         $connection = $this->createMock(Connection::class);
         $schemaManager = $this->createMock(\Doctrine\DBAL\Schema\AbstractSchemaManager::class);
-        $schemaManager->method('listTableColumns')->willReturn(['tx_container_parent' => $this->createMock(\Doctrine\DBAL\Schema\Column::class)]);
+        $table = $this->createMock(\Doctrine\DBAL\Schema\Table::class);
+        $table->method('hasColumn')->willReturn(true);
+        $schemaManager->method('introspectTableByUnquotedName')->willReturn($table);
         $connection->method('createSchemaManager')->willReturn($schemaManager);
         $connectionPool->method('getConnectionForTable')->willReturn($connection);
 
@@ -167,7 +171,9 @@ final class EmptyColumnServiceTest extends TestCase
         $connectionPool = $this->createMock(ConnectionPool::class);
         $connection = $this->createMock(Connection::class);
         $schemaManager = $this->createMock(\Doctrine\DBAL\Schema\AbstractSchemaManager::class);
-        $schemaManager->method('listTableColumns')->willReturn(['tx_container_parent' => $this->createMock(\Doctrine\DBAL\Schema\Column::class)]);
+        $table = $this->createMock(\Doctrine\DBAL\Schema\Table::class);
+        $table->method('hasColumn')->willReturn(true);
+        $schemaManager->method('introspectTableByUnquotedName')->willReturn($table);
         $connection->method('createSchemaManager')->willReturn($schemaManager);
         $connectionPool->method('getConnectionForTable')->willReturn($connection);
 
