@@ -16,9 +16,12 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Content;
 use Doctrine\DBAL\Result;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
+use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
 use TYPO3\CMS\Core\Database\Query\{Expression\ExpressionBuilder, QueryBuilder};
+use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Service\Content\EmptyColumnService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
 
@@ -39,8 +42,14 @@ final class EmptyColumnServiceTest extends TestCase
 
     protected function setUp(): void
     {
+        // Mock UriBuilder singleton so real UrlBuilderService picks it up
+        $uriBuilderMock = $this->createMock(UriBuilder::class);
+        $uriBuilderMock->method('buildUriFromRoute')
+            ->willReturn(new Uri('/typo3/record/content/wizard/new'));
+        GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilderMock);
+
         $this->connectionPool = $this->createMock(ConnectionPool::class);
-        $this->urlBuilderService = $this->createMock(UrlBuilderService::class);
+        $this->urlBuilderService = new UrlBuilderService();
         $this->languageServiceFactory = $this->createMock(LanguageServiceFactory::class);
 
         // Mock schema manager to simulate missing tx_container_parent field
@@ -51,11 +60,15 @@ final class EmptyColumnServiceTest extends TestCase
         $this->connectionPool->method('getConnectionForTable')->willReturn($connection);
     }
 
+    protected function tearDown(): void
+    {
+        GeneralUtility::purgeInstances();
+    }
+
     #[Test]
     public function getColumnTargetsMarksFilledColumnsAsNotEmpty(): void
     {
         $this->mockQueryBuilderWithCount(3);
-        $this->urlBuilderService->method('buildNewContentWizardUrl')->willReturn('/typo3/record/content/wizard/new');
 
         $service = new EmptyColumnService(
             $this->connectionPool,
@@ -74,7 +87,6 @@ final class EmptyColumnServiceTest extends TestCase
     public function getColumnTargetsMarksEmptyColumnsAsEmpty(): void
     {
         $this->mockQueryBuilderWithCount(0);
-        $this->urlBuilderService->method('buildNewContentWizardUrl')->willReturn('/typo3/record/content/wizard/new');
 
         $service = new EmptyColumnService(
             $this->connectionPool,
@@ -92,7 +104,6 @@ final class EmptyColumnServiceTest extends TestCase
     public function getColumnTargetsIgnoresContainerMarkersWithoutContainerField(): void
     {
         $this->mockQueryBuilderWithCount(1);
-        $this->urlBuilderService->method('buildNewContentWizardUrl')->willReturn('/typo3/record/content/wizard/new');
 
         $service = new EmptyColumnService(
             $this->connectionPool,
@@ -126,7 +137,6 @@ final class EmptyColumnServiceTest extends TestCase
 
         // All columns empty
         $this->mockQueryBuilderWithCountForPool($connectionPool, 0);
-        $this->urlBuilderService->method('buildNewContentWizardUrl')->willReturn('/typo3/record/content/wizard/new');
 
         $service = new EmptyColumnService(
             $connectionPool,
