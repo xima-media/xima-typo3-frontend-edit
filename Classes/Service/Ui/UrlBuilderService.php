@@ -135,14 +135,21 @@ final readonly class UrlBuilderService
     }
 
     /**
-     * Build URL to TYPO3's native New Content Element Wizard.
+     * Build URL to open TYPO3's native New Content Element Wizard.
      *
-     * Version-agnostic: the same backend route renders the wizard on v13 (inside
-     * the iframe modal) and v14 (inside the contextual sidebar). Passing a colPos
-     * skips the wizard's position-selection step and goes straight to the type grid.
+     * The wizard route (new_content_element_wizard) is an AJAX-modal fragment,
+     * not a navigable page — TYPO3 core only ever opens it via
+     * Modal.advanced({type: 'ajax'}) from an already-bootstrapped backend page.
+     * Loading it directly yields a blank page. So instead we return a web_layout
+     * (page module) URL with a hash fragment: iframe_edit.js loads the fully
+     * bootstrapped page module inside the modal and auto-clicks the matching
+     * wizard button, which opens the native wizard. Same mechanism on v13 and v14.
      *
-     * @param int|null $uidAfter Insert after this content element (uid_pid = -uid);
-     *                           null appends to the end of the column (uid_pid = pid).
+     * Hash params consumed by iframe_edit.js autoClickWizardButton():
+     *   colPos (required), afterUid (insert after element), container (container colPos parent).
+     *
+     * @param int|null $uidAfter    Insert after this content element; null appends to the column.
+     * @param int|null $containerUid Parent container UID for EXT:container columns.
      *
      * @throws RouteNotFoundException
      */
@@ -154,19 +161,15 @@ final readonly class UrlBuilderService
         ?int $uidAfter = null,
         ?int $containerUid = null,
     ): string {
-        $parameters = [
-            'id' => $pid,
-            'colPos' => $colPos,
-            'sys_language_uid' => $languageUid,
-            'uid_pid' => null !== $uidAfter ? -$uidAfter : $pid,
-            'returnUrl' => $returnUrl,
-        ];
-
+        $hash = 'colPos='.$colPos;
+        if (null !== $uidAfter) {
+            $hash .= '&afterUid='.$uidAfter;
+        }
         if (null !== $containerUid) {
-            $parameters['tx_container_parent'] = $containerUid;
+            $hash .= '&container='.$containerUid;
         }
 
-        return $this->uriBuilder->buildUriFromRoute('new_content_element_wizard', $parameters)->__toString();
+        return $this->buildPageLayoutUrlWithHash($pid, $languageUid, $returnUrl, $hash);
     }
 
     /**
@@ -256,4 +259,26 @@ final readonly class UrlBuilderService
         return $this->uriBuilder->buildUriFromRoute($route, $parameters)->__toString();
     }
 
+    /**
+     * Build a web_layout URL with a hash fragment for iframe_edit.js wizard auto-click.
+     *
+     * TYPO3's UriBuilder doesn't support hash fragments (they're client-side only),
+     * so we append them manually. The hash is parsed by iframe_edit.js to determine
+     * which "new content" wizard button to auto-click inside the iframe.
+     *
+     * @throws RouteNotFoundException
+     */
+    private function buildPageLayoutUrlWithHash(int $pid, int $languageUid, string $returnUrl, string $hash): string
+    {
+        $url = $this->uriBuilder->buildUriFromRoute(
+            'web_layout',
+            [
+                'id' => $pid,
+                'language' => $languageUid,
+                'returnUrl' => $returnUrl,
+            ],
+        )->__toString();
+
+        return $url.'#'.$hash;
+    }
 }
