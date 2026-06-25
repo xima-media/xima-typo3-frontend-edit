@@ -43,10 +43,6 @@
   const WIZARD_PATCH_POLL_MS = 100;           // every 100ms
   const WIZARD_PATCH_TIMEOUT_MS = 5000;       // give up after 5s
 
-  // Fixed wait before auto-clicking a wizard button (give the wizard
-  // time to render its items after the page loads).
-  const WIZARD_CLICK_DELAY_MS = 800;
-
   const WIZARD_SELECTORS = 'typo3-backend-new-record-wizard, typo3-backend-new-content-element-wizard';
 
   /**
@@ -176,7 +172,6 @@
       }
 
       this.getOrCreate();
-      IframeHandler._wizardAutoClicked = false;
       const { iframe } = this;
       const loader = this.element.querySelector('.frontend-edit__modal-loader');
 
@@ -257,7 +252,6 @@
     onLoad(iframe) {
       this.overrideContentContainer(iframe);
       this.ensureBackendModules(iframe);
-      this.autoClickWizardButton(iframe);
       this.patchWizardComponents(iframe);
       this.interceptIframeClicks(iframe);
       this.detectFrontendNavigation(iframe);
@@ -343,57 +337,6 @@
         Logger.log('ContentContainer.setUrl overridden');
         return true;
       }, CONTENT_CONTAINER_POLL_MS, CONTENT_CONTAINER_TIMEOUT_MS);
-    },
-
-    // ── Wizard auto-click ──────────────────────────────────────────
-
-    _wizardAutoClicked: false,
-
-    autoClickWizardButton(iframe) {
-      try {
-        if (this._wizardAutoClicked) return;
-
-        const currentUrl = (iframe.contentWindow?.location.href || iframe.src || '');
-        const hashPart = currentUrl.split('#')[1];
-        if (!hashPart) return;
-
-        const params = new URLSearchParams(hashPart);
-        const colPos = params.get('colPos');
-        const container = params.get('container');
-        const afterUid = params.get('afterUid');
-        if (!colPos) return;
-
-        Logger.log('Auto-click wizard detected', { colPos, container, afterUid });
-
-        setTimeout(() => {
-          try {
-            const buttons = iframe.contentWindow.document.querySelectorAll(
-              'typo3-backend-new-content-element-wizard-button'
-            );
-            for (const btn of buttons) {
-              if (this.matchesWizardButton(btn.getAttribute('url') || '', colPos, container, afterUid)) {
-                this._wizardAutoClicked = true;
-                btn.click();
-                return;
-              }
-            }
-          } catch (e) { Logger.log('Error clicking wizard button', e, 'error'); }
-        }, WIZARD_CLICK_DELAY_MS);
-      } catch (_) { /* ignore */ }
-    },
-
-    matchesWizardButton(btnUrl, colPos, container, afterUid) {
-      const colPosMatch = btnUrl.match(/colPos=(\d+)/);
-
-      if (afterUid) {
-        const m = btnUrl.match(/uid_pid=-(\d+)/);
-        return m && m[1] === afterUid && colPosMatch && colPosMatch[1] === colPos;
-      }
-      if (container) {
-        const m = btnUrl.match(/tx_container_parent=(\d+)/);
-        return colPosMatch && colPosMatch[1] === colPos && m && m[1] === container;
-      }
-      return colPosMatch && colPosMatch[1] === colPos && !btnUrl.includes('tx_container_parent');
     },
 
     // ── Wizard component patching ──────────────────────────────────
@@ -633,12 +576,6 @@
           Logger.log('Detected frontend URL in iframe');
           this.closeAndReload();
           return;
-        }
-        // After a wizard auto-click + save cycle, navigating back to
-        // web_layout means the record was saved — close and reload.
-        if (this._wizardAutoClicked && isPageLayoutPath(currentHref, iframe.contentWindow.location.origin)) {
-          Logger.log('Detected page layout after wizard save — closing modal');
-          this.closeAndReload();
         }
       } catch (_) { /* cross-origin */ }
     },

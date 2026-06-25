@@ -20,7 +20,6 @@ use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
-use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\VersionUtility;
 
 /**
  * UrlBuilderServiceTest.
@@ -133,41 +132,6 @@ final class UrlBuilderServiceTest extends TestCase
         $result = $service->buildHistoryUrl(1, 'tt_content', '/return');
 
         self::assertSame('/typo3/record_history', $result);
-    }
-
-    #[Test]
-    public function buildNewContentAfterUrlReturnsRecordEditUrlOnV14(): void
-    {
-        if (!VersionUtility::is14OrHigher()) {
-            self::markTestSkipped('TYPO3 v14+ only');
-        }
-
-        $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('record_edit', self::callback(static fn (array $params): bool => isset($params['edit']['tt_content'][-1]) && 'new' === $params['edit']['tt_content'][-1]))
-            ->willReturn(new Uri('/typo3/record/edit'));
-
-        $service = new UrlBuilderService();
-        $result = $service->buildNewContentAfterUrl(1, 5, 0, 2, '/return');
-
-        self::assertSame('/typo3/record/edit', $result);
-    }
-
-    #[Test]
-    public function buildNewContentAfterUrlReturnsHashedWebLayoutUrlOnV13(): void
-    {
-        if (VersionUtility::is14OrHigher()) {
-            self::markTestSkipped('TYPO3 v13 only');
-        }
-
-        $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('web_layout', self::callback(static fn (array $params): bool => 5 === ($params['id'] ?? null) && 2 === ($params['language'] ?? null) && '/return' === ($params['returnUrl'] ?? null)))
-            ->willReturn(new Uri('/typo3/module/web/layout'));
-
-        $service = new UrlBuilderService();
-        $result = $service->buildNewContentAfterUrl(1, 5, 0, 2, '/return');
-
-        // Hash fragment carries colPos + afterUid for the iframe wizard auto-click
-        self::assertSame('/typo3/module/web/layout#colPos=0&afterUid=1', $result);
     }
 
     #[Test]

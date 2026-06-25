@@ -16,7 +16,6 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\VersionUtility;
 
 /**
  * UrlBuilderService.
@@ -133,35 +132,6 @@ final readonly class UrlBuilderService
                 'returnUrl' => $returnUrl,
             ],
         )->__toString();
-    }
-
-    /**
-     * Build URL to create a new content element after an existing one.
-     *
-     * - On TYPO3 v13.4: returns a web_layout URL with a hash fragment so
-     *   iframe_edit.js can auto-click the correct wizard button.
-     * - On TYPO3 v14.2+: returns the native record_edit URL since the
-     *   contextual sidebar handles the new-content flow directly.
-     *
-     * @throws RouteNotFoundException
-     */
-    public function buildNewContentAfterUrl(int $uid, int $pid, int $colPos, int $languageUid, string $returnUrl): string
-    {
-        if (VersionUtility::is14OrHigher()) {
-            return $this->uriBuilder->buildUriFromRoute(
-                'record_edit',
-                [
-                    'edit' => [
-                        'tt_content' => [-$uid => 'new'],
-                        'language' => $languageUid,
-                    ],
-                    'returnUrl' => $returnUrl,
-                ],
-            )->__toString();
-        }
-
-        // v13: hash params tell iframe_edit.js which wizard button to auto-click
-        return $this->buildPageLayoutUrlWithHash($pid, $languageUid, $returnUrl, 'colPos='.$colPos.'&afterUid='.$uid);
     }
 
     /**
@@ -286,26 +256,4 @@ final readonly class UrlBuilderService
         return $this->uriBuilder->buildUriFromRoute($route, $parameters)->__toString();
     }
 
-    /**
-     * Build a web_layout URL with a hash fragment for iframe_edit.js wizard auto-click.
-     *
-     * TYPO3's UriBuilder doesn't support hash fragments (they're client-side only),
-     * so we append them manually. The hash is parsed by iframe_edit.js to determine
-     * which "new content" wizard button to auto-click inside the iframe.
-     *
-     * @throws RouteNotFoundException
-     */
-    private function buildPageLayoutUrlWithHash(int $pid, int $languageUid, string $returnUrl, string $hash): string
-    {
-        $url = $this->uriBuilder->buildUriFromRoute(
-            'web_layout',
-            [
-                'id' => $pid,
-                'language' => $languageUid,
-                'returnUrl' => $returnUrl,
-            ],
-        )->__toString();
-
-        return $url.'#'.$hash;
-    }
 }
