@@ -713,12 +713,24 @@
   const LinkInterceptor = {
     init() {
       document.addEventListener('click', (e) => {
-        const target =
-          e.target.closest('.frontend-edit__btn--edit') ||
-          e.target.closest('.frontend-edit__dropdown a:not(.hide):not(.delete)') ||
-          e.target.closest('.frontend-edit__sticky-dropdown a') ||
-          e.target.closest('.frontend-edit__column-btn') ||
-          e.target.closest('.frontend-edit__open-modal');
+        let target;
+
+        if (window.FRONTEND_EDIT_SIDEBAR_EDIT === true) {
+          // v14.2+: the contextual sidebar handles editing. The modal only takes
+          // the New Content Element Wizard links — web_layout URLs carrying a
+          // #colPos hash (see UrlBuilderService.buildNewContentWizardUrl). Edit
+          // links are left untouched so the sidebar handler can act on them.
+          const link = e.target.closest('a[href]');
+          target = (link && link.href.includes('#colPos=')) ? link : null;
+        } else {
+          // v13 (no sidebar): the modal handles all frontend-edit links.
+          target =
+            e.target.closest('.frontend-edit__btn--edit') ||
+            e.target.closest('.frontend-edit__dropdown a:not(.hide):not(.delete)') ||
+            e.target.closest('.frontend-edit__sticky-dropdown a') ||
+            e.target.closest('.frontend-edit__column-btn') ||
+            e.target.closest('.frontend-edit__open-modal');
+        }
 
         if (target?.href && isBackendUrl(target.href)) {
           e.preventDefault();

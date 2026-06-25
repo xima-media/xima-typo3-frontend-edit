@@ -148,8 +148,8 @@ final readonly class UrlBuilderService
      * Hash params consumed by iframe_edit.js autoClickWizardButton():
      *   colPos (required), afterUid (insert after element), container (container colPos parent).
      *
-     * @param int|null $uidAfter    Insert after this content element; null appends to the column.
-     * @param int|null $containerUid Parent container UID for EXT:container columns.
+     * @param int|null $uidAfter     insert after this content element; null appends to the column
+     * @param int|null $containerUid parent container UID for EXT:container columns
      *
      * @throws RouteNotFoundException
      */

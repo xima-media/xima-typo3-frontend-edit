@@ -213,8 +213,7 @@ final class UrlBuilderServiceTest extends TestCase
     public function buildNewContentWizardUrlAppendsToColumnWhenNoUidAfter(): void
     {
         $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('web_layout', self::callback(static fn (array $p): bool =>
-                5 === $p['id']
+            ->with('web_layout', self::callback(static fn (array $p): bool => 5 === $p['id']
                 && 2 === $p['language']
                 && '/return' === $p['returnUrl']))
             ->willReturn(new Uri('/typo3/module/web/layout'));
@@ -230,8 +229,7 @@ final class UrlBuilderServiceTest extends TestCase
     public function buildNewContentWizardUrlAddsAfterUidToHashWhenInsertingAfterElement(): void
     {
         $this->uriBuilderMock->method('buildUriFromRoute')
-            ->with('web_layout', self::callback(static fn (array $p): bool =>
-                5 === $p['id'] && 0 === $p['language'] && '/return' === $p['returnUrl']))
+            ->with('web_layout', self::callback(static fn (array $p): bool => 5 === $p['id'] && 0 === $p['language'] && '/return' === $p['returnUrl']))
             ->willReturn(new Uri('/typo3/module/web/layout'));
 
         $service = new UrlBuilderService();
