@@ -1036,6 +1036,11 @@
     font-weight: 400;
 }
 
+.frontend-edit__column-btn--append {
+    display: inline-flex;
+    width: auto;
+}
+
 /* ==========================================================================
    Contextual Edit Sidebar (Experimental)
    ========================================================================== */

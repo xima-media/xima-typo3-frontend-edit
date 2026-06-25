@@ -1029,15 +1029,15 @@
 
         const data = await response.json();
 
-        // Handle wrapped response { contentElements, emptyColumns }
+        // Handle wrapped response { contentElements, columnTargets }
         if (data.contentElements !== undefined) {
-          Logger.log(`Backend response received with ${Object.keys(data.contentElements).length} content element(s) and ${(data.emptyColumns || []).length} empty column(s)`);
+          Logger.log(`Backend response received with ${Object.keys(data.contentElements).length} content element(s) and ${(data.columnTargets || []).length} column target(s)`);
           return data;
         }
 
         // Fallback for legacy response (plain content elements object)
         Logger.log(`Backend response received with ${Object.keys(data).length} content element(s)`);
-        return { contentElements: data, emptyColumns: [] };
+        return { contentElements: data, columnTargets: [] };
       } catch (error) {
         Notification.show({ title: 'Frontend Edit', message: 'Failed to load edit information', severity: 'error' });
         Logger.log('Failed to fetch content elements', { error: error.message }, 'error');
@@ -1189,21 +1189,22 @@
   };
 
   /**
-   * Empty Column Renderer - Matches AJAX emptyColumns data against
+   * Column Target Renderer - Matches AJAX columnTargets data against
    * [data-xfe-colpos] markers placed by the integrator in Fluid templates
-   * and injects "+" buttons client-side.
+   * and injects "+" buttons client-side. Empty columns show the full label;
+   * filled columns get a compact "+" at the column end.
    */
-  const EmptyColumnRenderer = {
-    render(emptyColumns) {
-      if (!emptyColumns || emptyColumns.length === 0) return;
+  const ColumnTargetRenderer = {
+    render(columnTargets) {
+      if (!columnTargets || columnTargets.length === 0) return;
 
-      Logger.log(`Processing ${emptyColumns.length} empty column(s)`);
+      Logger.log(`Processing ${columnTargets.length} column target(s)`);
       let rendered = 0;
 
       const columnLabels = window.FRONTEND_EDIT_COLUMN_LABELS || {};
       const buttonLabel = columnLabels.createContent || 'Create new content';
 
-      emptyColumns.forEach(col => {
+      columnTargets.forEach(col => {
         let selector = `[data-xfe-colpos="${col.colPos}"]`;
         if (col.containerUid) {
           selector += `[data-xfe-container="${col.containerUid}"]`;
@@ -1219,13 +1220,15 @@
           Logger.log(`Invalid URL for colPos ${col.colPos}`, null, 'warn');
           return;
         }
+
         const tooltipText = col.name
           ? (columnLabels.createContentIn || 'Create new content in "%s" column').replace('%s', col.name)
           : buttonLabel;
 
         const link = document.createElement('a');
         link.href = col.newContentUrl;
-        link.className = 'frontend-edit__column-btn';
+        link.className = 'frontend-edit__column-btn'
+          + (col.isEmpty ? ' frontend-edit__column-btn--empty' : ' frontend-edit__column-btn--append');
         link.setAttribute('aria-label', tooltipText);
         link.dataset.tooltip = tooltipText;
 
@@ -1234,10 +1237,12 @@
         icon.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
         link.appendChild(icon);
 
-        const label = document.createElement('span');
-        label.className = 'frontend-edit__column-btn-label';
-        label.textContent = col.name || buttonLabel;
-        link.appendChild(label);
+        if (col.isEmpty) {
+          const label = document.createElement('span');
+          label.className = 'frontend-edit__column-btn-label';
+          label.textContent = col.name || buttonLabel;
+          link.appendChild(label);
+        }
 
         marker.innerHTML = '';
         marker.appendChild(link);
@@ -1245,10 +1250,10 @@
         Tooltip.attach(link);
 
         rendered++;
-        Logger.log(`Empty column button rendered for colPos ${col.colPos}`, { name: col.name, url: col.newContentUrl });
+        Logger.log(`Column target button rendered for colPos ${col.colPos}`, { name: col.name, isEmpty: col.isEmpty, url: col.newContentUrl });
       });
 
-      Logger.log(`Empty column rendering complete: ${rendered}/${emptyColumns.length} buttons placed`);
+      Logger.log(`Column target rendering complete: ${rendered}/${columnTargets.length} buttons placed`);
     }
   };
 
@@ -1314,7 +1319,7 @@
           const response = await DataService.fetchContentElements(dataItems);
 
           Renderer.render(response.contentElements || {});
-          EmptyColumnRenderer.render(response.emptyColumns || []);
+          ColumnTargetRenderer.render(response.columnTargets || []);
           Dropdown.setupGlobalHandler();
           DeleteHandler.init();
         }
