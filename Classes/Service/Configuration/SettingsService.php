@@ -127,6 +127,16 @@ final readonly class SettingsService
         return (bool) $settings->get('frontendEdit.showStickyToolbar', true);
     }
 
+    public function isShowInsertButtons(ServerRequestInterface $request): bool
+    {
+        $settings = $this->getSiteSettings($request);
+        if (null === $settings) {
+            return true;
+        }
+
+        return (bool) $settings->get('frontendEdit.showInsertButtons', true);
+    }
+
     public function getToolbarPosition(ServerRequestInterface $request): string
     {
         $validPositions = [

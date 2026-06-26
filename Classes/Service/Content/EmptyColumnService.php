@@ -15,11 +15,11 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Content;
 
 use Throwable;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
-use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Backend\View\BackendLayoutView;
 use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
 
 use function is_array;
 
@@ -35,7 +35,7 @@ final readonly class EmptyColumnService
 
     public function __construct(
         private ConnectionPool $connectionPool,
-        private UriBuilder $uriBuilder,
+        private UrlBuilderService $urlBuilderService,
         private LanguageServiceFactory $languageServiceFactory,
     ) {
         $this->containerFieldExists = $this->detectContainerField();
@@ -47,33 +47,31 @@ final readonly class EmptyColumnService
      * @param string       $returnUrl   Frontend URL to return to after editing
      * @param array<mixed> $requestData Raw request data from the AJAX call
      *
-     * @return list<array{colPos: int, newContentUrl: string, name?: string, containerUid?: int}>
+     * @return list<array{colPos: int, isEmpty: bool, newContentUrl: string, name?: string, containerUid?: int}>
      */
-    public function getEmptyColumns(int $pid, int $languageUid, string $returnUrl, array $requestData = []): array
+    public function getColumnTargets(int $pid, int $languageUid, string $returnUrl, array $requestData = []): array
     {
         return [
-            ...$this->findEmptyPageColumns($pid, $languageUid, $returnUrl),
-            ...$this->findEmptyContainerColumns($pid, $languageUid, $returnUrl, $this->extractContainerMarkers($requestData)),
+            ...$this->findPageColumnTargets($pid, $languageUid, $returnUrl),
+            ...$this->findContainerColumnTargets($pid, $languageUid, $returnUrl, $this->extractContainerMarkers($requestData)),
         ];
     }
 
     /**
-     * @return list<array{colPos: int, name: string, newContentUrl: string}>
+     * @return list<array{colPos: int, isEmpty: bool, name: string, newContentUrl: string}>
      */
-    private function findEmptyPageColumns(int $pid, int $languageUid, string $returnUrl): array
+    private function findPageColumnTargets(int $pid, int $languageUid, string $returnUrl): array
     {
         $result = [];
 
         foreach ($this->resolvePageColumns($pid) as $column) {
             $colPos = $column['colPos'];
-            if (!$this->isPageColumnEmpty($pid, $colPos, $languageUid)) {
-                continue;
-            }
             try {
                 $result[] = [
                     'colPos' => $colPos,
+                    'isEmpty' => $this->isPageColumnEmpty($pid, $colPos, $languageUid),
                     'name' => $column['name'],
-                    'newContentUrl' => $this->buildNewContentUrl($pid, $colPos, $languageUid, $returnUrl),
+                    'newContentUrl' => $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl),
                 ];
             } catch (RouteNotFoundException) {
             }
@@ -85,9 +83,9 @@ final readonly class EmptyColumnService
     /**
      * @param array<int, int[]> $containerMarkers
      *
-     * @return list<array{colPos: int, containerUid: int, newContentUrl: string}>
+     * @return list<array{colPos: int, isEmpty: bool, containerUid: int, newContentUrl: string}>
      */
-    private function findEmptyContainerColumns(int $pid, int $languageUid, string $returnUrl, array $containerMarkers): array
+    private function findContainerColumnTargets(int $pid, int $languageUid, string $returnUrl, array $containerMarkers): array
     {
         if (!$this->containerFieldExists || [] === $containerMarkers) {
             return [];
@@ -100,14 +98,12 @@ final readonly class EmptyColumnService
                 continue;
             }
             foreach ($colPositions as $colPos) {
-                if (!$this->isContainerColumnEmpty($containerUid, $colPos, $languageUid)) {
-                    continue;
-                }
                 try {
                     $result[] = [
                         'colPos' => $colPos,
+                        'isEmpty' => $this->isContainerColumnEmpty($containerUid, $colPos, $languageUid),
                         'containerUid' => $containerUid,
-                        'newContentUrl' => $this->buildNewContentUrl($pid, $colPos, $languageUid, $returnUrl, $containerUid),
+                        'newContentUrl' => $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl, containerUid: $containerUid),
                     ];
                 } catch (RouteNotFoundException) {
                 }
@@ -214,30 +210,6 @@ final readonly class EmptyColumnService
             )
             ->executeQuery()
             ->fetchOne();
-    }
-
-    /**
-     * @throws RouteNotFoundException
-     */
-    private function buildNewContentUrl(int $pid, int $colPos, int $languageUid, string $returnUrl, ?int $containerUid = null): string
-    {
-        $defVals = [
-            'colPos' => $colPos,
-            'sys_language_uid' => $languageUid,
-        ];
-
-        if (null !== $containerUid) {
-            $defVals['tx_container_parent'] = $containerUid;
-        }
-
-        return $this->uriBuilder->buildUriFromRoute(
-            'record_edit',
-            [
-                'edit' => ['tt_content' => [$pid => 'new']],
-                'defVals' => ['tt_content' => $defVals],
-                'returnUrl' => $returnUrl,
-            ],
-        )->__toString();
     }
 
     /**

@@ -28,7 +28,6 @@ use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
-use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\VersionUtility;
 use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
 use function sprintf;
@@ -63,10 +62,12 @@ final readonly class ResourceRendererService
             $nonceAttribute = '' !== $nonceValue ? ' nonce="'.$nonceValue.'"' : '';
             $resources = ResourceUtility::getResources(['nonce' => $nonceValue]);
 
-            // Iframe modal editor is a TYPO3 v13-only fallback, gated behind
-            // the same enableContextualEditing setting as the v14 sidebar.
-            $isIframeModalEnabled = !VersionUtility::is14OrHigher()
-                && $this->settingsService->isContextualEditingEnabled($request);
+            // The iframe modal hosts the New Content Element Wizard (web_layout +
+            // auto-click) on BOTH v13 and v14. On v13 it also handles editing; on
+            // v14 it loads alongside the contextual sidebar, which keeps handling
+            // edits while the modal only takes the new-content wizard links (see
+            // the FRONTEND_EDIT_SIDEBAR_EDIT flag and iframe_edit.js LinkInterceptor).
+            $isIframeModalEnabled = $this->settingsService->isContextualEditingEnabled($request);
 
             if ($isIframeModalEnabled) {
                 $this->addBackendStubs($resources, $nonceValue);
@@ -112,7 +113,14 @@ final readonly class ResourceRendererService
         $showContextMenu = $this->jsBool($request, $this->settingsService->isShowContextMenu(...));
         $enableOutline = $this->jsBool($request, $this->settingsService->isEnableOutline(...));
         $enableScrollToElement = $this->jsBool($request, $this->settingsService->isEnableScrollToElement(...));
+        $showInsertButtons = $this->jsBool($request, $this->settingsService->isShowInsertButtons(...));
         $contextualEditing = $this->jsBool($request, $this->settingsService->isContextualEditingEnabled(...));
+        // True only when edits are routed to the contextual sidebar (v14.2+ with the
+        // route available). iframe_edit.js then restricts the modal to new-content
+        // wizard links; on v13 this stays false so the modal handles all edit links.
+        $sidebarEdit = (null !== $request
+            && $this->settingsService->isContextualEditingEnabled($request)
+            && $this->urlBuilderService->isContextualEditRouteAvailable()) ? 'true' : 'false';
         $isDisabled = $this->backendUserService->isFrontendEditDisabled() ? 'true' : 'false';
         $deleteLabels = json_encode([
             'title' => $this->translate('delete.confirm.title', 'Delete this record?'),
@@ -125,18 +133,26 @@ final readonly class ResourceRendererService
         $columnLabels = json_encode([
             'createContent' => $this->translate('column.createContent', 'Create new content'),
             'createContentIn' => $this->translate('column.createContentIn', 'Create new content in "%s" column'),
+            'insertBefore' => $this->translate('column.insertBefore', 'Create new content before'),
+            'insertAfter' => $this->translate('column.insertAfter', 'Create new content after'),
+        ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
+        $notificationLabels = json_encode([
+            'contentCreated' => $this->translate('notification.contentCreated', 'Content element created'),
         ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $resources['settings_config'] = sprintf(
-            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s;</script>',
+            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_SIDEBAR_EDIT = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s; window.FRONTEND_EDIT_NOTIFICATION_LABELS = %s; window.FRONTEND_EDIT_SHOW_INSERT_BUTTONS = %s;</script>',
             $nonceAttribute,
             $colorScheme,
             $showContextMenu,
             $enableOutline,
             $enableScrollToElement,
             $contextualEditing,
+            $sidebarEdit,
             $isDisabled,
             $deleteLabels,
             $columnLabels,
+            $notificationLabels,
+            $showInsertButtons,
         );
     }
 

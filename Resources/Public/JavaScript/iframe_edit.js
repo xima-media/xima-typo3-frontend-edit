@@ -177,6 +177,9 @@
 
       this.getOrCreate();
       IframeHandler._wizardAutoClicked = false;
+      // A modal opened with a #colPos hash is a "new content" (create) flow;
+      // remembered so the post-save success flash can be relabelled "created".
+      IframeHandler._createFlow = url.includes('#colPos=');
       const { iframe } = this;
       const loader = this.element.querySelector('.frontend-edit__modal-loader');
 
@@ -348,6 +351,7 @@
     // ── Wizard auto-click ──────────────────────────────────────────
 
     _wizardAutoClicked: false,
+    _createFlow: false,
 
     autoClickWizardButton(iframe) {
       try {
@@ -684,6 +688,14 @@
       let uid = null;
       if (scrollToEdited) uid = this.getEditedElementUid();
 
+      // Carry the create-flow intent across the reload. If a save actually
+      // happened, the backend's "Record saved" success flash will be present
+      // on the next load and Notification.init() relabels it to "created".
+      // On cancel there is no success flash, so nothing is relabelled.
+      if (this._createFlow) {
+        try { sessionStorage.setItem('xfe-content-created', '1'); } catch (_) { /* unavailable */ }
+      }
+
       // Show modal loader in case it wasn't shown yet (e.g. close without save)
       this.showModalLoader();
 
@@ -713,12 +725,25 @@
   const LinkInterceptor = {
     init() {
       document.addEventListener('click', (e) => {
-        const target =
-          e.target.closest('.frontend-edit__btn--edit') ||
-          e.target.closest('.frontend-edit__dropdown a:not(.hide):not(.delete)') ||
-          e.target.closest('.frontend-edit__sticky-dropdown a') ||
-          e.target.closest('.frontend-edit__column-btn') ||
-          e.target.closest('.frontend-edit__open-modal');
+        let target;
+
+        if (window.FRONTEND_EDIT_SIDEBAR_EDIT === true) {
+          // v14.2+: the contextual sidebar handles editing. The modal only takes
+          // the New Content Element Wizard links — web_layout URLs carrying a
+          // #colPos hash (see UrlBuilderService.buildNewContentWizardUrl). Edit
+          // links are left untouched so the sidebar handler can act on them.
+          const link = e.target.closest('a[href]');
+          target = (link && link.href.includes('#colPos=')) ? link : null;
+        } else {
+          // v13 (no sidebar): the modal handles all frontend-edit links.
+          target =
+            e.target.closest('.frontend-edit__btn--edit') ||
+            e.target.closest('.frontend-edit__dropdown a:not(.hide):not(.delete)') ||
+            e.target.closest('.frontend-edit__sticky-dropdown a') ||
+            e.target.closest('.frontend-edit__column-btn') ||
+            e.target.closest('.frontend-edit__insert-btn') ||
+            e.target.closest('.frontend-edit__open-modal');
+        }
 
         if (target?.href && isBackendUrl(target.href)) {
           e.preventDefault();

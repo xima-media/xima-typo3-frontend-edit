@@ -105,6 +105,13 @@
                 <source>Opens content element edit forms in a sidebar panel instead of navigating to the backend. Requires TYPO3 v14.2+. This feature is experimental and may change in future versions.</source>
             </trans-unit>
 
+            <trans-unit id="settings.frontendEdit.showInsertButtons">
+                <source>Show insert buttons on hover</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.showInsertButtons">
+                <source>Shows "+" buttons above and below each content element on hover to insert a new element before or after it via the New Content Element Wizard.</source>
+            </trans-unit>
+
             <trans-unit id="settings.frontendEdit.enableOutline">
                 <source>Enable Outline</source>
             </trans-unit>

@@ -87,6 +87,15 @@
 			<trans-unit id="column.createContentIn">
 				<source>Create new content in "%s" column</source>
 			</trans-unit>
+			<trans-unit id="column.insertBefore">
+				<source>Create new content before</source>
+			</trans-unit>
+			<trans-unit id="column.insertAfter">
+				<source>Create new content after</source>
+			</trans-unit>
+			<trans-unit id="notification.contentCreated">
+				<source>Content element created</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

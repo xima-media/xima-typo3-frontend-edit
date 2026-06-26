@@ -98,6 +98,12 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         // Check once if the contextual edit route exists (TYPO3 v14.2+)
         $contextualRouteAvailable = $this->urlBuilderService->isContextualEditRouteAvailable();
 
+        // Hover insert buttons (before/after each element). Precompute the
+        // previous-sibling uid per column so "before" can target the position
+        // after the previous element (first element → column top).
+        $showInsertButtons = $this->settingsService->isShowInsertButtons($request);
+        $previousSiblingByUid = $this->buildPreviousSiblingMap($filteredElements, $showInsertButtons);
+
         $result = [];
         foreach ($filteredElements as $contentElement) {
             $contentElementConfig = $this->contentElementRepository->getContentElementConfig(
@@ -125,6 +131,8 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
             $iconIdentifier = $contentElementConfig['icon'] ?? 'content-textpic';
             $contentElement['ctypeIcon'] = (string) $this->iconService->getIcon($iconIdentifier);
 
+            $this->addInsertButtonUrls($contentElement, $showInsertButtons, $previousSiblingByUid, $pid, $languageUid, $returnUrlAnchor);
+
             // Use potentially modified button from event listeners
             $result[$contentElement['uid']] = [
                 'element' => $contentElement,
@@ -133,6 +141,70 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         }
 
         return $this->renderMenuButtons($result);
+    }
+
+    /**
+     * Map each content element uid to the uid of its previous sibling within the
+     * same column (and container). Used to position the "insert before" button.
+     * Returns null for the first element of a column (→ insert at column top).
+     *
+     * @param array<int, array<string, mixed>> $elements
+     *
+     * @return array<int, int|null>
+     */
+    private function buildPreviousSiblingMap(array $elements, bool $enabled): array
+    {
+        if (!$enabled) {
+            return [];
+        }
+
+        $groups = [];
+        foreach ($elements as $element) {
+            $key = (int) ($element['colPos'] ?? 0).'_'.(int) ($element['tx_container_parent'] ?? 0);
+            $groups[$key][] = $element;
+        }
+
+        $previousByUid = [];
+        foreach ($groups as $group) {
+            usort($group, static fn (array $a, array $b): int => ((int) ($a['sorting'] ?? 0)) <=> ((int) ($b['sorting'] ?? 0)));
+            $previousUid = null;
+            foreach ($group as $element) {
+                $previousByUid[(int) $element['uid']] = $previousUid;
+                $previousUid = (int) $element['uid'];
+            }
+        }
+
+        return $previousByUid;
+    }
+
+    /**
+     * Add the "insert before" / "insert after" wizard URLs to a content element,
+     * consumed by the frontend hover buttons. "before" targets the position after
+     * the previous sibling (or the column top for the first element); "after"
+     * targets the position after this element.
+     *
+     * @param array<string, mixed> $contentElement
+     * @param array<int, int|null> $previousSiblingByUid
+     */
+    private function addInsertButtonUrls(array &$contentElement, bool $enabled, array $previousSiblingByUid, int $pid, int $languageUid, string $returnUrl): void
+    {
+        if (!$enabled) {
+            return;
+        }
+
+        $uid = (int) $contentElement['uid'];
+        $colPos = (int) ($contentElement['colPos'] ?? 0);
+        $containerUid = (int) ($contentElement['tx_container_parent'] ?? 0) > 0
+            ? (int) $contentElement['tx_container_parent']
+            : null;
+        $previousUid = $previousSiblingByUid[$uid] ?? null;
+
+        try {
+            $contentElement['newAfterUrl'] = $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl, uidAfter: $uid, containerUid: $containerUid);
+            $contentElement['newBeforeUrl'] = $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl, uidAfter: $previousUid, containerUid: $containerUid);
+        } catch (RouteNotFoundException) {
+            // Leave the URLs unset; the frontend simply skips the buttons.
+        }
     }
 
     /**

@@ -115,6 +115,18 @@
 				<source />
 				<target>Neuen Inhalt in Spalte "%s" erstellen</target>
 			</trans-unit>
+			<trans-unit id="column.insertBefore">
+				<source />
+				<target>Neuen Inhalt davor erstellen</target>
+			</trans-unit>
+			<trans-unit id="column.insertAfter">
+				<source />
+				<target>Neuen Inhalt danach erstellen</target>
+			</trans-unit>
+			<trans-unit id="notification.contentCreated">
+				<source />
+				<target>Inhaltselement angelegt</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

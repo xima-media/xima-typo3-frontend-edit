@@ -16,7 +16,6 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\VersionUtility;
 
 /**
  * UrlBuilderService.
@@ -136,32 +135,41 @@ final readonly class UrlBuilderService
     }
 
     /**
-     * Build URL to create a new content element after an existing one.
+     * Build URL to open TYPO3's native New Content Element Wizard.
      *
-     * - On TYPO3 v13.4: returns a web_layout URL with a hash fragment so
-     *   iframe_edit.js can auto-click the correct wizard button.
-     * - On TYPO3 v14.2+: returns the native record_edit URL since the
-     *   contextual sidebar handles the new-content flow directly.
+     * The wizard route (new_content_element_wizard) is an AJAX-modal fragment,
+     * not a navigable page — TYPO3 core only ever opens it via
+     * Modal.advanced({type: 'ajax'}) from an already-bootstrapped backend page.
+     * Loading it directly yields a blank page. So instead we return a web_layout
+     * (page module) URL with a hash fragment: iframe_edit.js loads the fully
+     * bootstrapped page module inside the modal and auto-clicks the matching
+     * wizard button, which opens the native wizard. Same mechanism on v13 and v14.
+     *
+     * Hash params consumed by iframe_edit.js autoClickWizardButton():
+     *   colPos (required), afterUid (insert after element), container (container colPos parent).
+     *
+     * @param int|null $uidAfter     insert after this content element; null appends to the column
+     * @param int|null $containerUid parent container UID for EXT:container columns
      *
      * @throws RouteNotFoundException
      */
-    public function buildNewContentAfterUrl(int $uid, int $pid, int $colPos, int $languageUid, string $returnUrl): string
-    {
-        if (VersionUtility::is14OrHigher()) {
-            return $this->uriBuilder->buildUriFromRoute(
-                'record_edit',
-                [
-                    'edit' => [
-                        'tt_content' => [-$uid => 'new'],
-                        'language' => $languageUid,
-                    ],
-                    'returnUrl' => $returnUrl,
-                ],
-            )->__toString();
+    public function buildNewContentWizardUrl(
+        int $pid,
+        int $colPos,
+        int $languageUid,
+        string $returnUrl,
+        ?int $uidAfter = null,
+        ?int $containerUid = null,
+    ): string {
+        $hash = 'colPos='.$colPos;
+        if (null !== $uidAfter) {
+            $hash .= '&afterUid='.$uidAfter;
+        }
+        if (null !== $containerUid) {
+            $hash .= '&container='.$containerUid;
         }
 
-        // v13: hash params tell iframe_edit.js which wizard button to auto-click
-        return $this->buildPageLayoutUrlWithHash($pid, $languageUid, $returnUrl, 'colPos='.$colPos.'&afterUid='.$uid);
+        return $this->buildPageLayoutUrlWithHash($pid, $languageUid, $returnUrl, $hash);
     }
 
     /**
