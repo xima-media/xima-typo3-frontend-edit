@@ -1453,5 +1453,7 @@ body.frontend-edit--dragging .frontend-edit__toolbar {
     border-radius: 6px;
     outline: 2px solid var(--xfe-dnd-accent);
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
-    background: var(--xfe-bg-primary);
+    /* Fallback only — JS overrides this inline with the page's own background so
+       the snapshot matches the content, not the editor colour scheme. */
+    background: #ffffff;
 }

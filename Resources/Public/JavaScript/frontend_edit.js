@@ -1483,6 +1483,23 @@
       return (heading ? heading.textContent : '').trim().replace(/\s+/g, ' ').slice(0, 80);
     },
 
+    /**
+     * The nearest ancestor's opaque background, so the drag snapshot sits on the
+     * same colour as the real content. Falls back to white when everything up to
+     * the root is transparent.
+     */
+    resolveBackground(el) {
+      let node = el;
+      while (node instanceof Element) {
+        const bg = getComputedStyle(node).backgroundColor;
+        if (bg && bg !== 'transparent' && !/^rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)$/.test(bg)) {
+          return bg;
+        }
+        node = node.parentElement;
+      }
+      return '#ffffff';
+    },
+
     onDragStart(e, uid) {
       this.dragging = { uid };
       this.draggingBlock = this.resolveBlock(uid);
@@ -1498,7 +1515,11 @@
             const rect = this.draggingBlock.getBoundingClientRect();
             const ghost = this.draggingBlock.cloneNode(true);
             ghost.classList.add('frontend-edit__drag-ghost');
-            ghost.style.cssText = `position:fixed;top:-10000px;left:0;margin:0;width:${rect.width}px;opacity:0.85;pointer-events:none;`;
+            // Back the snapshot with the page's own background, not the extension
+            // theme — otherwise a dark editor scheme paints a dark card behind the
+            // page's dark-on-light content, making it unreadable.
+            const pageBg = this.resolveBackground(this.draggingBlock);
+            ghost.style.cssText = `position:fixed;top:-10000px;left:0;margin:0;width:${rect.width}px;opacity:0.85;pointer-events:none;background:${pageBg};`;
             document.body.appendChild(ghost);
             // Anchor the ghost at the exact point the cursor grabbed, so it
             // tracks the pointer instead of drifting off to one side.
