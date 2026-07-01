@@ -43,17 +43,16 @@ The extension injects a small JavaScript into the frontend that generates action
   - **[PSR-14 Events](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/Events.html)** - Customize menus with custom actions
   - **ViewHelpers** - [Data attributes](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/DataAttributes.html) for related records, [column target buttons](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/EmptyColumns.html) for new content (empty columns and end-of-column) *(new in v2.3)*
 
+### Inline Editing *(experimental)*
+
 > [!NOTE]
-> **New in v2.3.0 — Inline Editing** *(experimental)*
->
-> Edit content elements directly in the frontend without navigating to the backend. Enable via Site Settings: `frontendEdit.enableContextualEditing: true`
->
-> - **TYPO3 v13**: Opens a slide-in iframe modal (thanks to [Violetta Digital Craft](https://www.violetta.ch/) for developing this feature)
-> - **TYPO3 v14.2+**: Uses the native contextual editing sidebar (introduced in v2.2.0)
->
-> ![Contextual Editing Sidebar](./Documentation/Images/contextual-sidebar.gif)
->
-> [Documentation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)
+> New in **v2.2+** — thanks to [Violetta Digital Craft](https://www.violetta.ch/) for supporting this feature.
+
+Edit content elements directly in the frontend without navigating to the backend. Enable via Site Settings: `frontendEdit.enableContextualEditing: true`
+
+![Inline Editing](./Documentation/Images/inline-edit-screencast.gif)
+
+[Documentation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)
 
 ## 🔥 Installation
 
