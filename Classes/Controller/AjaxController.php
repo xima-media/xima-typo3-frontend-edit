@@ -21,7 +21,6 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
-use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\{ContentMoveService, EmptyColumnService};
 use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator;
 
@@ -41,7 +40,6 @@ readonly class AjaxController
         private ContentElementMenuGenerator $contentElementMenuGenerator,
         private BackendUserService $backendUserService,
         private EmptyColumnService $emptyColumnService,
-        private SettingsService $settingsService,
         private ContentMoveService $contentMoveService,
     ) {}
 
@@ -148,10 +146,6 @@ readonly class AjaxController
     {
         if (!$this->backendUserService->isFrontendEditAllowed()) {
             return new JsonResponse(['success' => false, 'error' => 'Frontend edit is not allowed'], 403);
-        }
-
-        if (!$this->settingsService->isDragAndDropEnabled($request)) {
-            return new JsonResponse(['success' => false, 'error' => 'Drag & drop reordering is disabled for this site'], 403);
         }
 
         try {
