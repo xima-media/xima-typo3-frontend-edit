@@ -42,19 +42,30 @@ final readonly class EmptyColumnService
     }
 
     /**
-     * @param int          $pid         Page UID
-     * @param int          $languageUid sys_language_uid
-     * @param string       $returnUrl   Frontend URL to return to after editing
-     * @param array<mixed> $requestData Raw request data from the AJAX call
+     * @param int          $pid               Page UID
+     * @param int          $languageUid       sys_language_uid
+     * @param string       $returnUrl         Frontend URL to return to after editing
+     * @param array<mixed> $requestData       Raw request data from the AJAX call
+     * @param bool         $showInsertButtons Whether per-element "insert after" buttons are enabled;
+     *                                         if so, the end-of-column button on filled columns is redundant
      *
      * @return list<array{colPos: int, isEmpty: bool, newContentUrl: string, name?: string, containerUid?: int}>
      */
-    public function getColumnTargets(int $pid, int $languageUid, string $returnUrl, array $requestData = []): array
+    public function getColumnTargets(int $pid, int $languageUid, string $returnUrl, array $requestData = [], bool $showInsertButtons = false): array
     {
-        return [
+        $targets = [
             ...$this->findPageColumnTargets($pid, $languageUid, $returnUrl),
             ...$this->findContainerColumnTargets($pid, $languageUid, $returnUrl, $this->extractContainerMarkers($requestData)),
         ];
+
+        // Filled columns already expose an "insert after" button on their last element,
+        // so the standalone end-of-column button would only duplicate it. Empty columns
+        // have no elements and therefore keep their button.
+        if ($showInsertButtons) {
+            $targets = array_values(array_filter($targets, static fn (array $target): bool => $target['isEmpty']));
+        }
+
+        return $targets;
     }
 
     /**

@@ -21,6 +21,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\EmptyColumnService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator;
 
@@ -40,6 +41,7 @@ readonly class AjaxController
         private ContentElementMenuGenerator $contentElementMenuGenerator,
         private BackendUserService $backendUserService,
         private EmptyColumnService $emptyColumnService,
+        private SettingsService $settingsService,
     ) {}
 
     /**
@@ -124,7 +126,13 @@ readonly class AjaxController
 
         $dropdown = $this->contentElementMenuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
 
-        $columnTargets = $this->emptyColumnService->getColumnTargets($pid, $languageUid, $returnUrl, $data);
+        $columnTargets = $this->emptyColumnService->getColumnTargets(
+            $pid,
+            $languageUid,
+            $returnUrl,
+            $data,
+            $this->settingsService->isShowInsertButtons($request),
+        );
 
         return new JsonResponse(mb_convert_encoding([
             'contentElements' => $dropdown,
