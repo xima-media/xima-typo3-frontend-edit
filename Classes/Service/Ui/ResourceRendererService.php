@@ -128,6 +128,7 @@ final readonly class ResourceRendererService
             'cancel' => $this->translate('delete.confirm.cancel', 'Cancel'),
             'delete' => $this->translate('delete.confirm.delete', 'Delete record (!)'),
             'success' => $this->translate('delete.success', 'Record deleted'),
+            'successMessage' => $this->translate('delete.success.message', 'The record was successfully deleted. The page will reload shortly.'),
             'error' => $this->translate('delete.error', 'Could not delete the record'),
         ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $columnLabels = json_encode([

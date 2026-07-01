@@ -276,7 +276,7 @@
       fetch(url, { method: 'GET', credentials: 'include', redirect: 'manual' })
         .then((response) => {
           if (response.type === 'opaqueredirect' || response.ok) {
-            Notification.show({ title: l.success || 'Record deleted', message: '', severity: 'ok' });
+            Notification.show({ title: l.success || 'Record deleted', message: l.successMessage || '', severity: 'ok' });
             setTimeout(() => window.location.reload(), 1500);
           } else {
             Notification.show({ title: l.error || 'Could not delete the record', message: '', severity: 'error' });

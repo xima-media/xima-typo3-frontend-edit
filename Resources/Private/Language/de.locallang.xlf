@@ -103,6 +103,10 @@
 				<source />
 				<target>Datensatz gelöscht</target>
 			</trans-unit>
+			<trans-unit id="delete.success.message">
+				<source />
+				<target>Der Datensatz wurde erfolgreich gelöscht. Die Seite wird in Kürze neu geladen.</target>
+			</trans-unit>
 			<trans-unit id="delete.error">
 				<source />
 				<target>Der Datensatz konnte nicht gelöscht werden</target>

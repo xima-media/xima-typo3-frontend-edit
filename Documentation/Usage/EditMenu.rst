@@ -26,6 +26,11 @@ Clicking this button opens the Edit Menu with various actions:
     :alt: Edit Menu
 
 ..  note::
+    The **New content after** entry can be hidden via the
+    :confval:`frontendEdit.showInsertButtons` site setting, which also controls the
+    hover insert buttons.
+
+..  note::
     The Edit Menu is only displayed if the backend user has the necessary
     permissions to edit the content element.
 

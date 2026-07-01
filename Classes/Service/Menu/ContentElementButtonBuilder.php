@@ -158,6 +158,7 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         array $contentElement,
         int $languageUid,
         string $returnUrlAnchor,
+        bool $showInsertButtons = true,
     ): void {
         $this->addButton($menuButton, 'div_action', ButtonType::Divider);
 
@@ -184,17 +185,20 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
 
         // New content after button — opens the native New Content Element Wizard
         // (type-picker grid) positioned after this element. Same route on v13/v14.
-        $newContentUrl = $this->urlBuilderService->buildNewContentWizardUrl(
-            (int) ($contentElement['pid'] ?? 0),
-            (int) ($contentElement['colPos'] ?? 0),
-            $languageUid,
-            $returnUrlAnchor,
-            uidAfter: (int) $contentElement['uid'],
-            containerUid: (int) ($contentElement['tx_container_parent'] ?? 0) > 0
-                ? (int) $contentElement['tx_container_parent']
-                : null,
-        );
-        $this->addButton($menuButton, 'new_content_after', ButtonType::Link, url: $newContentUrl, icon: 'actions-add');
+        // Gated by the same setting as the hover insert buttons for consistency.
+        if ($showInsertButtons) {
+            $newContentUrl = $this->urlBuilderService->buildNewContentWizardUrl(
+                (int) ($contentElement['pid'] ?? 0),
+                (int) ($contentElement['colPos'] ?? 0),
+                $languageUid,
+                $returnUrlAnchor,
+                uidAfter: (int) $contentElement['uid'],
+                containerUid: (int) ($contentElement['tx_container_parent'] ?? 0) > 0
+                    ? (int) $contentElement['tx_container_parent']
+                    : null,
+            );
+            $this->addButton($menuButton, 'new_content_after', ButtonType::Link, url: $newContentUrl, icon: 'actions-add');
+        }
 
         // Delete button
         $deleteUrl = $this->urlBuilderService->buildDeleteUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);

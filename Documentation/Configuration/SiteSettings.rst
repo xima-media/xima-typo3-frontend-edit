@@ -57,6 +57,23 @@ Appearance Settings
         frontendEdit:
           showContextMenu: true
 
+..  confval:: frontendEdit.showInsertButtons
+
+    :type: bool
+    :Default: true
+
+    ..  versionadded:: 2.3.0
+
+    Show the ``+`` buttons above and below each content element on hover to insert a
+    new element before or after it via the New Content Element Wizard. This setting
+    also controls the **New content after** entry in the Edit Menu. Disable to hide
+    both.
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          showInsertButtons: true
+
 ..  confval:: frontendEdit.showStickyToolbar
 
     :type: bool

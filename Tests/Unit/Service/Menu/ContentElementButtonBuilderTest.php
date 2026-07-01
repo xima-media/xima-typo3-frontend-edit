@@ -208,4 +208,18 @@ final class ContentElementButtonBuilderTest extends TestCase
         self::assertArrayHasKey('history', $children);
         self::assertArrayHasKey('new_content_after', $children);
     }
+
+    #[Test]
+    public function addActionSectionOmitsNewContentButtonWhenInsertButtonsDisabled(): void
+    {
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $menuButton = new Button('Menu', ButtonType::Menu);
+
+        $builder->addActionSection($menuButton, ['uid' => 1, 'pid' => 1], 0, '/return', false);
+
+        $children = $menuButton->getChildren();
+        self::assertArrayNotHasKey('new_content_after', $children);
+        self::assertArrayHasKey('hide', $children);
+        self::assertArrayHasKey('delete', $children);
+    }
 }

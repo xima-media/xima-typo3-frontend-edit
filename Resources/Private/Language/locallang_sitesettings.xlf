@@ -109,7 +109,7 @@
                 <source>Show insert buttons on hover</source>
             </trans-unit>
             <trans-unit id="settings.description.frontendEdit.showInsertButtons">
-                <source>Shows "+" buttons above and below each content element on hover to insert a new element before or after it via the New Content Element Wizard.</source>
+                <source>Shows "+" buttons above and below each content element on hover to insert a new element before or after it via the New Content Element Wizard. Also controls the "new content after" entry in the content element context menu.</source>
             </trans-unit>
 
             <trans-unit id="settings.frontendEdit.enableOutline">

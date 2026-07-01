@@ -117,7 +117,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
                 continue;
             }
 
-            $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request, $contextualUrl);
+            $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request, $contextualUrl, $showInsertButtons);
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
             /** @var FrontendEditDropdownModifyEvent $event */
@@ -221,6 +221,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         array $contentElementConfig,
         ServerRequestInterface $request,
         ?string $contextualUrl = null,
+        bool $showInsertButtons = true,
     ): Button {
         if (!$this->settingsService->isShowContextMenu($request)) {
             return $this->contentElementButtonBuilder->createSimpleEditButton(
@@ -236,7 +237,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
         $this->contentElementButtonBuilder->addInfoSection($menuButton, $contentElement, $contentElementConfig);
         $this->contentElementButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor, $contextualUrl);
-        $this->contentElementButtonBuilder->addActionSection($menuButton, $contentElement, $languageUid, $returnUrlAnchor);
+        $this->contentElementButtonBuilder->addActionSection($menuButton, $contentElement, $languageUid, $returnUrlAnchor, $showInsertButtons);
 
         return $menuButton;
     }
