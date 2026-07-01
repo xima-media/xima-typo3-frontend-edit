@@ -1402,19 +1402,27 @@
      */
     getColumnElements(container) {
       const items = [];
+      const containers = this.columns.map(c => c.container);
       container.querySelectorAll('[id]').forEach(el => {
         const match = el.id.match(/^c(\d+)$/);
         if (!match) return;
         const uid = parseInt(match[1], 10);
         if (uid <= 0) return;
 
+        // The element only belongs to this column if `container` is the closest
+        // registered column container above it. Skip elements nested inside
+        // another content element, and elements that actually live in a nested
+        // sub-column (e.g. colPos 0/2 inside the wider colPos 8/9 wrapper) — a
+        // deep querySelectorAll would otherwise leak them into the ancestor
+        // column and push the drop indicator too far down.
         let parent = el.parentElement;
-        let nested = false;
+        let ownedByOther = false;
         while (parent && parent !== container) {
-          if (parent.id && /^c\d+$/.test(parent.id)) { nested = true; break; }
+          if (parent.id && /^c\d+$/.test(parent.id)) { ownedByOther = true; break; }
+          if (containers.includes(parent)) { ownedByOther = true; break; }
           parent = parent.parentElement;
         }
-        if (nested) return;
+        if (ownedByOther || parent !== container) return;
 
         let block = el;
         if (el.getBoundingClientRect().height === 0 && el.nextElementSibling) {
