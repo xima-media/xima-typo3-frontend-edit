@@ -17,6 +17,7 @@ use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 
 use function array_map;
 use function array_values;
@@ -32,6 +33,7 @@ final readonly class ContentMoveService
 {
     public function __construct(
         private BackendUserService $backendUserService,
+        private SettingsService $settingsService,
     ) {}
 
     /**
@@ -69,6 +71,15 @@ final readonly class ContentMoveService
             return $this->failure(400, sprintf('Content element %d not found', $uid));
         }
 
+        $pid = (int) $record['pid'];
+
+        // Enforce the site-level flag here (not in the controller): backend AJAX
+        // routes have no "site" request attribute, so the setting is resolved via
+        // the record's page instead.
+        if (!$this->settingsService->isDragAndDropEnabledForPage($pid)) {
+            return $this->failure(403, 'Drag & drop reordering is disabled for this site');
+        }
+
         if (!$this->isMovable($record)) {
             return $this->failure(422, 'This content element cannot be moved via drag & drop (use the backend move dialog instead)');
         }
@@ -76,8 +87,6 @@ final readonly class ContentMoveService
         if (!$this->backendUserService->hasRecordEditAccess('tt_content', $record)) {
             return $this->failure(403, 'You are not allowed to edit this content element');
         }
-
-        $pid = (int) $record['pid'];
 
         if (null !== $targetUid && $targetUid > 0) {
             $neighbour = BackendUtility::getRecord('tt_content', $targetUid);

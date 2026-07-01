@@ -17,7 +17,9 @@ use Exception;
 use Psr\Container\{ContainerExceptionInterface, NotFoundExceptionInterface};
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
+use TYPO3\CMS\Core\Site\SiteFinder;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 
 use function array_map;
@@ -35,6 +37,7 @@ final readonly class SettingsService
 {
     public function __construct(
         private ExtensionConfiguration $extensionConfiguration,
+        private SiteFinder $siteFinder,
     ) {}
 
     /**
@@ -194,6 +197,24 @@ final readonly class SettingsService
         }
 
         return (bool) $settings->get('frontendEdit.enableDragAndDrop', false);
+    }
+
+    /**
+     * Resolve the drag & drop flag by page id.
+     *
+     * Backend AJAX routes (e.g. the move endpoint) carry no "site" request
+     * attribute, so the setting must be resolved via the page's site instead of
+     * the request.
+     */
+    public function isDragAndDropEnabledForPage(int $pageId): bool
+    {
+        try {
+            $site = $this->siteFinder->getSiteByPageId($pageId);
+        } catch (SiteNotFoundException) {
+            return false;
+        }
+
+        return (bool) $site->getSettings()->get('frontendEdit.enableDragAndDrop', false);
     }
 
     public function isEnableFlashMessages(ServerRequestInterface $request): bool

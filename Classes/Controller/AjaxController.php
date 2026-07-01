@@ -161,10 +161,6 @@ readonly class AjaxController
             return new JsonResponse(['success' => false, 'error' => 'Frontend edit is not allowed'], 403);
         }
 
-        if (!$this->settingsService->isDragAndDropEnabled($request)) {
-            return new JsonResponse(['success' => false, 'error' => 'Drag & drop reordering is disabled for this site'], 403);
-        }
-
         try {
             $data = $this->getRequestData($request);
         } catch (InvalidArgumentException) {

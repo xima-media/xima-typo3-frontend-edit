@@ -15,7 +15,10 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Content;
 
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
+use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Site\SiteFinder;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
+use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\ContentMoveService;
 
 /**
@@ -33,6 +36,10 @@ final class ContentMoveServiceTest extends TestCase
     {
         $this->subject = new ContentMoveService(
             new BackendUserService(),
+            new SettingsService(
+                $this->createMock(ExtensionConfiguration::class),
+                $this->createMock(SiteFinder::class),
+            ),
         );
     }
 
