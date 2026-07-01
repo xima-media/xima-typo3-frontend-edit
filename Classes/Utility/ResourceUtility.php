@@ -61,7 +61,7 @@ class ResourceUtility
                 ...$attributes,
                 'rel' => 'stylesheet',
                 'media' => 'all',
-                'href' => PathUtility::getAbsoluteWebPath(GeneralUtility::getFileAbsFileName($cssFileLocation)),
+                'href' => self::versionedWebPath($cssFileLocation),
             ], true),
         );
     }
@@ -75,8 +75,24 @@ class ResourceUtility
             '<script %s></script>',
             GeneralUtility::implodeAttributes([
                 ...$attributes,
-                'src' => PathUtility::getAbsoluteWebPath(GeneralUtility::getFileAbsFileName($jsFileLocation)),
+                'src' => self::versionedWebPath($jsFileLocation),
             ], true),
         );
+    }
+
+    /**
+     * Web path with a modification-time cache buster.
+     *
+     * The published _assets URL is stable and served with a far-future cache
+     * header, so without a version query browsers keep a stale copy after an
+     * extension update. Appending the file's mtime invalidates it on change.
+     */
+    protected static function versionedWebPath(string $fileLocation): string
+    {
+        $absolutePath = GeneralUtility::getFileAbsFileName($fileLocation);
+        $webPath = PathUtility::getAbsoluteWebPath($absolutePath);
+        $modificationTime = @filemtime($absolutePath);
+
+        return false !== $modificationTime ? $webPath.'?'.$modificationTime : $webPath;
     }
 }
