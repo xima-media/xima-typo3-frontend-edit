@@ -176,8 +176,8 @@
 				<target>Einfügen-Buttons beim Hover anzeigen</target>
 			</trans-unit>
 			<trans-unit id="settings.description.frontendEdit.showInsertButtons">
-				<source>Shows "+" buttons above and below each content element on hover to insert a new element before or after it via the New Content Element Wizard.</source>
-				<target>Zeigt beim Hover über jedem Inhaltselement "+"-Buttons oben und unten an, um per New Content Element Wizard ein neues Element davor oder danach einzufügen.</target>
+				<source>Shows "+" buttons above and below each content element on hover to insert a new element before or after it via the New Content Element Wizard. Also controls the "new content after" entry in the content element context menu.</source>
+				<target>Zeigt beim Hover über jedem Inhaltselement "+"-Buttons oben und unten an, um per New Content Element Wizard ein neues Element davor oder danach einzufügen. Steuert zusätzlich den Eintrag "Neuen Inhalt danach" im Kontextmenü des Inhaltselements.</target>
 			</trans-unit>
 
 			<trans-unit id="settings.frontendEdit.filter.ignoreUids">
