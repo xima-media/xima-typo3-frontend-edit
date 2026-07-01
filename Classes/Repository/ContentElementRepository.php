@@ -126,12 +126,14 @@ final readonly class ContentElementRepository
     ): array|false {
         $queryBuilder = $this->connectionPool->getQueryBuilderForTable($table);
 
+        $parentField = $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] ?? 'l10n_parent';
+
         return $queryBuilder
             ->select('*')
             ->from($table)
             ->where(
                 $queryBuilder->expr()->eq(
-                    'l10n_parent',
+                    $parentField,
                     $queryBuilder->createNamedParameter($parentUid, Connection::PARAM_INT),
                 ),
                 $queryBuilder->expr()->eq(
