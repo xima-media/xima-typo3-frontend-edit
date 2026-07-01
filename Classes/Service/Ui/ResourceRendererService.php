@@ -127,8 +127,10 @@ final readonly class ResourceRendererService
         $dragAndDropLabels = json_encode([
             'handle' => $this->translate('dnd.handle', 'Drag to reorder'),
             'success' => $this->translate('dnd.success', 'Content element moved'),
-            'successDetail' => $this->translate('dnd.successDetail', '“%s” was moved to its new position. The page was reloaded to reflect the change.'),
-            'successDetailGeneric' => $this->translate('dnd.successDetailGeneric', 'The content element was moved to its new position. The page was reloaded to reflect the change.'),
+            'successDetail' => $this->translate('dnd.successDetail', '“%s” was reordered within the column. The page was reloaded to reflect the change.'),
+            'successDetailGeneric' => $this->translate('dnd.successDetailGeneric', 'The content element was reordered within the column. The page was reloaded to reflect the change.'),
+            'successDetailMoved' => $this->translate('dnd.successDetailMoved', '“%s” was moved to another column. The page was reloaded to reflect the change.'),
+            'successDetailMovedGeneric' => $this->translate('dnd.successDetailMovedGeneric', 'The content element was moved to another column. The page was reloaded to reflect the change.'),
             'error' => $this->translate('dnd.error', 'Could not move the content element'),
             'errorDetail' => $this->translate('dnd.errorDetail', '“%s” could not be moved. Please try again.'),
             'errorDetailGeneric' => $this->translate('dnd.errorDetailGeneric', 'The content element could not be moved. Please try again.'),
