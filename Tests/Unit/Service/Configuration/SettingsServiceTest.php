@@ -21,6 +21,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Settings\SettingsInterface;
 use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
+use TYPO3\CMS\Core\Site\SiteFinder;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 
 /**
@@ -35,7 +36,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isEnabledReturnsFalseWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertFalse($service->isEnabled($this->createRequestWithoutSite()));
     }
@@ -43,7 +44,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isEnabledReturnsSettingValue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.enabled' => false]);
 
         self::assertFalse($service->isEnabled($request));
@@ -52,7 +53,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isEnabledDefaultsToTrue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings([]);
 
         self::assertTrue($service->isEnabled($request));
@@ -61,7 +62,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getIgnoredPidsReturnsEmptyArrayWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertSame([], $service->getIgnoredPids($this->createRequestWithoutSite()));
     }
@@ -69,7 +70,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getIgnoredPidsParsesCommaDelimitedString(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.filter.ignorePids' => '1, 2 ,3']);
 
         self::assertSame(['1', '2', '3'], array_values($service->getIgnoredPids($request)));
@@ -78,7 +79,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getIgnoredPidsReturnsEmptyArrayForEmptyValue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.filter.ignorePids' => '']);
 
         self::assertSame([], $service->getIgnoredPids($request));
@@ -87,7 +88,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getIgnoredPidsFiltersEmptyItems(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.filter.ignorePids' => '1,,2']);
 
         self::assertSame(['1', '2'], array_values($service->getIgnoredPids($request)));
@@ -96,7 +97,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getIgnoredPidsReturnsEmptyArrayWhenSettingThrows(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithThrowingSettings();
 
         self::assertSame([], $service->getIgnoredPids($request));
@@ -105,7 +106,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getIgnoredDoktypesReturnsIntegers(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.filter.ignoreDoktypes' => '3,254']);
 
         self::assertSame([3, 254], array_values($service->getIgnoredDoktypes($request)));
@@ -114,7 +115,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getIgnoredCTypesParsesValues(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.filter.ignoreCTypes' => 'text,html']);
 
         self::assertSame(['text', 'html'], array_values($service->getIgnoredCTypes($request)));
@@ -123,7 +124,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getIgnoredListTypesParsesValues(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.filter.ignoreListTypes' => 'news_pi1']);
 
         self::assertSame(['news_pi1'], array_values($service->getIgnoredListTypes($request)));
@@ -132,7 +133,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getIgnoredUidsReturnsIntegers(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.filter.ignoreUids' => '5,6']);
 
         self::assertSame([5, 6], array_values($service->getIgnoredUids($request)));
@@ -141,7 +142,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getColorSchemeReturnsAutoWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertSame('auto', $service->getColorScheme($this->createRequestWithoutSite()));
     }
@@ -149,7 +150,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getColorSchemeReturnsValidScheme(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.colorScheme' => 'dark']);
 
         self::assertSame('dark', $service->getColorScheme($request));
@@ -158,7 +159,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getColorSchemeFallsBackToAutoForInvalidValue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.colorScheme' => 'neon']);
 
         self::assertSame('auto', $service->getColorScheme($request));
@@ -167,7 +168,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isShowContextMenuReturnsTrueWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertTrue($service->isShowContextMenu($this->createRequestWithoutSite()));
     }
@@ -175,7 +176,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isShowContextMenuReturnsSettingValue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.showContextMenu' => false]);
 
         self::assertFalse($service->isShowContextMenu($request));
@@ -184,7 +185,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isShowStickyToolbarReturnsTrueWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertTrue($service->isShowStickyToolbar($this->createRequestWithoutSite()));
     }
@@ -192,7 +193,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isShowStickyToolbarReturnsSettingValue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.showStickyToolbar' => false]);
 
         self::assertFalse($service->isShowStickyToolbar($request));
@@ -201,7 +202,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isShowInsertButtonsReturnsTrueWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertTrue($service->isShowInsertButtons($this->createRequestWithoutSite()));
     }
@@ -209,7 +210,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isShowInsertButtonsReturnsSettingValue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.showInsertButtons' => false]);
 
         self::assertFalse($service->isShowInsertButtons($request));
@@ -218,7 +219,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getToolbarPositionReturnsDefaultWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertSame('bottom-right', $service->getToolbarPosition($this->createRequestWithoutSite()));
     }
@@ -226,7 +227,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getToolbarPositionReturnsValidPosition(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.toolbarPosition' => 'top-left']);
 
         self::assertSame('top-left', $service->getToolbarPosition($request));
@@ -235,7 +236,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function getToolbarPositionFallsBackForInvalidPosition(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.toolbarPosition' => 'middle']);
 
         self::assertSame('bottom-right', $service->getToolbarPosition($request));
@@ -244,7 +245,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isEnableOutlineReturnsTrueWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertTrue($service->isEnableOutline($this->createRequestWithoutSite()));
     }
@@ -252,7 +253,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isEnableOutlineReturnsSettingValue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.enableOutline' => false]);
 
         self::assertFalse($service->isEnableOutline($request));
@@ -261,7 +262,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isEnableScrollToElementReturnsTrueWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertTrue($service->isEnableScrollToElement($this->createRequestWithoutSite()));
     }
@@ -269,7 +270,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isEnableScrollToElementReturnsSettingValue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.enableScrollToElement' => false]);
 
         self::assertFalse($service->isEnableScrollToElement($request));
@@ -278,7 +279,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isContextualEditingEnabledReturnsFalseWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertFalse($service->isContextualEditingEnabled($this->createRequestWithoutSite()));
     }
@@ -286,7 +287,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isContextualEditingEnabledReturnsSettingValue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.enableContextualEditing' => true]);
 
         self::assertTrue($service->isContextualEditingEnabled($request));
@@ -295,7 +296,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isEnableFlashMessagesReturnsTrueWhenNoSite(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
 
         self::assertTrue($service->isEnableFlashMessages($this->createRequestWithoutSite()));
     }
@@ -303,7 +304,7 @@ final class SettingsServiceTest extends TestCase
     #[Test]
     public function isEnableFlashMessagesReturnsSettingValue(): void
     {
-        $service = new SettingsService($this->createMock(ExtensionConfiguration::class));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
         $request = $this->createRequestWithSettings(['frontendEdit.enableFlashMessages' => false]);
 
         self::assertFalse($service->isEnableFlashMessages($request));
@@ -315,7 +316,7 @@ final class SettingsServiceTest extends TestCase
         $extensionConfiguration = $this->createMock(ExtensionConfiguration::class);
         $extensionConfiguration->method('get')->willReturn(['frontendDebugMode' => true]);
 
-        $service = new SettingsService($extensionConfiguration);
+        $service = new SettingsService($extensionConfiguration, $this->createMock(SiteFinder::class));
 
         self::assertTrue($service->isFrontendDebugModeEnabled());
     }
@@ -326,7 +327,7 @@ final class SettingsServiceTest extends TestCase
         $extensionConfiguration = $this->createMock(ExtensionConfiguration::class);
         $extensionConfiguration->method('get')->willReturn([]);
 
-        $service = new SettingsService($extensionConfiguration);
+        $service = new SettingsService($extensionConfiguration, $this->createMock(SiteFinder::class));
 
         self::assertFalse($service->isFrontendDebugModeEnabled());
     }
@@ -337,7 +338,7 @@ final class SettingsServiceTest extends TestCase
         $extensionConfiguration = $this->createMock(ExtensionConfiguration::class);
         $extensionConfiguration->method('get')->willThrowException(new Exception('boom'));
 
-        $service = new SettingsService($extensionConfiguration);
+        $service = new SettingsService($extensionConfiguration, $this->createMock(SiteFinder::class));
 
         self::assertFalse($service->isFrontendDebugModeEnabled());
     }

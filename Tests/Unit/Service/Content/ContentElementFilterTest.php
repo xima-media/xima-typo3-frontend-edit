@@ -23,6 +23,7 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\{Expression\ExpressionBuilder, QueryBuilder};
 use TYPO3\CMS\Core\Settings\SettingsInterface;
 use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, RootlineUtility};
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
@@ -231,7 +232,7 @@ final class ContentElementFilterTest extends TestCase
 
     private function createSettingsService(): SettingsService
     {
-        return new SettingsService($this->createMock(ExtensionConfiguration::class));
+        return new SettingsService($this->createMock(ExtensionConfiguration::class), $this->createMock(SiteFinder::class));
     }
 
     /**
