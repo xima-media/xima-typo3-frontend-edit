@@ -21,7 +21,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Http\JsonResponse;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
-use Xima\XimaTypo3FrontendEdit\Service\Content\EmptyColumnService;
+use Xima\XimaTypo3FrontendEdit\Service\Content\{ContentMoveService, EmptyColumnService};
 use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator;
 
 use function is_array;
@@ -40,6 +40,7 @@ readonly class AjaxController
         private ContentElementMenuGenerator $contentElementMenuGenerator,
         private BackendUserService $backendUserService,
         private EmptyColumnService $emptyColumnService,
+        private ContentMoveService $contentMoveService,
     ) {}
 
     /**
@@ -130,6 +131,61 @@ readonly class AjaxController
             'contentElements' => $dropdown,
             'columnTargets' => $columnTargets,
         ], 'UTF-8'));
+    }
+
+    /**
+     * Move a content element to a new position (frontend drag & drop).
+     *
+     * Expects a JSON body with:
+     * - uid: content element to move (required, positive int)
+     * - targetColPos: destination column (required, non-negative int)
+     * - targetUid: neighbour to insert after; 0/omitted = top of column (optional int)
+     * - language: current frontend language (must be 0 — translations are out of scope)
+     */
+    public function moveAction(ServerRequestInterface $request): JsonResponse
+    {
+        if (!$this->backendUserService->isFrontendEditAllowed()) {
+            return new JsonResponse(['success' => false, 'error' => 'Frontend edit is not allowed'], 403);
+        }
+
+        try {
+            $data = $this->getRequestData($request);
+        } catch (InvalidArgumentException) {
+            return new JsonResponse(['success' => false, 'error' => 'Invalid request data'], 400);
+        }
+
+        $uid = filter_var($data['uid'] ?? null, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if (false === $uid) {
+            return new JsonResponse(['success' => false, 'error' => 'Missing or invalid parameter: uid'], 400);
+        }
+
+        $targetColPos = filter_var($data['targetColPos'] ?? null, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        if (false === $targetColPos) {
+            return new JsonResponse(['success' => false, 'error' => 'Missing or invalid parameter: targetColPos'], 400);
+        }
+
+        $language = filter_var($data['language'] ?? 0, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        if (false === $language) {
+            return new JsonResponse(['success' => false, 'error' => 'Invalid parameter: language'], 400);
+        }
+        if ($language > 0) {
+            return new JsonResponse(['success' => false, 'error' => 'Translated content cannot be moved via drag & drop'], 422);
+        }
+
+        $targetUidValue = $data['targetUid'] ?? null;
+        $targetUid = null === $targetUidValue ? null : filter_var($targetUidValue, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        if (false === $targetUid) {
+            return new JsonResponse(['success' => false, 'error' => 'Invalid parameter: targetUid'], 400);
+        }
+
+        $result = $this->contentMoveService->move($uid, $targetColPos, $targetUid);
+
+        return new JsonResponse(
+            $result->success
+                ? ['success' => true]
+                : ['success' => false, 'errors' => $result->errors],
+            $result->statusCode,
+        );
     }
 
     protected function getBackendUser(): ?BackendUserAuthentication

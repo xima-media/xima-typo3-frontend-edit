@@ -250,6 +250,14 @@ final readonly class UrlBuilderService
     }
 
     /**
+     * @throws RouteNotFoundException
+     */
+    public function buildMoveActionUrl(): string
+    {
+        return $this->buildRoute('ajax_frontendEdit_move');
+    }
+
+    /**
      * @param array<string, mixed> $parameters
      *
      * @throws RouteNotFoundException

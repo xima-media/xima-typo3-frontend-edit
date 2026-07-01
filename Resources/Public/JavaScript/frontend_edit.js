@@ -23,7 +23,8 @@
     warning: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>',
     error: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-1.4A5.6 5.6 0 1 0 8 2.4a5.6 5.6 0 0 0 0 11.2zM7.3 5h1.4v4.2H7.3V5zm0 5.6h1.4V12H7.3v-1.4z"/></svg>',
     info: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-1.4A5.6 5.6 0 1 0 8 2.4a5.6 5.6 0 0 0 0 11.2zM7.3 7h1.4v4.2H7.3V7zm0-2.1h1.4v1.4H7.3V4.9z"/></svg>',
-    close: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06z"/></svg>'
+    close: '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06z"/></svg>',
+    drag: '<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="6" cy="3" r="1.3"/><circle cx="10" cy="3" r="1.3"/><circle cx="6" cy="8" r="1.3"/><circle cx="10" cy="8" r="1.3"/><circle cx="6" cy="13" r="1.3"/><circle cx="10" cy="13" r="1.3"/></svg>'
   };
 
   /**
@@ -1343,6 +1344,287 @@
   };
 
   /**
+   * Drag & Drop Reordering (MVP)
+   *
+   * Reorders content elements within and between page-level columns by
+   * delegating to the core DataHandler via the move endpoint. Scope is limited
+   * to the default language and columns the integrator marked with
+   * [data-xfe-colpos] (without [data-xfe-container]). Nested container children
+   * and translated elements keep the classic backend move dialog.
+   */
+  const DragReorder = {
+    moveUrl: null,
+    labels: {},
+    columns: [],
+    dragging: null,
+    draggingBlock: null,
+    dragGhost: null,
+    dropTarget: null,
+    indicator: null,
+
+    init() {
+      if (!window.FRONTEND_EDIT_ENABLE_DND || !window.FRONTEND_EDIT_MOVE_URL) return;
+
+      const config = document.getElementById('frontend-edit-toolbar-config');
+      if (config && parseInt(config.dataset.language || '0', 10) > 0) {
+        Logger.log('Drag & drop disabled for translated pages');
+        return;
+      }
+
+      this.moveUrl = window.FRONTEND_EDIT_MOVE_URL;
+      this.labels = window.FRONTEND_EDIT_DND_LABELS || {};
+
+      this.collectColumns();
+      if (!this.columns.length) {
+        Logger.log('Drag & drop: no page column markers ([data-xfe-colpos]) found');
+        return;
+      }
+
+      this.addHandles();
+      document.addEventListener('dragover', (e) => this.onDragOver(e));
+      document.addEventListener('drop', (e) => this.onDrop(e));
+      Logger.log(`Drag & drop initialized for ${this.columns.length} column(s)`);
+    },
+
+    collectColumns() {
+      document.querySelectorAll('[data-xfe-colpos]:not([data-xfe-container])').forEach(marker => {
+        const colPos = parseInt(marker.dataset.xfeColpos, 10);
+        const container = marker.parentElement;
+        if (!Number.isFinite(colPos) || !container) return;
+        if (this.columns.some(c => c.container === container && c.colPos === colPos)) return;
+        this.columns.push({ colPos, container });
+      });
+    },
+
+    /**
+     * Top-level content elements of a column, ignoring nested/container children.
+     * Resolves the anchor pattern (<a id="c1"></a><div>…</div>) to the visual block.
+     */
+    getColumnElements(container) {
+      const items = [];
+      container.querySelectorAll('[id]').forEach(el => {
+        const match = el.id.match(/^c(\d+)$/);
+        if (!match) return;
+        const uid = parseInt(match[1], 10);
+        if (uid <= 0) return;
+
+        let parent = el.parentElement;
+        let nested = false;
+        while (parent && parent !== container) {
+          if (parent.id && /^c\d+$/.test(parent.id)) { nested = true; break; }
+          parent = parent.parentElement;
+        }
+        if (nested) return;
+
+        let block = el;
+        if (el.getBoundingClientRect().height === 0 && el.nextElementSibling) {
+          block = el.nextElementSibling;
+        }
+        items.push({ uid, block });
+      });
+      return items;
+    },
+
+    findColumnForUid(uid) {
+      return this.columns.find(col =>
+        this.getColumnElements(col.container).some(item => item.uid === uid)
+      ) || null;
+    },
+
+    addHandles() {
+      document.querySelectorAll('.frontend-edit__toolbar[data-cid]').forEach(toolbar => {
+        if (toolbar.querySelector('.frontend-edit__btn--drag')) return;
+        const uid = parseInt(toolbar.dataset.cid, 10);
+        if (!Number.isFinite(uid) || !this.findColumnForUid(uid)) return;
+
+        // Place the handle inside the visible action group (with edit/kebab),
+        // not as a bare toolbar child — the toolbar splits label (left) and
+        // actions (right), so a bare child would sit hidden behind the label.
+        const actions = toolbar.querySelector('.frontend-edit__toolbar-actions');
+        if (!actions) return;
+
+        const handle = document.createElement('button');
+        handle.type = 'button';
+        handle.className = 'frontend-edit__btn frontend-edit__btn--drag';
+        handle.draggable = true;
+        handle.innerHTML = ICONS.drag;
+        const label = this.labels.handle || 'Drag to reorder';
+        handle.setAttribute('aria-label', label);
+        handle.dataset.tooltip = label;
+        handle.addEventListener('dragstart', (e) => this.onDragStart(e, uid));
+        handle.addEventListener('dragend', () => this.onDragEnd());
+        Tooltip.attach(handle);
+        actions.insertBefore(handle, actions.firstChild);
+      });
+    },
+
+    resolveBlock(uid) {
+      const col = this.findColumnForUid(uid);
+      if (col) {
+        const item = this.getColumnElements(col.container).find(i => i.uid === uid);
+        if (item) return item.block;
+      }
+      const el = document.getElementById('c' + uid);
+      if (!el) return null;
+      return (el.getBoundingClientRect().height === 0 && el.nextElementSibling) ? el.nextElementSibling : el;
+    },
+
+    elementLabel(block) {
+      if (!block) return '';
+      const heading = block.querySelector('h1, h2, h3, h4, h5, h6');
+      return (heading ? heading.textContent : '').trim().replace(/\s+/g, ' ').slice(0, 80);
+    },
+
+    onDragStart(e, uid) {
+      this.dragging = { uid };
+      this.draggingBlock = this.resolveBlock(uid);
+
+      if (e.dataTransfer) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', String(uid));
+
+        // Drag a translucent snapshot of the whole element (feels more natural
+        // than dragging the tiny handle button).
+        if (this.draggingBlock) {
+          try {
+            const rect = this.draggingBlock.getBoundingClientRect();
+            const ghost = this.draggingBlock.cloneNode(true);
+            ghost.classList.add('frontend-edit__drag-ghost');
+            ghost.style.cssText = `position:fixed;top:-10000px;left:0;margin:0;width:${rect.width}px;opacity:0.85;pointer-events:none;`;
+            document.body.appendChild(ghost);
+            // Anchor the ghost at the exact point the cursor grabbed, so it
+            // tracks the pointer instead of drifting off to one side.
+            const offsetX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+            const offsetY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+            e.dataTransfer.setDragImage(ghost, offsetX, offsetY);
+            this.dragGhost = ghost;
+          } catch (_) { /* fall back to the default drag image */ }
+        }
+      }
+
+      // Dim the source in place — applied next frame so it is not captured by
+      // the drag-image snapshot above.
+      if (this.draggingBlock) {
+        const block = this.draggingBlock;
+        requestAnimationFrame(() => block.classList.add('frontend-edit--drag-source'));
+      }
+
+      document.body.classList.add('frontend-edit--dragging');
+      Dropdown.closeAll();
+    },
+
+    columnFromPoint(x, y) {
+      let node = document.elementFromPoint(x, y);
+      while (node) {
+        const col = this.columns.find(c => c.container === node);
+        if (col) return col;
+        node = node.parentElement;
+      }
+      return null;
+    },
+
+    onDragOver(e) {
+      if (!this.dragging) return;
+
+      const col = this.columnFromPoint(e.clientX, e.clientY);
+      if (!col) { this.clearIndicator(); this.dropTarget = null; return; }
+
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+
+      const elements = this.getColumnElements(col.container).filter(item => item.uid !== this.dragging.uid);
+      let afterUid = 0;
+      let indicatorTop = null;
+      for (const item of elements) {
+        const rect = item.block.getBoundingClientRect();
+        if (e.clientY > rect.top + rect.height / 2) {
+          afterUid = item.uid;
+          indicatorTop = rect.bottom;
+        } else {
+          if (indicatorTop === null) indicatorTop = rect.top;
+          break;
+        }
+      }
+
+      this.dropTarget = { colPos: col.colPos, afterUid };
+      this.showIndicator(col.container, indicatorTop);
+    },
+
+    onDrop(e) {
+      if (!this.dragging || !this.dropTarget) { this.onDragEnd(); return; }
+      e.preventDefault();
+      const { uid } = this.dragging;
+      const { colPos, afterUid } = this.dropTarget;
+      const header = this.elementLabel(this.draggingBlock);
+      this.onDragEnd();
+      void this.persistMove(uid, colPos, afterUid, header);
+    },
+
+    async persistMove(uid, targetColPos, targetUid, header) {
+      const config = document.getElementById('frontend-edit-toolbar-config');
+      const language = config ? parseInt(config.dataset.language || '0', 10) : 0;
+      const L = this.labels;
+      // "OK" is the TYPO3 severity that maps to the green success styling.
+      const successMsg = header
+        ? (L.successDetail || '“%s” was moved to its new position.').replace('%s', header)
+        : (L.successDetailGeneric || 'The content element was moved to its new position.');
+      const errorMsg = header
+        ? (L.errorDetail || '“%s” could not be moved. Please try again.').replace('%s', header)
+        : (L.errorDetailGeneric || 'The content element could not be moved. Please try again.');
+      try {
+        const response = await fetch(this.moveUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uid, targetColPos, targetUid, language })
+        });
+        if (!response.ok) throw new Error(`move failed (${response.status})`);
+
+        try {
+          sessionStorage.setItem('xfe-pending-notification', JSON.stringify({
+            title: L.success || 'Content element moved',
+            message: successMsg,
+            severity: 'ok'
+          }));
+        } catch (_) { /* ignore */ }
+        window.location.reload();
+      } catch (error) {
+        Logger.log('Drag & drop move failed', { error: error.message }, 'error');
+        Notification.show({
+          title: L.error || 'Could not move the content element',
+          message: errorMsg,
+          severity: 'error'
+        });
+      }
+    },
+
+    showIndicator(container, top) {
+      if (!this.indicator) {
+        this.indicator = document.createElement('div');
+        this.indicator.className = 'frontend-edit__drop-indicator';
+        document.body.appendChild(this.indicator);
+      }
+      const rect = container.getBoundingClientRect();
+      this.indicator.style.left = `${rect.left}px`;
+      this.indicator.style.width = `${rect.width}px`;
+      this.indicator.style.top = `${null != top ? top : rect.top}px`;
+      this.indicator.style.display = 'block';
+    },
+
+    clearIndicator() {
+      if (this.indicator) this.indicator.style.display = 'none';
+    },
+
+    onDragEnd() {
+      if (this.dragGhost) { this.dragGhost.remove(); this.dragGhost = null; }
+      if (this.draggingBlock) { this.draggingBlock.classList.remove('frontend-edit--drag-source'); this.draggingBlock = null; }
+      this.dragging = null;
+      this.dropTarget = null;
+      this.clearIndicator();
+      document.body.classList.remove('frontend-edit--dragging');
+    }
+  };
+
+  /**
    * Main Application
    */
   const FrontendEdit = {
@@ -1407,6 +1689,7 @@
           ColumnTargetRenderer.render(response.columnTargets || []);
           Dropdown.setupGlobalHandler();
           DeleteHandler.init();
+          DragReorder.init();
         }
 
         Logger.log(`Frontend Edit initialization completed in ${Math.round(performance.now() - startTime)}ms`);

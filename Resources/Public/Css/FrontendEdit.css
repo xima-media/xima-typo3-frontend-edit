@@ -1,5 +1,8 @@
 /* CSS Custom Properties for Theming */
 :root {
+    /* Drag & drop accent — a saturated blue that stays clearly visible on both
+       light and dark page layouts (the brown dialog color did not). */
+    --xfe-dnd-accent: #2d7ff9;
     --xfe-toolbar-bg: rgba(50, 50, 50, 0.95);
     --xfe-toolbar-text: #ffffff;
     --xfe-toolbar-btn-hover: rgba(255, 255, 255, 0.15);
@@ -1381,4 +1384,74 @@
     display: block;
     background: #f5f5f5;
     pointer-events: auto;
+}
+
+/* ---------------------------------------------------------------------------
+   Drag & drop reordering (opt-in via frontendEdit.enableDragAndDrop)
+   --------------------------------------------------------------------------- */
+/* Two classes (0,2,0) to beat bootstrap_package's `button:not(:disabled)`
+   reset (0,1,1), which otherwise forces cursor: pointer. */
+.frontend-edit__btn.frontend-edit__btn--drag {
+    cursor: grab;
+}
+
+.frontend-edit__btn.frontend-edit__btn--drag:active {
+    cursor: grabbing;
+}
+
+/* While dragging, let pointer hit-testing (elementFromPoint) fall through the
+   overlay toolbars to the underlying columns so drop targets resolve. */
+body.frontend-edit--dragging {
+    cursor: grabbing;
+}
+
+body.frontend-edit--dragging .frontend-edit__toolbar {
+    pointer-events: none;
+}
+
+/* Insertion line — an overlay only (never inserted into the content flow), so
+   it can never shift or break the page layout. */
+.frontend-edit__drop-indicator {
+    position: fixed;
+    display: none;
+    height: 4px;
+    margin-top: -2px;
+    border-radius: 999px;
+    background: var(--xfe-dnd-accent);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7), 0 1px 6px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    z-index: 10001;
+}
+
+/* Caret dot at the start of the insertion line (Gutenberg/Atlassian style). */
+.frontend-edit__drop-indicator::before {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: 50%;
+    width: 11px;
+    height: 11px;
+    transform: translateY(-50%);
+    border-radius: 50%;
+    background: var(--xfe-dnd-accent);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7);
+}
+
+/* The element being dragged fades in place while its translucent copy follows
+   the cursor (drag image built in JS). */
+.frontend-edit--drag-source {
+    opacity: 0.4 !important;
+    transition: opacity 0.15s ease;
+}
+
+/* The drag preview: a lifted "card" snapshot of the element. Height is capped
+   so a very tall element stays a tidy card; it lives off-screen and is only
+   used as the drag image, so it never affects the real page layout. */
+.frontend-edit__drag-ghost {
+    max-height: 180px;
+    overflow: hidden;
+    border-radius: 6px;
+    outline: 2px solid var(--xfe-dnd-accent);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+    background: var(--xfe-bg-primary);
 }

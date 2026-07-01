@@ -210,6 +210,19 @@ final class UrlBuilderServiceTest extends TestCase
     }
 
     #[Test]
+    public function buildMoveActionUrlReturnsCorrectUrl(): void
+    {
+        $this->uriBuilderMock->method('buildUriFromRoute')
+            ->with('ajax_frontendEdit_move', [])
+            ->willReturn(new Uri('/typo3/ajax/frontend-edit/move'));
+
+        $service = new UrlBuilderService();
+        $result = $service->buildMoveActionUrl();
+
+        self::assertSame('/typo3/ajax/frontend-edit/move', $result);
+    }
+
+    #[Test]
     public function buildNewContentWizardUrlAppendsToColumnWhenNoUidAfter(): void
     {
         $this->uriBuilderMock->method('buildUriFromRoute')
