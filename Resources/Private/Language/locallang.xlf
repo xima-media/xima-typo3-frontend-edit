@@ -99,6 +99,27 @@
 			<trans-unit id="notification.contentCreated">
 				<source>Content element created</source>
 			</trans-unit>
+			<trans-unit id="dnd.handle">
+				<source>Drag to reorder</source>
+			</trans-unit>
+			<trans-unit id="dnd.success">
+				<source>Content element moved</source>
+			</trans-unit>
+			<trans-unit id="dnd.successDetail">
+				<source>“%s” was moved to its new position. The page was reloaded to reflect the change.</source>
+			</trans-unit>
+			<trans-unit id="dnd.successDetailGeneric">
+				<source>The content element was moved to its new position. The page was reloaded to reflect the change.</source>
+			</trans-unit>
+			<trans-unit id="dnd.error">
+				<source>Could not move the content element</source>
+			</trans-unit>
+			<trans-unit id="dnd.errorDetail">
+				<source>“%s” could not be moved. Please try again.</source>
+			</trans-unit>
+			<trans-unit id="dnd.errorDetailGeneric">
+				<source>The content element could not be moved. Please try again.</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

@@ -105,6 +105,13 @@
                 <source>Opens content element edit forms in a sidebar panel instead of navigating to the backend. Requires TYPO3 v14.2+. This feature is experimental and may change in future versions.</source>
             </trans-unit>
 
+            <trans-unit id="settings.frontendEdit.enableDragAndDrop">
+                <source>[Experimental] Enable drag &amp; drop reordering</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.enableDragAndDrop">
+                <source>Allows editors to reorder content elements directly in the frontend by dragging them within and between columns. Requires the integrator's Fluid template to mark columns with the data-xfe-colpos attribute. Nested containers and translated elements fall back to the backend move dialog. Experimental.</source>
+            </trans-unit>
+
             <trans-unit id="settings.frontendEdit.showInsertButtons">
                 <source>Show insert buttons on hover</source>
             </trans-unit>

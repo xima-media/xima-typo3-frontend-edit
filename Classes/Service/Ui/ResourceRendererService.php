@@ -122,6 +122,17 @@ final readonly class ResourceRendererService
             && $this->settingsService->isContextualEditingEnabled($request)
             && $this->urlBuilderService->isContextualEditRouteAvailable()) ? 'true' : 'false';
         $isDisabled = $this->backendUserService->isFrontendEditDisabled() ? 'true' : 'false';
+        $enableDragAndDrop = $this->jsBool($request, $this->settingsService->isDragAndDropEnabled(...));
+        $moveUrl = $this->urlBuilderService->buildMoveActionUrl();
+        $dragAndDropLabels = json_encode([
+            'handle' => $this->translate('dnd.handle', 'Drag to reorder'),
+            'success' => $this->translate('dnd.success', 'Content element moved'),
+            'successDetail' => $this->translate('dnd.successDetail', '“%s” was moved to its new position. The page was reloaded to reflect the change.'),
+            'successDetailGeneric' => $this->translate('dnd.successDetailGeneric', 'The content element was moved to its new position. The page was reloaded to reflect the change.'),
+            'error' => $this->translate('dnd.error', 'Could not move the content element'),
+            'errorDetail' => $this->translate('dnd.errorDetail', '“%s” could not be moved. Please try again.'),
+            'errorDetailGeneric' => $this->translate('dnd.errorDetailGeneric', 'The content element could not be moved. Please try again.'),
+        ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $deleteLabels = json_encode([
             'title' => $this->translate('delete.confirm.title', 'Delete this record?'),
             'message' => $this->translate('delete.confirm.message', "Are you sure you want to delete the record '%s'?"),
@@ -141,7 +152,7 @@ final readonly class ResourceRendererService
             'contentCreated' => $this->translate('notification.contentCreated', 'Content element created'),
         ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $resources['settings_config'] = sprintf(
-            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_SIDEBAR_EDIT = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s; window.FRONTEND_EDIT_NOTIFICATION_LABELS = %s; window.FRONTEND_EDIT_SHOW_INSERT_BUTTONS = %s;</script>',
+            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_SIDEBAR_EDIT = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s; window.FRONTEND_EDIT_NOTIFICATION_LABELS = %s; window.FRONTEND_EDIT_SHOW_INSERT_BUTTONS = %s; window.FRONTEND_EDIT_ENABLE_DND = %s; window.FRONTEND_EDIT_MOVE_URL = "%s"; window.FRONTEND_EDIT_DND_LABELS = %s;</script>',
             $nonceAttribute,
             $colorScheme,
             $showContextMenu,
@@ -154,6 +165,9 @@ final readonly class ResourceRendererService
             $columnLabels,
             $notificationLabels,
             $showInsertButtons,
+            $enableDragAndDrop,
+            htmlspecialchars($moveUrl, \ENT_QUOTES, 'UTF-8'),
+            $dragAndDropLabels,
         );
     }
 

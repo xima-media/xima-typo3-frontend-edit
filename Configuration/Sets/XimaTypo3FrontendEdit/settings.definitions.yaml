@@ -64,6 +64,13 @@ settings:
     description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.enableContextualEditing
     category: frontendEdit.appearance
 
+  frontendEdit.enableDragAndDrop:
+    default: false
+    type: bool
+    label: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.frontendEdit.enableDragAndDrop
+    description: LLL:EXT:xima_typo3_frontend_edit/Resources/Private/Language/locallang_sitesettings.xlf:settings.description.frontendEdit.enableDragAndDrop
+    category: frontendEdit.appearance
+
   frontendEdit.showInsertButtons:
     default: true
     type: bool
