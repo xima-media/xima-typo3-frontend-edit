@@ -1,0 +1,9 @@
+"tt_content"
+,"uid","pid","sys_language_uid","l18n_parent","CType","header","hidden","deleted"
+,1,2,0,0,"text","Default EN",0,0
+,2,2,0,0,"textmedia","Second EN",0,0
+,3,2,1,1,"text","Translated DE",0,0
+,4,2,0,0,"text","Hidden",1,0
+,5,2,0,0,"text","Deleted",0,1
+,6,2,-1,0,"text","All languages",0,0
+,7,3,0,0,"text","Other page",0,0
