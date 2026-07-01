@@ -78,6 +78,9 @@
 			<trans-unit id="delete.success">
 				<source>Record deleted</source>
 			</trans-unit>
+			<trans-unit id="delete.success.message">
+				<source>The record was successfully deleted. The page will reload shortly.</source>
+			</trans-unit>
 			<trans-unit id="delete.error">
 				<source>Could not delete the record</source>
 			</trans-unit>
