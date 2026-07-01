@@ -47,7 +47,7 @@ final readonly class EmptyColumnService
      * @param string       $returnUrl         Frontend URL to return to after editing
      * @param array<mixed> $requestData       Raw request data from the AJAX call
      * @param bool         $showInsertButtons Whether per-element "insert after" buttons are enabled;
-     *                                         if so, the end-of-column button on filled columns is redundant
+     *                                        if so, the end-of-column button on filled columns is redundant
      *
      * @return list<array{colPos: int, isEmpty: bool, newContentUrl: string, name?: string, containerUid?: int}>
      */
