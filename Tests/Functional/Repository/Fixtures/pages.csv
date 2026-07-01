@@ -1,0 +1,7 @@
+"pages"
+,"uid","pid","doktype","title","sys_language_uid","l10n_parent","deleted","hidden"
+,1,0,1,"Root",0,0,0,0
+,2,1,1,"Subpage",0,0,0,0
+,3,2,1,"Subsubpage",0,0,0,0
+,4,1,254,"Folder",0,0,0,0
+,5,1,1,"Subpage DE",1,2,0,0
