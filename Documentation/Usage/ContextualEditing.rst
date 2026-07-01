@@ -12,6 +12,11 @@ Contextual Editing
 
     Contextual editing is **experimental**.
 
+..  note::
+
+    Thanks to `Violetta Digital Craft <https://www.violetta.ch/>`__ for
+    supporting the development of this feature.
+
 Contextual editing lets editors modify content elements and page properties
 directly in the frontend. Clicking an edit button opens a sidebar panel that
 slides in from the right, displaying the TYPO3 FormEngine edit form — no
