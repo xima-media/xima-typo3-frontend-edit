@@ -26,6 +26,7 @@ This TYPO3 extension adds lightweight editing tools to the frontend, allowing ba
 - **Content Element Editing**
   - [Edit Dropdown Menu](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html) - Quick access to edit, hide, delete, and move content elements, with confirmation before deleting records
   - [Contextual Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html) - Edit content directly in the frontend (experimental)
+  - Drag & Drop Reordering - Reorder content elements within and between columns directly in the frontend (experimental, requires `frontendEdit.enableDragAndDrop`)
   - New Content Elements - Create new content elements via TYPO3's native New Content Element Wizard, hosted in the slide-in iframe modal on both v13 and v14 (requires `frontendEdit.enableContextualEditing`)
 - **Page Toolbar**
   - [Toolbar](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/Toolbar.html) - Page-level actions and toggle for frontend editing
@@ -43,6 +44,13 @@ This TYPO3 extension adds lightweight editing tools to the frontend, allowing ba
 Edit content elements directly in the frontend without navigating to the backend. Enable via Site Settings: `frontendEdit.enableContextualEditing: true`
 
 ![Inline Editing](./Documentation/Images/inline-edit-screencast.gif)
+
+### Drag & Drop Reordering *(experimental)*
+
+Reorder content elements directly in the frontend by dragging them within a column or across columns on the same page. The move is persisted through TYPO3's core DataHandler — the same mechanism the backend page module uses. Enable via Site Settings: `frontendEdit.enableDragAndDrop: true`
+
+> [!NOTE]
+> Drag & drop relies on the same `data-xfe-colpos` column markers used by the [column target buttons](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/EmptyColumns.html). Your Fluid template must mark each column so its `colPos` can be resolved. Nested containers (EXT:container) and translated elements are out of scope and keep the classic backend move dialog.
 
 > [!IMPORTANT]
 > **Delineation and classification**: This is **not** a further development of the "original" extension [frontend_editing](https://extensions.typo3.org/extension/frontend_editing). It is similar in some ways to the realisation of the [feedit](https://extensions.typo3.org/extension/feedit) extension. This extension is an independent implementation with a different approach. See the [Delineation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Delineation/Index.html) page in the documentation for a detailed comparison with related extensions like [visual_editor](https://github.com/FriendsOfTYPO3/visual_editor) and [content_preview](https://github.com/T3-UX/content_preview).
