@@ -29,12 +29,13 @@
 		"typo3fluid/fluid": "^4.2 || ^5.0"
 	},
 	"require-dev": {
+		"composer/class-map-generator": "^1.7.3",
 		"eliashaeussler/version-bumper": "^4.0.3",
 		"phpunit/phpcov": "^9.0 || ^10.0 || ^11.0 || ^13.0",
 		"phpunit/phpunit": "^11.0 || ^12.0 || ^13.0",
 		"typo3/cms-base-distribution": "^13.4 || ^14.0",
 		"typo3/cms-lowlevel": "^13.4 || ^14.0",
-		"typo3/testing-framework": "^8.2 || ^9.0"
+		"typo3/testing-framework": "^8.0 || ^9.5"
 	},
 	"autoload": {
 		"psr-4": {
