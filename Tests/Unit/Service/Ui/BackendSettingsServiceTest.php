@@ -20,9 +20,11 @@ use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Core\{ApplicationContext, Environment};
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Package\PackageManager;
+use TYPO3\CMS\Core\Package\{PackageInterface, PackageManager};
 use TYPO3\CMS\Core\Utility\{ExtensionManagementUtility, GeneralUtility};
 use Xima\XimaTypo3FrontendEdit\Service\Ui\BackendSettingsService;
+
+use function dirname;
 
 /**
  * BackendSettingsServiceTest.
@@ -39,9 +41,16 @@ final class BackendSettingsServiceTest extends TestCase
         $uriBuilder->method('buildUriFromRoute')->willReturn(new Uri('/typo3/ajax/mock'));
         GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilder);
 
+        $package = $this->createMock(PackageInterface::class);
+        $package->method('getPackagePath')->willReturn(dirname(__DIR__, 4).'/');
+
         $packageManager = $this->createMock(PackageManager::class);
         $packageManager->method('resolvePackagePath')
             ->willReturnCallback(static fn (string $path): string => '/var/www/html/public/'.ltrim(str_replace('EXT:', 'typo3conf/ext/', $path), '/'));
+        $packageManager->method('isPackageActive')->willReturn(true);
+        $packageManager->method('getPackage')->willReturn($package);
+        $packageManager->method('getActivePackages')->willReturn([]);
+        GeneralUtility::setSingletonInstance(PackageManager::class, $packageManager);
         ExtensionManagementUtility::setPackageManager($packageManager);
 
         Environment::initialize(

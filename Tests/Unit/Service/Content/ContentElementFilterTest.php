@@ -221,6 +221,9 @@ final class ContentElementFilterTest extends TestCase
     private function createBackendUser(bool $hasAccess): BackendUserAuthentication
     {
         $backendUser = $this->createMock(BackendUserAuthentication::class);
+        if (method_exists(BackendUserAuthentication::class, 'checkRecordEditAccess')) {
+            $backendUser->method('checkRecordEditAccess')->willReturn(new \TYPO3\CMS\Core\Authentication\AccessCheckResult($hasAccess));
+        }
         $backendUser->method('recordEditAccessInternals')->willReturn($hasAccess);
 
         return $backendUser;

@@ -16,6 +16,7 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\EventListener;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
+use ReflectionClass;
 use stdClass;
 use TYPO3\CMS\Backend\Routing\Route;
 use TYPO3\CMS\Backend\Template\Components\{ButtonBar, ModifyButtonBarEvent};
@@ -96,7 +97,13 @@ final class PageLayoutScrollEventListenerTest extends TestCase
 
     private function createEvent(): ModifyButtonBarEvent
     {
-        return new ModifyButtonBarEvent([], $this->createMock(ButtonBar::class));
+        $args = [[], $this->createMock(ButtonBar::class)];
+        $reflection = new ReflectionClass(ModifyButtonBarEvent::class);
+        if ($reflection->getConstructor()->getNumberOfParameters() >= 3) {
+            $args[] = $this->createMock(ServerRequestInterface::class);
+        }
+
+        return $reflection->newInstanceArgs($args);
     }
 
     /**

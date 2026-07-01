@@ -22,7 +22,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Core\{ApplicationContext, Environment};
 use TYPO3\CMS\Core\Http\Uri;
-use TYPO3\CMS\Core\Package\PackageManager;
+use TYPO3\CMS\Core\Package\{PackageInterface, PackageManager};
 use TYPO3\CMS\Core\Settings\SettingsInterface;
 use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
 use TYPO3\CMS\Core\Utility\{ExtensionManagementUtility, GeneralUtility};
@@ -31,6 +31,8 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{BackendSettingsService, ResourceRendererService, UrlBuilderService};
+
+use function dirname;
 
 /**
  * ResourceRendererServiceTest.
@@ -47,9 +49,16 @@ final class ResourceRendererServiceTest extends TestCase
         $uriBuilder->method('buildUriFromRoute')->willReturn(new Uri('/typo3/mock'));
         GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilder);
 
+        $package = $this->createMock(PackageInterface::class);
+        $package->method('getPackagePath')->willReturn(dirname(__DIR__, 4).'/');
+
         $packageManager = $this->createMock(PackageManager::class);
         $packageManager->method('resolvePackagePath')
             ->willReturnCallback(static fn (string $path): string => '/var/www/html/public/'.ltrim(str_replace('EXT:', 'typo3conf/ext/', $path), '/'));
+        $packageManager->method('isPackageActive')->willReturn(true);
+        $packageManager->method('getPackage')->willReturn($package);
+        $packageManager->method('getActivePackages')->willReturn([]);
+        GeneralUtility::setSingletonInstance(PackageManager::class, $packageManager);
         ExtensionManagementUtility::setPackageManager($packageManager);
 
         Environment::initialize(

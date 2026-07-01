@@ -16,6 +16,7 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\EventListener;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
+use ReflectionClass;
 use TYPO3\CMS\Backend\Template\Components\{ButtonBar, ModifyButtonBarEvent};
 use TYPO3\CMS\Backend\Template\Components\Buttons\InputButton;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
@@ -109,7 +110,12 @@ final class ModifyButtonBarEventListenerTest extends TestCase
         $buttons = [ButtonBar::BUTTON_POSITION_LEFT => [2 => [0 => $saveButton]]];
         $buttonBar = $this->createMock(ButtonBar::class);
         $buttonBar->method('makeInputButton')->willReturn(new InputButton());
-        $event = new ModifyButtonBarEvent($buttons, $buttonBar);
+        $eventArgs = [$buttons, $buttonBar];
+        $eventReflection = new ReflectionClass(ModifyButtonBarEvent::class);
+        if ($eventReflection->getConstructor()->getNumberOfParameters() >= 3) {
+            $eventArgs[] = $this->createMock(ServerRequestInterface::class);
+        }
+        $event = $eventReflection->newInstanceArgs($eventArgs);
 
         $listener($event);
 
@@ -134,7 +140,13 @@ final class ModifyButtonBarEventListenerTest extends TestCase
      */
     private function createEvent(array $buttons): ModifyButtonBarEvent
     {
-        return new ModifyButtonBarEvent($buttons, $this->createMock(ButtonBar::class));
+        $args = [$buttons, $this->createMock(ButtonBar::class)];
+        $reflection = new ReflectionClass(ModifyButtonBarEvent::class);
+        if ($reflection->getConstructor()->getNumberOfParameters() >= 3) {
+            $args[] = $this->createMock(ServerRequestInterface::class);
+        }
+
+        return $reflection->newInstanceArgs($args);
     }
 
     /**
@@ -157,5 +169,12 @@ final class ModifyButtonBarEventListenerTest extends TestCase
         $languageService = $this->createMock(LanguageService::class);
         $languageService->method('sL')->willReturn('Save and close');
         $GLOBALS['LANG'] = $languageService;
+
+        $componentFactoryClass = 'TYPO3\\CMS\\Backend\\Template\\Components\\ComponentFactory';
+        if (class_exists($componentFactoryClass)) {
+            $componentFactory = $this->createMock($componentFactoryClass);
+            $componentFactory->method('createInputButton')->willReturn(new InputButton());
+            GeneralUtility::addInstance($componentFactoryClass, $componentFactory);
+        }
     }
 }

@@ -105,6 +105,9 @@ final class AdditionalDataHandlerTest extends TestCase
     {
         $backendUser = $this->createMock(BackendUserAuthentication::class);
         $backendUser->user = ['uid' => 1];
+        if (method_exists(BackendUserAuthentication::class, 'checkRecordEditAccess')) {
+            $backendUser->method('checkRecordEditAccess')->willReturn(new \TYPO3\CMS\Core\Authentication\AccessCheckResult(false));
+        }
         $backendUser->method('recordEditAccessInternals')->willReturn(false);
         $GLOBALS['BE_USER'] = $backendUser;
 
@@ -236,6 +239,9 @@ final class AdditionalDataHandlerTest extends TestCase
     {
         $backendUser = $this->createMock(BackendUserAuthentication::class);
         $backendUser->user = ['uid' => 1];
+        if (method_exists(BackendUserAuthentication::class, 'checkRecordEditAccess')) {
+            $backendUser->method('checkRecordEditAccess')->willReturn(new \TYPO3\CMS\Core\Authentication\AccessCheckResult(true));
+        }
         $backendUser->method('recordEditAccessInternals')->willReturn(true);
         $GLOBALS['BE_USER'] = $backendUser;
     }
@@ -246,9 +252,26 @@ final class AdditionalDataHandlerTest extends TestCase
     private function registerRecordLookup(array|false $record): void
     {
         $GLOBALS['TCA']['pages'] = ['ctrl' => []];
+        $this->registerTcaSchemaFactory();
         GeneralUtility::addInstance(
             ConnectionPool::class,
             $this->createConnectionPoolReturning($record),
+        );
+    }
+
+    private function registerTcaSchemaFactory(): void
+    {
+        if (!class_exists(\TYPO3\CMS\Core\Schema\TcaSchemaFactory::class)) {
+            return;
+        }
+
+        $schemaFactory = $this->createMock(\TYPO3\CMS\Core\Schema\TcaSchemaFactory::class);
+        $schemaFactory->method('has')->willReturn(true);
+        $schemaFactory->method('get')->willReturn($this->createMock(\TYPO3\CMS\Core\Schema\TcaSchema::class));
+        GeneralUtility::addInstance(\TYPO3\CMS\Core\Schema\TcaSchemaFactory::class, $schemaFactory);
+        GeneralUtility::addInstance(
+            \TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction::class,
+            $this->createMock(\TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction::class),
         );
     }
 
