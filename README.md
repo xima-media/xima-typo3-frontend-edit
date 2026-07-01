@@ -31,6 +31,7 @@ The extension injects a small JavaScript into the frontend that generates action
   - **[Edit Menu](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html)** - Quick access to edit, hide, delete, and move content elements
   - **[Delete Confirmation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html#delete-confirmation)** - Confirmation dialog before deleting records *(new in v2.3)*
   - **[Inline Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)** *(experimental)* - Edit content directly in the frontend
+  - **Drag & Drop Reordering** *(experimental)* - Reorder content elements within and between columns directly in the frontend (requires `frontendEdit.enableDragAndDrop`)
   - **New Content Wizard** - Create new content elements via TYPO3's native New Content Element Wizard, hosted in the slide-in iframe modal on both v13 and v14 (requires `frontendEdit.enableContextualEditing`)
 - **Page Toolbar**
   - **[Toolbar](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/Toolbar.html)** - Page-level actions and toggle for frontend editing
@@ -53,6 +54,13 @@ Edit content elements directly in the frontend without navigating to the backend
 ![Inline Editing](./Documentation/Images/inline-edit-screencast.gif)
 
 [Documentation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)
+
+### Drag & Drop Reordering *(experimental)*
+
+Reorder content elements directly in the frontend by dragging them within a column or across columns on the same page. The move is persisted through TYPO3's core DataHandler — the same mechanism the backend page module uses. Enable via Site Settings: `frontendEdit.enableDragAndDrop: true`
+
+> [!NOTE]
+> Drag & drop relies on the same `data-xfe-colpos` column markers used by the [column target buttons](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/EmptyColumns.html). Your Fluid template must mark each column so its `colPos` can be resolved. Nested containers (EXT:container) and translated elements are out of scope and keep the classic backend move dialog.
 
 ## 🔥 Installation
 
