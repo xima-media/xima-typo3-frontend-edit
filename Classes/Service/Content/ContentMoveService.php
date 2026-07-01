@@ -57,22 +57,24 @@ final readonly class ContentMoveService
      * The target page is always derived from the record itself, so a crafted
      * request cannot move an element across pages (out of MVP scope). When a
      * neighbour is given it must live on the same page.
+     *
+     * @return array{success: bool, statusCode: int, errors: list<string>}
      */
-    public function move(int $uid, int $targetColPos, ?int $targetUid): MoveResult
+    public function move(int $uid, int $targetColPos, ?int $targetUid): array
     {
         // Fetch all fields: tx_container_parent only exists when EXT:container is
         // installed, so it must not be named explicitly in the SELECT.
         $record = BackendUtility::getRecord('tt_content', $uid);
         if (null === $record) {
-            return MoveResult::failed([sprintf('Content element %d not found', $uid)]);
+            return $this->failure(400, sprintf('Content element %d not found', $uid));
         }
 
         if (!$this->isMovable($record)) {
-            return MoveResult::unprocessable('This content element cannot be moved via drag & drop (use the backend move dialog instead)');
+            return $this->failure(422, 'This content element cannot be moved via drag & drop (use the backend move dialog instead)');
         }
 
         if (!$this->backendUserService->hasRecordEditAccess('tt_content', $record)) {
-            return MoveResult::forbidden('You are not allowed to edit this content element');
+            return $this->failure(403, 'You are not allowed to edit this content element');
         }
 
         $pid = (int) $record['pid'];
@@ -80,7 +82,7 @@ final readonly class ContentMoveService
         if (null !== $targetUid && $targetUid > 0) {
             $neighbour = BackendUtility::getRecord('tt_content', $targetUid);
             if (null === $neighbour || (int) $neighbour['pid'] !== $pid || (int) ($neighbour['tx_container_parent'] ?? 0) > 0) {
-                return MoveResult::unprocessable('Invalid drop target');
+                return $this->failure(422, 'Invalid drop target');
             }
         }
 
@@ -91,10 +93,10 @@ final readonly class ContentMoveService
         $dataHandler->process_cmdmap();
 
         if ([] !== $dataHandler->errorLog) {
-            return MoveResult::failed(array_values(array_map(strval(...), $dataHandler->errorLog)));
+            return $this->failure(400, ...array_map(strval(...), array_values($dataHandler->errorLog)));
         }
 
-        return MoveResult::success();
+        return ['success' => true, 'statusCode' => 200, 'errors' => []];
     }
 
     /**
@@ -121,5 +123,13 @@ final readonly class ContentMoveService
                 ],
             ],
         ];
+    }
+
+    /**
+     * @return array{success: bool, statusCode: int, errors: list<string>}
+     */
+    private function failure(int $statusCode, string ...$errors): array
+    {
+        return ['success' => false, 'statusCode' => $statusCode, 'errors' => array_values($errors)];
     }
 }

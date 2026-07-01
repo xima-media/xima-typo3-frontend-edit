@@ -181,10 +181,10 @@ readonly class AjaxController
         $result = $this->contentMoveService->move($uid, $targetColPos, $targetUid);
 
         return new JsonResponse(
-            $result->success
+            $result['success']
                 ? ['success' => true]
-                : ['success' => false, 'errors' => $result->errors],
-            $result->statusCode,
+                : ['success' => false, 'errors' => $result['errors']],
+            $result['statusCode'],
         );
     }
 
