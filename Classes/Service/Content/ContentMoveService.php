@@ -81,7 +81,7 @@ final readonly class ContentMoveService
 
         if (null !== $targetUid && $targetUid > 0) {
             $neighbour = BackendUtility::getRecord('tt_content', $targetUid);
-            if (null === $neighbour || (int) $neighbour['pid'] !== $pid || (int) ($neighbour['tx_container_parent'] ?? 0) > 0) {
+            if (null === $neighbour || (int) $neighbour['pid'] !== $pid || !$this->isMovable($neighbour)) {
                 return $this->failure(422, 'Invalid drop target');
             }
         }
