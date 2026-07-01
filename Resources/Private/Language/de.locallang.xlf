@@ -141,11 +141,19 @@
 			</trans-unit>
 			<trans-unit id="dnd.successDetail">
 				<source />
-				<target>„%s“ wurde an die neue Position verschoben. Die Seite wurde neu geladen, um die Änderung anzuzeigen.</target>
+				<target>„%s“ wurde innerhalb der Spalte umsortiert. Die Seite wurde neu geladen, um die Änderung anzuzeigen.</target>
 			</trans-unit>
 			<trans-unit id="dnd.successDetailGeneric">
 				<source />
-				<target>Das Inhaltselement wurde an die neue Position verschoben. Die Seite wurde neu geladen, um die Änderung anzuzeigen.</target>
+				<target>Das Inhaltselement wurde innerhalb der Spalte umsortiert. Die Seite wurde neu geladen, um die Änderung anzuzeigen.</target>
+			</trans-unit>
+			<trans-unit id="dnd.successDetailMoved">
+				<source />
+				<target>„%s“ wurde in eine andere Spalte verschoben. Die Seite wurde neu geladen, um die Änderung anzuzeigen.</target>
+			</trans-unit>
+			<trans-unit id="dnd.successDetailMovedGeneric">
+				<source />
+				<target>Das Inhaltselement wurde in eine andere Spalte verschoben. Die Seite wurde neu geladen, um die Änderung anzuzeigen.</target>
 			</trans-unit>
 			<trans-unit id="dnd.error">
 				<source />

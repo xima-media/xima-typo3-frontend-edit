@@ -106,10 +106,16 @@
 				<source>Content element moved</source>
 			</trans-unit>
 			<trans-unit id="dnd.successDetail">
-				<source>“%s” was moved to its new position. The page was reloaded to reflect the change.</source>
+				<source>“%s” was reordered within the column. The page was reloaded to reflect the change.</source>
 			</trans-unit>
 			<trans-unit id="dnd.successDetailGeneric">
-				<source>The content element was moved to its new position. The page was reloaded to reflect the change.</source>
+				<source>The content element was reordered within the column. The page was reloaded to reflect the change.</source>
+			</trans-unit>
+			<trans-unit id="dnd.successDetailMoved">
+				<source>“%s” was moved to another column. The page was reloaded to reflect the change.</source>
+			</trans-unit>
+			<trans-unit id="dnd.successDetailMovedGeneric">
+				<source>The content element was moved to another column. The page was reloaded to reflect the change.</source>
 			</trans-unit>
 			<trans-unit id="dnd.error">
 				<source>Could not move the content element</source>

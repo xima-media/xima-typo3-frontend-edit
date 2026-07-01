@@ -1501,7 +1501,8 @@
     },
 
     onDragStart(e, uid) {
-      this.dragging = { uid };
+      const sourceCol = this.findColumnForUid(uid);
+      this.dragging = { uid, sourceColPos: sourceCol ? sourceCol.colPos : null };
       this.draggingBlock = this.resolveBlock(uid);
 
       if (e.dataTransfer) {
@@ -1585,18 +1586,25 @@
       const { uid } = this.dragging;
       const { colPos, afterUid } = this.dropTarget;
       const header = this.elementLabel(this.draggingBlock);
+      // Distinguish a reorder within the same column from a move to another one.
+      // Unknown source (null) is treated as a cross-column move.
+      const sameColumn = null != this.dragging.sourceColPos && this.dragging.sourceColPos === colPos;
       this.onDragEnd();
-      void this.persistMove(uid, colPos, afterUid, header);
+      void this.persistMove(uid, colPos, afterUid, header, sameColumn);
     },
 
-    async persistMove(uid, targetColPos, targetUid, header) {
+    async persistMove(uid, targetColPos, targetUid, header, sameColumn) {
       const config = document.getElementById('frontend-edit-toolbar-config');
       const language = config ? parseInt(config.dataset.language || '0', 10) : 0;
       const L = this.labels;
       // "OK" is the TYPO3 severity that maps to the green success styling.
+      const detail = sameColumn ? L.successDetail : L.successDetailMoved;
+      const detailGeneric = sameColumn ? L.successDetailGeneric : L.successDetailMovedGeneric;
+      const fallback = sameColumn ? '“%s” was reordered within the column.' : '“%s” was moved to another column.';
+      const fallbackGeneric = sameColumn ? 'The content element was reordered within the column.' : 'The content element was moved to another column.';
       const successMsg = header
-        ? (L.successDetail || '“%s” was moved to its new position.').replace('%s', header)
-        : (L.successDetailGeneric || 'The content element was moved to its new position.');
+        ? (detail || fallback).replace('%s', header)
+        : (detailGeneric || fallbackGeneric);
       const errorMsg = header
         ? (L.errorDetail || '“%s” could not be moved. Please try again.').replace('%s', header)
         : (L.errorDetailGeneric || 'The content element could not be moved. Please try again.');
