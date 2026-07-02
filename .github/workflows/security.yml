@@ -1,0 +1,12 @@
+name: Security
+on:
+  push:
+    branches:
+      - main
+  pull_request: ~
+
+jobs:
+  security:
+    uses: konradmichalik/reusable-github-actions/.github/workflows/security.yml@main
+    permissions:
+      contents: read
