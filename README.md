@@ -10,7 +10,6 @@
 [![Coverage](https://img.shields.io/coverallsCoverage/github/xima-media/xima-typo3-frontend-edit?logo=coveralls)](https://coveralls.io/github/xima-media/xima-typo3-frontend-edit)
 [![CGL](https://img.shields.io/github/actions/workflow/status/xima-media/xima-typo3-frontend-edit/cgl.yml?label=cgl&logo=github)](https://github.com/xima-media/xima-typo3-frontend-edit/actions/workflows/cgl.yml)
 [![Tests](https://img.shields.io/github/actions/workflow/status/xima-media/xima-typo3-frontend-edit/tests.yml?label=tests&logo=github)](https://github.com/xima-media/xima-typo3-frontend-edit/actions/workflows/tests.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/xima-media/xima-typo3-frontend-edit/badge)](https://securityscorecards.dev/viewer/?uri=github.com/xima-media/xima-typo3-frontend-edit)
 [![License](https://poser.pugx.org/xima/xima-typo3-frontend-edit/license)](LICENSE.md)
 
 </div>
