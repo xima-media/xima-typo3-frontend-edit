@@ -7,7 +7,7 @@
 				<source>Edit menu</source>
 			</trans-unit>
 			<trans-unit id="edit_content_element">
-				<source>Edit content element</source>
+				<source>Edit element</source>
 			</trans-unit>
 			<trans-unit id="edit_plugin">
 				<source>Edit plugin</source>
@@ -28,7 +28,7 @@
 				<source>Move</source>
 			</trans-unit>
 			<trans-unit id="new_content_after">
-				<source>New content after</source>
+				<source>New element (after)</source>
 			</trans-unit>
 			<trans-unit id="div_info">
 				<source>Info</source>
