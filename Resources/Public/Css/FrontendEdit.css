@@ -548,12 +548,8 @@
 }
 
 /* Disabled state */
-.frontend-edit__sticky-toolbar--disabled {
-    opacity: 0.7;
-}
-
-.frontend-edit__sticky-toolbar--disabled .frontend-edit__sticky-btn--toggle {
-    color: var(--xfe-text-secondary);
+.frontend-edit__sticky-toolbar--disabled .frontend-edit__sticky-btn--toggle svg {
+    opacity: 0.6;
 }
 
 /* Sticky toolbar buttons */
