@@ -103,6 +103,41 @@ final class EmptyColumnServiceTest extends TestCase
     }
 
     #[Test]
+    public function getColumnTargetsOmitsFilledColumnsWhenInsertButtonsEnabled(): void
+    {
+        $this->mockQueryBuilderWithCount(3);
+
+        $service = new EmptyColumnService(
+            $this->connectionPool,
+            $this->urlBuilderService,
+            $this->languageServiceFactory,
+        );
+
+        $result = $service->getColumnTargets(1, 0, '/return', [], true);
+
+        // Filled columns are redundant with the per-element "insert after" buttons
+        self::assertEmpty($result);
+    }
+
+    #[Test]
+    public function getColumnTargetsKeepsEmptyColumnsWhenInsertButtonsEnabled(): void
+    {
+        $this->mockQueryBuilderWithCount(0);
+
+        $service = new EmptyColumnService(
+            $this->connectionPool,
+            $this->urlBuilderService,
+            $this->languageServiceFactory,
+        );
+
+        $result = $service->getColumnTargets(1, 0, '/return', [], true);
+
+        // Empty columns have no elements, so they still need their own button
+        self::assertNotEmpty($result);
+        self::assertTrue($result[0]['isEmpty']);
+    }
+
+    #[Test]
     public function getColumnTargetsIgnoresContainerMarkersWithoutContainerField(): void
     {
         $this->mockQueryBuilderWithCount(1);
