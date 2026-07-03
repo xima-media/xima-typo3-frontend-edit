@@ -9,7 +9,7 @@
 			</trans-unit>
 			<trans-unit id="edit_content_element">
 				<source />
-				<target>Inhaltselement bearbeiten</target>
+				<target>Element bearbeiten</target>
 			</trans-unit>
 			<trans-unit id="edit_plugin">
 				<source />
@@ -37,7 +37,7 @@
 			</trans-unit>
 			<trans-unit id="new_content_after">
 				<source />
-				<target>Neues Inhaltselement danach</target>
+				<target>Neues Element (danach)</target>
 			</trans-unit>
 			<trans-unit id="div_info">
 				<source />
