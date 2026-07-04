@@ -164,6 +164,61 @@ final class AdditionalDataHandlerTest extends TestCase
     }
 
     #[Test]
+    public function handleDataRejectsUnsafeEntryUrl(): void
+    {
+        $this->registerBackendUserWithAccess();
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        $entries = [
+            ['label' => 'Evil', 'table' => null, 'uid' => null, 'url' => 'javascript:alert(1)', 'icon' => null],
+        ];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertArrayNotHasKey('data_0', $button->getChildren());
+    }
+
+    #[Test]
+    public function handleDataAcceptsSafeAbsoluteEntryUrl(): void
+    {
+        $this->registerBackendUserWithAccess();
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        $entries = [
+            ['label' => 'External', 'table' => 'pages', 'uid' => 5, 'url' => 'https://example.com/edit', 'icon' => null],
+        ];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertSame('https://example.com/edit', $button->getChildren()['data_0']->getUrl());
+    }
+
+    #[Test]
+    public function handleDataToleratesEntryWithMissingKeys(): void
+    {
+        $this->registerBackendUserWithAccess();
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        // Crafted entry missing the optional url/icon keys must not raise warnings.
+        $entries = [
+            ['label' => 'Record', 'table' => 'pages', 'uid' => 5],
+        ];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertArrayHasKey('data_0', $button->getChildren());
+    }
+
+    #[Test]
     public function handleDataSkipsWhenRecordNotFound(): void
     {
         $this->registerBackendUserWithAccess();
