@@ -26,6 +26,11 @@ $configuration
     ->addPathsToExclude([
         $rootPath.'/Tests/CGL',
     ])
+    // AccessCheckResult only exists in TYPO3 v14.2+. The unit test doubles reference
+    // it behind method_exists() guards, so it is legitimately unavailable on v13.
+    ->ignoreUnknownClasses([
+        'TYPO3\CMS\Core\Authentication\AccessCheckResult',
+    ])
 ;
 
 return $configuration;
