@@ -139,10 +139,10 @@ readonly class AjaxController
             $this->settingsService->isShowInsertButtons($request),
         );
 
-        return new JsonResponse(mb_convert_encoding([
+        return new JsonResponse([
             'contentElements' => $dropdown,
             'columnTargets' => $columnTargets,
-        ], 'UTF-8'));
+        ]);
     }
 
     protected function getBackendUser(): ?BackendUserAuthentication
