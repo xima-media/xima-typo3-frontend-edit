@@ -14,12 +14,12 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Repository;
 
 use ArrayObject;
-use Generator;
 use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, RootlineUtility};
 
 use function array_slice;
+use function in_array;
 
 /**
  * ContentElementRepository.
@@ -33,7 +33,7 @@ final readonly class ContentElementRepository
     private const CACHE_CLEANUP_THRESHOLD = 80;
 
     /**
-     * @var ArrayObject<string, bool>
+     * @var ArrayObject<string, list<int>>
      */
     private ArrayObject $rootlineCache;
 
@@ -42,11 +42,17 @@ final readonly class ContentElementRepository
      */
     private ArrayObject $configCache;
 
+    /**
+     * @var ArrayObject<string, array<string, array<string, mixed>>>
+     */
+    private ArrayObject $tcaItemMapCache;
+
     public function __construct(
         private ConnectionPool $connectionPool,
     ) {
         $this->rootlineCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
         $this->configCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
+        $this->tcaItemMapCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
     }
 
     /**
@@ -174,21 +180,14 @@ final readonly class ContentElementRepository
             return false;
         }
 
-        // Lazy loading: iterate through TCA items using generator to avoid loading entire array
-        foreach ($this->getTcaItemsLazily($cType) as $item) {
-            if (('list' === $cType && $item['value'] === $listType)
-                || $item['value'] === $cType) {
-                $this->manageCacheSize($this->configCache);
-                $this->configCache->offsetSet($cacheKey, $item);
-
-                return $item;
-            }
-        }
+        $field = 'list' === $cType ? 'list_type' : 'CType';
+        $lookupValue = 'list' === $cType ? $listType : $cType;
+        $config = $this->getTcaItemsMap($field)[$lookupValue] ?? false;
 
         $this->manageCacheSize($this->configCache);
-        $this->configCache->offsetSet($cacheKey, false);
+        $this->configCache->offsetSet($cacheKey, $config);
 
-        return false;
+        return $config;
     }
 
     public function getPageDoktype(int $pid): ?int
@@ -216,31 +215,7 @@ final readonly class ContentElementRepository
 
     public function isSubpageOf(int $subPageId, int $parentPageId): bool
     {
-        $cacheKey = $subPageId.':'.$parentPageId;
-
-        if ($this->rootlineCache->offsetExists($cacheKey)) {
-            return (bool) $this->rootlineCache->offsetGet($cacheKey);
-        }
-
-        try {
-            $rootLine = GeneralUtility::makeInstance(RootlineUtility::class, $subPageId)->get();
-
-            foreach ($rootLine as $page) {
-                if ($page['uid'] === $parentPageId) {
-                    $this->manageCacheSize($this->rootlineCache);
-                    $this->rootlineCache->offsetSet($cacheKey, true);
-
-                    return true;
-                }
-            }
-        } catch (\Exception) {
-            // Page not found or other error
-        }
-
-        $this->manageCacheSize($this->rootlineCache);
-        $this->rootlineCache->offsetSet($cacheKey, false);
-
-        return false;
+        return in_array($parentPageId, $this->getRootlinePageIds($subPageId), true);
     }
 
     /**
@@ -248,13 +223,53 @@ final readonly class ContentElementRepository
      */
     public function isSubpageOfAny(int $subPageId, array $parentPageIds): bool
     {
+        if ([] === $parentPageIds) {
+            return false;
+        }
+
+        $rootlineIds = $this->getRootlinePageIds($subPageId);
+
         foreach ($parentPageIds as $parentPageId) {
-            if ($this->isSubpageOf($subPageId, (int) $parentPageId)) {
+            if (in_array((int) $parentPageId, $rootlineIds, true)) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    /**
+     * Resolve the rootline page uids of a page once and cache them, so multiple
+     * ancestor checks for the same page reuse a single RootlineUtility lookup
+     * instead of rebuilding the rootline per parent candidate.
+     *
+     * @return list<int>
+     */
+    private function getRootlinePageIds(int $subPageId): array
+    {
+        $cacheKey = (string) $subPageId;
+
+        if ($this->rootlineCache->offsetExists($cacheKey)) {
+            /** @var list<int>|null $cached */
+            $cached = $this->rootlineCache->offsetGet($cacheKey);
+
+            return $cached ?? [];
+        }
+
+        $pageIds = [];
+
+        try {
+            foreach (GeneralUtility::makeInstance(RootlineUtility::class, $subPageId)->get() as $page) {
+                $pageIds[] = (int) $page['uid'];
+            }
+        } catch (\Exception) {
+            // Page not found or other error
+        }
+
+        $this->manageCacheSize($this->rootlineCache);
+        $this->rootlineCache->offsetSet($cacheKey, $pageIds);
+
+        return $pageIds;
     }
 
     /**
@@ -410,20 +425,30 @@ final readonly class ContentElementRepository
     }
 
     /**
-     * Generator for lazy loading TCA items to reduce memory consumption.
+     * Build a value => item lookup map for a tt_content select field once, so
+     * repeated config lookups are O(1) instead of scanning the TCA items list.
      *
-     * @return Generator<int, array<string, mixed>>
+     * @return array<string, array<string, mixed>>
      */
-    private function getTcaItemsLazily(string $cType): Generator
+    private function getTcaItemsMap(string $field): array
     {
-        $tcaPath = 'list' === $cType
-            ? $GLOBALS['TCA']['tt_content']['columns']['list_type']['config']['items'] ?? []
-            : $GLOBALS['TCA']['tt_content']['columns']['CType']['config']['items'] ?? [];
+        if ($this->tcaItemMapCache->offsetExists($field)) {
+            /** @var array<string, array<string, mixed>>|null $cached */
+            $cached = $this->tcaItemMapCache->offsetGet($field);
 
-        // Yield items one by one instead of loading entire array into memory
-        foreach ($tcaPath as $item) {
-            yield $item;
+            return $cached ?? [];
         }
+
+        $map = [];
+        foreach ($GLOBALS['TCA']['tt_content']['columns'][$field]['config']['items'] ?? [] as $item) {
+            if (isset($item['value'])) {
+                $map[$item['value']] = $item;
+            }
+        }
+
+        $this->tcaItemMapCache->offsetSet($field, $map);
+
+        return $map;
     }
 
     /**
