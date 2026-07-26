@@ -1056,7 +1056,7 @@
   const DataService = {
     getClosestContentElement(element) {
       if (!element) return null;
-      while (element && !Dom.id(element).match(/c\d+/)) {
+      while (element && !/^c\d+$/.test(Dom.id(element))) {
         element = element.parentElement;
       }
       return element;
