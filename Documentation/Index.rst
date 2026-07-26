@@ -77,6 +77,13 @@ This TYPO3 extension adds lightweight editing tools to the frontend, allowing ba
         ..  card-footer::   :ref:`View usage guide <usage>`
             :button-style: btn btn-secondary stretched-link
 
+    ..  card::  Languages
+
+        Which language modes are supported and how translated content is resolved.
+
+        ..  card-footer::   :ref:`View language support <languages>`
+            :button-style: btn btn-secondary stretched-link
+
     ..  card::  Developer corner
 
         A quick overview of the possibilities for extending the extension
@@ -114,6 +121,7 @@ This TYPO3 extension adds lightweight editing tools to the frontend, allowing ba
     Installation/Index
     Configuration/Index
     Usage/Index
+    Languages/Index
     DeveloperCorner/Index
     Delineation/Index
     FAQ/Index
