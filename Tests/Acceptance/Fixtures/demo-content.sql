@@ -3,8 +3,8 @@
 
 -- Clean slate: remove records from previous installs and default sys_template
 DELETE FROM `sys_template` WHERE `pid` = 1;
-DELETE FROM `tt_content` WHERE `pid` IN (1, 2, 3, 4, 5, 6, 7, 8, 9);
-DELETE FROM `pages` WHERE `uid` IN (1, 2, 3, 4, 5, 6, 7, 8, 9);
+DELETE FROM `tt_content` WHERE `pid` IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+DELETE FROM `pages` WHERE `uid` IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 
 -- Pages
 REPLACE INTO `pages` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `title`, `doktype`, `slug`, `is_siteroot`) VALUES
@@ -16,7 +16,8 @@ REPLACE INTO `pages` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `so
 (6, 4, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 512, 'Frontend Editing Tips', 1, '/blog/frontend-editing-tips', 0),
 (7, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1024, 'Contact', 1, '/contact', 0),
 (8, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1280, 'Two Columns (Empty Column Test)', 1, '/two-columns', 0),
-(9, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1536, 'Default Layout (Empty Columns)', 1, '/empty-columns', 0);
+(9, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1536, 'Default Layout (Empty Columns)', 1, '/empty-columns', 0),
+(10, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1792, 'Container (Nested Content)', 1, '/container', 0);
 
 -- Content Elements: Home (pid=1)
 REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `CType`, `colPos`, `header`, `header_layout`, `bodytext`, `starttime`, `endtime`) VALUES
@@ -88,6 +89,24 @@ REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`
 REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `CType`, `colPos`, `header`, `header_layout`, `bodytext`) VALUES
 (27, 9, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 256, 'text', 0, 'Main Content Only', 0,
 '<p>This page uses the default layout. Only the main content column (colPos 0) has content. The border (colPos 3), content-before (colPos 8), and content-after (colPos 9) columns are empty.</p>\n<p>You should see "Create new content" buttons in the empty column areas when frontend editing is enabled.</p>');
+
+-- Content Elements: Container page (pid=10) — EXT:container nested content
+-- Requires b13/container (installed via the demo setup). bootstrap-package/full
+-- pre-registers the "container_2_columns" CType (child columns colPos 201/202).
+-- The container element itself (colPos 0) and the plain elements around it are
+-- draggable; the container CHILDREN (tx_container_parent > 0) intentionally keep
+-- the classic backend move dialog as fallback.
+REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `CType`, `colPos`, `tx_container_parent`, `header`, `header_layout`, `bodytext`) VALUES
+(28, 10, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 256, 'header', 0, 0, 'Nested Content with EXT:container', 1, ''),
+(29, 10, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 512, 'text', 0, 0, 'Intro (plain element)', 0,
+'<p>This page contains a two-column container. The plain elements in the main column (this one, the heading above, and the note below) are draggable via frontend edit. The elements <em>inside</em> the container fall back to the classic backend move dialog.</p>'),
+(30, 10, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 768, 'container_2_columns', 0, 0, 'Two Column Container', 1, ''),
+(31, 10, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 256, 'text', 201, 30, 'Left Column Child', 0,
+'<p>This content element lives inside the left container column (colPos 201, tx_container_parent 30). Frontend edit shows its edit menu, but no drag handle — use the backend move dialog to relocate it.</p>'),
+(32, 10, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 256, 'text', 202, 30, 'Right Column Child', 0,
+'<p>This content element lives inside the right container column (colPos 202, tx_container_parent 30). Same behaviour: editable, but not drag &amp; drop movable.</p>'),
+(33, 10, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1024, 'text', 0, 0, 'Note (plain element)', 0,
+'<p>Try dragging this element above the container to confirm plain elements reorder around the container element.</p>');
 
 -- Assign backend layout "2 Columns 50/50" to page 8
 UPDATE `pages` SET `backend_layout` = 'pagets__2_columns_50_50' WHERE `uid` = 8;
