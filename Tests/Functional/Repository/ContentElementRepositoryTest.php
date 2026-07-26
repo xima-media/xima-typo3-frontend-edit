@@ -109,6 +109,95 @@ final class ContentElementRepositoryTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function fetchContentElementsByUidsResolvesTranslationForConnectedModeAnchor(): void
+    {
+        // Connected mode: the DOM anchor carries the L0 uid (1); the request must
+        // resolve to the translation record (uid 3) so the edit URL targets it.
+        $result = $this->subject->fetchContentElementsByUids([1], 1);
+
+        $uids = array_map(static fn (array $row): int => (int) $row['uid'], $result);
+
+        self::assertSame([3], $uids);
+    }
+
+    #[Test]
+    public function fetchContentElementsByUidsReturnsL0FallbackWhenNoTranslationExists(): void
+    {
+        // Fallback-rendered L0 element on a translated page (uid 2 has no DE
+        // translation) must still receive a record/menu.
+        $result = $this->subject->fetchContentElementsByUids([2], 1);
+
+        $uids = array_map(static fn (array $row): int => (int) $row['uid'], $result);
+
+        self::assertSame([2], $uids);
+    }
+
+    #[Test]
+    public function fetchContentElementsByUidsPrefersTranslationOverDefaultWithoutDuplicates(): void
+    {
+        // uid 1 has a DE translation (3), uid 2 does not. Each anchor must yield
+        // exactly one record: the translation for 1, the L0 fallback for 2.
+        $result = $this->subject->fetchContentElementsByUids([1, 2], 1);
+
+        $uids = array_map(static fn (array $row): int => (int) $row['uid'], $result);
+        sort($uids);
+
+        self::assertSame([2, 3], $uids);
+    }
+
+    #[Test]
+    public function fetchContentElementsByUidsResolvesChainedTranslationViaParent(): void
+    {
+        // uid 8 (FR) is translated from the DE record (l10n_source = 3) but its
+        // l18n_parent still points to the L0 uid (1). Requesting the L0 anchor for
+        // language 2 must resolve to the chained translation via l18n_parent.
+        $result = $this->subject->fetchContentElementsByUids([1], 2);
+
+        $uids = array_map(static fn (array $row): int => (int) $row['uid'], $result);
+
+        self::assertSame([8], $uids);
+    }
+
+    #[Test]
+    public function fetchContentElementsByUidsReturnsAllLanguageRecordForTranslatedRequest(): void
+    {
+        $result = $this->subject->fetchContentElementsByUids([6], 1);
+
+        $uids = array_map(static fn (array $row): int => (int) $row['uid'], $result);
+
+        self::assertSame([6], $uids);
+    }
+
+    #[Test]
+    public function fetchContentElementsByUidsHandlesOnepagerMixedLanguagesAcrossPages(): void
+    {
+        // Mixed onepager: L0 anchor with translation (1 → 3) plus a foreign-page
+        // L0 element without translation (7).
+        $result = $this->subject->fetchContentElementsByUids([1, 7], 1);
+
+        $uids = array_map(static fn (array $row): int => (int) $row['uid'], $result);
+        sort($uids);
+
+        self::assertSame([3, 7], $uids);
+    }
+
+    #[Test]
+    public function fetchContentElementsByUidsReturnsDefaultLanguageRecordUnchanged(): void
+    {
+        $result = $this->subject->fetchContentElementsByUids([1], 0);
+
+        $uids = array_map(static fn (array $row): int => (int) $row['uid'], $result);
+
+        self::assertSame([1], $uids);
+    }
+
+    #[Test]
+    public function fetchContentElementsByUidsExcludesHiddenAndDeletedRecords(): void
+    {
+        self::assertSame([], $this->subject->fetchContentElementsByUids([4, 5], 0));
+    }
+
+    #[Test]
     public function getTranslatedRecordReturnsTranslationRow(): void
     {
         $record = $this->subject->getTranslatedRecord('pages', 2, 1);
