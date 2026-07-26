@@ -1199,8 +1199,9 @@
         // (the translation uid) has no anchor of its own. Fall back to the L0
         // anchor even when the primary lookup missed. Prefer l18n_parent (the
         // canonical connected-mode pointer) over l10n_source (chained translations).
-        const anchorUid = contentElement.element.l18n_parent || contentElement.element.l10n_source;
-        if (anchorUid && (!idElement || idElement.tagName.toLowerCase() === 'a')) {
+        // Coerce to number: DB values may arrive as strings, and "0" is truthy in JS.
+        const anchorUid = Number(contentElement.element.l18n_parent) || Number(contentElement.element.l10n_source);
+        if (anchorUid > 0 && (!idElement || idElement.tagName.toLowerCase() === 'a')) {
           const anchorElement = document.querySelector(`#c${anchorUid}`);
           if (anchorElement) {
             Logger.log(`Translation mapping: c${uid} → c${anchorUid}`);
