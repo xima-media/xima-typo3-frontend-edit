@@ -41,6 +41,26 @@
   };
 
   /**
+   * DOM attribute helpers.
+   *
+   * Read id/class from the content attribute instead of the IDL property to
+   * avoid two footguns that can make the property a non-string:
+   * - DOM clobbering: a <form> containing a control named or id'd "id" shadows
+   *   `form.id` with that control (HTMLFormElement named-property getter), so
+   *   `element.id.match(...)` throws "match is not a function".
+   * - SVG: `svgElement.className` is an SVGAnimatedString object, not a string,
+   *   so reading `.className` directly and calling string methods throws.
+   * getAttribute() always returns a string (or null) and sidesteps both.
+   */
+  const Dom = {
+    id(element) {
+      return element && typeof element.getAttribute === 'function'
+        ? (element.getAttribute('id') || '')
+        : '';
+    }
+  };
+
+  /**
    * Tooltip Manager
    */
   const Tooltip = {
@@ -487,9 +507,10 @@
       }
 
       if (sibling) {
-        Logger.log(`Anchor pattern detected: Using next sibling for #${idElement.id}`, {
+        const siblingClass = sibling.getAttribute('class') || '';
+        Logger.log(`Anchor pattern detected: Using next sibling for #${Dom.id(idElement)}`, {
           anchor: idElement.outerHTML.substring(0, 50),
-          sibling: sibling.tagName + (sibling.className ? '.' + sibling.className.split(' ')[0] : '')
+          sibling: sibling.tagName + (siblingClass ? '.' + siblingClass.split(' ')[0] : '')
         });
         return sibling;
       }
@@ -1035,7 +1056,7 @@
   const DataService = {
     getClosestContentElement(element) {
       if (!element) return null;
-      while (element && !element.id.match(/c\d+/)) {
+      while (element && !Dom.id(element).match(/c\d+/)) {
         element = element.parentElement;
       }
       return element;
@@ -1048,7 +1069,7 @@
       // Scan DOM for all content elements by id="c{uid}" pattern
       // This enables editing content from other pages (onepager scenarios)
       document.querySelectorAll('[id]').forEach(element => {
-        const match = element.id.match(/^c(\d+)$/);
+        const match = Dom.id(element).match(/^c(\d+)$/);
         if (match) {
           const uid = parseInt(match[1], 10);
           if (uid > 0) {
@@ -1068,7 +1089,7 @@
         const closestElement = this.getClosestContentElement(element);
         if (!closestElement) return;
 
-        const id = closestElement.id.replace('c', '');
+        const id = Dom.id(closestElement).replace('c', '');
         const uid = parseInt(id, 10);
 
         if (!dataItems[uid]) dataItems[uid] = [];
