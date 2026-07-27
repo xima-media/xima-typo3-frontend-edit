@@ -18,7 +18,7 @@
 		"psr/http-message": "^1.0 || ^2.0",
 		"shipmonk/composer-dependency-analyser": "1.8.4",
 		"ssch/typo3-rector": "^2.10 || ^3.0",
-		"typo3/coding-standards": "^0.7 || ^0.8"
+		"typo3/coding-standards": "^0.7 || ^0.8 || ^0.9"
 	},
 	"replace": {
 		"typo3/cms-core": "*",
