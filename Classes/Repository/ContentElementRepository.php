@@ -81,6 +81,11 @@ final readonly class ContentElementRepository
      * is rendered on a single page. Permission checks are performed per-element
      * in the ContentElementFilter layer.
      *
+     * In connected/overlay language mode the given UIDs are the default-language
+     * (L0) uids taken from the DOM anchors; translations are resolved via
+     * l18n_parent and the matching variant is selected in resolveLanguageVariants()
+     * (translation wins over L0). Free mode and the default language are unaffected.
+     *
      * @param array<int> $uids Array of content element UIDs
      *
      * @return array<int, array<string, mixed>> Array of content element records
@@ -99,16 +104,22 @@ final readonly class ContentElementRepository
         }
 
         try {
-            $queryBuilder = $this->buildContentQuery($languageUid, $includeMultilingualContent);
+            if (!$includeMultilingualContent) {
+                $queryBuilder = $this->buildContentQuery($languageUid, false);
+                $queryBuilder->andWhere(
+                    $queryBuilder->expr()->in(
+                        'uid',
+                        $queryBuilder->createNamedParameter($uids, Connection::PARAM_INT_ARRAY),
+                    ),
+                );
 
-            $queryBuilder->andWhere(
-                $queryBuilder->expr()->in(
-                    'uid',
-                    $queryBuilder->createNamedParameter($uids, Connection::PARAM_INT_ARRAY),
-                ),
-            );
+                return $queryBuilder->executeQuery()->fetchAllAssociative();
+            }
 
-            return $queryBuilder->executeQuery()->fetchAllAssociative();
+            $queryBuilder = $this->buildContentQueryByUids($uids, $languageUid);
+            $rows = $queryBuilder->executeQuery()->fetchAllAssociative();
+
+            return $this->resolveLanguageVariants($rows);
         } catch (\Doctrine\DBAL\Exception $exception) {
             throw new Exception('Failed to fetch content elements by UIDs: '.$exception->getMessage(), 1640000011, $exception);
         }
@@ -298,6 +309,104 @@ final readonly class ContentElementRepository
         }
 
         return $queryBuilder;
+    }
+
+    /**
+     * Build a QueryBuilder for the UID-based fetch path (onepager + language overlay).
+     *
+     * In connected/overlay language mode the DOM anchors (`id="c{uid}"`) carry the
+     * default-language (L0) uids, so the requested $uids are L0 uids. This query
+     * therefore also matches the translations of those L0 uids via l18n_parent and
+     * keeps L0 records (sys_language_uid = 0) so fallback-rendered elements on
+     * translated pages still receive a menu. The actual variant is picked in
+     * resolveLanguageVariants().
+     *
+     * @param array<int> $uids
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    private function buildContentQueryByUids(
+        array $uids,
+        int $languageUid,
+    ): \Doctrine\DBAL\Query\QueryBuilder {
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable('tt_content');
+
+        $uidsParameter = $queryBuilder->createNamedParameter($uids, Connection::PARAM_INT_ARRAY);
+
+        $queryBuilder
+            ->select('*')
+            ->from('tt_content')
+            ->where(
+                $queryBuilder->expr()->eq(
+                    'hidden',
+                    $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
+                ),
+                $queryBuilder->expr()->eq(
+                    'deleted',
+                    $queryBuilder->createNamedParameter(0, Connection::PARAM_INT),
+                ),
+            );
+
+        if ($languageUid > 0) {
+            // Match the requested uids directly, or the translations of those uids
+            // (connected mode: translation.l18n_parent points to the L0 uid).
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->or(
+                    $queryBuilder->expr()->in('uid', $uidsParameter),
+                    $queryBuilder->expr()->and(
+                        $queryBuilder->expr()->in('l18n_parent', $uidsParameter),
+                        $queryBuilder->expr()->eq(
+                            'sys_language_uid',
+                            $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT),
+                        ),
+                    ),
+                ),
+                $queryBuilder->expr()->in(
+                    'sys_language_uid',
+                    $queryBuilder->createNamedParameter([-1, 0, $languageUid], Connection::PARAM_INT_ARRAY),
+                ),
+            );
+        } else {
+            $queryBuilder->andWhere(
+                $queryBuilder->expr()->in('uid', $uidsParameter),
+                $queryBuilder->expr()->in(
+                    'sys_language_uid',
+                    $queryBuilder->createNamedParameter([-1, 0], Connection::PARAM_INT_ARRAY),
+                ),
+            );
+        }
+
+        return $queryBuilder;
+    }
+
+    /**
+     * Collapse language variants that map to the same DOM anchor.
+     *
+     * The DOM anchor of a record is its l18n_parent (for translations) or its own
+     * uid (for L0 and all-language records). When both an L0 record and its
+     * translation are returned for the same anchor, the translation wins so the
+     * edit URL targets the translation uid (FormEngine cannot switch records via a
+     * language parameter).
+     *
+     * @param array<int, array<string, mixed>> $rows
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function resolveLanguageVariants(array $rows): array
+    {
+        $byAnchor = [];
+        foreach ($rows as $row) {
+            $languageId = (int) ($row['sys_language_uid'] ?? 0);
+            $parent = (int) ($row['l18n_parent'] ?? 0);
+            $anchorUid = ($languageId > 0 && $parent > 0) ? $parent : (int) $row['uid'];
+
+            $existing = $byAnchor[$anchorUid] ?? null;
+            if (null === $existing || ($languageId > 0 && (int) ($existing['sys_language_uid'] ?? 0) <= 0)) {
+                $byAnchor[$anchorUid] = $row;
+            }
+        }
+
+        return array_values($byAnchor);
     }
 
     /**

@@ -1215,13 +1215,19 @@
 
         let idElement = document.querySelector(`#c${uid}`);
 
-        // Handle translation mapping
-        if (idElement?.tagName.toLowerCase() === 'a' && contentElement.element.l10n_source) {
-          const l10nElement = document.querySelector(`#c${contentElement.element.l10n_source}`);
-          if (l10nElement) {
-            Logger.log(`Translation mapping: c${uid} → c${contentElement.element.l10n_source}`);
-            uid = contentElement.element.l10n_source;
-            idElement = l10nElement;
+        // Handle translation mapping. In connected/overlay mode the DOM anchor
+        // carries the default-language uid (l18n_parent), so the response uid
+        // (the translation uid) has no anchor of its own. Fall back to the L0
+        // anchor even when the primary lookup missed. Prefer l18n_parent (the
+        // canonical connected-mode pointer) over l10n_source (chained translations).
+        // Coerce to number: DB values may arrive as strings, and "0" is truthy in JS.
+        const anchorUid = Number(contentElement.element.l18n_parent) || Number(contentElement.element.l10n_source);
+        if (anchorUid > 0 && (!idElement || idElement.tagName.toLowerCase() === 'a')) {
+          const anchorElement = document.querySelector(`#c${anchorUid}`);
+          if (anchorElement) {
+            Logger.log(`Translation mapping: c${uid} → c${anchorUid}`);
+            uid = anchorUid;
+            idElement = anchorElement;
           }
         }
 
