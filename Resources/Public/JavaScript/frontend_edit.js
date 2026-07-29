@@ -1068,8 +1068,12 @@
       const allUids = new Set();
 
       // Scan DOM for all content elements by id="c{uid}" pattern
-      // This enables editing content from other pages (onepager scenarios)
-      document.querySelectorAll('[id]').forEach(element => {
+      // This enables editing content from other pages (onepager scenarios).
+      // Narrow the candidate set to ids starting with "c" (the regex below still
+      // validates the exact "c{digits}" shape) instead of scanning every [id].
+      // The attribute selector reads the real attribute, so it stays safe against
+      // the id clobbering that Dom.id() guards against.
+      document.querySelectorAll('[id^="c"]').forEach(element => {
         const match = Dom.id(element).match(/^c(\d+)$/);
         if (match) {
           const uid = parseInt(match[1], 10);
