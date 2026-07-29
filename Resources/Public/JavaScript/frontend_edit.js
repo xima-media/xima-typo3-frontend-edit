@@ -1377,11 +1377,12 @@
   /**
    * Drag & Drop Reordering (MVP)
    *
-   * Reorders content elements within and between page-level columns by
-   * delegating to the core DataHandler via the move endpoint. Scope is limited
-   * to the default language and columns the integrator marked with
-   * [data-xfe-colpos] (without [data-xfe-container]). Nested container children
-   * and translated elements keep the classic backend move dialog.
+   * Reorders content elements within and between page-level columns and
+   * EXT:container columns by delegating to the core DataHandler via the move
+   * endpoint. Scope is limited to the default language and columns the
+   * integrator marked with [data-xfe-colpos]; container columns additionally
+   * carry [data-xfe-container] with the container's uid. Translated elements
+   * keep the classic backend move dialog.
    */
   const DragReorder = {
     moveUrl: null,
@@ -1418,12 +1419,20 @@
     },
 
     collectColumns() {
-      document.querySelectorAll('[data-xfe-colpos]:not([data-xfe-container])').forEach(marker => {
+      // Container columns carry data-xfe-container with the container's uid; page
+      // columns have no such attribute. Both are drop targets, but only the former
+      // may set tx_container_parent.
+      document.querySelectorAll('[data-xfe-colpos]').forEach(marker => {
         const colPos = parseInt(marker.dataset.xfeColpos, 10);
         const container = marker.parentElement;
         if (!Number.isFinite(colPos) || !container) return;
+        const rawContainerUid = marker.dataset.xfeContainer;
+        const containerUid = rawContainerUid === undefined
+          ? null
+          : parseInt(rawContainerUid, 10);
+        if (containerUid !== null && !Number.isFinite(containerUid)) return;
         if (this.columns.some(c => c.container === container && c.colPos === colPos)) return;
-        this.columns.push({ colPos, container });
+        this.columns.push({ colPos, container, containerUid });
       });
     },
 
@@ -1434,8 +1443,8 @@
     getColumnElements(container) {
       const items = [];
       const containers = this.columns.map(c => c.container);
-      container.querySelectorAll('[id]').forEach(el => {
-        const match = el.id.match(/^c(\d+)$/);
+      container.querySelectorAll('[id^="c"]').forEach(el => {
+        const match = Dom.id(el).match(/^c(\d+)$/);
         if (!match) return;
         const uid = parseInt(match[1], 10);
         if (uid <= 0) return;
@@ -1613,7 +1622,7 @@
         }
       }
 
-      this.dropTarget = { colPos: col.colPos, afterUid };
+      this.dropTarget = { colPos: col.colPos, afterUid, containerUid: col.containerUid };
       this.showIndicator(col.container, indicatorTop);
     },
 
@@ -1621,16 +1630,22 @@
       if (!this.dragging || !this.dropTarget) { this.onDragEnd(); return; }
       e.preventDefault();
       const { uid } = this.dragging;
-      const { colPos, afterUid } = this.dropTarget;
+      const { colPos, afterUid, containerUid } = this.dropTarget;
       const header = this.elementLabel(this.draggingBlock);
       // Distinguish a reorder within the same column from a move to another one.
       // Unknown source (null) is treated as a cross-column move.
       const sameColumn = null != this.dragging.sourceColPos && this.dragging.sourceColPos === colPos;
       this.onDragEnd();
-      void this.persistMove(uid, colPos, afterUid, header, sameColumn);
+      void this.persistMove(uid, colPos, afterUid, header, sameColumn, containerUid);
     },
 
-    async persistMove(uid, targetColPos, targetUid, header, sameColumn) {
+    rememberNotification(title, message, severity) {
+      try {
+        sessionStorage.setItem('xfe-pending-notification', JSON.stringify({ title, message, severity }));
+      } catch (_) { /* storage unavailable — the reload just shows no toast */ }
+    },
+
+    async persistMove(uid, targetColPos, targetUid, header, sameColumn, targetContainerUid) {
       const config = document.getElementById('frontend-edit-toolbar-config');
       const language = config ? parseInt(config.dataset.language || '0', 10) : 0;
       const L = this.labels;
@@ -1645,21 +1660,37 @@
       const errorMsg = header
         ? (L.errorDetail || '“%s” could not be moved. Please try again.').replace('%s', header)
         : (L.errorDetailGeneric || 'The content element could not be moved. Please try again.');
+      const rejectedMsg = header
+        ? (L.rejectedDetail || '“%s” cannot be placed at this position. Use the move dialog in the backend instead.').replace('%s', header)
+        : (L.rejectedDetailGeneric || 'The content element cannot be placed at this position. Use the move dialog in the backend instead.');
       try {
         const response = await fetch(this.moveUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ uid, targetColPos, targetUid, language })
+          body: JSON.stringify({ uid, targetColPos, targetUid, language, targetContainerUid: targetContainerUid ?? null })
         });
+
+        // 422 means the drop is refused for good: retrying changes nothing, so
+        // say that instead of "please try again", and do not reload.
+        if (response.status === 422) {
+          Notification.show({
+            title: L.rejected || 'Cannot be dropped here',
+            message: rejectedMsg,
+            severity: 'error'
+          });
+          return;
+        }
+
+        // 409 means the outcome is uncertain — reload so the editor sees reality.
+        if (response.status === 409) {
+          this.rememberNotification(L.error || 'Could not move the content element', errorMsg, 'error');
+          window.location.reload();
+          return;
+        }
+
         if (!response.ok) throw new Error(`move failed (${response.status})`);
 
-        try {
-          sessionStorage.setItem('xfe-pending-notification', JSON.stringify({
-            title: L.success || 'Content element moved',
-            message: successMsg,
-            severity: 'ok'
-          }));
-        } catch (_) { /* ignore */ }
+        this.rememberNotification(L.success || 'Content element moved', successMsg, 'ok');
         window.location.reload();
       } catch (error) {
         Logger.log('Drag & drop move failed', { error: error.message }, 'error');
