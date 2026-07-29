@@ -75,19 +75,40 @@ The target page is always derived from the moved record itself. A manipulated
 request therefore cannot move an element to a different page — cross-page moves
 remain a backend operation.
 
+Container columns
+=================
+
+Columns of an `EXT:container <https://github.com/b13/container>`__ element are
+drop targets as well, as long as the template marks them with the container's
+uid:
+
+..  code-block:: html
+
+    {namespace xfe=Xima\XimaTypo3FrontendEdit\ViewHelpers}
+
+    <xfe:columnTarget colPos="201" containerUid="{data.uid}" />
+
+Content can be reordered inside a container column, moved between the columns of
+a container, moved out into a page column and moved from a page column into a
+container.
+
+A container element itself can be reordered within page columns, but cannot be
+dropped into another container — nesting stays a backend operation.
+
 Limitations
 ===========
 
 The following cases are out of scope and keep the classic **move** button in
 the :ref:`edit menu <edit-menu>` as a fallback:
 
-Container children
-    Content elements nested inside an EXT:container element cannot be dragged.
-
 Translated elements
     Only default-language elements can be reordered. Translations follow the
     ordering of their parent record, so reordering a translation would have no
     meaningful effect.
+
+Nesting containers
+    A container element cannot be dropped into another container. Use the
+    **move** button in the edit menu for that.
 
 Keyboard operation
     Dragging relies on the browser's native drag & drop, which is pointer-only.
