@@ -173,7 +173,7 @@ readonly class AjaxController
             return new JsonResponse(['success' => false, 'error' => 'Invalid request data'], 400);
         }
 
-        $parseResult = $this->parseMovePrameters($data);
+        $parseResult = $this->parseMoveParameters($data);
         if ($parseResult['hasError']) {
             $statusCode = $parseResult['statusCode'] ?? 400;
 
@@ -274,7 +274,7 @@ readonly class AjaxController
      *
      * @return array{hasError: true, statusCode?: int, error: string}|array{hasError: false, uid: int, targetColPos: int, targetUid: int|null, targetContainerUid: int|null}
      */
-    private function parseMovePrameters(array $data): array
+    private function parseMoveParameters(array $data): array
     {
         $uid = filter_var($data['uid'] ?? null, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
         if (false === $uid) {
