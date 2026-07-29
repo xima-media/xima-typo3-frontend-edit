@@ -24,6 +24,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{FlashMessageService, ResourceRendererService};
 
 use function is_array;
+use function strlen;
 
 /**
  * ToolRendererMiddleware.
@@ -49,10 +50,8 @@ class ToolRendererMiddleware implements MiddlewareInterface
     {
         $response = $handler->handle($request);
 
-        if (!$this->settingsService->isEnabled($request)) {
-            return $response;
-        }
-
+        // Cheapest gate first: bail out immediately for anonymous frontend traffic
+        // before resolving any site settings.
         $backendUser = $GLOBALS['BE_USER'] ?? null;
         if (
             !$backendUser instanceof BackendUserAuthentication
@@ -66,6 +65,11 @@ class ToolRendererMiddleware implements MiddlewareInterface
             return $response;
         }
 
+        // Resolving the site settings is the most expensive check, so it runs last.
+        if (!$this->settingsService->isEnabled($request)) {
+            return $response;
+        }
+
         // Collect flash messages from backend session before rendering (if enabled).
         //
         // The iframe modal editor appends ?tx_ximatypo3frontendedit_iframe=1 to the
@@ -76,14 +80,22 @@ class ToolRendererMiddleware implements MiddlewareInterface
             ? $this->flashMessageService->collectFromSession()
             : [];
 
-        $body = $response->getBody();
-        $body->rewind();
-        $contents = $response->getBody()->getContents();
-        $content = str_ireplace(
-            '</body>',
-            $this->resourceRendererService->render(request: $request, flashMessages: $flashMessages).'</body>',
-            $contents,
-        );
+        $responseBody = $response->getBody();
+        $responseBody->rewind();
+        $contents = $responseBody->getContents();
+
+        // Inject the asset bundle right before the last closing body tag. Using the
+        // last occurrence (instead of str_ireplace, which rewrites every match and
+        // scans the whole document case-insensitively) keeps a stray "</body>" in
+        // page content from receiving a second, misplaced injection.
+        $position = strripos($contents, '</body>');
+        if (false === $position) {
+            return $response;
+        }
+
+        $injection = $this->resourceRendererService->render(request: $request, flashMessages: $flashMessages);
+        $content = substr_replace($contents, $injection.'</body>', $position, strlen('</body>'));
+
         $body = new Stream('php://temp', 'rw');
         $body->write($content);
 

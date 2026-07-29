@@ -109,6 +109,43 @@ final class ToolRendererMiddlewareTest extends FunctionalTestCase
         self::assertStringEndsWith('</body></html>', $body);
     }
 
+    #[Test]
+    public function processInjectsOnlyBeforeLastBodyClosingTag(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $html = '<html><body><code>&lt;/body&gt;</code><pre></body></pre><h1>Page</h1></body></html>';
+
+        $response = $this->subject->process(
+            $this->createRequest(enabled: true),
+            $this->createHandler($html),
+        );
+
+        $body = $this->readBody($response);
+
+        // Earlier "</body>" occurrences inside page content must stay untouched;
+        // only the final closing tag receives the injection.
+        self::assertStringContainsString('<code>&lt;/body&gt;</code>', $body);
+        self::assertStringContainsString('<pre></body></pre>', $body);
+        self::assertNotSame($html, $body);
+        self::assertStringEndsWith('</body></html>', $body);
+    }
+
+    #[Test]
+    public function processReturnsUnchangedResponseWhenNoBodyClosingTag(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $html = '<html><h1>Page without closing body</h1></html>';
+
+        $response = $this->subject->process(
+            $this->createRequest(enabled: true),
+            $this->createHandler($html),
+        );
+
+        self::assertSame($html, $this->readBody($response));
+    }
+
     private function createRequest(bool $enabled): ServerRequestInterface
     {
         $site = new Site('test', 1, [
@@ -126,12 +163,14 @@ final class ToolRendererMiddlewareTest extends FunctionalTestCase
             ->withAttribute('site', $site);
     }
 
-    private function createHandler(): RequestHandlerInterface
+    private function createHandler(?string $html = null): RequestHandlerInterface
     {
-        return new class implements RequestHandlerInterface {
+        return new class($html ?? ToolRendererMiddlewareTest::HTML) implements RequestHandlerInterface {
+            public function __construct(private readonly string $html) {}
+
             public function handle(ServerRequestInterface $request): ResponseInterface
             {
-                return new HtmlResponse(ToolRendererMiddlewareTest::HTML);
+                return new HtmlResponse($this->html);
             }
         };
     }
