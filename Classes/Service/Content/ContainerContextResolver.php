@@ -26,7 +26,7 @@ use function sprintf;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
-final class ContainerContextResolver
+final readonly class ContainerContextResolver
 {
     public function __construct(
         private Registry $registry,
