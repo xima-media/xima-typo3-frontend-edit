@@ -276,17 +276,17 @@ readonly class AjaxController
      */
     private function parseMoveParameters(array $data): array
     {
-        $uid = filter_var($data['uid'] ?? null, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $uid = $this->parseInt($data, 'uid', 1);
         if (false === $uid) {
             return ['hasError' => true, 'error' => 'Missing or invalid parameter: uid'];
         }
 
-        $targetColPos = filter_var($data['targetColPos'] ?? null, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        $targetColPos = $this->parseInt($data, 'targetColPos', 0);
         if (false === $targetColPos) {
             return ['hasError' => true, 'error' => 'Missing or invalid parameter: targetColPos'];
         }
 
-        $language = filter_var($data['language'] ?? 0, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        $language = $this->parseInt($data, 'language', 0, 0);
         if (false === $language) {
             return ['hasError' => true, 'error' => 'Invalid parameter: language'];
         }
@@ -294,16 +294,12 @@ readonly class AjaxController
             return ['hasError' => true, 'statusCode' => 422, 'error' => 'Translated content cannot be moved via drag & drop'];
         }
 
-        $targetUidValue = $data['targetUid'] ?? null;
-        $targetUid = null === $targetUidValue ? null : filter_var($targetUidValue, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        $targetUid = $this->parseOptionalInt($data, 'targetUid', 0);
         if (false === $targetUid) {
             return ['hasError' => true, 'error' => 'Invalid parameter: targetUid'];
         }
 
-        $containerUidValue = $data['targetContainerUid'] ?? null;
-        $targetContainerUid = null === $containerUidValue
-            ? null
-            : filter_var($containerUidValue, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $targetContainerUid = $this->parseOptionalInt($data, 'targetContainerUid', 1);
         if (false === $targetContainerUid) {
             return ['hasError' => true, 'error' => 'Invalid parameter: targetContainerUid'];
         }
@@ -315,5 +311,28 @@ readonly class AjaxController
             'targetUid' => $targetUid,
             'targetContainerUid' => $targetContainerUid,
         ];
+    }
+
+    /**
+     * Parse a required integer parameter, substituting $default when absent.
+     *
+     * @param array<mixed> $data
+     */
+    private function parseInt(array $data, string $key, int $min, ?int $default = null): int|false
+    {
+        return filter_var($data[$key] ?? $default, \FILTER_VALIDATE_INT, ['options' => ['min_range' => $min]]);
+    }
+
+    /**
+     * Parse an optional integer parameter: absent or explicit null passes
+     * through as null, present-but-invalid yields false.
+     *
+     * @param array<mixed> $data
+     */
+    private function parseOptionalInt(array $data, string $key, int $min): int|false|null
+    {
+        $value = $data[$key] ?? null;
+
+        return null === $value ? null : filter_var($value, \FILTER_VALIDATE_INT, ['options' => ['min_range' => $min]]);
     }
 }
