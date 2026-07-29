@@ -115,10 +115,20 @@ final readonly class ContentMoveService
      * record uid", a non-negative target is the page uid (insert as first element
      * in the target column). The colPos is applied via the move's update payload.
      *
-     * @return array<string, array<int, array{move: array{action: string, target: int, update: array{colPos: int}}}>>
+     * tx_container_parent is ALWAYS part of the payload, including the value 0.
+     * EXT:container forces it to 0 whenever colPos is set without it, which would
+     * silently orphan a container child; and its own target rewriting for the top
+     * of a container column only runs when both fields are present.
+     *
+     * @return array<string, array<int, array{move: array{action: string, target: int, update: array{colPos: int, tx_container_parent: int}}}>>
      */
-    public function buildMoveCommand(int $uid, int $targetColPos, ?int $targetUid, int $pid): array
-    {
+    public function buildMoveCommand(
+        int $uid,
+        int $targetColPos,
+        ?int $targetUid,
+        int $pid,
+        int $targetContainerUid = 0,
+    ): array {
         $target = null !== $targetUid && $targetUid > 0 ? -$targetUid : $pid;
 
         return [
@@ -127,7 +137,10 @@ final readonly class ContentMoveService
                     'move' => [
                         'action' => 'paste',
                         'target' => $target,
-                        'update' => ['colPos' => $targetColPos],
+                        'update' => [
+                            'colPos' => $targetColPos,
+                            'tx_container_parent' => $targetContainerUid,
+                        ],
                     ],
                 ],
             ],
