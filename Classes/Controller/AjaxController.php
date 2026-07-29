@@ -157,6 +157,10 @@ readonly class AjaxController
      */
     public function moveAction(ServerRequestInterface $request): JsonResponse
     {
+        if (!$this->isSameOriginWriteRequest($request)) {
+            return new JsonResponse(['success' => false, 'error' => 'Invalid request'], 403);
+        }
+
         if (!$this->backendUserService->isFrontendEditAllowed()) {
             return new JsonResponse(['success' => false, 'error' => 'Frontend edit is not allowed'], 403);
         }

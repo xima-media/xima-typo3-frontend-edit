@@ -216,6 +216,41 @@ final class AjaxControllerTest extends FunctionalTestCase
         self::assertArrayHasKey('columnTargets', $payload);
     }
 
+    #[Test]
+    public function moveActionRejectsNonPostRequest(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $response = $this->subject->moveAction($this->createMoveRequest(method: 'GET'));
+
+        self::assertSame(403, $response->getStatusCode());
+        self::assertFalse($this->decode($response)['success']);
+    }
+
+    #[Test]
+    public function moveActionRejectsCrossSiteRequest(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $request = $this->createMoveRequest()->withHeader('Sec-Fetch-Site', 'cross-site');
+        $response = $this->subject->moveAction($request);
+
+        self::assertSame(403, $response->getStatusCode());
+        self::assertFalse($this->decode($response)['success']);
+    }
+
+    #[Test]
+    public function moveActionPassesOriginGuardOnSameOriginPostRequest(): void
+    {
+        $this->setUpBackendUser(1);
+
+        // The record does not exist in the fixture, so the guard must be passed
+        // and the request must fail later on the record lookup, not with a 403.
+        $response = $this->subject->moveAction($this->createMoveRequest());
+
+        self::assertNotSame(403, $response->getStatusCode());
+    }
+
     /**
      * @param array<string, string> $queryParams
      */
@@ -223,6 +258,19 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         return (new ServerRequest('https://example.com/', 'GET'))
             ->withQueryParams($queryParams);
+    }
+
+    private function createMoveRequest(string $method = 'POST'): ServerRequestInterface
+    {
+        return (new ServerRequest('https://example.com/', $method))
+            ->withHeader('Sec-Fetch-Site', 'same-origin')
+            ->withHeader('Content-Type', 'application/json')
+            ->withBody($this->stream((string) json_encode([
+                'uid' => 9999,
+                'targetColPos' => 0,
+                'targetUid' => 0,
+                'language' => 0,
+            ])));
     }
 
     private function createToggleRequest(string $method = 'POST'): ServerRequestInterface
