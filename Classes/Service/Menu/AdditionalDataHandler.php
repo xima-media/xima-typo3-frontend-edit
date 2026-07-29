@@ -110,8 +110,9 @@ final readonly class AdditionalDataHandler
      *
      * The data attributes originate from the (untrusted) frontend, so an absolute
      * URL must use http(s); relative URLs are allowed. Script-executing schemes
-     * (javascript:, data:, vbscript:, …) and control-character obfuscation are
-     * rejected server-side rather than relying on the client denylist alone.
+     * (javascript:, data:, vbscript:, …), scheme-relative URLs pointing at a
+     * foreign host and control-character obfuscation are rejected server-side
+     * rather than relying on the client denylist alone.
      */
     private function isSafeUrl(string $url): bool
     {
@@ -122,6 +123,13 @@ final readonly class AdditionalDataHandler
 
         // Control characters may be used to obfuscate a scheme (e.g. "java\tscript:").
         if (1 === preg_match('/[\x00-\x1F\x7F]/', $url)) {
+            return false;
+        }
+
+        // Scheme-relative URLs ("//host") carry no scheme but still point at a
+        // foreign host. Browsers normalise backslashes to forward slashes in the
+        // authority, so "\\host" and "/\host" resolve the same way.
+        if (str_starts_with(strtr($url, '\\', '/'), '//')) {
             return false;
         }
 
