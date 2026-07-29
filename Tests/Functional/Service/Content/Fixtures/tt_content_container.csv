@@ -1,0 +1,9 @@
+"tt_content"
+,"uid","pid","sys_language_uid","l18n_parent","CType","colPos","tx_container_parent","sorting","header","hidden","deleted"
+,1,1,0,0,"text",0,0,256,"Plain first",0,0
+,2,1,0,0,"text",0,0,512,"Plain second",0,0
+,3,1,0,0,"container_2_columns",0,0,768,"Two column container",0,0
+,4,1,0,0,"text",201,3,256,"Left child first",0,0
+,5,1,0,0,"text",201,3,512,"Left child second",0,0
+,6,1,0,0,"text",202,3,256,"Right child",0,0
+,7,1,1,1,"text",0,0,1024,"Translated plain",0,0
