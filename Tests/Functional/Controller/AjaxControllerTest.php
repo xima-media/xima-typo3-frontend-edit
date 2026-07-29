@@ -56,7 +56,30 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         unset($GLOBALS['BE_USER']);
 
-        $response = $this->subject->toggleAction();
+        $response = $this->subject->toggleAction($this->createToggleRequest());
+
+        self::assertSame(403, $response->getStatusCode());
+        self::assertFalse($this->decode($response)['success']);
+    }
+
+    #[Test]
+    public function toggleActionRejectsNonPostRequest(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $response = $this->subject->toggleAction($this->createToggleRequest(method: 'GET'));
+
+        self::assertSame(403, $response->getStatusCode());
+        self::assertFalse($this->decode($response)['success']);
+    }
+
+    #[Test]
+    public function toggleActionRejectsCrossSiteRequest(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $request = $this->createToggleRequest()->withHeader('Sec-Fetch-Site', 'cross-site');
+        $response = $this->subject->toggleAction($request);
 
         self::assertSame(403, $response->getStatusCode());
         self::assertFalse($this->decode($response)['success']);
@@ -67,7 +90,7 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         $this->setUpBackendUser(1);
 
-        $response = $this->subject->toggleAction();
+        $response = $this->subject->toggleAction($this->createToggleRequest());
 
         $payload = $this->decode($response);
 
@@ -82,7 +105,7 @@ final class AjaxControllerTest extends FunctionalTestCase
         $backendUser = $this->setUpBackendUser(1);
         $backendUser->uc[Configuration::UC_KEY_DISABLED] = true;
 
-        $payload = $this->decode($this->subject->toggleAction());
+        $payload = $this->decode($this->subject->toggleAction($this->createToggleRequest()));
 
         self::assertTrue($payload['success']);
         self::assertFalse($payload['disabled']);
@@ -93,7 +116,7 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         $backendUser = $this->setUpBackendUser(1);
 
-        $this->subject->toggleAction();
+        $this->subject->toggleAction($this->createToggleRequest());
 
         self::assertTrue((bool) $backendUser->uc[Configuration::UC_KEY_DISABLED]);
     }
@@ -200,6 +223,12 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         return (new ServerRequest('https://example.com/', 'GET'))
             ->withQueryParams($queryParams);
+    }
+
+    private function createToggleRequest(string $method = 'POST'): ServerRequestInterface
+    {
+        return (new ServerRequest('https://example.com/', $method))
+            ->withHeader('Sec-Fetch-Site', 'same-origin');
     }
 
     private function stream(string $content): Stream

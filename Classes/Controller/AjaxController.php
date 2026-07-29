@@ -25,6 +25,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\EmptyColumnService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator;
 
+use function in_array;
 use function is_array;
 use function is_scalar;
 
@@ -49,8 +50,12 @@ readonly class AjaxController
      *
      * Uses the backend user's uc (user configuration) to persist the state.
      */
-    public function toggleAction(): JsonResponse
+    public function toggleAction(ServerRequestInterface $request): JsonResponse
     {
+        if (!$this->isSameOriginWriteRequest($request)) {
+            return new JsonResponse(['success' => false, 'error' => 'Invalid request'], 403);
+        }
+
         if (!$this->backendUserService->isFrontendEditAllowed()) {
             return new JsonResponse(['success' => false, 'error' => 'Frontend edit is not allowed'], 403);
         }
@@ -143,6 +148,24 @@ readonly class AjaxController
     protected function getBackendUser(): ?BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'] ?? null;
+    }
+
+    /**
+     * Guard state-changing requests against cross-site request forgery.
+     *
+     * Requires POST and, when the browser provides Fetch Metadata, a same-origin
+     * context. Browsers that omit Sec-Fetch-Site (legacy) fall back to POST-only.
+     */
+    private function isSameOriginWriteRequest(ServerRequestInterface $request): bool
+    {
+        if ('POST' !== $request->getMethod()) {
+            return false;
+        }
+
+        $fetchSite = $request->getHeaderLine('Sec-Fetch-Site');
+
+        return '' === $fetchSite
+            || in_array($fetchSite, ['same-origin', 'same-site', 'none'], true);
     }
 
     private function validateContentType(ServerRequestInterface $request): void
