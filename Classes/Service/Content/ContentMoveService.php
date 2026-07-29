@@ -34,22 +34,20 @@ final readonly class ContentMoveService
     public function __construct(
         private BackendUserService $backendUserService,
         private SettingsService $settingsService,
+        private ContainerContextResolver $containerContextResolver,
     ) {}
 
     /**
-     * Whether a record is within the MVP scope for frontend drag & drop.
+     * Whether a record is within scope for frontend drag & drop.
      *
-     * Container children (EXT:container) and translated elements are out of scope
-     * and keep the classic backend move button as fallback.
+     * Translated elements follow their parent's ordering, so reordering them
+     * would have no meaningful effect. Container children are in scope; their
+     * target is validated by ContainerContextResolver.
      *
      * @param array<string, mixed> $record
      */
     public function isMovable(array $record): bool
     {
-        if ((int) ($record['tx_container_parent'] ?? 0) > 0) {
-            return false;
-        }
-
         return (int) ($record['sys_language_uid'] ?? 0) <= 0;
     }
 
@@ -58,11 +56,12 @@ final readonly class ContentMoveService
      *
      * The target page is always derived from the record itself, so a crafted
      * request cannot move an element across pages (out of MVP scope). When a
-     * neighbour is given it must live on the same page.
+     * neighbour is given it must live on the same page and in the resolved
+     * column context.
      *
      * @return array{success: bool, statusCode: int, errors: list<string>}
      */
-    public function move(int $uid, int $targetColPos, ?int $targetUid): array
+    public function move(int $uid, int $targetColPos, ?int $targetUid, ?int $targetContainerUid = null): array
     {
         // Fetch all fields: tx_container_parent only exists when EXT:container is
         // installed, so it must not be named explicitly in the SELECT.
@@ -88,14 +87,16 @@ final readonly class ContentMoveService
             return $this->failure(403, 'You are not allowed to edit this content element');
         }
 
-        if (null !== $targetUid && $targetUid > 0) {
-            $neighbour = BackendUtility::getRecord('tt_content', $targetUid);
-            if (null === $neighbour || (int) $neighbour['pid'] !== $pid || !$this->isMovable($neighbour)) {
-                return $this->failure(422, 'Invalid drop target');
-            }
+        $context = $this->containerContextResolver->resolve($targetContainerUid, $targetColPos, $record);
+        if (!$context['valid']) {
+            return $this->failure(422, (string) $context['error']);
         }
 
-        $command = $this->buildMoveCommand($uid, $targetColPos, $targetUid, $pid);
+        if (null !== $targetUid && $targetUid > 0 && !$this->isValidNeighbour($targetUid, $pid, $context)) {
+            return $this->failure(422, 'Invalid drop target');
+        }
+
+        $command = $this->buildMoveCommand($uid, $context['colPos'], $targetUid, $pid, $context['containerUid']);
 
         $dataHandler = GeneralUtility::makeInstance(DataHandler::class);
         $dataHandler->start([], $command, $this->backendUserService->getBackendUser());
@@ -109,7 +110,7 @@ final readonly class ContentMoveService
         // rewrite and even unset commands. Confirm the record actually landed
         // where it was asked to go.
         $moved = BackendUtility::getRecord('tt_content', $uid);
-        if (null === $moved || (int) $moved['colPos'] !== $targetColPos) {
+        if (!$this->wasMovedAsRequested($moved, $context)) {
             return $this->failure(409, 'The move was not applied as requested');
         }
 
@@ -153,6 +154,30 @@ final readonly class ContentMoveService
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param array{valid: bool, colPos: int, containerUid: int, error: string|null} $context
+     */
+    private function isValidNeighbour(int $targetUid, int $pid, array $context): bool
+    {
+        $neighbour = BackendUtility::getRecord('tt_content', $targetUid);
+
+        return null !== $neighbour
+            && (int) $neighbour['pid'] === $pid
+            && (int) $neighbour['colPos'] === $context['colPos']
+            && (int) ($neighbour['tx_container_parent'] ?? 0) === $context['containerUid'];
+    }
+
+    /**
+     * @param array<string, mixed>|null                                              $moved
+     * @param array{valid: bool, colPos: int, containerUid: int, error: string|null} $context
+     */
+    private function wasMovedAsRequested(?array $moved, array $context): bool
+    {
+        return null !== $moved
+            && (int) $moved['colPos'] === $context['colPos']
+            && (int) ($moved['tx_container_parent'] ?? 0) === $context['containerUid'];
     }
 
     /**

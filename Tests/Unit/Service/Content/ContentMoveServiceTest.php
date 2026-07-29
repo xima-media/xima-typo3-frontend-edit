@@ -13,13 +13,16 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Content;
 
+use B13\Container\Tca\Registry;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
-use Xima\XimaTypo3FrontendEdit\Service\Content\ContentMoveService;
+use Xima\XimaTypo3FrontendEdit\Service\Content\{ContainerContextResolver, ContentMoveService};
 
 /**
  * ContentMoveServiceTest.
@@ -39,6 +42,10 @@ final class ContentMoveServiceTest extends TestCase
             new SettingsService(
                 $this->createMock(ExtensionConfiguration::class),
                 $this->createMock(SiteFinder::class),
+            ),
+            new ContainerContextResolver(
+                new Registry($this->createMock(EventDispatcherInterface::class)),
+                $this->createMock(ConnectionPool::class),
             ),
         );
     }
@@ -99,6 +106,16 @@ final class ContentMoveServiceTest extends TestCase
     }
 
     #[Test]
+    public function isMovableAcceptsContainerChild(): void
+    {
+        self::assertTrue($this->subject->isMovable([
+            'uid' => 1,
+            'sys_language_uid' => 0,
+            'tx_container_parent' => 99,
+        ]));
+    }
+
+    #[Test]
     #[DataProvider('nonMovableRecordProvider')]
     public function isMovableRejectsOutOfScopeRecords(array $record): void
     {
@@ -110,7 +127,6 @@ final class ContentMoveServiceTest extends TestCase
      */
     public static function nonMovableRecordProvider(): iterable
     {
-        yield 'container child' => [['sys_language_uid' => 0, 'tx_container_parent' => 99]];
         yield 'translated element' => [['sys_language_uid' => 1, 'tx_container_parent' => 0]];
     }
 

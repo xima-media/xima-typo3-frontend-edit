@@ -136,6 +136,27 @@ final class ContainerContextResolverTest extends TestCase
     }
 
     #[Test]
+    public function resolveAcceptsPageColumnWhenRegistryIsAbsent(): void
+    {
+        // EXT:container is not installed (require-dev only) — the registry
+        // service does not exist, so it is null. Plain drag & drop must still
+        // work: a page column with no container given is accepted as usual.
+        $result = $this->createSubjectWithoutRegistry()->resolve(null, 0, ['uid' => 1, 'pid' => 1, 'CType' => 'text']);
+
+        self::assertTrue($result['valid']);
+        self::assertSame(0, $result['containerUid']);
+    }
+
+    #[Test]
+    public function resolveRejectsContainerUidWhenRegistryIsAbsent(): void
+    {
+        $result = $this->createSubjectWithoutRegistry()->resolve(3, 201, ['uid' => 1, 'pid' => 1, 'CType' => 'text']);
+
+        self::assertFalse($result['valid']);
+        self::assertStringContainsString('not installed', (string) $result['error']);
+    }
+
+    #[Test]
     public function resolveAcceptsValidContainerColumn(): void
     {
         $this->registerContainer('test_container', [201]);
@@ -175,6 +196,11 @@ final class ContainerContextResolverTest extends TestCase
             new Registry($this->createMock(EventDispatcherInterface::class)),
             $this->createConnectionPoolReturning($records),
         );
+    }
+
+    private function createSubjectWithoutRegistry(): ContainerContextResolver
+    {
+        return new ContainerContextResolver(null, $this->createConnectionPoolReturning([]));
     }
 
     /**

@@ -31,8 +31,14 @@ use function sprintf;
  */
 final readonly class ContainerContextResolver
 {
+    /**
+     * $registry is null when EXT:container is not installed — a supported
+     * setup, since the extension only requires it via require-dev. Every
+     * containerUid is then rejected; there are no registered containers to
+     * validate against.
+     */
     public function __construct(
-        private Registry $registry,
+        private ?Registry $registry,
         private ConnectionPool $connectionPool,
     ) {}
 
@@ -59,6 +65,10 @@ final readonly class ContainerContextResolver
             }
 
             return $this->accept($colPos, 0);
+        }
+
+        if (null === $this->registry) {
+            return $this->reject('EXT:container is not installed');
         }
 
         // Rule 5: a container element itself must not be nested via drag & drop.
@@ -137,6 +147,10 @@ final readonly class ContainerContextResolver
      */
     private function allRegisteredContainerColPos(): array
     {
+        if (null === $this->registry) {
+            return [];
+        }
+
         $colPositions = [];
         foreach ($this->registry->getRegisteredCTypes() as $cType) {
             foreach ($this->registry->getAllAvailableColumnsColPos($cType) as $colPos) {
