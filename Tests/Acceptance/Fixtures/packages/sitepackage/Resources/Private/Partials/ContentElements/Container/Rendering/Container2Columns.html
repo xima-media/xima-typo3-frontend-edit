@@ -1,0 +1,14 @@
+{namespace xfe=Xima\XimaTypo3FrontendEdit\ViewHelpers}
+
+<div class="contentcontainer-column" data-container-column="left">
+    <xfe:columnTarget colPos="201" containerUid="{data.uid}" />
+    <f:for each="{children_201}" as="record">
+        <f:format.raw>{record.renderedContent}</f:format.raw>
+    </f:for>
+</div>
+<div class="contentcontainer-column" data-container-column="right">
+    <xfe:columnTarget colPos="202" containerUid="{data.uid}" />
+    <f:for each="{children_202}" as="record">
+        <f:format.raw>{record.renderedContent}</f:format.raw>
+    </f:for>
+</div>
