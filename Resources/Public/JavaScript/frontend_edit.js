@@ -1654,24 +1654,39 @@
       } catch (_) { /* storage unavailable — the reload just shows no toast */ }
     },
 
+    // Picks the header-specific detail label (with "%s" substituted) when a
+    // header is known, otherwise the generic label — falling back to English
+    // defaults if the label itself is missing.
+    formatMoveMessage(detail, detailGeneric, fallback, fallbackGeneric, header) {
+      return header
+        ? (detail || fallback).replace('%s', header)
+        : (detailGeneric || fallbackGeneric);
+    },
+
     async persistMove(uid, targetColPos, targetUid, header, sameColumn, targetContainerUid) {
       const config = document.getElementById('frontend-edit-toolbar-config');
       const language = config ? parseInt(config.dataset.language || '0', 10) : 0;
       const L = this.labels;
       // "OK" is the TYPO3 severity that maps to the green success styling.
-      const detail = sameColumn ? L.successDetail : L.successDetailMoved;
-      const detailGeneric = sameColumn ? L.successDetailGeneric : L.successDetailMovedGeneric;
-      const fallback = sameColumn ? '“%s” was reordered within the column.' : '“%s” was moved to another column.';
-      const fallbackGeneric = sameColumn ? 'The content element was reordered within the column.' : 'The content element was moved to another column.';
-      const successMsg = header
-        ? (detail || fallback).replace('%s', header)
-        : (detailGeneric || fallbackGeneric);
-      const errorMsg = header
-        ? (L.errorDetail || '“%s” could not be moved. Please try again.').replace('%s', header)
-        : (L.errorDetailGeneric || 'The content element could not be moved. Please try again.');
-      const rejectedMsg = header
-        ? (L.rejectedDetail || '“%s” cannot be placed at this position. Use the move dialog in the backend instead.').replace('%s', header)
-        : (L.rejectedDetailGeneric || 'The content element cannot be placed at this position. Use the move dialog in the backend instead.');
+      const successMsg = this.formatMoveMessage(
+        sameColumn ? L.successDetail : L.successDetailMoved,
+        sameColumn ? L.successDetailGeneric : L.successDetailMovedGeneric,
+        sameColumn ? '“%s” was reordered within the column.' : '“%s” was moved to another column.',
+        sameColumn ? 'The content element was reordered within the column.' : 'The content element was moved to another column.',
+        header
+      );
+      const errorMsg = this.formatMoveMessage(
+        L.errorDetail, L.errorDetailGeneric,
+        '“%s” could not be moved. Please try again.',
+        'The content element could not be moved. Please try again.',
+        header
+      );
+      const rejectedMsg = this.formatMoveMessage(
+        L.rejectedDetail, L.rejectedDetailGeneric,
+        '“%s” cannot be placed at this position. Use the move dialog in the backend instead.',
+        'The content element cannot be placed at this position. Use the move dialog in the backend instead.',
+        header
+      );
       try {
         const response = await fetch(this.moveUrl, {
           method: 'POST',
