@@ -135,6 +135,18 @@ final class ContentMoveServiceTest extends FunctionalTestCase
         );
     }
 
+    #[Test]
+    public function moveVerificationAcceptsACorrectlyAppliedMove(): void
+    {
+        // Pins the verification against false negatives: a move that really did
+        // land where it was asked to go must still report success.
+        $result = $this->subject->move(1, 0, 2);
+
+        self::assertTrue($result['success']);
+        self::assertSame(200, $result['statusCode']);
+        self::assertSame(0, (int) $this->readRecord(1)['colPos']);
+    }
+
     /**
      * @return array<string, mixed>
      */

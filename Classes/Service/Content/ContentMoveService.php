@@ -105,6 +105,14 @@ final readonly class ContentMoveService
             return $this->failure(400, ...array_map(strval(...), array_values($dataHandler->errorLog)));
         }
 
+        // An empty errorLog is not proof the move happened: EXT:container hooks
+        // rewrite and even unset commands. Confirm the record actually landed
+        // where it was asked to go.
+        $moved = BackendUtility::getRecord('tt_content', $uid);
+        if (null === $moved || (int) $moved['colPos'] !== $targetColPos) {
+            return $this->failure(409, 'The move was not applied as requested');
+        }
+
         return ['success' => true, 'statusCode' => 200, 'errors' => []];
     }
 
