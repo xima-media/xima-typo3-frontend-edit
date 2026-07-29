@@ -170,8 +170,6 @@ final class ContentMoveServiceTest extends FunctionalTestCase
     #[Test]
     public function moveRejectsContainerColumnWithoutContainerUid(): void
     {
-        $before = $this->readRecord(1);
-
         // The orphan path: colPos 201 with no container would leave a container
         // column number without a container binding.
         $result = $this->subject->move(1, 201, null, null);
