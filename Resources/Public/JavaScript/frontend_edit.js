@@ -1484,8 +1484,14 @@
         handle.draggable = true;
         handle.innerHTML = ICONS.drag;
         const label = this.labels.handle || 'Drag to reorder';
-        handle.setAttribute('aria-label', label);
         handle.dataset.tooltip = label;
+        // Native drag & drop is pointer-only: this handle cannot be operated with
+        // a keyboard. Keeping it in the tab order would offer a focusable control
+        // that does nothing, so it is taken out of the tab order and hidden from
+        // assistive technology. The "move" button in the edit menu remains the
+        // keyboard-accessible way to reposition an element.
+        handle.tabIndex = -1;
+        handle.setAttribute('aria-hidden', 'true');
         handle.addEventListener('dragstart', (e) => this.onDragStart(e, uid));
         handle.addEventListener('dragend', () => this.onDragEnd());
         Tooltip.attach(handle);

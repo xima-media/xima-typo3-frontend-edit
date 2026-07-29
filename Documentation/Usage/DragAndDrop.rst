@@ -91,8 +91,10 @@ Translated elements
 
 Keyboard operation
     Dragging relies on the browser's native drag & drop, which is pointer-only.
-    The drag handle cannot be operated with a keyboard — use the **move** button
-    in the edit menu instead, which opens the backend move dialog.
+    The drag handle is therefore deliberately kept out of the tab order and
+    hidden from assistive technology, so it does not present a focusable control
+    that cannot be used. Use the **move** button in the edit menu instead, which
+    opens the backend move dialog and is fully keyboard-accessible.
 
 Fallback Behavior
 =================
