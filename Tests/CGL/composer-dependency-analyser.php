@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 use Composer\Autoload;
 use ShipMonk\ComposerDependencyAnalyser;
+use ShipMonk\ComposerDependencyAnalyser\Config\ErrorType;
 
 $rootPath = dirname(__DIR__, 2);
 
@@ -31,6 +32,12 @@ $configuration
     ->ignoreUnknownClasses([
         'TYPO3\CMS\Core\Authentication\AccessCheckResult',
     ])
+    // b13/container is a deliberately optional integration: ContainerContextResolver
+    // takes a nullable Registry (Configuration/Services.yaml wires it via the Symfony
+    // "@?" optional service reference), so a site without EXT:container still boots and
+    // simply rejects container-column moves. Moving it to "require" would force every
+    // consumer to install EXT:container even when they never use it.
+    ->ignoreErrorsOnPackage('b13/container', [ErrorType::DEV_DEPENDENCY_IN_PROD])
 ;
 
 return $configuration;
