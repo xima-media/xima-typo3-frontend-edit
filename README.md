@@ -14,12 +14,12 @@
 
 </div>
 
-This TYPO3 extension adds lightweight editing tools to the frontend, allowing backend users to edit, hide, delete, and reorder content elements and pages without leaving the site. It works out of the box with TYPO3's default `fluid_styled_content` templates; custom templates need to expose a content element ID (c-id) — see [How it works](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/HowItWorks/Index.html) for details.
+This TYPO3 extension adds lightweight editing tools to the frontend, allowing backend users to edit, hide, delete, and reorder content elements and pages without leaving the site. It works out of the box with TYPO3's default `fluid_styled_content` templates; custom templates need to expose a content element ID (c-id). See [How it works](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/HowItWorks/Index.html) for details.
 
 ![Frontend Edit](./Documentation/Images/screenshot.jpg)
 
 > [!NOTE]
-> **Why?** TYPO3 editors often need to switch between the frontend and the backend to find and edit the right content element. This extension eliminates that context switch by providing editing actions directly where the content is displayed — making the editorial workflow faster and more intuitive.
+> **Why?** TYPO3 editors often need to switch between the frontend and the backend to find and edit the right content element. This extension eliminates that context switch by providing editing actions directly where the content is displayed, making the editorial workflow faster and more intuitive.
 
 ## ✨ Features
 
@@ -39,7 +39,7 @@ This TYPO3 extension adds lightweight editing tools to the frontend, allowing ba
 ### [Inline Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)
 
 > [!NOTE]
-> New in **v2.2+** — thanks to [Violetta Digital Craft](https://www.violetta.ch/) for supporting this feature. This feature is still experimental and may change in future releases.
+> New in **v2.2+**, thanks to [Violetta Digital Craft](https://www.violetta.ch/) for supporting this feature. This feature is still experimental and may change in future releases.
 
 Edit content elements directly in the frontend without navigating to the backend. Enable via Site Settings: `frontendEdit.enableContextualEditing: true`
 
