@@ -299,6 +299,45 @@ final class AdditionalDataHandlerTest extends TestCase
     }
 
     #[Test]
+    public function handleDataSkipsTranslatedRecordWhenAccessDenied(): void
+    {
+        // Access is granted for the parent (uid 5) but denied for the translation (uid 99).
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        if (method_exists(BackendUserAuthentication::class, 'checkRecordEditAccess')) {
+            $backendUser->method('checkRecordEditAccess')->willReturnCallback(
+                static fn (string $table, array $record): \TYPO3\CMS\Core\Authentication\AccessCheckResult => new \TYPO3\CMS\Core\Authentication\AccessCheckResult(99 !== ($record['uid'] ?? 0)),
+            );
+        }
+        $backendUser->method('recordEditAccessInternals')->willReturnCallback(
+            static fn (string $table, array $record): bool => 99 !== ($record['uid'] ?? 0),
+        );
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $repository = new ContentElementRepository(
+            $this->createConnectionPoolReturning(['uid' => 99, 'sys_language_uid' => 1]),
+        );
+
+        $handler = new AdditionalDataHandler(
+            new BackendUserService(),
+            new UrlBuilderService(),
+            new IconService($this->createIconFactory()),
+            $repository,
+        );
+        $button = $this->createButton();
+
+        $entries = [
+            ['label' => 'Record', 'table' => 'pages', 'uid' => 5, 'url' => null, 'icon' => null],
+        ];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 1, '#anchor');
+
+        self::assertArrayNotHasKey('data_0', $button->getChildren());
+    }
+
+    #[Test]
     public function handleDataSkipsWhenTranslationMissing(): void
     {
         $this->registerBackendUserWithAccess();

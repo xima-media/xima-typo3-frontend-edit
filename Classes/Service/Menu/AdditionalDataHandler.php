@@ -173,11 +173,17 @@ final readonly class AdditionalDataHandler
                 $languageUid,
             );
 
-            if (is_array($translatedRecord)) {
-                return $translatedRecord['uid'];
+            if (!is_array($translatedRecord)) {
+                return null;
             }
 
-            return null;
+            // The access check above applied to the parent record; re-check it on the
+            // resolved translation before its uid is turned into an edit link.
+            if (!$this->backendUserService->hasRecordEditAccess($dataEntry['table'], $translatedRecord)) {
+                return null;
+            }
+
+            return $translatedRecord['uid'];
         }
 
         return $recordUid;
