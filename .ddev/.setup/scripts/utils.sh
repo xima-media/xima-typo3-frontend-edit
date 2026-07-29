@@ -290,6 +290,7 @@ function install_composer_packages() {
             typo3/cms-reports:"^$VERSION" \
             typo3/cms-lowlevel:"^$VERSION" \
             bk2k/bootstrap-package:'*' \
+            b13/container:'^4.0' \
             $PACKAGE_NAME:'*@dev' \
             test/sitepackage:'*@dev' \
             helhum/typo3-console:'*' \

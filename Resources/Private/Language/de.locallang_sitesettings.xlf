@@ -171,6 +171,15 @@
 				<target>Öffnet Inhaltselement-Bearbeitungsformulare in einem Seitenpanel anstatt zum Backend zu navigieren. Erfordert TYPO3 v14.2+. Diese Funktion ist experimentell und kann sich in zukünftigen Versionen ändern.</target>
 			</trans-unit>
 
+			<trans-unit id="settings.frontendEdit.enableDragAndDrop">
+				<source>[Experimental] Enable drag &amp; drop reordering</source>
+				<target>[Experimentell] Umsortieren per Drag &amp; Drop aktivieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.enableDragAndDrop">
+				<source>Allows editors to reorder content elements directly in the frontend by dragging them within and between columns. Requires the integrator's Fluid template to mark columns with the data-xfe-colpos attribute. Nested containers and translated elements fall back to the backend move dialog. Experimental.</source>
+				<target>Ermöglicht Redakteuren, Inhaltselemente direkt im Frontend per Drag &amp; Drop innerhalb und zwischen Spalten umzusortieren. Erfordert, dass das Fluid-Template des Integrators die Spalten mit dem Attribut data-xfe-colpos markiert. Verschachtelte Container und übersetzte Elemente greifen auf den Backend-Verschiebedialog zurück. Experimentell.</target>
+			</trans-unit>
+
 			<trans-unit id="settings.frontendEdit.showInsertButtons">
 				<source>Show insert buttons on hover</source>
 				<target>Einfügen-Buttons beim Hover anzeigen</target>

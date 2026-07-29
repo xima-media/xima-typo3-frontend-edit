@@ -20,4 +20,8 @@ return [
         'path' => '/xima-frontend-edit/edit-information',
         'target' => Xima\XimaTypo3FrontendEdit\Controller\AjaxController::class.'::editInformationAction',
     ],
+    'frontendEdit_move' => [
+        'path' => '/xima-frontend-edit/move',
+        'target' => Xima\XimaTypo3FrontendEdit\Controller\AjaxController::class.'::moveAction',
+    ],
 ];

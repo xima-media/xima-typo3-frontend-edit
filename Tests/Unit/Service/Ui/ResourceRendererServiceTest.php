@@ -25,6 +25,7 @@ use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Package\{PackageInterface, PackageManager};
 use TYPO3\CMS\Core\Settings\SettingsInterface;
 use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
+use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\{ExtensionManagementUtility, GeneralUtility};
 use TYPO3\CMS\Core\View\{ViewFactoryInterface, ViewInterface};
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
@@ -209,7 +210,7 @@ final class ResourceRendererServiceTest extends TestCase
         $extensionConfiguration = $this->createMock(ExtensionConfiguration::class);
         $extensionConfiguration->method('get')->willReturn(['frontendDebugMode' => $debugMode]);
 
-        $settingsService = new SettingsService($extensionConfiguration);
+        $settingsService = new SettingsService($extensionConfiguration, $this->createMock(SiteFinder::class));
         $backendUserService = new BackendUserService();
         $urlBuilderService = new UrlBuilderService();
         $pageMenuGenerator = (new ReflectionClass(PageMenuGenerator::class))->newInstanceWithoutConstructor();

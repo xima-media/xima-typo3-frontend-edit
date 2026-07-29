@@ -6,8 +6,8 @@
 Usage
 =====
 
-Once installed and configured, the extension provides two main editing interfaces
-in the frontend for logged-in backend users.
+Once installed and configured, the extension provides the following editing
+interfaces in the frontend for logged-in backend users.
 
 ..  card-grid::
     :columns: 1
@@ -39,9 +39,18 @@ in the frontend for logged-in backend users.
         ..  card-footer::   :ref:`Learn more <contextual-editing>`
             :button-style: btn btn-secondary stretched-link
 
+    ..  card::  Drag & Drop Reordering (experimental)
+
+        Reorder content elements within a column or move them to another
+        column of the same page by dragging them in the frontend.
+
+        ..  card-footer::   :ref:`Learn more <drag-and-drop>`
+            :button-style: btn btn-secondary stretched-link
+
 ..  toctree::
     :hidden:
 
     EditMenu
     Toolbar
     ContextualEditing
+    DragAndDrop
