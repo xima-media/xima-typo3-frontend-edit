@@ -167,6 +167,18 @@
 				<source />
 				<target>Das Inhaltselement konnte nicht verschoben werden. Bitte versuche es erneut.</target>
 			</trans-unit>
+			<trans-unit id="dnd.rejected">
+				<source />
+				<target>Hier kann nicht abgelegt werden</target>
+			</trans-unit>
+			<trans-unit id="dnd.rejectedDetail">
+				<source />
+				<target>„%s" kann an dieser Stelle nicht platziert werden. Nutze den Verschieben-Dialog im Backend.</target>
+			</trans-unit>
+			<trans-unit id="dnd.rejectedDetailGeneric">
+				<source />
+				<target>Das Inhaltselement kann an dieser Stelle nicht platziert werden. Nutze den Verschieben-Dialog im Backend.</target>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>
