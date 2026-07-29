@@ -5,7 +5,7 @@
 # TYPO3 extension `xima_typo3_frontend_edit`
 
 [![Latest Stable Version](https://typo3-badges.dev/badge/xima_typo3_frontend_edit/version/shields.svg)](https://extensions.typo3.org/extension/xima_typo3_frontend_edit)
-![TYPO3](https://img.shields.io/badge/TYPO3-13.4%20%7C%2014.0-orange.svg)
+![TYPO3](https://img.shields.io/badge/TYPO3-13.4%20%7C%2014.3-orange.svg)
 [![Supported PHP Versions](https://img.shields.io/packagist/dependency-v/xima/xima-typo3-frontend-edit/php?logo=php)](https://packagist.org/packages/xima/xima-typo3-frontend-edit)
 [![Coverage](https://img.shields.io/coverallsCoverage/github/xima-media/xima-typo3-frontend-edit?logo=coveralls)](https://coveralls.io/github/xima-media/xima-typo3-frontend-edit)
 [![CGL](https://img.shields.io/github/actions/workflow/status/xima-media/xima-typo3-frontend-edit/cgl.yml?label=cgl&logo=github)](https://github.com/xima-media/xima-typo3-frontend-edit/actions/workflows/cgl.yml)
@@ -14,12 +14,12 @@
 
 </div>
 
-This TYPO3 extension adds lightweight editing tools to the frontend, allowing backend users to edit, hide, delete, and reorder content elements and pages without leaving the site. It works out of the box with TYPO3's default `fluid_styled_content` templates; custom templates need to expose a content element ID (c-id) — see [How it works](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/HowItWorks/Index.html) for details.
+This TYPO3 extension adds lightweight editing tools to the frontend, allowing backend users to edit, hide, delete, and reorder content elements and pages without leaving the site. It works out of the box with TYPO3's default `fluid_styled_content` templates; custom templates need to expose a content element ID (c-id). See [How it works](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/HowItWorks/Index.html) for details.
 
 ![Frontend Edit](./Documentation/Images/screenshot.jpg)
 
 > [!NOTE]
-> **Why?** TYPO3 editors often need to switch between the frontend and the backend to find and edit the right content element. This extension eliminates that context switch by providing editing actions directly where the content is displayed — making the editorial workflow faster and more intuitive.
+> **Why?** TYPO3 editors often need to switch between the frontend and the backend to find and edit the right content element. This extension eliminates that context switch by providing editing actions directly where the content is displayed, making the editorial workflow faster and more intuitive.
 
 ## ✨ Features
 
@@ -39,18 +39,11 @@ This TYPO3 extension adds lightweight editing tools to the frontend, allowing ba
 ### [Inline Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html)
 
 > [!NOTE]
-> New in **v2.2+** — thanks to [Violetta Digital Craft](https://www.violetta.ch/) for supporting this feature. This feature is still experimental and may change in future releases.
+> New in **v2.2+**, thanks to [Violetta Digital Craft](https://www.violetta.ch/) for supporting this feature. This feature is still experimental and may change in future releases.
 
 Edit content elements directly in the frontend without navigating to the backend. Enable via Site Settings: `frontendEdit.enableContextualEditing: true`
 
 ![Inline Editing](./Documentation/Images/inline-edit-screencast.gif)
-
-### Drag & Drop Reordering *(experimental)*
-
-Reorder content elements directly in the frontend by dragging them within a column or across columns on the same page. The move is persisted through TYPO3's core DataHandler — the same mechanism the backend page module uses. Enable via Site Settings: `frontendEdit.enableDragAndDrop: true`
-
-> [!NOTE]
-> Drag & drop relies on the same `data-xfe-colpos` column markers used by the [column target buttons](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/EmptyColumns.html). Your Fluid template must mark each column so its `colPos` can be resolved. Translated elements and nesting a container inside another container keep the classic backend move dialog.
 
 > [!IMPORTANT]
 > **Delineation and classification**: This is **not** a further development of the "original" extension [frontend_editing](https://extensions.typo3.org/extension/frontend_editing). It is similar in some ways to the realisation of the [feedit](https://extensions.typo3.org/extension/feedit) extension. This extension is an independent implementation with a different approach. See the [Delineation](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Delineation/Index.html) page in the documentation for a detailed comparison with related extensions like [visual_editor](https://github.com/FriendsOfTYPO3/visual_editor) and [content_preview](https://github.com/T3-UX/content_preview).
