@@ -173,7 +173,7 @@
 			</trans-unit>
 			<trans-unit id="dnd.rejectedDetail">
 				<source />
-				<target>„%s" kann an dieser Stelle nicht platziert werden. Nutze den Verschieben-Dialog im Backend.</target>
+				<target>„%s“ kann an dieser Stelle nicht platziert werden. Nutze den Verschieben-Dialog im Backend.</target>
 			</trans-unit>
 			<trans-unit id="dnd.rejectedDetailGeneric">
 				<source />

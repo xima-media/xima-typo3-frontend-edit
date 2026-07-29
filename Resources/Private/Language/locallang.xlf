@@ -130,7 +130,7 @@
 				<source>Cannot be dropped here</source>
 			</trans-unit>
 			<trans-unit id="dnd.rejectedDetail">
-				<source>"%s" cannot be placed at this position. Use the move dialog in the backend instead.</source>
+				<source>“%s” cannot be placed at this position. Use the move dialog in the backend instead.</source>
 			</trans-unit>
 			<trans-unit id="dnd.rejectedDetailGeneric">
 				<source>The content element cannot be placed at this position. Use the move dialog in the backend instead.</source>
