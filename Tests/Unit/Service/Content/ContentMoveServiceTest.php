@@ -13,13 +13,16 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Content;
 
+use B13\Container\Tca\Registry;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
+use Psr\EventDispatcher\EventDispatcherInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Site\SiteFinder;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
-use Xima\XimaTypo3FrontendEdit\Service\Content\ContentMoveService;
+use Xima\XimaTypo3FrontendEdit\Service\Content\{ContainerContextResolver, ContentMoveService};
 
 /**
  * ContentMoveServiceTest.
@@ -40,6 +43,10 @@ final class ContentMoveServiceTest extends TestCase
                 $this->createMock(ExtensionConfiguration::class),
                 $this->createMock(SiteFinder::class),
             ),
+            new ContainerContextResolver(
+                new Registry($this->createMock(EventDispatcherInterface::class)),
+                $this->createMock(ConnectionPool::class),
+            ),
         );
     }
 
@@ -54,7 +61,7 @@ final class ContentMoveServiceTest extends TestCase
                     'move' => [
                         'action' => 'paste',
                         'target' => -456,
-                        'update' => ['colPos' => 2],
+                        'update' => ['colPos' => 2, 'tx_container_parent' => 0],
                     ],
                 ],
             ],
@@ -67,7 +74,7 @@ final class ContentMoveServiceTest extends TestCase
         $command = $this->subject->buildMoveCommand(123, 0, null, 10);
 
         self::assertSame(10, $command['tt_content'][123]['move']['target']);
-        self::assertSame(['colPos' => 0], $command['tt_content'][123]['move']['update']);
+        self::assertSame(['colPos' => 0, 'tx_container_parent' => 0], $command['tt_content'][123]['move']['update']);
     }
 
     #[Test]
@@ -99,6 +106,16 @@ final class ContentMoveServiceTest extends TestCase
     }
 
     #[Test]
+    public function isMovableAcceptsContainerChild(): void
+    {
+        self::assertTrue($this->subject->isMovable([
+            'uid' => 1,
+            'sys_language_uid' => 0,
+            'tx_container_parent' => 99,
+        ]));
+    }
+
+    #[Test]
     #[DataProvider('nonMovableRecordProvider')]
     public function isMovableRejectsOutOfScopeRecords(array $record): void
     {
@@ -110,7 +127,28 @@ final class ContentMoveServiceTest extends TestCase
      */
     public static function nonMovableRecordProvider(): iterable
     {
-        yield 'container child' => [['sys_language_uid' => 0, 'tx_container_parent' => 99]];
         yield 'translated element' => [['sys_language_uid' => 1, 'tx_container_parent' => 0]];
+    }
+
+    #[Test]
+    public function buildMoveCommandAlwaysSetsContainerParentEvenForPageColumns(): void
+    {
+        $command = $this->subject->buildMoveCommand(5, 0, null, 1);
+
+        self::assertArrayHasKey(
+            'tx_container_parent',
+            $command['tt_content'][5]['move']['update'],
+            'tx_container_parent must never be omitted — EXT:container would null it silently',
+        );
+        self::assertSame(0, $command['tt_content'][5]['move']['update']['tx_container_parent']);
+    }
+
+    #[Test]
+    public function buildMoveCommandSetsGivenContainerParent(): void
+    {
+        $command = $this->subject->buildMoveCommand(5, 201, null, 1, 3);
+
+        self::assertSame(201, $command['tt_content'][5]['move']['update']['colPos']);
+        self::assertSame(3, $command['tt_content'][5]['move']['update']['tx_container_parent']);
     }
 }

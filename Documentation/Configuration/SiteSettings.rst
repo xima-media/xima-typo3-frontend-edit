@@ -171,8 +171,9 @@ Appearance Settings
 
     Requires your Fluid template to mark each column with the
     :php:`ColumnTargetViewHelper`; without those markers no drag handle is
-    rendered. Container children and translated elements are out of scope and
-    keep the backend move dialog.
+    rendered. Columns of EXT:container elements are supported when the template passes
+    ``containerUid``. Translated elements and nesting a container inside another
+    container keep the backend move dialog.
 
     See :ref:`drag-and-drop` for details on how to use this feature.
 

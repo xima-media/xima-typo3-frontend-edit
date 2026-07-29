@@ -16,6 +16,14 @@ services:
             $flashMessageService: '@Xima\XimaTypo3FrontendEdit\Service\Ui\FlashMessageService'
             $backendUserService: '@Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService'
 
+    # B13\Container\Tca\Registry only exists when EXT:container is installed
+    # (require-dev, not require) — '@?' resolves to null instead of a compile
+    # error when the service is absent.
+    Xima\XimaTypo3FrontendEdit\Service\Content\ContainerContextResolver:
+        arguments:
+            $registry: '@?B13\Container\Tca\Registry'
+            $connectionPool: '@TYPO3\CMS\Core\Database\ConnectionPool'
+
     Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator:
         arguments:
             $pageButtonBuilder: '@Xima\XimaTypo3FrontendEdit\Service\Menu\PageButtonBuilder'

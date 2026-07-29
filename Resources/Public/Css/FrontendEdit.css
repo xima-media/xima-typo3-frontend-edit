@@ -259,6 +259,16 @@
     box-sizing: border-box;
 }
 
+/* Element: toolbar-separator - divides grouped items within a toolbar pill */
+.frontend-edit__toolbar-separator {
+    width: 1px;
+    height: 16px;
+    background: var(--xfe-border-color);
+    opacity: 0.5;
+    margin: 0 2px;
+    flex-shrink: 0;
+}
+
 /* Element: btn - toolbar buttons */
 .frontend-edit__btn {
     position: relative;
@@ -1393,6 +1403,17 @@
 
 .frontend-edit__btn.frontend-edit__btn--drag:active {
     cursor: grabbing;
+}
+
+/* The handle sits inside the slim label pill (not the actions pill), so it
+   shrinks to icon size and drops the button hover background. */
+.frontend-edit__toolbar-label .frontend-edit__btn.frontend-edit__btn--drag {
+    width: 16px;
+    height: 16px;
+}
+
+.frontend-edit__toolbar-label .frontend-edit__btn.frontend-edit__btn--drag:hover {
+    background: transparent;
 }
 
 /* While dragging, let pointer hit-testing (elementFromPoint) fall through the

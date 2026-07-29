@@ -126,6 +126,15 @@
 			<trans-unit id="dnd.errorDetailGeneric">
 				<source>The content element could not be moved. Please try again.</source>
 			</trans-unit>
+			<trans-unit id="dnd.rejected">
+				<source>Cannot be dropped here</source>
+			</trans-unit>
+			<trans-unit id="dnd.rejectedDetail">
+				<source>“%s” cannot be placed at this position. Use the move dialog in the backend instead.</source>
+			</trans-unit>
+			<trans-unit id="dnd.rejectedDetailGeneric">
+				<source>The content element cannot be placed at this position. Use the move dialog in the backend instead.</source>
+			</trans-unit>
 		</body>
 	</file>
 </xliff>

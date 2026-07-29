@@ -111,7 +111,9 @@ REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`
 -- Assign backend layout "2 Columns 50/50" to page 8
 UPDATE `pages` SET `backend_layout` = 'pagets__2_columns_50_50' WHERE `uid` = 8;
 
--- sys_template: add sitepackage template override for page templates with <xfe:columnTarget> markers
+-- sys_template: add sitepackage template override for page templates with <xfe:columnTarget> markers,
+-- plus a partial override so EXT:container's 2-column layout marks its columns for drag & drop too
+-- (the bk2k/bootstrap-package stock partial renders container children without any xfe markers).
 REPLACE INTO `sys_template` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `title`, `root`, `clear`, `config`) VALUES
 (2, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 512, 'Sitepackage Override', 0, 0,
-'page.10.templateRootPaths.100 = EXT:sitepackage/Resources/Private/Templates/Page/\n');
+'page.10.templateRootPaths.100 = EXT:sitepackage/Resources/Private/Templates/Page/\ntt_content.container_2_columns.partialRootPaths.100 = EXT:sitepackage/Resources/Private/Partials/ContentElements/\n');
