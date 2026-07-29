@@ -154,6 +154,33 @@ Appearance Settings
         frontendEdit:
           enableContextualEditing: true
 
+..  confval:: frontendEdit.enableDragAndDrop
+
+    :type: bool
+    :Default: false
+
+    ..  versionadded:: 2.5.0
+
+    ..  note::
+
+        This feature is **experimental**.
+
+    Allows editors to reorder content elements by dragging them within a column
+    or into another column of the same page. The move is persisted through the
+    core DataHandler.
+
+    Requires your Fluid template to mark each column with the
+    :php:`ColumnTargetViewHelper`; without those markers no drag handle is
+    rendered. Container children and translated elements are out of scope and
+    keep the backend move dialog.
+
+    See :ref:`drag-and-drop` for details on how to use this feature.
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          enableDragAndDrop: true
+
 ..  confval:: frontendEdit.enableFlashMessages
 
     :type: bool
@@ -261,6 +288,7 @@ Full example with all available options:
       enableScrollToElement: true
       enableFlashMessages: true
       enableContextualEditing: false
+      enableDragAndDrop: false
       filter:
         ignorePids: '1,2,3'
         ignoreDoktypes: '4,199,254'

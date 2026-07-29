@@ -26,7 +26,7 @@ This TYPO3 extension adds lightweight editing tools to the frontend, allowing ba
 - **Content Element Editing**
   - [Edit Dropdown Menu](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html) - Quick access to edit, hide, delete, and move content elements, with confirmation before deleting records
   - [Contextual Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/ContextualEditing.html) - Edit content directly in the frontend (experimental)
-  - Drag & Drop Reordering - Reorder content elements within and between columns directly in the frontend (experimental, requires `frontendEdit.enableDragAndDrop`)
+  - [Drag & Drop Reordering](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/DragAndDrop.html) - Reorder content elements within and between columns directly in the frontend (experimental, requires `frontendEdit.enableDragAndDrop`)
   - New Content Elements - Create new content elements via TYPO3's native New Content Element Wizard, hosted in the slide-in iframe modal on both v13 and v14 (requires `frontendEdit.enableContextualEditing`)
 - **Page Toolbar**
   - [Toolbar](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/Toolbar.html) - Page-level actions and toggle for frontend editing
