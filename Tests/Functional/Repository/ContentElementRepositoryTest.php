@@ -272,6 +272,12 @@ final class ContentElementRepositoryTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function isSubpageOfAnyReturnsFalseForEmptyParentList(): void
+    {
+        self::assertFalse($this->subject->isSubpageOfAny(3, []));
+    }
+
+    #[Test]
     public function getContentElementConfigReturnsFalseForUnknownCType(): void
     {
         self::assertFalse($this->subject->getContentElementConfig('does_not_exist', ''));
