@@ -17,13 +17,15 @@ use Doctrine\DBAL\Result;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\{Expression\ExpressionBuilder, QueryBuilder};
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Service\Content\EmptyColumnService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
+
+use function is_array;
 
 /**
  * EmptyColumnServiceTest.
@@ -52,25 +54,20 @@ final class EmptyColumnServiceTest extends TestCase
         $this->urlBuilderService = new UrlBuilderService();
         $this->languageServiceFactory = $this->createMock(LanguageServiceFactory::class);
 
-        // Mock schema manager to simulate missing tx_container_parent field
-        $connection = $this->createMock(Connection::class);
-        $schemaManager = $this->createMock(\Doctrine\DBAL\Schema\AbstractSchemaManager::class);
-        $table = $this->createMock(\Doctrine\DBAL\Schema\Table::class);
-        $table->method('hasColumn')->willReturn(false);
-        $schemaManager->method('introspectTableByUnquotedName')->willReturn($table);
-        $connection->method('createSchemaManager')->willReturn($schemaManager);
-        $this->connectionPool->method('getConnectionForTable')->willReturn($connection);
+        // Default: EXT:container not installed (tx_container_parent absent from TCA)
+        unset($GLOBALS['TCA']['tt_content']);
     }
 
     protected function tearDown(): void
     {
         GeneralUtility::purgeInstances();
+        unset($GLOBALS['TCA']['tt_content']);
     }
 
     #[Test]
     public function getColumnTargetsMarksFilledColumnsAsNotEmpty(): void
     {
-        $this->mockQueryBuilderWithCount(3);
+        $this->mockGroupedCount($this->connectionPool, 3);
 
         $service = new EmptyColumnService(
             $this->connectionPool,
@@ -88,7 +85,7 @@ final class EmptyColumnServiceTest extends TestCase
     #[Test]
     public function getColumnTargetsMarksEmptyColumnsAsEmpty(): void
     {
-        $this->mockQueryBuilderWithCount(0);
+        $this->mockGroupedCount($this->connectionPool, 0);
 
         $service = new EmptyColumnService(
             $this->connectionPool,
@@ -105,7 +102,7 @@ final class EmptyColumnServiceTest extends TestCase
     #[Test]
     public function getColumnTargetsOmitsFilledColumnsWhenInsertButtonsEnabled(): void
     {
-        $this->mockQueryBuilderWithCount(3);
+        $this->mockGroupedCount($this->connectionPool, 3);
 
         $service = new EmptyColumnService(
             $this->connectionPool,
@@ -122,7 +119,7 @@ final class EmptyColumnServiceTest extends TestCase
     #[Test]
     public function getColumnTargetsKeepsEmptyColumnsWhenInsertButtonsEnabled(): void
     {
-        $this->mockQueryBuilderWithCount(0);
+        $this->mockGroupedCount($this->connectionPool, 0);
 
         $service = new EmptyColumnService(
             $this->connectionPool,
@@ -140,7 +137,7 @@ final class EmptyColumnServiceTest extends TestCase
     #[Test]
     public function getColumnTargetsIgnoresContainerMarkersWithoutContainerField(): void
     {
-        $this->mockQueryBuilderWithCount(1);
+        $this->mockGroupedCount($this->connectionPool, 1);
 
         $service = new EmptyColumnService(
             $this->connectionPool,
@@ -164,18 +161,11 @@ final class EmptyColumnServiceTest extends TestCase
     #[Test]
     public function getColumnTargetsHandlesContainerMarkersWhenFieldExists(): void
     {
-        // Mock schema manager to simulate tx_container_parent field exists
-        $connectionPool = $this->createMock(ConnectionPool::class);
-        $connection = $this->createMock(Connection::class);
-        $schemaManager = $this->createMock(\Doctrine\DBAL\Schema\AbstractSchemaManager::class);
-        $table = $this->createMock(\Doctrine\DBAL\Schema\Table::class);
-        $table->method('hasColumn')->willReturn(true);
-        $schemaManager->method('introspectTableByUnquotedName')->willReturn($table);
-        $connection->method('createSchemaManager')->willReturn($schemaManager);
-        $connectionPool->method('getConnectionForTable')->willReturn($connection);
+        $this->registerContainerField();
 
-        // All columns empty
-        $this->mockQueryBuilderWithCountForPool($connectionPool, 0);
+        // All columns empty (grouped query returns no rows)
+        $connectionPool = $this->createMock(ConnectionPool::class);
+        $this->mockGroupedCount($connectionPool, 0);
 
         $service = new EmptyColumnService(
             $connectionPool,
@@ -200,20 +190,45 @@ final class EmptyColumnServiceTest extends TestCase
     }
 
     #[Test]
+    public function getColumnTargetsMarksFilledContainerColumnAsNotEmpty(): void
+    {
+        $this->registerContainerField();
+
+        $connectionPool = $this->createMock(ConnectionPool::class);
+        // Container column 200 of container 42 holds one element
+        $this->mockGroupedCountForPool(
+            $connectionPool,
+            [['colPos' => 0, 'tx_container_parent' => 0, 'cnt' => 0]],
+            [['colPos' => 200, 'tx_container_parent' => 42, 'cnt' => 1]],
+        );
+
+        $service = new EmptyColumnService(
+            $connectionPool,
+            $this->urlBuilderService,
+            $this->languageServiceFactory,
+        );
+
+        $requestData = [
+            '_containerMarkers' => [
+                42 => [200],
+            ],
+        ];
+
+        $result = $service->getColumnTargets(1, 0, '/return', $requestData);
+
+        $containerResults = array_values(array_filter($result, static fn (array $r): bool => isset($r['containerUid'])));
+        self::assertNotEmpty($containerResults);
+        self::assertFalse($containerResults[0]['isEmpty']);
+    }
+
+    #[Test]
     public function getColumnTargetsFiltersInvalidContainerMarkers(): void
     {
-        // Mock schema manager with container field
-        $connectionPool = $this->createMock(ConnectionPool::class);
-        $connection = $this->createMock(Connection::class);
-        $schemaManager = $this->createMock(\Doctrine\DBAL\Schema\AbstractSchemaManager::class);
-        $table = $this->createMock(\Doctrine\DBAL\Schema\Table::class);
-        $table->method('hasColumn')->willReturn(true);
-        $schemaManager->method('introspectTableByUnquotedName')->willReturn($table);
-        $connection->method('createSchemaManager')->willReturn($schemaManager);
-        $connectionPool->method('getConnectionForTable')->willReturn($connection);
+        $this->registerContainerField();
 
+        $connectionPool = $this->createMock(ConnectionPool::class);
         // Keep page columns non-empty
-        $this->mockQueryBuilderWithCountForPool($connectionPool, 1);
+        $this->mockGroupedCount($connectionPool, 1);
 
         $service = new EmptyColumnService(
             $connectionPool,
@@ -235,12 +250,24 @@ final class EmptyColumnServiceTest extends TestCase
         self::assertEmpty($containerResults);
     }
 
-    private function mockQueryBuilderWithCount(int $count): void
+    private function registerContainerField(): void
     {
-        $this->mockQueryBuilderWithCountForPool($this->connectionPool, $count);
+        $GLOBALS['TCA']['tt_content']['columns']['tx_container_parent'] = ['config' => ['type' => 'passthrough']];
     }
 
-    private function mockQueryBuilderWithCountForPool(ConnectionPool $connectionPool, int $count): void
+    private function mockGroupedCount(ConnectionPool $connectionPool, int $count): void
+    {
+        $this->mockGroupedCountForPool(
+            $connectionPool,
+            [['colPos' => 0, 'tx_container_parent' => 0, 'cnt' => $count]],
+        );
+    }
+
+    /**
+     * @param list<array<string, int>>      $pageRows      grouped rows for the page-column query
+     * @param list<array<string, int>>|null $containerRows grouped rows for the container-column query
+     */
+    private function mockGroupedCountForPool(ConnectionPool $connectionPool, array $pageRows, ?array $containerRows = null): void
     {
         $queryBuilder = $this->createMock(QueryBuilder::class);
         $expressionBuilder = $this->createMock(ExpressionBuilder::class);
@@ -248,13 +275,21 @@ final class EmptyColumnServiceTest extends TestCase
 
         $expressionBuilder->method('eq')->willReturn('');
         $expressionBuilder->method('in')->willReturn('');
+        $expressionBuilder->method('count')->willReturn('COUNT(`uid`) AS `cnt`');
         $queryBuilder->method('expr')->willReturn($expressionBuilder);
-        $queryBuilder->method('count')->willReturn($queryBuilder);
+        $queryBuilder->method('select')->willReturn($queryBuilder);
+        $queryBuilder->method('addSelectLiteral')->willReturn($queryBuilder);
         $queryBuilder->method('from')->willReturn($queryBuilder);
         $queryBuilder->method('where')->willReturn($queryBuilder);
-        $queryBuilder->method('createNamedParameter')->willReturnCallback(static fn (mixed $value): string => (string) $value);
+        $queryBuilder->method('groupBy')->willReturn($queryBuilder);
+        $queryBuilder->method('createNamedParameter')->willReturnCallback(static fn (mixed $value): string => is_array($value) ? implode(',', $value) : (string) $value);
         $queryBuilder->method('executeQuery')->willReturn($result);
-        $result->method('fetchOne')->willReturn($count);
+
+        // The page-column query runs first, the container-column query (if any) second.
+        $result->method('fetchAllAssociative')->willReturnOnConsecutiveCalls(
+            $pageRows,
+            $containerRows ?? [],
+        );
 
         $connectionPool->method('getQueryBuilderForTable')->willReturn($queryBuilder);
     }

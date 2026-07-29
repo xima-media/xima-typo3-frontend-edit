@@ -74,13 +74,14 @@ final readonly class EmptyColumnService
     private function findPageColumnTargets(int $pid, int $languageUid, string $returnUrl): array
     {
         $result = [];
+        $counts = $this->countPageColumnContent($pid, $languageUid);
 
         foreach ($this->resolvePageColumns($pid) as $column) {
             $colPos = $column['colPos'];
             try {
                 $result[] = [
                     'colPos' => $colPos,
-                    'isEmpty' => $this->isPageColumnEmpty($pid, $colPos, $languageUid),
+                    'isEmpty' => 0 === ($counts[$colPos] ?? 0),
                     'name' => $column['name'],
                     'newContentUrl' => $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl),
                 ];
@@ -102,6 +103,12 @@ final readonly class EmptyColumnService
             return [];
         }
 
+        $counts = $this->countContainerColumnContent(
+            array_keys($containerMarkers),
+            array_values(array_unique(array_merge(...array_values($containerMarkers)))),
+            $languageUid,
+        );
+
         $result = [];
 
         foreach ($containerMarkers as $containerUid => $colPositions) {
@@ -112,7 +119,7 @@ final readonly class EmptyColumnService
                 try {
                     $result[] = [
                         'colPos' => $colPos,
-                        'isEmpty' => $this->isContainerColumnEmpty($containerUid, $colPos, $languageUid),
+                        'isEmpty' => 0 === ($counts[$containerUid][$colPos] ?? 0),
                         'containerUid' => $containerUid,
                         'newContentUrl' => $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl, containerUid: $containerUid),
                     ];
@@ -180,13 +187,18 @@ final readonly class EmptyColumnService
         return $columns;
     }
 
-    private function isPageColumnEmpty(int $pid, int $colPos, int $languageUid): bool
+    /**
+     * Count visible content elements per column of a page in a single grouped
+     * query, so column emptiness can be resolved without one COUNT query per column.
+     *
+     * @return array<int, int> colPos => number of visible content elements
+     */
+    private function countPageColumnContent(int $pid, int $languageUid): array
     {
         $qb = $this->connectionPool->getQueryBuilderForTable('tt_content');
 
         $conditions = [
             $qb->expr()->eq('pid', $qb->createNamedParameter($pid, Connection::PARAM_INT)),
-            $qb->expr()->eq('colPos', $qb->createNamedParameter($colPos, Connection::PARAM_INT)),
             $qb->expr()->in('sys_language_uid', [
                 $qb->createNamedParameter($languageUid, Connection::PARAM_INT),
                 $qb->createNamedParameter(-1, Connection::PARAM_INT),
@@ -199,19 +211,48 @@ final readonly class EmptyColumnService
             $conditions[] = $qb->expr()->eq('tx_container_parent', $qb->createNamedParameter(0, Connection::PARAM_INT));
         }
 
-        return 0 === (int) $qb->count('uid')->from('tt_content')->where(...$conditions)->executeQuery()->fetchOne();
+        $rows = $qb
+            ->select('colPos')
+            ->addSelectLiteral($qb->expr()->count('uid', 'cnt'))
+            ->from('tt_content')
+            ->where(...$conditions)
+            ->groupBy('colPos')
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(int) $row['colPos']] = (int) $row['cnt'];
+        }
+
+        return $counts;
     }
 
-    private function isContainerColumnEmpty(int $containerUid, int $colPos, int $languageUid): bool
+    /**
+     * Count visible content elements per (container, column) in a single grouped
+     * query, so container column emptiness can be resolved without one COUNT query
+     * per column.
+     *
+     * @param int[] $containerUids
+     * @param int[] $colPositions
+     *
+     * @return array<int, array<int, int>> containerUid => (colPos => count)
+     */
+    private function countContainerColumnContent(array $containerUids, array $colPositions, int $languageUid): array
     {
+        if ([] === $containerUids || [] === $colPositions) {
+            return [];
+        }
+
         $qb = $this->connectionPool->getQueryBuilderForTable('tt_content');
 
-        return 0 === (int) $qb
-            ->count('uid')
+        $rows = $qb
+            ->select('tx_container_parent', 'colPos')
+            ->addSelectLiteral($qb->expr()->count('uid', 'cnt'))
             ->from('tt_content')
             ->where(
-                $qb->expr()->eq('tx_container_parent', $qb->createNamedParameter($containerUid, Connection::PARAM_INT)),
-                $qb->expr()->eq('colPos', $qb->createNamedParameter($colPos, Connection::PARAM_INT)),
+                $qb->expr()->in('tx_container_parent', $qb->createNamedParameter($containerUids, Connection::PARAM_INT_ARRAY)),
+                $qb->expr()->in('colPos', $qb->createNamedParameter($colPositions, Connection::PARAM_INT_ARRAY)),
                 $qb->expr()->in('sys_language_uid', [
                     $qb->createNamedParameter($languageUid, Connection::PARAM_INT),
                     $qb->createNamedParameter(-1, Connection::PARAM_INT),
@@ -219,8 +260,16 @@ final readonly class EmptyColumnService
                 $qb->expr()->eq('deleted', $qb->createNamedParameter(0, Connection::PARAM_INT)),
                 $qb->expr()->eq('hidden', $qb->createNamedParameter(0, Connection::PARAM_INT)),
             )
+            ->groupBy('tx_container_parent', 'colPos')
             ->executeQuery()
-            ->fetchOne();
+            ->fetchAllAssociative();
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(int) $row['tx_container_parent']][(int) $row['colPos']] = (int) $row['cnt'];
+        }
+
+        return $counts;
     }
 
     /**
@@ -244,15 +293,10 @@ final readonly class EmptyColumnService
 
     private function detectContainerField(): bool
     {
-        try {
-            return $this->connectionPool
-                ->getConnectionForTable('tt_content')
-                ->createSchemaManager()
-                ->introspectTableByUnquotedName('tt_content')
-                ->hasColumn('tx_container_parent');
-        } catch (Throwable) {
-            return false;
-        }
+        // EXT:container registers tx_container_parent in the TCA, which is already
+        // loaded in memory — cheaper than introspecting the database schema on every
+        // request just to learn whether the column exists.
+        return isset($GLOBALS['TCA']['tt_content']['columns']['tx_container_parent']);
     }
 
     private function translateLabel(string $label): string
