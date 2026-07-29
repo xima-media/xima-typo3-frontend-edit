@@ -221,6 +221,22 @@ final class ContentMoveServiceTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function moveRejectsNeighbourFromADifferentColumnOfTheSameContainer(): void
+    {
+        $before = $this->readRecord(1);
+
+        // (container 3, column 201) resolves fine, but neighbour 6 actually
+        // lives in column 202 of that same container — isValidNeighbour() must
+        // catch the colPos mismatch that resolve() itself cannot see.
+        $result = $this->subject->move(1, 201, 6, 3);
+
+        self::assertFalse($result['success']);
+        self::assertSame(422, $result['statusCode']);
+        self::assertSame((int) $before['colPos'], (int) $this->readRecord(1)['colPos']);
+        self::assertSame((int) $before['sorting'], (int) $this->readRecord(1)['sorting']);
+    }
+
+    #[Test]
     public function moveReordersPlainElementWithinPageColumn(): void
     {
         $result = $this->subject->move(1, 0, 2);
