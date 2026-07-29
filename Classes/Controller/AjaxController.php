@@ -154,6 +154,8 @@ readonly class AjaxController
      * - targetColPos: destination column (required, non-negative int)
      * - targetUid: neighbour to insert after; 0/omitted = top of column (optional int)
      * - language: current frontend language (must be 0 — translations are out of scope)
+     * - targetContainerUid: EXT:container element the target column belongs to
+     *   (optional; omitted or null means the target is a page column)
      */
     public function moveAction(ServerRequestInterface $request): JsonResponse
     {
@@ -171,31 +173,19 @@ readonly class AjaxController
             return new JsonResponse(['success' => false, 'error' => 'Invalid request data'], 400);
         }
 
-        $uid = filter_var($data['uid'] ?? null, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-        if (false === $uid) {
-            return new JsonResponse(['success' => false, 'error' => 'Missing or invalid parameter: uid'], 400);
+        $parseResult = $this->parseMovePrameters($data);
+        if ($parseResult['hasError']) {
+            $statusCode = $parseResult['statusCode'] ?? 400;
+
+            return new JsonResponse(['success' => false, 'error' => $parseResult['error']], $statusCode);
         }
 
-        $targetColPos = filter_var($data['targetColPos'] ?? null, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
-        if (false === $targetColPos) {
-            return new JsonResponse(['success' => false, 'error' => 'Missing or invalid parameter: targetColPos'], 400);
-        }
-
-        $language = filter_var($data['language'] ?? 0, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
-        if (false === $language) {
-            return new JsonResponse(['success' => false, 'error' => 'Invalid parameter: language'], 400);
-        }
-        if ($language > 0) {
-            return new JsonResponse(['success' => false, 'error' => 'Translated content cannot be moved via drag & drop'], 422);
-        }
-
-        $targetUidValue = $data['targetUid'] ?? null;
-        $targetUid = null === $targetUidValue ? null : filter_var($targetUidValue, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
-        if (false === $targetUid) {
-            return new JsonResponse(['success' => false, 'error' => 'Invalid parameter: targetUid'], 400);
-        }
-
-        $result = $this->contentMoveService->move($uid, $targetColPos, $targetUid);
+        $result = $this->contentMoveService->move(
+            $parseResult['uid'],
+            $parseResult['targetColPos'],
+            $parseResult['targetUid'],
+            $parseResult['targetContainerUid'],
+        );
 
         return new JsonResponse(
             $result['success']
@@ -275,5 +265,55 @@ readonly class AjaxController
         } catch (JsonException $e) {
             throw new InvalidArgumentException('Invalid JSON format: '.$e->getMessage(), 1640000025, $e);
         }
+    }
+
+    /**
+     * Parse move request parameters.
+     *
+     * @param array<mixed> $data
+     *
+     * @return array{hasError: true, statusCode?: int, error: string}|array{hasError: false, uid: int, targetColPos: int, targetUid: int|null, targetContainerUid: int|null}
+     */
+    private function parseMovePrameters(array $data): array
+    {
+        $uid = filter_var($data['uid'] ?? null, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if (false === $uid) {
+            return ['hasError' => true, 'error' => 'Missing or invalid parameter: uid'];
+        }
+
+        $targetColPos = filter_var($data['targetColPos'] ?? null, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        if (false === $targetColPos) {
+            return ['hasError' => true, 'error' => 'Missing or invalid parameter: targetColPos'];
+        }
+
+        $language = filter_var($data['language'] ?? 0, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        if (false === $language) {
+            return ['hasError' => true, 'error' => 'Invalid parameter: language'];
+        }
+        if ($language > 0) {
+            return ['hasError' => true, 'statusCode' => 422, 'error' => 'Translated content cannot be moved via drag & drop'];
+        }
+
+        $targetUidValue = $data['targetUid'] ?? null;
+        $targetUid = null === $targetUidValue ? null : filter_var($targetUidValue, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+        if (false === $targetUid) {
+            return ['hasError' => true, 'error' => 'Invalid parameter: targetUid'];
+        }
+
+        $containerUidValue = $data['targetContainerUid'] ?? null;
+        $targetContainerUid = null === $containerUidValue
+            ? null
+            : filter_var($containerUidValue, \FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if (false === $targetContainerUid) {
+            return ['hasError' => true, 'error' => 'Invalid parameter: targetContainerUid'];
+        }
+
+        return [
+            'hasError' => false,
+            'uid' => $uid,
+            'targetColPos' => $targetColPos,
+            'targetUid' => $targetUid,
+            'targetContainerUid' => $targetContainerUid,
+        ];
     }
 }

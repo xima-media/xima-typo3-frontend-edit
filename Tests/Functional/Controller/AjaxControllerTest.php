@@ -251,6 +251,24 @@ final class AjaxControllerTest extends FunctionalTestCase
         self::assertNotSame(403, $response->getStatusCode());
     }
 
+    #[Test]
+    public function moveActionRejectsInvalidContainerUid(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $request = $this->createMoveRequest()->withBody($this->stream((string) json_encode([
+            'uid' => 9999,
+            'targetColPos' => 201,
+            'targetContainerUid' => -5,
+            'language' => 0,
+        ])));
+
+        $response = $this->subject->moveAction($request);
+
+        self::assertSame(400, $response->getStatusCode());
+        self::assertStringContainsString('targetContainerUid', (string) $this->decode($response)['error']);
+    }
+
     /**
      * @param array<string, string> $queryParams
      */
