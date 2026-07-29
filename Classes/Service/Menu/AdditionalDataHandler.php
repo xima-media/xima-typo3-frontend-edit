@@ -24,6 +24,7 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
 use function array_key_exists;
+use function in_array;
 use function is_array;
 
 /**
@@ -88,14 +89,58 @@ final readonly class AdditionalDataHandler
      */
     private function isValidDataEntry(array $dataEntry): bool
     {
-        if (null === $dataEntry['label'] || '' === $dataEntry['label']) {
+        $label = $dataEntry['label'] ?? null;
+        if (null === $label || '' === $label) {
             return false;
         }
 
-        $hasTableAndUid = (null !== $dataEntry['table'] && null !== $dataEntry['uid']);
-        $hasUrl = (null !== $dataEntry['url']);
+        $url = $dataEntry['url'] ?? null;
+        if (null !== $url && !$this->isSafeUrl((string) $url)) {
+            return false;
+        }
+
+        $hasTableAndUid = (null !== ($dataEntry['table'] ?? null) && null !== ($dataEntry['uid'] ?? null));
+        $hasUrl = (null !== $url);
 
         return $hasTableAndUid || $hasUrl;
+    }
+
+    /**
+     * Validate a client-supplied edit URL before it is rendered into a menu link.
+     *
+     * The data attributes originate from the (untrusted) frontend, so an absolute
+     * URL must use http(s); relative URLs are allowed. Script-executing schemes
+     * (javascript:, data:, vbscript:, …), scheme-relative URLs pointing at a
+     * foreign host and control-character obfuscation are rejected server-side
+     * rather than relying on the client denylist alone.
+     */
+    private function isSafeUrl(string $url): bool
+    {
+        $url = trim($url);
+        if ('' === $url) {
+            return false;
+        }
+
+        // Control characters may be used to obfuscate a scheme (e.g. "java\tscript:").
+        if (1 === preg_match('/[\x00-\x1F\x7F]/', $url)) {
+            return false;
+        }
+
+        // Scheme-relative URLs ("//host") carry no scheme but still point at a
+        // foreign host. Browsers normalise backslashes to forward slashes in the
+        // authority, so "\\host" and "/\host" resolve the same way.
+        if (str_starts_with(strtr($url, '\\', '/'), '//')) {
+            return false;
+        }
+
+        // Relative URLs carry no scheme and are considered safe.
+        if (1 !== preg_match('#^[a-z][a-z0-9+.\-]*:#i', $url)) {
+            return true;
+        }
+
+        $scheme = strtolower((string) parse_url($url, \PHP_URL_SCHEME));
+
+        return in_array($scheme, ['http', 'https'], true);
     }
 
     /**
@@ -105,7 +150,7 @@ final readonly class AdditionalDataHandler
      */
     private function resolveRecordUid(array $dataEntry, int $languageUid): ?int
     {
-        if (null === $dataEntry['table'] || null === $dataEntry['uid']) {
+        if (null === ($dataEntry['table'] ?? null) || null === ($dataEntry['uid'] ?? null)) {
             return null;
         }
 
@@ -178,7 +223,7 @@ final readonly class AdditionalDataHandler
      */
     private function buildDataUrl(array $dataEntry, int $recordUid, int $languageUid, string $returnUrlAnchor): string
     {
-        if (null !== $dataEntry['url']) {
+        if (null !== ($dataEntry['url'] ?? null)) {
             return $dataEntry['url'];
         }
 
@@ -196,7 +241,7 @@ final readonly class AdditionalDataHandler
      */
     private function resolveDataIcon(array $dataEntry, array $contentElementConfig): \TYPO3\CMS\Core\Imaging\Icon
     {
-        if (null !== $dataEntry['icon']) {
+        if (null !== ($dataEntry['icon'] ?? null)) {
             return $this->iconService->getIcon($dataEntry['icon']);
         }
 

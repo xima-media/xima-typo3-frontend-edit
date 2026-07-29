@@ -14,7 +14,8 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
 use Doctrine\DBAL\Result;
-use PHPUnit\Framework\Attributes\{CoversClass, Test};
+use Generator;
+use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -161,6 +162,95 @@ final class AdditionalDataHandlerTest extends TestCase
         $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
 
         self::assertSame('/custom/url', $button->getChildren()['data_0']->getUrl());
+    }
+
+    #[Test]
+    public function handleDataRejectsUnsafeEntryUrl(): void
+    {
+        $this->registerBackendUserWithAccess();
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        // table/uid must be set, otherwise the entry is already dropped by the
+        // record lookup and the url would never be reached.
+        $entries = [
+            ['label' => 'Evil', 'table' => 'pages', 'uid' => 5, 'url' => 'javascript:alert(1)', 'icon' => null],
+        ];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertArrayNotHasKey('data_0', $button->getChildren());
+    }
+
+    #[Test]
+    #[DataProvider('schemeRelativeUrlProvider')]
+    public function handleDataRejectsSchemeRelativeEntryUrl(string $url): void
+    {
+        $this->registerBackendUserWithAccess();
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        // table/uid must be set, otherwise the entry is already dropped by the
+        // record lookup and the url would never be reached.
+        $entries = [
+            ['label' => 'Evil', 'table' => 'pages', 'uid' => 5, 'url' => $url, 'icon' => null],
+        ];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertArrayNotHasKey('data_0', $button->getChildren());
+    }
+
+    /**
+     * @return Generator<string, array{string}>
+     */
+    public static function schemeRelativeUrlProvider(): Generator
+    {
+        yield 'protocol relative' => ['//evil.example.com/edit'];
+        yield 'protocol relative with credentials' => ['//user@evil.example.com'];
+        yield 'backslashes normalised by browsers' => ['\\\\evil.example.com/edit'];
+        yield 'mixed slash and backslash' => ['/\\evil.example.com'];
+    }
+
+    #[Test]
+    public function handleDataAcceptsSafeAbsoluteEntryUrl(): void
+    {
+        $this->registerBackendUserWithAccess();
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        $entries = [
+            ['label' => 'External', 'table' => 'pages', 'uid' => 5, 'url' => 'https://example.com/edit', 'icon' => null],
+        ];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertSame('https://example.com/edit', $button->getChildren()['data_0']->getUrl());
+    }
+
+    #[Test]
+    public function handleDataToleratesEntryWithMissingKeys(): void
+    {
+        $this->registerBackendUserWithAccess();
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        // Crafted entry missing the optional url/icon keys must not raise warnings.
+        $entries = [
+            ['label' => 'Record', 'table' => 'pages', 'uid' => 5],
+        ];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertArrayHasKey('data_0', $button->getChildren());
     }
 
     #[Test]
