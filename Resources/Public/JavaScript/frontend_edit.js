@@ -805,12 +805,20 @@
       container.appendChild(editBtn);
 
       if (showContextMenu && contentElement.menu.children && Object.keys(contentElement.menu.children).length > 0) {
+        container.appendChild(this.createSeparator());
         const kebabBtn = this.createKebabButton(uid);
         Tooltip.attach(kebabBtn);
         container.appendChild(kebabBtn);
       }
 
       return container;
+    },
+
+    createSeparator() {
+      const separator = document.createElement('div');
+      separator.className = 'frontend-edit__toolbar-separator';
+      separator.setAttribute('aria-hidden', 'true');
+      return separator;
     },
 
     createEditButton(contentElement) {
@@ -1485,11 +1493,11 @@
         const uid = parseInt(toolbar.dataset.cid, 10);
         if (!Number.isFinite(uid) || !this.findColumnForUid(uid)) return;
 
-        // Place the handle inside the visible action group (with edit/kebab),
-        // not as a bare toolbar child — the toolbar splits label (left) and
-        // actions (right), so a bare child would sit hidden behind the label.
-        const actions = toolbar.querySelector('.frontend-edit__toolbar-actions');
-        if (!actions) return;
+        // Place the handle at the end of the label pill (left side), separated
+        // by a divider — not in the actions group — so it sits next to the
+        // element-type display rather than crowding the edit/kebab buttons.
+        const labelGroup = toolbar.querySelector('.frontend-edit__toolbar-label');
+        if (!labelGroup) return;
 
         const handle = document.createElement('button');
         handle.type = 'button';
@@ -1508,7 +1516,8 @@
         handle.addEventListener('dragstart', (e) => this.onDragStart(e, uid));
         handle.addEventListener('dragend', () => this.onDragEnd());
         Tooltip.attach(handle);
-        actions.insertBefore(handle, actions.firstChild);
+        labelGroup.appendChild(UI.createSeparator());
+        labelGroup.appendChild(handle);
       });
     },
 
