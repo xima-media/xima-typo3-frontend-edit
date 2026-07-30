@@ -13,16 +13,17 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
+use KonradMichalik\Ttt\Attribute\WithSingleton;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\{Icon, IconFactory};
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\PageButtonBuilder;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
 
 /**
  * PageButtonBuilderTest.
@@ -31,10 +32,11 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
  * @license GPL-2.0-or-later
  */
 #[CoversClass(PageButtonBuilder::class)]
+#[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class PageButtonBuilderTest extends TestCase
 {
     private IconService $iconService;
-    private UrlBuilderService $urlBuilderService;
+    private ?UrlBuilderService $urlBuilderService = null;
 
     protected function setUp(): void
     {
@@ -42,11 +44,6 @@ final class PageButtonBuilderTest extends TestCase
         $iconFactoryMock = $this->createMock(IconFactory::class);
         $iconFactoryMock->method('getIcon')->willReturn($iconMock);
         $this->iconService = new IconService($iconFactoryMock);
-
-        $uriBuilderMock = $this->createMock(UriBuilder::class);
-        $uriBuilderMock->method('buildUriFromRoute')->willReturn(new Uri('/typo3/mock'));
-        GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilderMock);
-        $this->urlBuilderService = new UrlBuilderService();
     }
 
     protected function tearDown(): void
@@ -60,7 +57,7 @@ final class PageButtonBuilderTest extends TestCase
     {
         $this->setUpGlobals();
 
-        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addInfoSection($menuButton, ['uid' => 1, 'title' => 'Test Page', 'doktype' => 1]);
@@ -75,7 +72,7 @@ final class PageButtonBuilderTest extends TestCase
     {
         $this->setUpGlobals();
 
-        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addInfoSection($menuButton, ['uid' => 1, 'title' => '', 'doktype' => 1]);
@@ -88,7 +85,7 @@ final class PageButtonBuilderTest extends TestCase
     {
         $this->setUpGlobals();
 
-        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addInfoSection($menuButton, ['uid' => 1, 'doktype' => 1]);
@@ -101,7 +98,7 @@ final class PageButtonBuilderTest extends TestCase
     {
         $this->setUpGlobals();
 
-        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addInfoSection($menuButton, ['uid' => 1]);
@@ -112,7 +109,7 @@ final class PageButtonBuilderTest extends TestCase
     #[Test]
     public function addEditSectionAddsEditButtons(): void
     {
-        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addEditSection($menuButton, 1, 0, '/return');
@@ -126,7 +123,7 @@ final class PageButtonBuilderTest extends TestCase
     #[Test]
     public function addEditSectionSetsContextualUrl(): void
     {
-        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addEditSection($menuButton, 1, 0, '/return', '/typo3/contextual');
@@ -137,7 +134,7 @@ final class PageButtonBuilderTest extends TestCase
     #[Test]
     public function addActionSectionAddsInfoAndHistoryButtons(): void
     {
-        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addActionSection($menuButton, 1, '/return');
@@ -146,6 +143,14 @@ final class PageButtonBuilderTest extends TestCase
         self::assertArrayHasKey('div_action', $children);
         self::assertArrayHasKey('info', $children);
         self::assertArrayHasKey('history', $children);
+    }
+
+    /**
+     * Lazily constructed: #[WithSingleton] only takes effect once the test method starts running, after setUp().
+     */
+    private function urlBuilderService(): UrlBuilderService
+    {
+        return $this->urlBuilderService ??= new UrlBuilderService();
     }
 
     private function setUpGlobals(): void

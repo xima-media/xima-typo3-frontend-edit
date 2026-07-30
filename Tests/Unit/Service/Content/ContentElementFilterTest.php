@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Content;
 
 use Doctrine\DBAL\Result;
+use KonradMichalik\Ttt\Http\Requests;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -21,8 +22,6 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\{Expression\ExpressionBuilder, QueryBuilder};
-use TYPO3\CMS\Core\Settings\SettingsInterface;
-use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, RootlineUtility};
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
@@ -92,7 +91,7 @@ final class ContentElementFilterTest extends TestCase
             ['uid' => 2, 'CType' => 'text', 'list_type' => ''],
         ];
 
-        $request = $this->createRequest(['frontendEdit.filter.ignoreUids' => '1']);
+        $request = $this->createRequest(['frontendEdit' => ['filter' => ['ignoreUids' => '1']]]);
         $result = $filter->filterContentElements($elements, $backendUser, $request);
 
         self::assertCount(1, $result);
@@ -113,7 +112,7 @@ final class ContentElementFilterTest extends TestCase
             ['uid' => 2, 'CType' => 'html', 'list_type' => ''],
         ];
 
-        $request = $this->createRequest(['frontendEdit.filter.ignoreCTypes' => 'html']);
+        $request = $this->createRequest(['frontendEdit' => ['filter' => ['ignoreCTypes' => 'html']]]);
         $result = $filter->filterContentElements($elements, $backendUser, $request);
 
         self::assertCount(1, $result);
@@ -134,7 +133,7 @@ final class ContentElementFilterTest extends TestCase
             ['uid' => 2, 'CType' => 'list', 'list_type' => 'other'],
         ];
 
-        $request = $this->createRequest(['frontendEdit.filter.ignoreListTypes' => 'news_pi1']);
+        $request = $this->createRequest(['frontendEdit' => ['filter' => ['ignoreListTypes' => 'news_pi1']]]);
         $result = $filter->filterContentElements($elements, $backendUser, $request);
 
         self::assertCount(1, $result);
@@ -151,7 +150,7 @@ final class ContentElementFilterTest extends TestCase
             $this->createRepository(),
         );
 
-        $request = $this->createRequest(['frontendEdit.filter.ignorePids' => '5']);
+        $request = $this->createRequest(['frontendEdit' => ['filter' => ['ignorePids' => '5']]]);
         self::assertTrue($filter->isPageIgnored(10, $request));
     }
 
@@ -166,8 +165,7 @@ final class ContentElementFilterTest extends TestCase
         );
 
         $request = $this->createRequest([
-            'frontendEdit.filter.ignorePids' => '5',
-            'frontendEdit.filter.ignoreDoktypes' => '254',
+            'frontendEdit' => ['filter' => ['ignorePids' => '5', 'ignoreDoktypes' => '254']],
         ]);
         self::assertTrue($filter->isPageIgnored(10, $request));
     }
@@ -183,8 +181,7 @@ final class ContentElementFilterTest extends TestCase
         );
 
         $request = $this->createRequest([
-            'frontendEdit.filter.ignorePids' => '5',
-            'frontendEdit.filter.ignoreDoktypes' => '254',
+            'frontendEdit' => ['filter' => ['ignorePids' => '5', 'ignoreDoktypes' => '254']],
         ]);
         self::assertFalse($filter->isPageIgnored(10, $request));
     }
@@ -200,8 +197,7 @@ final class ContentElementFilterTest extends TestCase
         );
 
         $request = $this->createRequest([
-            'frontendEdit.filter.ignorePids' => '5',
-            'frontendEdit.filter.ignoreDoktypes' => '254',
+            'frontendEdit' => ['filter' => ['ignorePids' => '5', 'ignoreDoktypes' => '254']],
         ]);
         self::assertFalse($filter->isPageIgnored(10, $request));
     }
@@ -271,21 +267,12 @@ final class ContentElementFilterTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $settings
+     * @param array<string, mixed> $settingsTree
      */
-    private function createRequest(array $settings): ServerRequestInterface
+    private function createRequest(array $settingsTree): ServerRequestInterface
     {
-        $settingsInterface = $this->createMock(SettingsInterface::class);
-        $settingsInterface->method('has')->willReturn(false);
-        $settingsInterface->method('getIdentifiers')->willReturn([]);
-        $siteSettings = new SiteSettings($settingsInterface, [], $settings);
-
-        $site = $this->createMock(Site::class);
-        $site->method('getSettings')->willReturn($siteSettings);
-
-        $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getAttribute')->with('site')->willReturn($site);
-
-        return $request;
+        return Requests::get('/')
+            ->withSiteSettings($settingsTree)
+            ->build();
     }
 }

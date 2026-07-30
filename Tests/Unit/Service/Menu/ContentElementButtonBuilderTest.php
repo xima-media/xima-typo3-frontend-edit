@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
+use KonradMichalik\Ttt\Attribute\WithSingleton;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -23,6 +24,7 @@ use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementButtonBuilder;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
 
 /**
  * ContentElementButtonBuilderTest.
@@ -31,11 +33,11 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
  * @license GPL-2.0-or-later
  */
 #[CoversClass(ContentElementButtonBuilder::class)]
+#[WithSingleton(UriBuilder::class, new FakeUriBuilder(new Uri('/typo3/record/edit')))]
 final class ContentElementButtonBuilderTest extends TestCase
 {
     private IconService $iconService;
-    private UrlBuilderService $urlBuilderService;
-    private UriBuilder $uriBuilderMock;
+    private ?UrlBuilderService $urlBuilderService = null;
 
     protected function setUp(): void
     {
@@ -43,11 +45,6 @@ final class ContentElementButtonBuilderTest extends TestCase
         $iconFactoryMock = $this->createMock(IconFactory::class);
         $iconFactoryMock->method('getIcon')->willReturn($iconMock);
         $this->iconService = new IconService($iconFactoryMock);
-
-        $this->uriBuilderMock = $this->createMock(UriBuilder::class);
-        $this->uriBuilderMock->method('buildUriFromRoute')->willReturn(new Uri('/typo3/record/edit'));
-        GeneralUtility::setSingletonInstance(UriBuilder::class, $this->uriBuilderMock);
-        $this->urlBuilderService = new UrlBuilderService();
     }
 
     protected function tearDown(): void
@@ -59,7 +56,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function createSimpleEditButtonReturnsLinkButton(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
 
         $button = $builder->createSimpleEditButton(
             ['uid' => 1, 'CType' => 'text'],
@@ -76,7 +73,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function createSimpleEditButtonSetsContextualUrl(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
 
         $button = $builder->createSimpleEditButton(
             ['uid' => 1, 'CType' => 'text'],
@@ -92,7 +89,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function createSimpleEditButtonWithoutContextualUrlSetsNull(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
 
         $button = $builder->createSimpleEditButton(
             ['uid' => 1, 'CType' => 'text'],
@@ -107,7 +104,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function createFullMenuButtonReturnsMenuButton(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
 
         $button = $builder->createFullMenuButton();
 
@@ -117,7 +114,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function addInfoSectionAddsChildrenToMenuButton(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
@@ -136,7 +133,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function addInfoSectionHandlesEmptyHeader(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
@@ -153,7 +150,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function addInfoSectionHandlesMissingHeader(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
@@ -170,7 +167,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function addEditSectionAddsEditAndPageButtons(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addEditSection($menuButton, ['uid' => 1, 'CType' => 'text'], 0, 1, '/return');
@@ -184,7 +181,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function addEditSectionSetsContextualUrlOnEditButton(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addEditSection($menuButton, ['uid' => 1, 'CType' => 'text'], 0, 1, '/return', '/typo3/contextual');
@@ -195,7 +192,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function addActionSectionAddsAllActionButtons(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addActionSection($menuButton, ['uid' => 1, 'pid' => 1], 0, '/return');
@@ -212,7 +209,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     #[Test]
     public function addActionSectionOmitsNewContentButtonWhenInsertButtonsDisabled(): void
     {
-        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService);
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu);
 
         $builder->addActionSection($menuButton, ['uid' => 1, 'pid' => 1], 0, '/return', false);
@@ -221,5 +218,13 @@ final class ContentElementButtonBuilderTest extends TestCase
         self::assertArrayNotHasKey('new_content_after', $children);
         self::assertArrayHasKey('hide', $children);
         self::assertArrayHasKey('delete', $children);
+    }
+
+    /**
+     * Lazily constructed: #[WithSingleton] only takes effect once the test method starts running, after setUp().
+     */
+    private function urlBuilderService(): UrlBuilderService
+    {
+        return $this->urlBuilderService ??= new UrlBuilderService();
     }
 }

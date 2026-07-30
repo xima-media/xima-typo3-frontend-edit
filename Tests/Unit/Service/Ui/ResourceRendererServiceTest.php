@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Ui;
 
+use KonradMichalik\Ttt\Attribute\{WithEnvironment, WithSingleton};
+use KonradMichalik\Ttt\Http\Requests;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,11 +22,7 @@ use ReflectionClass;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
-use TYPO3\CMS\Core\Core\{ApplicationContext, Environment};
-use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Package\{PackageInterface, PackageManager};
-use TYPO3\CMS\Core\Settings\SettingsInterface;
-use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
 use TYPO3\CMS\Core\Site\SiteFinder;
 use TYPO3\CMS\Core\Utility\{ExtensionManagementUtility, GeneralUtility};
 use TYPO3\CMS\Core\View\{ViewFactoryInterface, ViewInterface};
@@ -32,6 +30,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{BackendSettingsService, ResourceRendererService, UrlBuilderService};
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
 
 use function dirname;
 
@@ -42,14 +41,12 @@ use function dirname;
  * @license GPL-2.0-or-later
  */
 #[CoversClass(ResourceRendererService::class)]
+#[WithEnvironment(context: 'Testing')]
+#[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class ResourceRendererServiceTest extends TestCase
 {
     protected function setUp(): void
     {
-        $uriBuilder = $this->createMock(UriBuilder::class);
-        $uriBuilder->method('buildUriFromRoute')->willReturn(new Uri('/typo3/mock'));
-        GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilder);
-
         $package = $this->createMock(PackageInterface::class);
         $package->method('getPackagePath')->willReturn(dirname(__DIR__, 4).'/');
 
@@ -61,18 +58,6 @@ final class ResourceRendererServiceTest extends TestCase
         $packageManager->method('getActivePackages')->willReturn([]);
         GeneralUtility::setSingletonInstance(PackageManager::class, $packageManager);
         ExtensionManagementUtility::setPackageManager($packageManager);
-
-        Environment::initialize(
-            new ApplicationContext('Testing'),
-            true,
-            true,
-            '/var/www/html',
-            '/var/www/html/public',
-            '/var/www/html/var',
-            '/var/www/html/config',
-            '/var/www/html/public/index.php',
-            'UNIX',
-        );
     }
 
     protected function tearDown(): void
@@ -104,7 +89,7 @@ final class ResourceRendererServiceTest extends TestCase
 
         $service = $this->createService(true);
 
-        $service->render($this->createRequest(['frontendEdit.enableContextualEditing' => true]));
+        $service->render($this->createRequest(['frontendEdit' => ['enableContextualEditing' => true]]));
 
         self::assertArrayHasKey('backend_stubs', $captured);
         self::assertArrayHasKey('iframe_edit', $captured);
@@ -146,7 +131,7 @@ final class ResourceRendererServiceTest extends TestCase
 
         $service = $this->createService(false);
 
-        $service->render($this->createRequest(['frontendEdit.showStickyToolbar' => false]));
+        $service->render($this->createRequest(['frontendEdit' => ['showStickyToolbar' => false]]));
 
         self::assertArrayNotHasKey('sticky_toolbar', $captured);
         self::assertArrayNotHasKey('sticky_toolbar_config', $captured);
@@ -226,24 +211,12 @@ final class ResourceRendererServiceTest extends TestCase
     }
 
     /**
-     * @param array<string, mixed> $settings
+     * @param array<string, mixed> $settingsTree
      */
-    private function createRequest(array $settings): ServerRequestInterface
+    private function createRequest(array $settingsTree): ServerRequestInterface
     {
-        $settingsInterface = $this->createMock(SettingsInterface::class);
-        $settingsInterface->method('has')->willReturn(false);
-        $settingsInterface->method('getIdentifiers')->willReturn([]);
-        $siteSettings = new SiteSettings($settingsInterface, [], $settings);
-
-        $site = $this->createMock(Site::class);
-        $site->method('getSettings')->willReturn($siteSettings);
-
-        $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getAttribute')->willReturnCallback(
-            static fn (string $name): mixed => 'site' === $name ? $site : null,
-        );
-        $request->method('getUri')->willReturn(new Uri('https://example.com/page'));
-
-        return $request;
+        return Requests::get('https://example.com/page')
+            ->withSiteSettings($settingsTree)
+            ->build();
     }
 }
