@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Content;
 
 use Doctrine\DBAL\Result;
+use KonradMichalik\Ttt\Attribute\WithSingleton;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -24,6 +25,7 @@ use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Service\Content\EmptyColumnService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
 
 use function is_array;
 
@@ -34,24 +36,18 @@ use function is_array;
  * @license GPL-2.0-or-later
  */
 #[CoversClass(EmptyColumnService::class)]
+#[WithSingleton(UriBuilder::class, new FakeUriBuilder(new Uri('/typo3/record/content/wizard/new')))]
 final class EmptyColumnServiceTest extends TestCase
 {
     private ConnectionPool $connectionPool;
 
-    private UrlBuilderService $urlBuilderService;
+    private ?UrlBuilderService $urlBuilderService = null;
 
     private LanguageServiceFactory $languageServiceFactory;
 
     protected function setUp(): void
     {
-        // Mock UriBuilder singleton so real UrlBuilderService picks it up
-        $uriBuilderMock = $this->createMock(UriBuilder::class);
-        $uriBuilderMock->method('buildUriFromRoute')
-            ->willReturn(new Uri('/typo3/record/content/wizard/new'));
-        GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilderMock);
-
         $this->connectionPool = $this->createMock(ConnectionPool::class);
-        $this->urlBuilderService = new UrlBuilderService();
         $this->languageServiceFactory = $this->createMock(LanguageServiceFactory::class);
 
         // Default: EXT:container not installed (tx_container_parent absent from TCA)
@@ -71,7 +67,7 @@ final class EmptyColumnServiceTest extends TestCase
 
         $service = new EmptyColumnService(
             $this->connectionPool,
-            $this->urlBuilderService,
+            $this->urlBuilderService(),
             $this->languageServiceFactory,
         );
 
@@ -89,7 +85,7 @@ final class EmptyColumnServiceTest extends TestCase
 
         $service = new EmptyColumnService(
             $this->connectionPool,
-            $this->urlBuilderService,
+            $this->urlBuilderService(),
             $this->languageServiceFactory,
         );
 
@@ -106,7 +102,7 @@ final class EmptyColumnServiceTest extends TestCase
 
         $service = new EmptyColumnService(
             $this->connectionPool,
-            $this->urlBuilderService,
+            $this->urlBuilderService(),
             $this->languageServiceFactory,
         );
 
@@ -123,7 +119,7 @@ final class EmptyColumnServiceTest extends TestCase
 
         $service = new EmptyColumnService(
             $this->connectionPool,
-            $this->urlBuilderService,
+            $this->urlBuilderService(),
             $this->languageServiceFactory,
         );
 
@@ -141,7 +137,7 @@ final class EmptyColumnServiceTest extends TestCase
 
         $service = new EmptyColumnService(
             $this->connectionPool,
-            $this->urlBuilderService,
+            $this->urlBuilderService(),
             $this->languageServiceFactory,
         );
 
@@ -169,7 +165,7 @@ final class EmptyColumnServiceTest extends TestCase
 
         $service = new EmptyColumnService(
             $connectionPool,
-            $this->urlBuilderService,
+            $this->urlBuilderService(),
             $this->languageServiceFactory,
         );
 
@@ -204,7 +200,7 @@ final class EmptyColumnServiceTest extends TestCase
 
         $service = new EmptyColumnService(
             $connectionPool,
-            $this->urlBuilderService,
+            $this->urlBuilderService(),
             $this->languageServiceFactory,
         );
 
@@ -232,7 +228,7 @@ final class EmptyColumnServiceTest extends TestCase
 
         $service = new EmptyColumnService(
             $connectionPool,
-            $this->urlBuilderService,
+            $this->urlBuilderService(),
             $this->languageServiceFactory,
         );
 
@@ -248,6 +244,14 @@ final class EmptyColumnServiceTest extends TestCase
 
         $containerResults = array_filter($result, static fn (array $r): bool => isset($r['containerUid']));
         self::assertEmpty($containerResults);
+    }
+
+    /**
+     * Lazily constructed: #[WithSingleton] only takes effect once the test method starts running, after setUp().
+     */
+    private function urlBuilderService(): UrlBuilderService
+    {
+        return $this->urlBuilderService ??= new UrlBuilderService();
     }
 
     private function registerContainerField(): void

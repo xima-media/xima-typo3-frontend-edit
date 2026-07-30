@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
 use Doctrine\DBAL\Result;
+use KonradMichalik\Ttt\Attribute\WithSingleton;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -34,6 +35,7 @@ use Xima\XimaTypo3FrontendEdit\Event\FrontendEditPageDropdownModifyEvent;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\{PageButtonBuilder, PageMenuGenerator};
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
 
 /**
  * PageMenuGeneratorTest.
@@ -42,15 +44,9 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
  * @license GPL-2.0-or-later
  */
 #[CoversClass(PageMenuGenerator::class)]
+#[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class PageMenuGeneratorTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        $uriBuilderMock = $this->createMock(UriBuilder::class);
-        $uriBuilderMock->method('buildUriFromRoute')->willReturn(new Uri('/typo3/mock'));
-        GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilderMock);
-    }
-
     protected function tearDown(): void
     {
         GeneralUtility::purgeInstances();

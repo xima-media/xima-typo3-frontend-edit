@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
 use Doctrine\DBAL\Result;
+use KonradMichalik\Ttt\Attribute\WithSingleton;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,7 +26,6 @@ use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Expression\ExpressionBuilder;
 use TYPO3\CMS\Core\Database\Query\QueryBuilder;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
-use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\{Icon, IconFactory};
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -39,6 +39,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Content\ContentElementFilter;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\{AdditionalDataHandler, ContentElementButtonBuilder, ContentElementMenuGenerator};
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
 
 /**
  * ContentElementMenuGeneratorTest.
@@ -47,14 +48,11 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
  * @license GPL-2.0-or-later
  */
 #[CoversClass(ContentElementMenuGenerator::class)]
+#[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class ContentElementMenuGeneratorTest extends TestCase
 {
     protected function setUp(): void
     {
-        $uriBuilderMock = $this->createMock(UriBuilder::class);
-        $uriBuilderMock->method('buildUriFromRoute')->willReturn(new Uri('/typo3/mock'));
-        GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilderMock);
-
         for ($i = 0; $i < 10; ++$i) {
             $versionMock = $this->createMock(Typo3Version::class);
             $versionMock->method('getMajorVersion')->willReturn(13);

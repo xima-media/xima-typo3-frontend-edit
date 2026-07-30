@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
+use KonradMichalik\Ttt\Attribute\WithSingleton;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\{Icon, IconFactory};
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -24,6 +24,7 @@ use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\AbstractMenuButtonBuilder;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
 
 /**
  * AbstractMenuButtonBuilderTest.
@@ -32,6 +33,7 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
  * @license GPL-2.0-or-later
  */
 #[CoversClass(AbstractMenuButtonBuilder::class)]
+#[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class AbstractMenuButtonBuilderTest extends TestCase
 {
     private Icon $iconMock;
@@ -44,10 +46,6 @@ final class AbstractMenuButtonBuilderTest extends TestCase
         $iconFactoryMock = $this->createMock(IconFactory::class);
         $iconFactoryMock->method('getIcon')->willReturn($this->iconMock);
         $this->iconService = new IconService($iconFactoryMock);
-
-        $uriBuilderMock = $this->createMock(UriBuilder::class);
-        $uriBuilderMock->method('buildUriFromRoute')->willReturn(new Uri('/typo3/mock'));
-        GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilderMock);
     }
 
     protected function tearDown(): void

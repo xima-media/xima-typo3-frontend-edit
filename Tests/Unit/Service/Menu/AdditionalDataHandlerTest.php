@@ -15,13 +15,13 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
 use Doctrine\DBAL\Result;
 use Generator;
+use KonradMichalik\Ttt\Attribute\WithSingleton;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\{Expression\ExpressionBuilder, QueryBuilder, Restriction\DefaultRestrictionContainer};
-use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Imaging\{Icon, IconFactory};
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
@@ -30,6 +30,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\AdditionalDataHandler;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
 
 /**
  * AdditionalDataHandlerTest.
@@ -38,15 +39,9 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
  * @license GPL-2.0-or-later
  */
 #[CoversClass(AdditionalDataHandler::class)]
+#[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class AdditionalDataHandlerTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        $uriBuilder = $this->createMock(UriBuilder::class);
-        $uriBuilder->method('buildUriFromRoute')->willReturn(new Uri('/typo3/mock'));
-        GeneralUtility::setSingletonInstance(UriBuilder::class, $uriBuilder);
-    }
-
     protected function tearDown(): void
     {
         GeneralUtility::purgeInstances();
