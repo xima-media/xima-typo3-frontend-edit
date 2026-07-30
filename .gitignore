@@ -15,3 +15,6 @@ phpstan.xml
 .Build/
 .phpunit.result.cache
 .superpowers/
+Tests/Playwright/.auth/
+Tests/Playwright/test-results/
+Tests/Playwright/playwright-report/
