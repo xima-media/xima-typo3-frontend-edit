@@ -14,13 +14,23 @@ test('edit menu opens on hover with the default actions', async ({ page }) => {
   await editInfoResponse;
 
   const hoverMenu = new HoverMenu(page);
+  const toolbar = hoverMenu.toolbar(CONTENT_ELEMENT_UID);
 
-  // Before hovering, the toolbar for this element must not be visible.
-  await expect(hoverMenu.editButton(CONTENT_ELEMENT_UID)).toBeHidden();
+  // The toolbar is always in the DOM; OverlayManager toggles it via opacity/
+  // pointer-events on the TOOLBAR element itself (see
+  // Resources/Public/Css/FrontendEdit.css: `.frontend-edit__toolbar { opacity: 0; }`,
+  // `.frontend-edit__overlay--active .frontend-edit__toolbar { opacity: 1; }`) —
+  // not display/visibility, and not on the child buttons. Two consequences:
+  // (1) Playwright's toBeVisible()/toBeHidden() only check display/visibility +
+  // bounding box, so they can't tell the two opacity states apart — assert
+  // toHaveCSS('opacity', ...) instead. (2) CSS `opacity` is NOT inherited into
+  // a descendant's own computed style (verified live: the toolbar reports
+  // opacity 0 while its child edit button independently reports opacity 1) —
+  // so the assertion must target the toolbar element, not editButton()/kebabButton().
+  await expect(toolbar).toHaveCSS('opacity', '0');
 
   await hoverMenu.hover(CONTENT_ELEMENT_UID);
-  await expect(hoverMenu.editButton(CONTENT_ELEMENT_UID)).toBeVisible();
-  await expect(hoverMenu.kebabButton(CONTENT_ELEMENT_UID)).toBeVisible();
+  await expect(toolbar).toHaveCSS('opacity', '1');
 
   await hoverMenu.kebabButton(CONTENT_ELEMENT_UID).click();
   const dropdown = hoverMenu.dropdown(CONTENT_ELEMENT_UID);
