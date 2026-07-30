@@ -5,15 +5,15 @@ on:
     branches:
       - main
     paths:
+      - 'Classes/**'
       - 'Resources/**'
-      - 'Classes/Middleware/**'
       - 'Tests/Playwright/**'
       - 'Tests/Acceptance/Fixtures/**'
       - '.github/workflows/e2e.yml'
   pull_request:
     paths:
+      - 'Classes/**'
       - 'Resources/**'
-      - 'Classes/Middleware/**'
       - 'Tests/Playwright/**'
       - 'Tests/Acceptance/Fixtures/**'
       - '.github/workflows/e2e.yml'
@@ -21,14 +21,18 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        typo3-version: ['13', '14']
     steps:
       - uses: actions/checkout@v4
 
       - name: Install ddev
         uses: ddev/github-action-setup-ddev@v1
 
-      - name: Install TYPO3 13
-        run: ddev install 13
+      - name: Install TYPO3 ${{ matrix.typo3-version }}
+        run: ddev install ${{ matrix.typo3-version }}
 
       - name: Install Playwright dependencies
         run: ddev exec -d /var/www/html/Tests/Playwright npm ci
@@ -40,11 +44,12 @@ jobs:
         run: ddev exec -d /var/www/html/Tests/Playwright npx playwright test
         env:
           CI: true
+          TYPO3_VERSION: ${{ matrix.typo3-version }}
 
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.typo3-version }}
           path: Tests/Playwright/playwright-report/
           retention-days: 14
