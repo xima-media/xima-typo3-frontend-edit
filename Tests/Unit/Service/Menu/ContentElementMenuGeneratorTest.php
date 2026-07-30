@@ -240,6 +240,22 @@ final class ContentElementMenuGeneratorTest extends TestCase
     }
 
     #[Test]
+    public function getDropdownOmitsHideButtonWhenFieldAccessDenied(): void
+    {
+        $this->setUpAuthenticatedBackendUser(canHide: false);
+        $this->setUpLanguageService();
+        $this->setUpTca();
+
+        $element = $this->createContentElementRecord(91);
+        $connectionPool = $this->createConnectionPoolReturning([$element]);
+        $generator = $this->createGenerator($connectionPool);
+
+        $result = $generator->getDropdown(1, '/return', 0, $this->createRequestMock());
+
+        self::assertArrayNotHasKey('hide', $result[91]['menu']['children']);
+    }
+
+    #[Test]
     public function getDropdownRespectsEventListenerModifiedButton(): void
     {
         $this->setUpAuthenticatedBackendUser();
@@ -294,12 +310,13 @@ final class ContentElementMenuGeneratorTest extends TestCase
         ];
     }
 
-    private function setUpAuthenticatedBackendUser(bool $hasEditAccess = true): void
+    private function setUpAuthenticatedBackendUser(bool $hasEditAccess = true, bool $canHide = true): void
     {
         $backendUser = $this->createMock(BackendUserAuthentication::class);
         $backendUser->user = ['uid' => 1, 'admin' => 1];
         $backendUser->uc = [];
         $backendUser->method('recordEditAccessInternals')->willReturn($hasEditAccess);
+        $backendUser->method('check')->willReturn($canHide);
         $GLOBALS['BE_USER'] = $backendUser;
     }
 
