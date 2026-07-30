@@ -10,6 +10,9 @@
     <php>
         <env name="COLUMNS" value="300" />
     </php>
+    <extensions>
+        <bootstrap class="KonradMichalik\Ttt\TttExtension"/>
+    </extensions>
     <testsuites>
         <testsuite name="Tests">
             <directory>Tests/Unit</directory>
