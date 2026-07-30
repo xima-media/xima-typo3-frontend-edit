@@ -85,6 +85,22 @@ ddev 13 composer install
 ddev all typo3 database:updateschema
 ```
 
+## Run E2E tests (Playwright)
+
+E2E tests live in `Tests/Playwright/` and run against an installed TYPO3 instance (see "TYPO3 Setup" above).
+
+```bash
+# Install once
+ddev exec -d /var/www/html/Tests/Playwright npm install
+ddev exec -d /var/www/html/Tests/Playwright npx playwright install --with-deps chromium
+
+# Run the suite (targets TYPO3 13 by default)
+ddev exec -d /var/www/html/Tests/Playwright npx playwright test
+
+# Target TYPO3 14 instead
+TYPO3_VERSION=14 ddev exec -d /var/www/html/Tests/Playwright npx playwright test
+```
+
 ## Submit a pull request
 
 After completing your work, **open a pull request** and provide a description of your changes. Ideally, your PR should reference an issue that explains the problem you are addressing.
