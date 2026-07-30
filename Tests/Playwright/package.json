@@ -2,10 +2,12 @@
   "name": "xima-typo3-frontend-edit-e2e",
   "private": true,
   "scripts": {
-    "test": "playwright test"
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.0",
+    "@types/node": "^24.0.0",
     "typescript": "^5.7.2"
   }
 }
