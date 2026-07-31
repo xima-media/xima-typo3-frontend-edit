@@ -1,10 +1,16 @@
 import { test, expect } from '@playwright/test';
 import { HoverMenu } from '../support/frontend-edit/hover-menu';
+import { resolveTypo3Version } from '../support/typo3/environment';
 
 // "About This Demo" text element on the Home page (Tests/Acceptance/Fixtures/demo-content.sql).
 const CONTENT_ELEMENT_UID = 2;
 
 test('expand button opens the current edit URL in the full backend, same tab', async ({ page, context }) => {
+  // The expand button only exists in the v13-only iframe modal (iframe_edit.js) —
+  // on v14.2+ the contextual sidebar handles editing and this modal is never loaded
+  // for a plain edit click (see ResourceRendererService::render()).
+  test.skip(resolveTypo3Version() !== '13', 'expand button is part of the v13-only iframe modal');
+
   // See edit-menu.spec.ts: the listener must be registered before goto(), not after.
   const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
   await page.goto('/');
