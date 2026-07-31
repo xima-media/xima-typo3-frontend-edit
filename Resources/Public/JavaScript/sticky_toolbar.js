@@ -196,10 +196,10 @@
         html += `
         <div class="frontend-edit__sticky-separator"></div>
         <div class="frontend-edit__sticky-dropdown-container">
-          <button class="frontend-edit__sticky-btn frontend-edit__sticky-btn--menu" data-tooltip="${this.escapeAttribute(this.tooltips.pageOptions)}" type="button">
+          <button class="frontend-edit__sticky-btn frontend-edit__sticky-btn--menu" data-tooltip="${this.escapeAttribute(this.tooltips.pageOptions)}" type="button" aria-haspopup="menu" aria-expanded="false">
             ${ICONS.kebab}
           </button>
-          <div class="frontend-edit__sticky-dropdown"></div>
+          <div class="frontend-edit__sticky-dropdown" role="menu"></div>
         </div>`;
       }
 
@@ -243,12 +243,14 @@
         if (item.type === 'divider') {
           element = document.createElement('div');
           element.className = `frontend-edit__divider ${this.escapeClassName(name)}`;
+          element.setAttribute('role', 'separator');
           const span = document.createElement('span');
           span.textContent = item.label || '';
           element.appendChild(span);
         } else if (item.type === 'info') {
           element = document.createElement('div');
           element.className = `frontend-edit__info ${this.escapeClassName(name)}`;
+          element.setAttribute('role', 'presentation');
           // Icons are trusted HTML from TYPO3 backend (IconFactory)
           if (item.icon) {
             const iconWrapper = document.createElement('span');
@@ -260,6 +262,8 @@
           element.appendChild(span);
         } else if (item.type === 'link') {
           element = document.createElement('a');
+          element.setAttribute('role', 'menuitem');
+          element.setAttribute('tabindex', '-1');
           // Validate URL to prevent javascript: protocol attacks
           if (item.url && this.isValidUrl(item.url)) {
             element.href = item.url;
@@ -278,6 +282,7 @@
               // Close the sticky toolbar dropdown
               const dropdown = document.querySelector('.frontend-edit__sticky-dropdown');
               if (dropdown) dropdown.classList.remove('frontend-edit__sticky-dropdown--visible');
+              document.querySelector('.frontend-edit__sticky-btn--menu')?.setAttribute('aria-expanded', 'false');
             });
           }
           // Icons are trusted HTML from TYPO3 backend (IconFactory)
@@ -343,20 +348,75 @@
         // (toolbar may have CSS transform which creates a new containing block)
         document.body.appendChild(dropdown);
 
+        const focusFirstItem = () => {
+          dropdown.querySelector('[role="menuitem"]')?.focus();
+        };
+
+        const closeDropdown = () => {
+          dropdown.classList.remove('frontend-edit__sticky-dropdown--visible');
+          menuBtn.setAttribute('aria-expanded', 'false');
+          // In case the menu closes again before its open-transition ran its
+          // course, so this doesn't fire late and re-focus an already-hidden item.
+          dropdown.removeEventListener('transitionend', focusFirstItem);
+        };
+
         menuBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
           const isVisible = dropdown.classList.contains('frontend-edit__sticky-dropdown--visible');
           if (isVisible) {
-            dropdown.classList.remove('frontend-edit__sticky-dropdown--visible');
+            closeDropdown();
           } else {
             await this.positionDropdown(menuBtn, dropdown);
             dropdown.classList.add('frontend-edit__sticky-dropdown--visible');
+            menuBtn.setAttribute('aria-expanded', 'true');
+            // CSS transitions visibility together with opacity (so it only
+            // switches to hidden once the fade-out completes on close). The
+            // browser only treats the dropdown as focusable once that
+            // transition has actually run its course - a requestAnimationFrame
+            // still fires too early. Waiting for its own transitionend is what
+            // reliably works, and it self-adjusts to prefers-reduced-motion.
+            dropdown.addEventListener('transitionend', focusFirstItem, { once: true });
           }
         });
 
         document.addEventListener('click', (e) => {
           if (!dropdownContainer.contains(e.target) && !dropdown.contains(e.target)) {
-            dropdown.classList.remove('frontend-edit__sticky-dropdown--visible');
+            closeDropdown();
+          }
+        });
+
+        dropdown.addEventListener('keydown', (e) => {
+          const items = Array.from(dropdown.querySelectorAll('[role="menuitem"]'));
+          const idx = items.indexOf(document.activeElement);
+
+          if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            items[idx < items.length - 1 ? idx + 1 : 0]?.focus();
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            items[idx > 0 ? idx - 1 : items.length - 1]?.focus();
+          } else if (e.key === 'Home') {
+            e.preventDefault();
+            items[0]?.focus();
+          } else if (e.key === 'End') {
+            e.preventDefault();
+            items[items.length - 1]?.focus();
+          } else if (e.key === 'Enter') {
+            e.preventDefault();
+            document.activeElement?.click?.();
+          } else if (e.key === 'Escape') {
+            closeDropdown();
+            menuBtn.focus();
+          }
+        });
+
+        // Roving focus (tabindex="-1" on every item) keeps Tab out of the menu
+        // by design (APG menu-button pattern) - but the menu must then close
+        // itself once focus actually leaves it, or it stays open with no
+        // visible focus inside.
+        dropdown.addEventListener('focusout', (e) => {
+          if (!dropdown.contains(e.relatedTarget)) {
+            closeDropdown();
           }
         });
 
