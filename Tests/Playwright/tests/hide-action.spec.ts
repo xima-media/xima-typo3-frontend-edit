@@ -20,8 +20,13 @@ test.describe('hide action', () => {
     const hoverMenu = new HoverMenu(page);
     await hoverMenu.openDropdown(CONTENT_ELEMENT_UID);
 
+    // Not waitForURL('**/'): we start on '/', so that pattern already matches
+    // the current URL and would resolve immediately instead of waiting for
+    // the tce_db redirect round trip. A 3xx redirect never fires 'load' for
+    // the intermediate hop — only for the final destination — so waiting for
+    // the next 'load' event genuinely waits for the redirect to land back home.
     await Promise.all([
-      page.waitForURL('**/'),
+      page.waitForEvent('load'),
       hoverMenu.dropdown(CONTENT_ELEMENT_UID).locator('.hide').click(),
     ]);
 

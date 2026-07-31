@@ -13,11 +13,14 @@ test.describe('sticky toolbar', () => {
     const isDisabled = (await page.locator('#frontend-edit-toolbar-config').getAttribute('data-disabled')) === 'true';
     if (!isDisabled) return;
 
+    // waitForLoadState('load') alone can resolve against the page's current
+    // (pre-reload) state rather than the upcoming one — wait for the actual
+    // future 'load' event registered concurrently with the click instead.
     await Promise.all([
       page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/toggle')),
+      page.waitForEvent('load'),
       page.locator('.frontend-edit__sticky-btn--toggle').click(),
     ]);
-    await page.waitForLoadState('load');
   });
 
   test('renders and the toggle persists across reload', async ({ page }) => {
@@ -30,11 +33,14 @@ test.describe('sticky toolbar', () => {
     const toggleButton = toolbar.locator('.frontend-edit__sticky-btn--toggle');
 
     // Disable frontend editing. The client reloads the page itself on success.
+    // Wait for the actual future 'load' event (registered concurrently with
+    // the click) rather than waitForLoadState('load') after the fact, which
+    // can resolve against the page's current state instead of the reload.
     await Promise.all([
       page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/toggle')),
+      page.waitForEvent('load'),
       toggleButton.click(),
     ]);
-    await page.waitForLoadState('load');
     await expect(page.locator('.frontend-edit__sticky-toolbar')).toHaveClass(DISABLED_CLASS);
 
     // Prove persistence: reload again without touching the toggle.
