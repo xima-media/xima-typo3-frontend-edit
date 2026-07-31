@@ -86,6 +86,15 @@ Dynamic content elements do not provide the required "c-id" (Content Element ID)
 ..  note::
     Styling problems may occur with nested content elements.
 
+Alternatively, add the :code:`data-frontend-edit` attribute instead (see :ref:`How it works <how-it-works>`) - it avoids the "c-id" naming collision risk entirely and needs no sibling resolution:
+
+..  code-block:: html
+    :caption: DCE Template
+
+    <div class="dce"<xfe:editable uid="{contentObject.uid}" />>
+        Your template goes here...
+    </div>
+
 .. rst-class:: panel panel-default
 
 The edit button is not displayed with `container <https://extensions.typo3.org/extension/container/>`__ extension content elements.
