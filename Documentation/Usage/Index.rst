@@ -15,6 +15,22 @@ interfaces in the frontend for logged-in backend users.
     :gap: 4
     :card-height: 100
 
+    ..  card::  First steps
+
+        New to frontend editing? A short tour of what appears in the frontend
+        and how to use it.
+
+        ..  card-footer::   :ref:`Take the tour <first-steps>`
+            :button-style: btn btn-primary stretched-link
+
+    ..  card::  Keyboard and screen readers
+
+        Which keys operate the menus and dialogs — and where support is
+        deliberately limited.
+
+        ..  card-footer::   :ref:`View keyboard support <keyboard>`
+            :button-style: btn btn-secondary stretched-link
+
     ..  card::  Edit Menu
 
         The Edit Menu appears on content elements and provides quick access
@@ -50,7 +66,9 @@ interfaces in the frontend for logged-in backend users.
 ..  toctree::
     :hidden:
 
+    FirstSteps
     EditMenu
     Toolbar
     InlineEditing
     DragAndDrop
+    Keyboard

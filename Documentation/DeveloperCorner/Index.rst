@@ -6,18 +6,54 @@
 Developer corner
 ================
 
-Three opportunities exist to extend the Edit Menu with custom entries:
+How the extension works internally, and the APIs it offers to extend it.
 
-- Use an :ref:`event <events>` to modify the Edit Menu directly
-- Use a :ref:`viewhelper <data-attributes>` to extend the Edit Menu with data entries
-- Use :ref:`column target markers <empty-columns>` to add "Create new content" buttons for empty columns and at the end of filled columns
+..  card-grid::
+    :columns: 1
+    :columns-md: 2
+    :gap: 4
+    :card-height: 100
 
-Additionally, you can provide a :ref:`custom css <custom-styling>` file to adjust the styling.
+    ..  card::  How it works
+
+        Request flow, why permissions are decided server-side, and what the
+        client needs from your templates.
+
+        ..  card-footer::   :ref:`Deep dive into concepts <how-it-works>`
+            :button-style: btn btn-secondary stretched-link
+
+    ..  card::  PSR-14 Events
+
+        Add, remove or modify entries in the Edit Menu and the Toolbar.
+
+        ..  card-footer::   :ref:`Customize the menus <events>`
+            :button-style: btn btn-secondary stretched-link
+
+    ..  card::  Data ViewHelper
+
+        Add edit links for related records — e.g. every news item inside a
+        list plugin.
+
+        ..  card-footer::   :ref:`Extend the Edit Menu <data-attributes>`
+            :button-style: btn btn-secondary stretched-link
+
+    ..  card::  Language handling
+
+        Which language modes are supported and how the extension resolves the
+        record to edit.
+
+        ..  card-footer::   :ref:`View language support <languages>`
+            :button-style: btn btn-secondary stretched-link
+
+..  seealso::
+
+    Looking for the template side? :ref:`integration` covers the required
+    content element IDs, column markers and custom styling.
 
 ..  toctree::
-    :maxdepth: 3
+    :hidden:
 
+    Architecture
     Events
     DataAttributes
-    EmptyColumns
-    CustomStyling
+    Languages

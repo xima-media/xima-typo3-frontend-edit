@@ -41,7 +41,7 @@ Inline editing — the edit form opens next to the page:
 | [Edit Menu](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html) | Edit, hide, delete, move, info and history per content element — with a confirmation dialog before deleting |
 | [Toolbar](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/Toolbar.html) | Page-level actions and a toggle to switch frontend editing on and off |
 | [Inline Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/InlineEditing.html) 🧪 | Edit content and page properties in a panel next to the page — sidebar on TYPO3 v14.2+, slide-in modal on v13 |
-| [New content](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/EmptyColumns.html) | Insert buttons on hover and per column, opening TYPO3's native New Content Element Wizard |
+| [New content](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Integration/ColumnTargets.html) | Insert buttons on hover and per column, opening TYPO3's native New Content Element Wizard |
 | [Drag & Drop](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/DragAndDrop.html) 🧪 | Reorder elements within a column or move them into another column — incl. `EXT:container` |
 | [Site Settings](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Configuration/SiteSettings.html) | Per-site configuration via YAML: appearance, toolbar position, and filters for pages, doktypes, CTypes and UIDs |
 | [UserTSconfig](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Configuration/UserTSconfig.html) | Disable frontend editing per backend user or user group |
@@ -82,7 +82,10 @@ The toolbar appears in the bottom-right corner, and hovering a content element r
 
 | | |
 |---|---|
-| 🧭 [How it works](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/HowItWorks/Index.html) | What gets injected and why |
+| 🚶 [First steps](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/FirstSteps.html) | A short tour for editors |
+| 🧩 [Integration](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Integration/Index.html) | What your site package has to provide |
+| ⌨️ [Keyboard](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/Keyboard.html) | Operating it without a mouse |
+| 🧭 [How it works](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/Architecture.html) | What gets injected and why |
 | ❓ [FAQ](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/FAQ/Index.html) | Troubleshooting |
 | 🔀 [Migration](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Migration/Index.html) | Upgrading from 1.x to 2.x |
 | ⚖️ [Comparison](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Delineation/Index.html) | How it differs from similar extensions |

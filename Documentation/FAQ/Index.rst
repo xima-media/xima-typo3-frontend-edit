@@ -79,66 +79,31 @@ Nothing appears in the frontend
             extension, which provides backend login across multiple domains
             without a shared cookie domain.
 
-    ..  accordion-item:: The edit button is missing on DCE content elements
-        :name: faqDce
+    ..  accordion-item:: The edit button is missing on EXT:container or EXT:dce elements
+        :name: faqThirdPartyCe
         :header-level: 3
 
-        `DCE <https://extensions.typo3.org/extension/dce>`__ elements do not
-        provide the required "c-id" in their default templates. Customize the
-        `DCE template <https://docs.typo3.org/p/t3/dce/main/en-us/UsersManual/Template.html>`__
-        to include it:
+        Neither `container <https://extensions.typo3.org/extension/container/>`__
+        nor `DCE <https://extensions.typo3.org/extension/dce>`__ render the
+        required content element ID in their default templates — you have to add
+        it.
 
-        ..  code-block:: html
-            :caption: DCE template
-
-            <div class="dce" id="c{contentObject.uid}">
-                Your template goes here...
-            </div>
+        :ref:`template-requirements` has a ready-to-copy snippet for both,
+        including a ``fluid_styled_content``-based alternative for containers.
 
         ..  note::
             Styling problems may occur with nested content elements.
 
-    ..  accordion-item:: The edit button is missing on EXT:container elements
-        :name: faqContainer
+    ..  accordion-item:: The menu is missing on inherited content (e.g. a shared footer)
+        :name: faqInheritedContent
         :header-level: 3
 
-        `container <https://extensions.typo3.org/extension/container/>`__
-        elements do not provide the required "c-id" in their default templates.
-        Customize the
-        `container template <https://github.com/b13/container?tab=readme-ov-file#template>`__:
+        Only content elements belonging to the **current page** are editable.
+        Content pulled in from another page cannot be edited from the inheriting
+        page — the record simply does not live there.
 
-        ..  code-block:: html
-            :caption: Container template
-
-            <div id="c{data.uid}">
-               <f:for each="{children_200}" as="record">
-                   {record.header} <br>
-                   <f:format.raw>
-                       {record.renderedContent}
-                   </f:format.raw>
-               </f:for>
-            </div>
-
-        Alternatively, use
-        `fluid_styled_content <https://docs.typo3.org/c/typo3/cms-fluid-styled-content/main/en-us/Introduction/Index.html>`__
-        in the template:
-
-        ..  code-block:: html
-            :caption: Container template using fluid_styled_content
-
-            <f:layout name="Default" />
-
-            <f:section name="Main">
-              <f:for each="{children_200}" as="record">
-                  {record.header} <br>
-                  <f:format.raw>
-                      {record.renderedContent}
-                  </f:format.raw>
-              </f:for>
-            </f:section>
-
-        ..  note::
-            Styling problems may occur with nested content elements.
+        Use the :ref:`toolbar <toolbar>` to navigate to the page that owns the
+        record and edit it there.
 
 ..  _faq-edit-form:
 

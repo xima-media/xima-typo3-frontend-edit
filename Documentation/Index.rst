@@ -107,12 +107,12 @@ For integrators
         ..  card-footer::   :ref:`View configuration options <configuration>`
             :button-style: btn btn-primary stretched-link
 
-    ..  card::  Languages
+    ..  card::  Integration
 
-        Which language modes are supported and how translated content is
-        resolved.
+        What your site package has to provide: content element IDs, optional
+        column markers and custom styling.
 
-        ..  card-footer::   :ref:`View language support <languages>`
+        ..  card-footer::   :ref:`Integrate it <integration>`
             :button-style: btn btn-secondary stretched-link
 
 For developers
@@ -120,21 +120,14 @@ For developers
 
 ..  card-grid::
     :columns: 1
-    :columns-md: 2
+    :columns-md: 1
     :gap: 4
     :card-height: 100
 
-    ..  card::  How it works
-
-        What gets injected into the frontend, and the one requirement your
-        templates have to meet.
-
-        ..  card-footer::   :ref:`Deep dive into concepts <how-it-works>`
-            :button-style: btn btn-secondary stretched-link
-
     ..  card::  Developer corner
 
-        PSR-14 events, ViewHelpers, column markers and custom styling.
+        How it works under the hood, PSR-14 events, ViewHelpers and language
+        handling.
 
         ..  card-footer::   :ref:`Extend the functionalities <developer-corner>`
             :button-style: btn btn-secondary stretched-link
@@ -171,8 +164,7 @@ Reference
     Installation/Index
     Usage/Index
     Configuration/Index
-    Languages/Index
-    HowItWorks/Index
+    Integration/Index
     DeveloperCorner/Index
     FAQ/Index
     Migration/Index
