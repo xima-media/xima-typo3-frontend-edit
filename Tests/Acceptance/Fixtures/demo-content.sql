@@ -3,8 +3,8 @@
 
 -- Clean slate: remove records from previous installs and default sys_template
 DELETE FROM `sys_template` WHERE `pid` = 1;
-DELETE FROM `tt_content` WHERE `pid` IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-DELETE FROM `pages` WHERE `uid` IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+DELETE FROM `tt_content` WHERE `pid` IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
+DELETE FROM `pages` WHERE `uid` IN (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 
 -- Pages
 REPLACE INTO `pages` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `title`, `doktype`, `slug`, `is_siteroot`) VALUES
@@ -17,7 +17,8 @@ REPLACE INTO `pages` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `so
 (7, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1024, 'Contact', 1, '/contact', 0),
 (8, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1280, 'Two Columns (Empty Column Test)', 1, '/two-columns', 0),
 (9, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1536, 'Default Layout (Empty Columns)', 1, '/empty-columns', 0),
-(10, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1792, 'Container (Nested Content)', 1, '/container', 0);
+(10, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1792, 'Container (Nested Content)', 1, '/container', 0),
+(11, 1, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 2048, 'DOM Hardening', 1, '/dom-hardening', 0);
 
 -- Content Elements: Home (pid=1)
 REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `CType`, `colPos`, `header`, `header_layout`, `bodytext`, `starttime`, `endtime`) VALUES
@@ -107,6 +108,21 @@ REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`
 '<p>This content element lives inside the right container column (colPos 202, tx_container_parent 30). Same behaviour: editable, but not drag &amp; drop movable.</p>'),
 (33, 10, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 1024, 'text', 0, 0, 'Note (plain element)', 0,
 '<p>Try dragging this element above the container to confirm plain elements reorder around the container element.</p>');
+
+-- Content Elements: DOM Hardening page (pid=11) — regression fixture for #222/#223.
+-- The html block embeds a DOM-clobbering form (a <form> whose child <input
+-- name="id"> shadows the IDL `form.id` property with the input itself,
+-- per HTMLFormElement named-property clobbering) and an SVG element (whose
+-- `.className` is an SVGAnimatedString, not a string) so any un-hardened
+-- `element.id`/`element.className` read in frontend_edit.js's DOM scan would
+-- throw and abort initialization. "section-c123" deliberately does not start
+-- with "c", so it must never be picked up as content element 123.
+REPLACE INTO `tt_content` (`uid`, `pid`, `tstamp`, `crdate`, `deleted`, `hidden`, `sorting`, `CType`, `colPos`, `header`, `header_layout`, `bodytext`) VALUES
+(34, 11, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 256, 'header', 0, 'DOM Hardening Regression Coverage', 1, ''),
+(35, 11, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 512, 'text', 0, 'Control Element', 0,
+'<p>This element must still receive an edit toolbar even with the hazards below present on the page — proof that initialization actually completed rather than merely not crashing.</p>'),
+(36, 11, UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), 0, 0, 768, 'html', 0, 'DOM Clobbering / SVG Hazards', 0,
+'<form id="cform-clobber"><input name="id" value="clobbered"></form>\n<svg id="csvg-icon" class="test-icon" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4"></circle></svg>\n<div id="section-c123">Not a content element — must not be treated as uid 123.</div>');
 
 -- Assign backend layout "2 Columns 50/50" to page 8
 UPDATE `pages` SET `backend_layout` = 'pagets__2_columns_50_50' WHERE `uid` = 8;
