@@ -17,16 +17,18 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 
 use function is_array;
+use function preg_match;
 use function sprintf;
 
 /**
  * EditableViewHelper.
  *
- * Renders the `data-frontend-edit="tt_content:{uid}"` attribute - the
+ * Renders the `data-frontend-edit="{table}:{uid}"` attribute - the
  * alternative to the `id="c{uid}"` anchor pattern for templates that cannot
- * carry that anchor (e.g. DCE, other custom Fluid templates). Place directly
- * inside the opening tag of the content element's own wrapping element; it
- * renders only the attribute, not a wrapping tag.
+ * carry that anchor (e.g. DCE, other custom Fluid templates), or for editing
+ * a foreign record (news, addresses, ...) via a thin edit+info+history menu
+ * (see #216). Place directly inside the opening tag of the record's own
+ * wrapping element; it renders only the attribute, not a wrapping tag.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
@@ -44,8 +46,9 @@ class EditableViewHelper extends AbstractViewHelper
 
     public function initializeArguments(): void
     {
-        $this->registerArgument('record', 'array', 'The tt_content record (or any array containing at least "uid")');
-        $this->registerArgument('uid', 'int', 'Content element uid, alternative to "record"');
+        $this->registerArgument('record', 'array', 'The record (or any array containing at least "uid")');
+        $this->registerArgument('uid', 'int', 'Record uid, alternative to "record"');
+        $this->registerArgument('table', 'string', 'Database table of the record', false, 'tt_content');
     }
 
     public function render(): string
@@ -61,7 +64,12 @@ class EditableViewHelper extends AbstractViewHelper
             return '';
         }
 
-        return sprintf(' data-frontend-edit="tt_content:%d"', $uid);
+        $table = (string) $this->arguments['table'];
+        if (1 !== preg_match('/^[a-z][a-z0-9_]*$/', $table)) {
+            return '';
+        }
+
+        return sprintf(' data-frontend-edit="%s:%d"', $table, $uid);
     }
 
     private function resolveUid(): ?int
