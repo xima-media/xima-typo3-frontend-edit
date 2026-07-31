@@ -14,3 +14,6 @@ php-cs-fixer.xml
 phpstan.xml
 .Build/
 .phpunit.result.cache
+Tests/Playwright/.auth/
+Tests/Playwright/test-results/
+Tests/Playwright/playwright-report/

@@ -1,0 +1,58 @@
+name: E2E
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Classes/**'
+      - 'Resources/**'
+      - 'Tests/Playwright/**'
+      - 'Tests/Acceptance/Fixtures/**'
+      - '.github/workflows/e2e.yml'
+  pull_request:
+    paths:
+      - 'Classes/**'
+      - 'Resources/**'
+      - 'Tests/Playwright/**'
+      - 'Tests/Acceptance/Fixtures/**'
+      - '.github/workflows/e2e.yml'
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        typo3-version: ['13', '14']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ddev
+        uses: ddev/github-action-setup-ddev@v1
+
+      - name: Install TYPO3 ${{ matrix.typo3-version }}
+        run: ddev install ${{ matrix.typo3-version }}
+
+      - name: Install Playwright dependencies
+        run: ddev exec -d /var/www/html/Tests/Playwright npm ci
+
+      - name: Install Playwright browsers
+        run: ddev exec -d /var/www/html/Tests/Playwright npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        # `ddev exec` runs its argument string inside the container; a step-level
+        # `env:` only sets variables for the host runner process, so it never
+        # reaches Playwright's config in there (confirmed live: both matrix legs
+        # would silently run against the same TYPO3 version, and CI-specific
+        # config would never activate). `env VAR=val ...` as ddev exec arguments
+        # sets them inside the container instead.
+        run: ddev exec -d /var/www/html/Tests/Playwright env CI=true TYPO3_VERSION=${{ matrix.typo3-version }} npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.typo3-version }}
+          path: Tests/Playwright/playwright-report/
+          retention-days: 14
