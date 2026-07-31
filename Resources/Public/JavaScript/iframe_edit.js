@@ -785,6 +785,11 @@
 
   // ── Init ───────────────────────────────────────────────────────────
 
+  // Export for the public API's openBackendView() (frontend_edit.js) - the
+  // only way to reach this modal from outside this IIFE.
+  window.XimaFrontendEdit = window.XimaFrontendEdit || {};
+  window.XimaFrontendEdit.openModal = Modal.open.bind(Modal);
+
   LinkInterceptor.init();
   Logger.log('Modal edit system initialized');
 })();
