@@ -39,3 +39,24 @@ test('edit menu opens on hover with the default actions', async ({ page }) => {
   await expect(dropdown.locator('.hide')).toBeVisible();
   await expect(dropdown.locator('.delete')).toBeVisible();
 });
+
+test('the edit menu closes automatically once keyboard focus moves outside it', async ({ page }) => {
+  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
+  await page.goto('/');
+  await editInfoResponse;
+
+  const hoverMenu = new HoverMenu(page);
+  await hoverMenu.openDropdown(CONTENT_ELEMENT_UID);
+
+  const dropdown = hoverMenu.dropdown(CONTENT_ELEMENT_UID);
+  await expect(dropdown).toBeVisible();
+  await expect(dropdown.locator('[role="menuitem"]').first()).toBeFocused();
+
+  // Every menu item has tabindex="-1" (roving focus, APG menu-button pattern),
+  // so Tab never lands inside the menu - it must close itself via focusout
+  // once focus actually leaves, or it stays open with no focus indicator
+  // inside it.
+  await page.locator('a[href="/about-us"]').first().focus();
+
+  await expect(dropdown).toBeHidden();
+});

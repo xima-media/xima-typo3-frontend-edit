@@ -1016,6 +1016,16 @@
         }
       });
 
+      // Roving focus (tabindex="-1" on every item) keeps Tab out of the menu
+      // by design (APG menu-button pattern) - but the menu must then close
+      // itself once focus actually leaves it, or it stays open with no
+      // visible focus inside.
+      dropdown.addEventListener('focusout', (e) => {
+        if (!dropdown.contains(e.relatedTarget)) {
+          Dropdown.closeAll();
+        }
+      });
+
       return dropdown;
     },
 
