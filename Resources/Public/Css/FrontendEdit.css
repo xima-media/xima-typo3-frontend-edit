@@ -1321,7 +1321,12 @@
 }
 
 .frontend-edit__modal-header {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #21232b;
 }
 
 .frontend-edit__modal-title {
