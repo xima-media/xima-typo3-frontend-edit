@@ -1,16 +1,27 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { HoverMenu } from '../support/frontend-edit/hover-menu';
 
-test.describe('onepager foreign-pid menus', () => {
-  test.fixme(
-    'needs an onepager fixture page — see follow-up issue filed after #220 merges',
-    async () => {
-      // Tests/Acceptance/Fixtures/demo-content.sql has no onepager page yet (a page
-      // rendering tt_content records whose pid differs from the page being viewed).
-      // Once added: navigate to that page, wait for the editInformation response,
-      // and assert the foreign-pid content elements still receive a working edit
-      // menu — DataService.collectDataItems() in frontend_edit.js scans the whole
-      // DOM by id="c{uid}", not by pid, so this should already work; the point of
-      // this test is to catch a regression in that assumption.
-    },
-  );
+// Onepager page (uid=12) seeded by Tests/Acceptance/Fixtures/demo-content.sql:
+// a native "Insert Records" (shortcut) content element embeds tt_content
+// uid=7 ("Our Mission"), which actually lives on the About Us page (pid=2).
+// fluid_styled_content renders the referenced record through the normal
+// tt_content pipeline, so it keeps its own id="c7" anchor here — exercising
+// DataService.collectDataItems()'s whole-DOM id="c{uid}" scan (not pid-based)
+// against a real foreign-pid element.
+const FOREIGN_PID_CONTENT_ELEMENT_UID = 7;
+
+test('builds a working edit menu for a content element embedded from another page', async ({ page }) => {
+  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
+  await page.goto('/onepager');
+  await editInfoResponse;
+
+  const hoverMenu = new HoverMenu(page);
+  await hoverMenu.hover(FOREIGN_PID_CONTENT_ELEMENT_UID);
+
+  await expect(hoverMenu.toolbar(FOREIGN_PID_CONTENT_ELEMENT_UID)).toHaveCSS('opacity', '1');
+
+  // Edit action must target the foreign-pid record itself (uid 7), not the
+  // shortcut element that embeds it (uid 38) or the wrong page's content.
+  const editHref = await hoverMenu.editButton(FOREIGN_PID_CONTENT_ELEMENT_UID).getAttribute('href');
+  expect(decodeURIComponent(editHref ?? '')).toContain(`edit[tt_content][${FOREIGN_PID_CONTENT_ELEMENT_UID}]=edit`);
 });
