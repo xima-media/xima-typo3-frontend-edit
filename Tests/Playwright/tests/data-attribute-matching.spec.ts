@@ -85,3 +85,41 @@ test('a stray data-frontend-edit attribute for an already-anchored uid does not 
   await page.hover('#xfe-test-duplicate-target', { force: true });
   await expect(page.locator(`.frontend-edit__toolbar[data-cid="${ANCHOR_UID}"]`)).toHaveCSS('opacity', '0');
 });
+
+test('a nested .frontend-edit__data element (the <xfe:data> ViewHelper) resolves via its data-attribute-only owning element', async ({ page }) => {
+  // <xfe:data> attaches a hidden .frontend-edit__data input to add extra
+  // menu entries for related records - previously only resolved via the
+  // id="c{uid}" anchor (getClosestContentElement); must also work when the
+  // owning element instead uses data-frontend-edit.
+  await page.addInitScript(
+    ({ elementId, uid, relatedUid }) => {
+      document.addEventListener('DOMContentLoaded', () => {
+        const el = document.createElement('div');
+        el.id = elementId;
+        el.setAttribute('data-frontend-edit', `tt_content:${uid}`);
+        el.textContent = 'Data-attribute test element with nested additional data';
+
+        const dataInput = document.createElement('input');
+        dataInput.type = 'hidden';
+        dataInput.className = 'frontend-edit__data';
+        dataInput.value = JSON.stringify({ label: 'Related item', table: 'tt_content', uid: relatedUid });
+        el.appendChild(dataInput);
+
+        document.body.prepend(el);
+      });
+    },
+    { elementId: 'xfe-test-data-attribute-with-additional-data', uid: DATA_ATTRIBUTE_ONLY_UID, relatedUid: ANCHOR_UID },
+  );
+
+  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
+  await page.goto('/');
+  await editInfoResponse;
+
+  await page.hover('#xfe-test-data-attribute-with-additional-data', { force: true });
+  const toolbar = page.locator(`.frontend-edit__toolbar[data-cid="${DATA_ATTRIBUTE_ONLY_UID}"]`);
+  await toolbar.locator('.frontend-edit__btn--kebab').click();
+
+  const dropdown = page.locator(`.frontend-edit__dropdown[data-cid="${DATA_ATTRIBUTE_ONLY_UID}"]`);
+  await expect(dropdown).toBeVisible();
+  await expect(dropdown.getByText('Related item')).toHaveCount(1);
+});

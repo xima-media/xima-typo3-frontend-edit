@@ -1082,9 +1082,17 @@
    * Data Service
    */
   const DataService = {
+    /**
+     * Walks up from a .frontend-edit__data element to its owning content
+     * element - either the id="c{uid}" anchor or a data-frontend-edit="tt_content:{uid}"
+     * element - so <xfe:data> additional-data entries also resolve on content
+     * elements that only expose the data attribute.
+     */
     getClosestContentElement(element) {
       if (!element) return null;
-      while (element && !/^c\d+$/.test(Dom.id(element))) {
+      const isContentElement = (el) =>
+        /^c\d+$/.test(Dom.id(el)) || /^tt_content:\d+$/.test(el.getAttribute('data-frontend-edit') || '');
+      while (element && !isContentElement(element)) {
         element = element.parentElement;
       }
       return element;
@@ -1140,18 +1148,18 @@
         const closestElement = this.getClosestContentElement(element);
         if (!closestElement) return;
 
-        const id = Dom.id(closestElement).replace('c', '');
-        const uid = parseInt(id, 10);
+        // The owning element was found via either channel (see
+        // getClosestContentElement) - resolve the uid from whichever matched.
+        const idMatch = Dom.id(closestElement).match(/^c(\d+)$/);
+        const dataMatch = idMatch ? null : (closestElement.getAttribute('data-frontend-edit') || '').match(/^tt_content:(\d+)$/);
+        const uid = parseInt((idMatch || dataMatch)?.[1] ?? '', 10);
+        if (!(uid > 0)) return;
 
         if (!dataItems[uid]) dataItems[uid] = [];
 
         const parsedData = JSON.parse(element.value);
         dataItems[uid].push(parsedData);
-
-        // Ensure this UID is included
-        if (uid > 0) {
-          allUids.add(uid);
-        }
+        allUids.add(uid);
 
         Logger.log(`Additional data element ${index + 1}: Found content element c${uid}`, { parsedData });
       });
