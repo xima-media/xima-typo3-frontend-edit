@@ -218,7 +218,7 @@
       const backendUrl = buildExpandUrl(currentUrl);
       this.close();
       if (this.linkTargetBlank) {
-        window.open(backendUrl, '_blank');
+        window.open(backendUrl, '_blank', 'noopener');
       } else {
         window.location.href = backendUrl;
       }
