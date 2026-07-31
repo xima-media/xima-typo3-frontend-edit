@@ -4,18 +4,13 @@ import { resolveTypo3Version, typo3AuthStateFile, typo3BaseUrl } from './environ
 export interface Typo3PlaywrightConfigOptions {
   /** ddev hostname suffix this suite's per-version sites are registered under, e.g. "xima-typo3-frontend-edit.ddev.site". */
   hostname: string;
-  /** Path (relative to the project root) matched by the login setup project. */
-  setupProject?: string;
-  /** Glob matched by the main spec project. */
-  testMatch?: string;
 }
 
 /**
  * TYPO3-generic Playwright config factory — the extraction candidate for a
  * future shared typo3-playwright package. Wires up the version-parametrized
  * baseURL/storageState convention (see environment.ts) and the two-project
- * login-then-test structure; extension-specific test directories and specs
- * are supplied by the caller.
+ * login-then-test structure.
  */
 export function defineTypo3PlaywrightConfig(options: Typo3PlaywrightConfigOptions): PlaywrightTestConfig {
   const version = resolveTypo3Version();
@@ -35,11 +30,11 @@ export function defineTypo3PlaywrightConfig(options: Typo3PlaywrightConfigOption
     projects: [
       {
         name: 'setup',
-        testMatch: options.setupProject ?? 'support/typo3/auth.setup.ts',
+        testMatch: 'support/typo3/auth.setup.ts',
       },
       {
         name: 'chromium',
-        testMatch: options.testMatch ?? 'tests/**/*.spec.ts',
+        testMatch: 'tests/**/*.spec.ts',
         use: { ...devices['Desktop Chrome'], storageState: typo3AuthStateFile(version) },
         dependencies: ['setup'],
       },
