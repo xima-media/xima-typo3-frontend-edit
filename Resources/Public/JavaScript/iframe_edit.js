@@ -28,7 +28,9 @@
   // cleanly instead of accumulating handles.
 
   const MODAL_ID = 'xima-typo3-frontend-edit-modal';
-  const IFRAME_ID = 'xima-typo3-frontend-edit-modal-iframe';
+  // Single source of truth is backend_stubs.js (loads first); the literal
+  // here only covers the loading-bug case where stubs failed to load.
+  const IFRAME_ID = window.XimaFrontendEdit?.IFRAME_ID || 'xima-typo3-frontend-edit-modal-iframe';
   const ANIMATION_DELAY_MS = 10;
   const ANIMATION_DURATION_MS = 300;
 
@@ -48,6 +50,9 @@
   const WIZARD_CLICK_DELAY_MS = 800;
 
   const WIZARD_SELECTORS = 'typo3-backend-new-record-wizard, typo3-backend-new-content-element-wizard';
+
+  // Feather "external-link" icon (MIT) — used for the expand-to-backend button.
+  const EXPAND_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
 
   /**
    * Poll until predicate() returns truthy or timeout elapses.
@@ -121,12 +126,45 @@
     return url;
   }
 
+  /**
+   * Strip the iframe-only markers from a backend edit URL before opening it
+   * as a full backend page (expand button).
+   *
+   * 1. Drops the top-level `tx_ximatypo3frontendedit` marker so the
+   *    extension's injected "Save & Close" button doesn't show up
+   *    redundantly next to the backend's native Save/Close UI.
+   * 2. The `returnUrl` param carries a nested `tx_ximatypo3frontendedit_iframe=1`
+   *    marker (see ensureReturnUrl) that tells ToolRendererMiddleware to skip
+   *    flash-message collection on the post-save redirect. Once we're in the
+   *    full backend this is no longer an iframe flow, so that marker must be
+   *    removed from inside the returnUrl too — otherwise the success flash
+   *    silently disappears after Save.
+   */
+  function buildExpandUrl(url) {
+    try {
+      const backendUrl = new URL(url, window.location.origin);
+      backendUrl.searchParams.delete('tx_ximatypo3frontendedit');
+
+      const returnUrl = backendUrl.searchParams.get('returnUrl');
+      if (returnUrl) {
+        const cleanedReturnUrl = new URL(returnUrl, window.location.origin);
+        cleanedReturnUrl.searchParams.delete('tx_ximatypo3frontendedit_iframe');
+        backendUrl.searchParams.set('returnUrl', cleanedReturnUrl.toString());
+      }
+
+      return backendUrl.toString();
+    } catch (e) {
+      return url;
+    }
+  }
+
   // ── Modal ──────────────────────────────────────────────────────────
 
   const Modal = {
     element: null,
     iframe: null,
     closeTimer: null,
+    linkTargetBlank: false,
 
     getOrCreate() {
       if (this.element) return this.element;
@@ -138,6 +176,7 @@
         '<div class="frontend-edit__modal-overlay"></div>' +
         '<div class="frontend-edit__modal-panel">' +
           '<div class="frontend-edit__modal-header">' +
+            '<button class="frontend-edit__modal-expand" title="Open in backend">' + EXPAND_ICON + '</button>' +
             '<span class="frontend-edit__modal-title"></span>' +
             '<button class="frontend-edit__modal-close" title="Close">&times;</button>' +
           '</div>' +
@@ -153,6 +192,7 @@
       const close = () => this.close();
       modal.querySelector('.frontend-edit__modal-overlay').addEventListener('click', close);
       modal.querySelector('.frontend-edit__modal-close').addEventListener('click', close);
+      modal.querySelector('.frontend-edit__modal-expand').addEventListener('click', () => this.expandToBackend());
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 
       this.element = modal;
@@ -161,7 +201,32 @@
       return modal;
     },
 
-    open(url) {
+    /**
+     * Open the current iframe URL in the full backend — the escape hatch for
+     * limitations the modal can't handle (complex IRRE, RTE issues, file
+     * relations). Uses contentWindow.location so it reflects wizard steps and
+     * in-form navigation, not just the URL the modal was opened with.
+     */
+    expandToBackend() {
+      let currentUrl;
+      try {
+        currentUrl = this.iframe?.contentWindow?.location.href;
+      } catch (_) { /* cross-origin */ }
+      currentUrl = currentUrl || this.iframe?.src;
+      if (!currentUrl || currentUrl === 'about:blank') return;
+
+      const backendUrl = buildExpandUrl(currentUrl);
+      this.close();
+      if (this.linkTargetBlank) {
+        window.open(backendUrl, '_blank');
+      } else {
+        window.location.href = backendUrl;
+      }
+      Logger.log('Expanded to backend', { url: backendUrl });
+    },
+
+    open(url, linkTargetBlank) {
+      this.linkTargetBlank = !!linkTargetBlank;
       // Ensure the returnUrl carries tx_ximatypo3frontendedit_iframe=1
       // so the post-save redirect to the frontend URL does not consume the
       // flash message queue inside the iframe — the parent reload picks
@@ -748,7 +813,7 @@
         if (target?.href && isBackendUrl(target.href)) {
           e.preventDefault();
           e.stopPropagation();
-          Modal.open(target.href);
+          Modal.open(target.href, target.target === '_blank');
           Logger.log('Link intercepted → modal', { href: target.href });
         }
       }, true);

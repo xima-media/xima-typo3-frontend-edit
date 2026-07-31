@@ -1330,18 +1330,20 @@
 }
 
 .frontend-edit__modal-title {
+    flex: 1;
+    text-align: center;
     color: #fff;
     font-size: 14px;
     font-weight: 500;
 }
 
-.frontend-edit__modal-close {
+.frontend-edit__modal-close,
+.frontend-edit__modal-expand {
     width: 28px;
     height: 28px;
     background: transparent;
     border: none;
     color: #fff;
-    font-size: 20px;
     line-height: 1;
     cursor: pointer;
     display: flex;
@@ -1351,11 +1353,22 @@
     transition: background-color 0.2s ease;
 }
 
-.frontend-edit__modal-close:hover {
+.frontend-edit__modal-close {
+    font-size: 20px;
+}
+
+.frontend-edit__modal-expand svg {
+    width: 16px;
+    height: 16px;
+}
+
+.frontend-edit__modal-close:hover,
+.frontend-edit__modal-expand:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
-.frontend-edit__modal-close:focus-visible {
+.frontend-edit__modal-close:focus-visible,
+.frontend-edit__modal-expand:focus-visible {
     outline: 2px solid #fff;
     outline-offset: 2px;
     background: rgba(255, 255, 255, 0.1);
