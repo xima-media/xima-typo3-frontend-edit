@@ -44,7 +44,6 @@ final class RecordButtonBuilderTest extends TestCase
         $iconMock = $this->createMock(Icon::class);
         $iconFactoryMock = $this->createMock(IconFactory::class);
         $iconFactoryMock->method('getIcon')->willReturn($iconMock);
-        $iconFactoryMock->method('mapRecordTypeToIconIdentifier')->willReturn('content-news');
         $this->iconService = new IconService($iconFactoryMock);
     }
 
