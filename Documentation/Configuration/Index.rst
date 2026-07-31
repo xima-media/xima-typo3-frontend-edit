@@ -18,3 +18,4 @@ Learn what configuration options are available on the following pages:
     SiteSettings
     UserTSconfig
     ExtensionConfiguration
+    SetupRequirementsAndLimits

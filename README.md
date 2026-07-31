@@ -55,6 +55,8 @@ Edit content elements directly in the frontend without navigating to the backend
 * TYPO3 >= 13.4
 * PHP 8.2+
 
+See [Setup requirements & limits](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Configuration/SetupRequirementsAndLimits.html) for multi-domain setups, external caches (Varnish/CDN), the content element anchor pattern requirement (and the headless/SPA non-goal), and preview links.
+
 ### Supports
 
 | **Version** | **TYPO3** | **PHP** |
