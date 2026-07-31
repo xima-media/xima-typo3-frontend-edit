@@ -41,10 +41,13 @@ jobs:
         run: ddev exec -d /var/www/html/Tests/Playwright npx playwright install --with-deps chromium
 
       - name: Run Playwright tests
-        run: ddev exec -d /var/www/html/Tests/Playwright npx playwright test
-        env:
-          CI: true
-          TYPO3_VERSION: ${{ matrix.typo3-version }}
+        # `ddev exec` runs its argument string inside the container; a step-level
+        # `env:` only sets variables for the host runner process, so it never
+        # reaches Playwright's config in there (confirmed live: both matrix legs
+        # would silently run against the same TYPO3 version, and CI-specific
+        # config would never activate). `env VAR=val ...` as ddev exec arguments
+        # sets them inside the container instead.
+        run: ddev exec -d /var/www/html/Tests/Playwright env CI=true TYPO3_VERSION=${{ matrix.typo3-version }} npx playwright test
 
       - name: Upload Playwright report
         if: always()

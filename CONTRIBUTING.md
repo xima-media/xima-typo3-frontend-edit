@@ -98,7 +98,7 @@ ddev exec -d /var/www/html/Tests/Playwright npx playwright install --with-deps c
 ddev exec -d /var/www/html/Tests/Playwright npx playwright test
 
 # Target TYPO3 14 instead
-TYPO3_VERSION=14 ddev exec -d /var/www/html/Tests/Playwright npx playwright test
+ddev exec -d /var/www/html/Tests/Playwright env TYPO3_VERSION=14 npx playwright test
 ```
 
 ## Submit a pull request
