@@ -161,10 +161,12 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
             $elementsByUid[(int) $element['uid']] = $element;
         }
 
-        /* @var FrontendEditDataEnrichmentEvent */
-        return $this->eventDispatcher->dispatch(
+        /** @var FrontendEditDataEnrichmentEvent $event */
+        $event = $this->eventDispatcher->dispatch(
             new FrontendEditDataEnrichmentEvent($elementsByUid, $pid, $languageUid, $returnUrl),
         );
+
+        return $event;
     }
 
     /**
