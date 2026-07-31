@@ -11,9 +11,11 @@ Additionally, there is an option to extend your fluid template to provide data f
 ..  code-block:: html
     :caption: Custom Fluid Template
 
+    {namespace xfe=Xima\XimaTypo3FrontendEdit\ViewHelpers}
+
     <div class="news-item">
         ...
-        <xtfe:data label="{news.title}" uid="{news.uid}" table="tx_news_domain_model_news" icon="content-news" />
+        <xfe:data label="{news.title}" uid="{news.uid}" table="tx_news_domain_model_news" icon="content-news" />
     </div>
 
 This generates a hidden input element with the provided data (only if the frontend edit is enabled). Within the parent content element (e.g. the whole list plugin), a new "data" section will show up in the Edit Menu to list all edit links.

@@ -32,9 +32,18 @@ Frontend Edit
     :alt: Frontend Edit Logo
     :align: center
 
-This TYPO3 extension adds lightweight editing tools to the frontend, allowing backend users to edit, hide, delete, and reorder content elements and pages without leaving the site.
+This TYPO3 extension adds lightweight editing tools to the frontend, allowing backend users to edit, hide, delete, reorder and create content elements and pages without leaving the site.
+
+..  figure:: /Images/intro.gif
+    :alt: Frontend Edit in action
+    :class: with-shadow
+
+    Editing actions appear directly on the content element
 
 ----
+
+Get started
+===========
 
 ..  card-grid::
     :columns: 1
@@ -44,66 +53,100 @@ This TYPO3 extension adds lightweight editing tools to the frontend, allowing ba
 
     ..  card::  Introduction
 
-        A quick overview about the main features provided by this extension.
+        What the extension does and a complete overview of its features.
 
         ..  card-footer::   :ref:`Learn more about this extension <introduction>`
             :button-style: btn btn-secondary stretched-link
 
-    ..  card::  How it works
-
-        A detailed explanation of the inner workings of the extension.
-
-        ..  card-footer::   :ref:`Deep dive into concepts <how-it-works>`
-            :button-style: btn btn-secondary stretched-link
-
     ..  card::  Installation
 
-        Instructions on how to install this extension and which TYPO3 and PHP versions are currently supported.
+        Install it, include the site set, verify the setup — plus the supported
+        TYPO3 and PHP versions.
 
-        ..  card-footer::   :ref:`Getting started <installation>`
-            :button-style: btn btn-secondary stretched-link
+        ..  card-footer::   :ref:`Install in three steps <installation>`
+            :button-style: btn btn-primary stretched-link
 
-    ..  card::  Configuration
+For editors
+===========
 
-        Learn how to configure the extension in various ways.
-
-        ..  card-footer::   :ref:`View configuration options <configuration>`
-            :button-style: btn btn-secondary stretched-link
+..  card-grid::
+    :columns: 1
+    :columns-md: 2
+    :gap: 4
+    :card-height: 100
 
     ..  card::  Usage
 
-        Learn how to use the Edit Menu and the Toolbar.
+        The Edit Menu, the Toolbar, inline editing and drag & drop reordering —
+        everything that happens in the frontend.
 
         ..  card-footer::   :ref:`View usage guide <usage>`
+            :button-style: btn btn-primary stretched-link
+
+    ..  card::  FAQ
+
+        Nothing showing up in the frontend? Start here.
+
+        ..  card-footer::   :ref:`Get answers <faq>`
             :button-style: btn btn-secondary stretched-link
+
+For integrators
+===============
+
+..  card-grid::
+    :columns: 1
+    :columns-md: 2
+    :gap: 4
+    :card-height: 100
+
+    ..  card::  Configuration
+
+        Site settings, per-user restrictions and global extension
+        configuration — and which layer to use for what.
+
+        ..  card-footer::   :ref:`View configuration options <configuration>`
+            :button-style: btn btn-primary stretched-link
 
     ..  card::  Languages
 
-        Which language modes are supported and how translated content is resolved.
+        Which language modes are supported and how translated content is
+        resolved.
 
         ..  card-footer::   :ref:`View language support <languages>`
             :button-style: btn btn-secondary stretched-link
 
+For developers
+==============
+
+..  card-grid::
+    :columns: 1
+    :columns-md: 2
+    :gap: 4
+    :card-height: 100
+
+    ..  card::  How it works
+
+        What gets injected into the frontend, and the one requirement your
+        templates have to meet.
+
+        ..  card-footer::   :ref:`Deep dive into concepts <how-it-works>`
+            :button-style: btn btn-secondary stretched-link
+
     ..  card::  Developer corner
 
-        A quick overview of the possibilities for extending the extension
+        PSR-14 events, ViewHelpers, column markers and custom styling.
 
         ..  card-footer::   :ref:`Extend the functionalities <developer-corner>`
             :button-style: btn btn-secondary stretched-link
 
-    ..  card::  Delineation
+Reference
+=========
 
-        How this extension compares to similar extensions like visual_editor, feedit, and others.
-
-        ..  card-footer::   :ref:`View comparison <delineation>`
-            :button-style: btn btn-secondary stretched-link
-
-    ..  card::  FAQ
-
-        A collection of frequently asked questions.
-
-        ..  card-footer::   :ref:`Get answers <faq>`
-            :button-style: btn btn-secondary stretched-link
+..  card-grid::
+    :columns: 1
+    :columns-md: 2
+    :gap: 4
+    :card-height: 100
 
     ..  card::  Migration
 
@@ -112,22 +155,25 @@ This TYPO3 extension adds lightweight editing tools to the frontend, allowing ba
         ..  card-footer::   :ref:`View migration guide <migration>`
             :button-style: btn btn-secondary stretched-link
 
+    ..  card::  Comparison
+
+        How this extension compares to visual_editor, feedit, frontend_editing
+        and content_preview.
+
+        ..  card-footer::   :ref:`View comparison <delineation>`
+            :button-style: btn btn-secondary stretched-link
+
 
 ..  toctree::
     :hidden:
 
     Introduction/Index
-    HowItWorks/Index
     Installation/Index
-    Configuration/Index
     Usage/Index
+    Configuration/Index
     Languages/Index
+    HowItWorks/Index
     DeveloperCorner/Index
-    Delineation/Index
     FAQ/Index
     Migration/Index
-
-..  toctree::
-    :hidden:
-
-    Sitemap
+    Delineation/Index

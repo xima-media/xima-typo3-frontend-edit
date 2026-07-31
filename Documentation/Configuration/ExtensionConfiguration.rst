@@ -12,7 +12,7 @@ Extension configuration
 The extension currently provides the following configuration options:
 
 Features
-=======
+========
 
 ..  _extconf-enableSaveAndCloseButton:
 
@@ -54,7 +54,7 @@ Features
         But keep in mind, that with this option the return to the frontend using the "close" button will not work anymore.
 
 Debug
-=======
+=====
 
 ..  _extconf-frontendDebugMode:
 

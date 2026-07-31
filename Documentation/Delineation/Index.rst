@@ -10,6 +10,45 @@ There are several TYPO3 extensions that aim to improve the editing experience
 between frontend and backend. This page provides an overview of related
 extensions and how they differ from **xima_typo3_frontend_edit**.
 
+At a glance
+===========
+
+..  list-table::
+    :header-rows: 1
+    :widths: 26 22 26 26
+
+    *   -   Extension
+        -   Where it runs
+        -   Editing model
+        -   Template changes
+    *   -   **xima_typo3_frontend_edit**
+        -   Regular frontend
+        -   Links to backend forms; optionally :ref:`inline <inline-editing>`
+            in a panel
+        -   None with ``fluid_styled_content``
+    *   -   visual_editor
+        -   Backend module (frontend in an iframe)
+        -   Inline WYSIWYG (CKEditor 5)
+        -   ViewHelper integration required
+    *   -   feedit
+        -   Regular frontend
+        -   Server-side injected edit icons
+        -   None (core integration removed)
+    *   -   frontend_editing
+        -   Regular frontend
+        -   Own editing overlay
+        -   Depends on setup
+    *   -   content_preview
+        -   Backend page module
+        -   Preview only, no frontend editing
+        -   None
+
+..  note::
+
+    The comparison below reflects our understanding at the time of writing.
+    Please refer to each extension's own documentation for authoritative and
+    current information.
+
 ..  _delineation-visual-editor:
 
 visual_editor (FriendsOfTYPO3)

@@ -33,10 +33,10 @@ interfaces in the frontend for logged-in backend users.
 
     ..  card::  Inline Editing (experimental)
 
-        Edit content elements directly in the frontend. Uses a contextual
-        sidebar on TYPO3 v14.2+ or a slide-in iframe modal on TYPO3 v13.
+        Edit content elements and page properties in a panel next to the page,
+        without navigating to the backend at all.
 
-        ..  card-footer::   :ref:`Learn more <contextual-editing>`
+        ..  card-footer::   :ref:`Learn more <inline-editing>`
             :button-style: btn btn-secondary stretched-link
 
     ..  card::  Drag & Drop Reordering (experimental)
@@ -52,5 +52,5 @@ interfaces in the frontend for logged-in backend users.
 
     EditMenu
     Toolbar
-    ContextualEditing
+    InlineEditing
     DragAndDrop

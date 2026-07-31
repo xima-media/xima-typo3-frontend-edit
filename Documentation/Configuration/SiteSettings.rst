@@ -138,16 +138,18 @@ Appearance Settings
 
     ..  note::
 
-        This feature is **experimental** and requires **TYPO3 v14.2+**.
-        It has no effect on TYPO3 v13 or earlier v14 versions, where the
-        extension uses an experimental slide-in iframe modal for inline
-        editing instead (enabled automatically, no configuration needed).
+        This feature is **experimental**.
 
-    Opens content element and page property edit forms in a sidebar panel directly in the
-    frontend instead of navigating to the backend. Uses TYPO3's ``record_edit_contextual``
-    route introduced in v14.2.
+    Enables :ref:`inline-editing`: content element and page property edit forms
+    open in a panel next to the page instead of navigating to the backend.
 
-    See :ref:`contextual-editing` for details on how to use this feature.
+    The setting is required on **all supported TYPO3 versions** — it also gates
+    the New Content Element Wizard used by :ref:`empty-columns`. Only the
+    presentation differs and is chosen automatically: a sidebar panel on
+    TYPO3 v14.2+ (native ``record_edit_contextual`` route), a slide-in modal on
+    TYPO3 v13 and v14.0/v14.1.
+
+    See :ref:`inline-editing` for details on how to use this feature.
 
     ..  code-block:: yaml
 
@@ -176,6 +178,10 @@ Appearance Settings
     container keep the backend move dialog.
 
     See :ref:`drag-and-drop` for details on how to use this feature.
+
+    ..  seealso::
+
+        :ref:`empty-columns` describes the required template markers.
 
     ..  code-block:: yaml
 
@@ -283,6 +289,7 @@ Full example with all available options:
       enabled: true
       colorScheme: 'auto'
       showContextMenu: true
+      showInsertButtons: true
       showStickyToolbar: true
       toolbarPosition: 'bottom-right'
       enableOutline: true

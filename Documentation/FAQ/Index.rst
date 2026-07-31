@@ -1,126 +1,176 @@
 ..  include:: /Includes.rst.txt
 
-.. _faq:
+..  _faq:
 
 ===
 FAQ
 ===
 
-.. contents:: Table of contents
-  :local:
-  :depth: 2
+Answers to the problems reported most often. If none of these help, please
+`open an issue on GitHub <https://github.com/xima-media/xima-typo3-frontend-edit/issues>`__.
 
-.. rst-class:: panel panel-default
+..  _faq-no-menu:
 
-Why is the Edit Menu not displayed on my page / for my content element?
-=======================================
+Nothing appears in the frontend
+===============================
 
-There may be a number of reasons for this:
+..  accordion::
+    :name: faqNoMenu
 
-**Backend user session**
+    ..  accordion-item:: Why is the Edit Menu not displayed at all?
+        :name: faqNoMenuChecklist
+        :header-level: 3
+        :show:
 
-Are you currently logged into the TYPO3 backend? Otherwise, frontend editing will not work.
+        Work through this checklist — the cause is almost always one of these
+        six points.
 
-**Backend user permission**
+        Backend user session
+            Are you logged into the TYPO3 backend? Without an active backend
+            session nothing is injected into the frontend.
 
-Does your user have all permissions to edit the page as well as the content elements?
+        Backend user permissions
+            Does your user have permission to edit both the page and the
+            content elements on it?
 
-**Site Set**
+        Site set
+            Is the Frontend Edit site set included in your site configuration?
+            See :ref:`installation`.
 
-Is the Frontend Edit site set included in your site configuration? Check the Site Settings to verify the extension is enabled.
+        Frontend editing switched off
+            Check whether :confval:`frontendEdit.enabled` is ``true``, whether
+            the page is excluded via :confval:`frontendEdit.filter.ignorePids`,
+            and whether the toggle in the :ref:`toolbar <toolbar>` is switched
+            off for your user. It can also be disabled administratively via
+            :ref:`user-tsconfig`.
 
-**Content Element IDs**
+        Content element IDs
+            The rendered HTML must expose a "c-id" per element, e.g.
+            ``id="c908"``. See :ref:`how-it-works`.
 
-Make sure that the content element "c-ids" (Content Element IDs) are available within your frontend template, e.g. "c908".
+        Content element on the current page
+            Only elements belonging to the current page are editable. Inherited
+            content (e.g. a shared footer) cannot be edited from the inheriting
+            page.
 
-**Content Element on current Page**
+        ..  tip::
 
-Currently, only content elements that belong to the current page are editable. Inherited content (e.g. shared footer elements) cannot be edited from the inheriting page.
+            Check the network tab for the initial AJAX call to
+            :code:`/typo3/ajax/xima-frontend-edit/edit-information`. Its
+            response lists every element the extension considers editable.
+            Enabling :ref:`Frontend Debug Mode <extconf-frontendDebugMode>`
+            adds detailed console logging.
 
-**Debug**
+    ..  accordion-item:: The edit button is missing on a different (sub)domain
+        :name: faqSubdomain
+        :header-level: 3
 
-Check the network tab for the initial AJAX call to :code:`/typo3/ajax/xima-frontend-edit/edit-information` with the information about the editable content elements and the according Edit Menus.
+        Frontend editing needs an active backend user session. On a different
+        (sub)domain the session cookie is only valid for the backend domain and
+        is therefore not available to the frontend.
 
+        Two ways out:
 
-.. rst-class:: panel panel-default
+        *   Configure a broader
+            `cookieDomain <https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/Configuration/Typo3ConfVars/SYS.html#confval-globals-typo3-conf-vars-sys-cookiedomain>`__
+            so the session cookie is shared between the domains.
+        *   Use the
+            `multisite_belogin <https://extensions.typo3.org/extension/multisite_belogin>`__
+            extension, which provides backend login across multiple domains
+            without a shared cookie domain.
 
-After closing the edit form, I am redirected to the wrong frontend location (e.g. the root page)
-=======================================
+    ..  accordion-item:: The edit button is missing on DCE content elements
+        :name: faqDce
+        :header-level: 3
 
-This could be caused by a strict referer header in your request. If the return url could not be determined correctly, you can force the url generation by pid and language in the extension setting: :code:`forceReturnUrlGeneration`.
+        `DCE <https://extensions.typo3.org/extension/dce>`__ elements do not
+        provide the required "c-id" in their default templates. Customize the
+        `DCE template <https://docs.typo3.org/p/t3/dce/main/en-us/UsersManual/Template.html>`__
+        to include it:
 
-.. rst-class:: panel panel-default
+        ..  code-block:: html
+            :caption: DCE template
 
-I can't change the language within a content element.
-=======================================
+            <div class="dce" id="c{contentObject.uid}">
+                Your template goes here...
+            </div>
 
-This is a TYPO3 backend limitation. The reduced edit form frame does not support the language switch. Use the :ref:`redirect <extconf-useRedirect>` configuration in the extension settings to open the edit form within the full TYPO3 backend context, which supports the language switch.
+        ..  note::
+            Styling problems may occur with nested content elements.
 
-.. rst-class:: panel panel-default
+    ..  accordion-item:: The edit button is missing on EXT:container elements
+        :name: faqContainer
+        :header-level: 3
 
-The edit button is not displayed for a different (sub)domain.
-=======================================
+        `container <https://extensions.typo3.org/extension/container/>`__
+        elements do not provide the required "c-id" in their default templates.
+        Customize the
+        `container template <https://github.com/b13/container?tab=readme-ov-file#template>`__:
 
-The frontend edit needs an active backend user session to work. If you are using a different (sub)domain, the session cookie is only valid for the TYPO3 backend domain and is not available for the frontend edit.
+        ..  code-block:: html
+            :caption: Container template
 
-You can have a look at the `cookieDomain` setting to set a more flexible domain configuration. This allows the session cookie to be shared between different (sub)domains, enabling the frontend edit functionality to work across different domains.
+            <div id="c{data.uid}">
+               <f:for each="{children_200}" as="record">
+                   {record.header} <br>
+                   <f:format.raw>
+                       {record.renderedContent}
+                   </f:format.raw>
+               </f:for>
+            </div>
 
-See https://docs.typo3.org/m/typo3/reference-coreapi/13.4/en-us/Configuration/Typo3ConfVars/SYS.html#confval-globals-typo3-conf-vars-sys-cookiedomain
+        Alternatively, use
+        `fluid_styled_content <https://docs.typo3.org/c/typo3/cms-fluid-styled-content/main/en-us/Introduction/Index.html>`__
+        in the template:
 
-Alternatively, you can use the `multisite_belogin <https://extensions.typo3.org/extension/multisite_belogin>`__ extension, which provides backend login support across multiple domains without requiring shared cookie domains.
+        ..  code-block:: html
+            :caption: Container template using fluid_styled_content
 
-.. rst-class:: panel panel-default
+            <f:layout name="Default" />
 
-The edit button is not displayed with `DCE <https://extensions.typo3.org/extension/dce>`__ extension content elements.
-=======================================
+            <f:section name="Main">
+              <f:for each="{children_200}" as="record">
+                  {record.header} <br>
+                  <f:format.raw>
+                      {record.renderedContent}
+                  </f:format.raw>
+              </f:for>
+            </f:section>
 
-Dynamic content elements do not provide the required "c-id" (Content Element ID) in their default templates. You need to customize the `DCE templates <https://docs.typo3.org/p/t3/dce/main/en-us/UsersManual/Template.html>`__ to include the "c-id" in the HTML output.
+        ..  note::
+            Styling problems may occur with nested content elements.
 
-..  code-block:: html
-    :caption: DCE Template
+..  _faq-edit-form:
 
-    <div class="dce" id="c{contentObject.uid}">
-        Your template goes here...
-    </div>
+Problems with the edit form
+===========================
 
-..  note::
-    Styling problems may occur with nested content elements.
+..  accordion::
+    :name: faqEditForm
 
-.. rst-class:: panel panel-default
+    ..  accordion-item:: After saving I end up on the wrong page (e.g. the root page)
+        :name: faqReturnUrl
+        :header-level: 3
 
-The edit button is not displayed with `container <https://extensions.typo3.org/extension/container/>`__ extension content elements.
-=======================================
+        This is usually caused by a strict referer header. If the return URL
+        cannot be determined from the request, force it to be generated from
+        page ID and language via the
+        :ref:`Return URL generation <extconf-forceReturnUrlGeneration>`
+        extension setting.
 
-Container content elements do not provide the required "c-id" (Content Element ID) in their default templates. You need to customize the `container templates <https://github.com/b13/container?tab=readme-ov-file#template>`__ to include the "c-id" in the HTML output.
+    ..  accordion-item:: I cannot change the language inside a content element
+        :name: faqLanguageSwitch
+        :header-level: 3
 
-..  code-block:: html
-    :caption: Container Template
+        This is a TYPO3 backend limitation: the reduced edit form frame does not
+        include the language switch.
 
-    <div id="c{data.uid}">
-       <f:for each="{children_200}" as="record">
-           {record.header} <br>
-           <f:format.raw>
-               {record.renderedContent}
-           </f:format.raw>
-       </f:for>
-    </div>
+        Use the :ref:`Redirect <extconf-useRedirect>` extension setting to open
+        the edit form in the full TYPO3 backend, which does provide the language
+        switch.
 
+        ..  note::
 
-Alternatively, you can also use `fluid_styled_content <https://docs.typo3.org/c/typo3/cms-fluid-styled-content/main/en-us/Introduction/Index.html>`__ in the templates:
-
-..  code-block:: html
-    :caption: Container Template
-
-    <f:layout name="Default" />
-
-    <f:section name="Main">
-      <f:for each="{children_200}" as="record">
-          {record.header} <br>
-          <f:format.raw>
-              {record.renderedContent}
-          </f:format.raw>
-      </f:for>
-    </f:section>
-
-..  note::
-    Styling problems may occur with nested content elements.
+            In connected mode the edit link already targets the *translated*
+            record, so a manual language switch is usually unnecessary. See
+            :ref:`languages`.

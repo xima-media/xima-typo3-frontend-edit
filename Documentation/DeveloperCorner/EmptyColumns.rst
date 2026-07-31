@@ -78,13 +78,13 @@ A "+" button always appears at the marker position — whether the column is emp
 
 .. note::
 
-   This feature requires contextual editing to be enabled
+   This feature requires :ref:`inline-editing` to be enabled
    (``frontendEdit.enableContextualEditing: true`` in the site settings) — the
-   wizard is hosted inside the slide-in iframe modal that this setting activates.
+   wizard is hosted inside the slide-in modal that this setting activates.
 
-On both **TYPO3 v13 and v14** the wizard opens in the slide-in iframe modal: the
-page module is loaded inside the modal and the matching wizard button is
-auto-clicked, so the editor sees TYPO3's real wizard. On v14 the contextual
+On both **TYPO3 v13 and v14** the wizard opens in the slide-in modal: the page
+module is loaded inside the modal and the matching wizard button is
+auto-clicked, so the editor sees TYPO3's real wizard. On v14.2+ the inline
 editing sidebar continues to handle editing of existing elements; creating new
 content uses the modal.
 
