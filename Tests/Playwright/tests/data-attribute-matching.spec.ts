@@ -121,5 +121,5 @@ test('a nested .frontend-edit__data element (the <xfe:data> ViewHelper) resolves
 
   const dropdown = page.locator(`.frontend-edit__dropdown[data-cid="${DATA_ATTRIBUTE_ONLY_UID}"]`);
   await expect(dropdown).toBeVisible();
-  await expect(dropdown.getByText('Related item')).toHaveCount(1);
+  await expect(dropdown.getByText('Related item', { exact: true })).toBeVisible();
 });
