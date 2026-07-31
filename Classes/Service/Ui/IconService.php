@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 
 use TYPO3\CMS\Core\Imaging\{Icon, IconFactory, IconSize};
+use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\IconFactoryUtility;
 
 /**
  * IconService.
@@ -42,5 +43,17 @@ final class IconService
         }
 
         return $this->iconCache[$identifier];
+    }
+
+    /**
+     * Resolves the icon identifier TYPO3 would use for a record's own table/type
+     * (TCA `ctrl.typeicon_classes`/`iconfile`) - for tables this extension has no
+     * built-in icon convention for, unlike tt_content's CType-driven lookup.
+     *
+     * @param array<string, mixed> $record
+     */
+    public function getIconIdentifierForRecord(string $table, array $record): string
+    {
+        return IconFactoryUtility::mapRecordTypeToIconIdentifier($this->iconFactory, $table, $record);
     }
 }
