@@ -1,13 +1,15 @@
 import { test as setup } from '@playwright/test';
 import { BackendPage } from './backend.page';
+import { typo3AuthStateFile } from './environment';
 
-const TYPO3_VERSION = process.env.TYPO3_VERSION || '13';
-// Must match playwright.config.ts's AUTH_FILE — namespaced by version so
-// switching TYPO3_VERSION doesn't clobber the other version's saved session.
-const AUTH_FILE = `.auth/state-${TYPO3_VERSION}.json`;
+// Matches this repo's .ddev/.setup admin bootstrap
+// (.ddev/docker-compose.typo3-setup.yaml's TYPO3_SETUP_ADMIN_PASSWORD);
+// override via env for a ddev setup with different credentials.
+const USERNAME = process.env.TYPO3_ADMIN_USERNAME || 'admin';
+const PASSWORD = process.env.TYPO3_ADMIN_PASSWORD || 'Password1!';
 
 setup('authenticate as backend admin', async ({ page }) => {
   const backend = new BackendPage(page);
-  await backend.login('admin', 'Password1!');
-  await page.context().storageState({ path: AUTH_FILE });
+  await backend.login(USERNAME, PASSWORD);
+  await page.context().storageState({ path: typo3AuthStateFile() });
 });

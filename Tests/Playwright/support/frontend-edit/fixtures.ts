@@ -1,8 +1,4 @@
-import { execSync } from 'node:child_process';
-
-const TYPO3_VERSION = process.env.TYPO3_VERSION || '13';
-const DATABASE = `database_${TYPO3_VERSION}`;
-const TYPO3_BIN = `/var/www/html/.Build/${TYPO3_VERSION}/vendor/bin/typo3`;
+import { flushCache, runSql } from '../typo3/environment';
 
 /**
  * Un-hides a tt_content record via a direct DB write, restoring
@@ -20,6 +16,6 @@ export function restoreHiddenContentElement(uid: number): void {
     throw new Error(`Invalid content element uid: ${uid}`);
   }
 
-  execSync(`mysql -h db -u root -proot ${DATABASE} -e "UPDATE tt_content SET hidden = 0 WHERE uid = ${uid};"`);
-  execSync(`${TYPO3_BIN} cache:flush`);
+  runSql(`UPDATE tt_content SET hidden = 0 WHERE uid = ${uid};`);
+  flushCache();
 }
