@@ -62,6 +62,23 @@
   };
 
   /**
+   * Finds (or lazily creates) the badge slot for one corner of a content
+   * element's overlay - see PublicApi.registerBadge. The slot is a plain DOM
+   * child of the overlay, so it automatically inherits the overlay's
+   * position tracking (scroll, resize, nested elements) with no extra code.
+   */
+  function getBadgeSlot(overlay, position) {
+    const slotClass = 'frontend-edit__badge-slot--' + position;
+    let slot = Array.from(overlay.children).find(child => child.classList.contains(slotClass));
+    if (!slot) {
+      slot = document.createElement('div');
+      slot.className = 'frontend-edit__badge-slot ' + slotClass;
+      overlay.appendChild(slot);
+    }
+    return slot;
+  }
+
+  /**
    * Dispatches the public `xfe:*` lifecycle events (see PublicApi below) on
    * `document`, so third-party listeners can use standard event delegation.
    */
@@ -638,9 +655,12 @@
       const { x, y } = this.lastPointer;
       const el = document.elementFromPoint(x, y);
 
-      // While the cursor is over an overlay control (toolbar, insert button) or
-      // an open dropdown, keep the current highlight — same as Edit/More Actions.
-      if (el && el.closest('.frontend-edit__toolbar, .frontend-edit__insert-btn, .frontend-edit__dropdown')) {
+      // While the cursor is over an overlay control (toolbar, insert button,
+      // badge) or an open dropdown, keep the current highlight — same as
+      // Edit/More Actions. Without the badge here, hovering an interactive
+      // badge (registerBadge's onClick) would drop the outline/toolbar
+      // highlight the instant the cursor entered it.
+      if (el && el.closest('.frontend-edit__toolbar, .frontend-edit__insert-btn, .frontend-edit__dropdown, .frontend-edit__badge')) {
         return;
       }
 
@@ -1166,22 +1186,27 @@
 
     /**
      * Renders a persistent, hover-independent indicator on a content element's
-     * overlay. spec: { html | element, position, onClick }; position is one of
-     * 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' (default 'top-right').
+     * overlay. spec: { html | element, position, id, onClick }:
+     * - position: one of 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+     *   (default 'top-right'). Multiple badges in the same corner stack in a
+     *   row, in registration order - each corner is its own slot, created on
+     *   first use (see getBadgeSlot below).
+     * - id: when given, a later registerBadge() call with the same uid+id
+     *   replaces this badge in place (same slot position) instead of adding a
+     *   duplicate - needed because xfe:element-rendered can fire more than
+     *   once for the same element (e.g. re-fetched data).
      * Returns the created badge, or null if the uid is unknown.
-     *
-     * This is deliberately minimal: stacking of multiple badges per element and
-     * a dedicated always-on-top badge layer are covered by a later iteration
-     * (issue #211); this appends directly into the existing position-tracked
-     * overlay, which is enough for a single badge per element today.
      */
     registerBadge(uid, spec) {
       const entry = Registry.get(uid);
       if (!entry) return null;
 
       const badgeSpec = spec || {};
+      const slot = getBadgeSlot(entry.overlay, badgeSpec.position || 'top-right');
+
       const badge = document.createElement('span');
-      badge.className = 'frontend-edit__badge frontend-edit__badge--' + (badgeSpec.position || 'top-right');
+      badge.className = 'frontend-edit__badge';
+      if (badgeSpec.id) badge.dataset.badgeId = String(badgeSpec.id);
       if (badgeSpec.element instanceof Element) {
         badge.appendChild(badgeSpec.element);
       } else if (badgeSpec.html) {
@@ -1193,8 +1218,29 @@
         badge.addEventListener('click', badgeSpec.onClick);
       }
 
-      entry.overlay.appendChild(badge);
+      // A fresh node (rather than mutating an existing one) means no stale
+      // event listeners survive a replace.
+      const existing = badgeSpec.id
+        ? Array.from(slot.children).find(child => child.dataset.badgeId === String(badgeSpec.id))
+        : null;
+      if (existing) {
+        existing.replaceWith(badge);
+      } else {
+        slot.appendChild(badge);
+      }
       return badge;
+    },
+
+    /**
+     * Sets the badge display-mode hook: 'subtle' (default) or 'prominent',
+     * exposed as document.documentElement's `data-xfe-badge-mode` attribute.
+     * The extension ships no badge content itself (see registerBadge), so it
+     * has no opinion on what "subtle" vs "prominent" should look like -
+     * consumer CSS reacts to this attribute, e.g.
+     * `[data-xfe-badge-mode="subtle"] .my-badge-label { display: none }`.
+     */
+    setBadgeMode(mode) {
+      document.documentElement.setAttribute('data-xfe-badge-mode', 'prominent' === mode ? 'prominent' : 'subtle');
     },
 
     /**
