@@ -1199,12 +1199,18 @@
 
     /**
      * Opens a backend URL in the version-appropriate container: the contextual
-     * sidebar (v14.2+, when enabled), the v13 iframe modal (via the export
-     * iframe_edit.js attaches to this namespace), or a new tab as a fallback.
-     * options: { target } where target is 'tab' to force a new tab.
-     *
-     * This is deliberately minimal (no link-interception policy, no close
-     * callback) - the full primitive with those is issue #209.
+     * sidebar (v14.2+, when enabled and available), the v13 iframe modal (via
+     * the export iframe_edit.js attaches to this namespace), or a new tab as
+     * a fallback. options:
+     * - target: 'tab' forces a new tab regardless of version
+     * - title, width: container chrome (width accepts a CSS length, e.g. '600px')
+     * - onClose({ reason }): called when the container closes
+     * - reloadOnClose: reload the parent page on close (default true)
+     * - linkPolicy: a rule or array of rules `{ match: string|RegExp, action }`,
+     *   action one of 'stay' | 'close' | 'ignore' | 'external', evaluated
+     *   against link clicks inside the embedded document. Only 'stay' (the
+     *   default when no rule matches) is honored for the built-in save/close
+     *   buttons of an actual edit form - those keep working unchanged.
      */
     openBackendView(url, options) {
       if (!UI.isValidUrl(url)) return false;
@@ -1214,12 +1220,33 @@
         window.open(url, '_blank');
         return true;
       }
-      if (window.FRONTEND_EDIT_CONTEXTUAL_EDITING && window.ContextualEdit && window.ContextualEdit.sidebar) {
-        window.ContextualEdit.open(url, null, false);
+
+      // Apply the same returnUrl flash-deferral marker record_edit forms get
+      // (see backend_stubs.js/ensureReturnUrl) to every view opened through
+      // this primitive, not only edit forms.
+      const finalUrl = typeof window.XimaFrontendEdit?.ensureReturnUrl === 'function'
+        ? window.XimaFrontendEdit.ensureReturnUrl(url)
+        : url;
+      const containerOptions = {
+        title: opts.title,
+        width: opts.width,
+        onClose: opts.onClose,
+        linkPolicy: opts.linkPolicy,
+        reloadOnClose: opts.reloadOnClose,
+      };
+
+      // FRONTEND_EDIT_SIDEBAR_EDIT (not the broader "contextual editing
+      // enabled" setting) is the correct gate: it is only true when the
+      // contextual sidebar route is actually available (v14.2+). On v13 it
+      // stays false even with contextual editing enabled, so the iframe
+      // modal below handles it instead - see
+      // ResourceRendererService::addSettingsConfig().
+      if (window.FRONTEND_EDIT_SIDEBAR_EDIT === true && window.ContextualEdit && window.ContextualEdit.sidebar) {
+        window.ContextualEdit.open(finalUrl, null, false, containerOptions);
         return true;
       }
       if (typeof window.XimaFrontendEdit?.openModal === 'function') {
-        window.XimaFrontendEdit.openModal(url, false);
+        window.XimaFrontendEdit.openModal(finalUrl, containerOptions);
         return true;
       }
       window.open(url, '_blank');
