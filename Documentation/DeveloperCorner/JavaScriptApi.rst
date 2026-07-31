@@ -77,15 +77,43 @@ visible at a glance rather than only on hover. :code:`spec`:
 
 - ``html`` or ``element`` - the badge content (HTML string or a DOM element)
 - ``position`` - one of ``top-left``, ``top-right`` (default), ``bottom-left``, ``bottom-right``
+- ``id`` - when given, a later call with the same uid + id replaces this badge in place instead of adding a duplicate (useful since ``xfe:element-rendered`` can fire more than once for the same element)
 - ``onClick`` - click handler; the badge only receives pointer events when this is set
+
+Multiple badges registered for the same corner lay out in a row, in
+registration order, instead of overlapping - each corner is its own slot,
+created on first use.
 
 ..  code-block:: javascript
 
     window.XimaFrontendEdit.registerBadge(42, {
         html: '<span class="my-badge" title="3 comments">3</span>',
         position: 'top-left',
+        id: 'comment-count',
         onClick: () => openCommentsPanel(42),
     });
+
+``setBadgeMode(mode)``
+------------------------
+
+Sets a display-mode hook for badges: ``'subtle'`` (default) or ``'prominent'``,
+exposed as :code:`document.documentElement`'s :code:`data-xfe-badge-mode`
+attribute. The extension ships no badge content itself (see
+``registerBadge`` above), so it has no opinion on what "subtle" vs
+"prominent" should actually look like - write your own CSS against the
+attribute:
+
+..  code-block:: javascript
+
+    window.XimaFrontendEdit.setBadgeMode('prominent');
+
+..  code-block:: css
+    :caption: A consumer's own stylesheet
+
+    /* Small dot only, by default */
+    .my-badge-label { display: none; }
+    /* Full label once prominent mode is active */
+    [data-xfe-badge-mode="prominent"] .my-badge-label { display: inline; }
 
 ``openBackendView(url, options)``
 ------------------------------------
