@@ -1,0 +1,4 @@
+"sys_category"
+,"uid","pid","title","sys_language_uid","l10n_parent","deleted","hidden"
+,1,1,"Test Category",0,0,0,0
+,2,1,"Test Category (DE)",1,1,0,0
