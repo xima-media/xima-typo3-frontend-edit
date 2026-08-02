@@ -60,3 +60,25 @@ test('the edit menu closes automatically once keyboard focus moves outside it', 
 
   await expect(dropdown).toBeHidden();
 });
+
+test('clicking the kebab button while a menu item is focused closes the menu', async ({ page }) => {
+  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
+  await page.goto('/');
+  await editInfoResponse;
+
+  const hoverMenu = new HoverMenu(page);
+  await hoverMenu.openDropdown(CONTENT_ELEMENT_UID);
+
+  const dropdown = hoverMenu.dropdown(CONTENT_ELEMENT_UID);
+  const kebab = hoverMenu.kebabButton(CONTENT_ELEMENT_UID);
+  await expect(dropdown).toBeVisible();
+  await expect(dropdown.locator('[role="menuitem"]').first()).toBeFocused();
+
+  // Clicking the trigger fires focusout (focus leaves the item) BEFORE click.
+  // If focusout closed the menu, the click handler would see a closed menu and
+  // reopen it — so the trigger must toggle the open menu shut, not flicker it.
+  await kebab.click();
+
+  await expect(dropdown).toBeHidden();
+  await expect(kebab).toHaveAttribute('aria-expanded', 'false');
+});

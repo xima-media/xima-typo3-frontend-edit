@@ -86,4 +86,23 @@ test.describe('sticky toolbar', () => {
     await page.locator('a[href="/about-us"]').first().focus();
     await expect(dropdown).not.toHaveClass(/frontend-edit__sticky-dropdown--visible/);
   });
+
+  test('clicking the menu button while an item is focused closes the menu', async ({ page }) => {
+    await page.goto('/');
+
+    const menuBtn = page.locator('.frontend-edit__sticky-btn--menu');
+    const dropdown = page.locator('.frontend-edit__sticky-dropdown');
+    const items = dropdown.locator('[role="menuitem"]');
+
+    await menuBtn.click();
+    await expect(items.first()).toBeFocused();
+
+    // Clicking the trigger fires focusout (focus leaving the item to the button)
+    // BEFORE click. If focusout closed the menu, the click handler would read a
+    // closed menu and reopen it — the trigger must close the open menu instead.
+    await menuBtn.click();
+
+    await expect(dropdown).not.toHaveClass(/frontend-edit__sticky-dropdown--visible/);
+    await expect(menuBtn).toHaveAttribute('aria-expanded', 'false');
+  });
 });

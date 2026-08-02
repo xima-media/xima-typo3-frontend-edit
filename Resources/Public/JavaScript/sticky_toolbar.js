@@ -415,6 +415,12 @@
         // itself once focus actually leaves it, or it stays open with no
         // visible focus inside.
         dropdown.addEventListener('focusout', (e) => {
+          // Focus moving to the trigger means the user is toggling the menu via
+          // that button; its click handler owns the open/close decision. Closing
+          // here first would let the click reopen an already-closed menu.
+          if (e.relatedTarget === menuBtn) {
+            return;
+          }
           if (!dropdown.contains(e.relatedTarget)) {
             closeDropdown();
           }
