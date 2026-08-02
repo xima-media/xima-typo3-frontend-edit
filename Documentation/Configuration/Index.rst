@@ -6,7 +6,7 @@
 Configuration
 =============
 
-The extension works without any further setup — everything below is optional.
+After the site set is included, the extension works without further configuration — everything below is optional.
 
 There are three configuration layers, each answering a different question:
 

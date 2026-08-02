@@ -79,6 +79,14 @@ Nothing appears in the frontend
             extension, which provides backend login across multiple domains
             without a shared cookie domain.
 
+        ..  warning::
+
+            A broader ``cookieDomain`` shares the backend session cookie with
+            **every** matching subdomain of that deployment — restrict it to
+            trusted subdomains served over HTTPS. It cannot bridge unrelated
+            domains (a session is tied to a single TYPO3 instance); use
+            ``multisite_belogin`` where a shared cookie is unsuitable.
+
     ..  accordion-item:: The edit button is missing on EXT:container or EXT:dce elements
         :name: faqThirdPartyCe
         :header-level: 3

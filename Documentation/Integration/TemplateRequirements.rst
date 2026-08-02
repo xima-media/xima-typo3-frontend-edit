@@ -59,21 +59,6 @@ c-id means no edit button for that element.
                </f:for>
             </div>
 
-        Alternatively, render the children through
-        `fluid_styled_content <https://docs.typo3.org/c/typo3/cms-fluid-styled-content/main/en-us/Introduction/Index.html>`__,
-        which brings the c-id along:
-
-        ..  code-block:: html
-            :caption: Container template using fluid_styled_content
-
-            <f:layout name="Default" />
-
-            <f:section name="Main">
-              <f:for each="{children_200}" as="record">
-                  <f:format.raw>{record.renderedContent}</f:format.raw>
-              </f:for>
-            </f:section>
-
     ..  group-tab:: EXT:dce
 
         `DCE <https://extensions.typo3.org/extension/dce>`__ elements need the
