@@ -4,6 +4,9 @@
        light and dark page layouts (the brown dialog color did not). */
     --xfe-dnd-accent: #2d7ff9;
     --xfe-toolbar-bg: rgba(50, 50, 50, 0.95);
+    /* Toolbar-button border: its own value because #767676 (the page outline
+       color) only reaches ~2.8:1 on the dark fill, below the 3:1 non-text target. */
+    --xfe-toolbar-border-color: #aaaaaa;
     --xfe-toolbar-text: #ffffff;
     --xfe-toolbar-btn-hover: rgba(255, 255, 255, 0.15);
     --xfe-bg-primary: #ffffff;
@@ -33,6 +36,8 @@
 /* Light theme (explicit) */
 [data-xfe-theme="light"] {
     --xfe-toolbar-bg: rgba(245, 245, 245, 0.95);
+    /* Light toolbar fill; #767676 clears 3:1 here, so reuse the outline value. */
+    --xfe-toolbar-border-color: #767676;
     --xfe-toolbar-text: #1a1a1a;
     --xfe-toolbar-btn-hover: rgba(0, 0, 0, 0.1);
     --xfe-bg-primary: #ffffff;
@@ -1021,7 +1026,7 @@
     line-height: 1;
     transition: background 0.15s ease, border-color 0.15s ease;
     border-radius: 4px;
-    border: 1px solid var(--xfe-outline-color);
+    border: 1px solid var(--xfe-toolbar-border-color);
     background: var(--xfe-toolbar-bg);
 }
 
