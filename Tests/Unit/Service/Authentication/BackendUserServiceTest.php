@@ -315,6 +315,28 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    public function hasPageEditAccessReturnsFalseWhenRecordEditAccessDenies(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('isAdmin')->willReturn(false);
+        $backendUser->method('calcPerms')->willReturn(Permission::PAGE_EDIT);
+        $backendUser->method('check')->willReturnMap([
+            ['tables_modify', 'pages', true],
+            ['pagetypes_select', '1', true],
+        ]);
+        // e.g. editlock or a restricted language on the page record itself -
+        // tables_modify/PAGE_EDIT/pagetypes_select all pass, but the record
+        // itself is still locked, which only hasRecordEditAccess() catches.
+        $backendUser->method('recordEditAccessInternals')->willReturn(false);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertFalse($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
+    }
+
+    #[Test]
     public function hasPageEditAccessReturnsTrueWhenAllChecksPass(): void
     {
         $backendUser = $this->createMock(BackendUserAuthentication::class);
@@ -325,6 +347,7 @@ final class BackendUserServiceTest extends TestCase
             ['tables_modify', 'pages', true],
             ['pagetypes_select', '1', true],
         ]);
+        $backendUser->method('recordEditAccessInternals')->willReturn(true);
         $GLOBALS['BE_USER'] = $backendUser;
 
         $service = new BackendUserService();
@@ -343,6 +366,7 @@ final class BackendUserServiceTest extends TestCase
             ['tables_modify', 'pages', true],
             ['pagetypes_select', '1', true],
         ]);
+        $backendUser->method('recordEditAccessInternals')->willReturn(true);
         $GLOBALS['BE_USER'] = $backendUser;
 
         $service = new BackendUserService();

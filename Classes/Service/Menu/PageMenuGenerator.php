@@ -111,8 +111,11 @@ final class PageMenuGenerator extends AbstractMenuGenerator
         $queryBuilder = $this->connectionPool
             ->getQueryBuilderForTable('pages');
 
+        // SELECT * (not a hand-picked column list): hasPageEditAccess()'s
+        // hasRecordEditAccess() check reads whichever TCA-configured fields
+        // (editlock, sys_language_uid, ...) the current TYPO3 version needs.
         $result = $queryBuilder
-            ->select('uid', 'title', 'doktype', 'perms_userid', 'perms_groupid', 'perms_user', 'perms_group', 'perms_everybody')
+            ->select('*')
             ->from('pages')
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)),

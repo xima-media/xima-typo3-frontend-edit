@@ -96,14 +96,17 @@ final class BackendUserService
     /**
      * Check if the backend user can actually edit this page's properties.
      *
-     * Mirrors the checks TYPO3 core's DatabaseUserPermissionCheck performs when the
+     * Combines the checks TYPO3 core's DatabaseUserPermissionCheck performs when the
      * "Edit page properties" form is opened (tables_modify, the page's PAGE_EDIT
-     * permission bit, and pagetypes_select for its doktype). Without this, a user
-     * missing any of these rights still sees the edit button and only learns
-     * about it from a backend error page after clicking it.
+     * permission bit, and pagetypes_select for its doktype) with hasRecordEditAccess()
+     * (editlock, language access, authMode fields — the same check ContentElementFilter
+     * uses for tt_content). Without this, a user missing any of these rights still sees
+     * the edit button and only learns about it from a backend error page after clicking it.
      *
-     * @param array<string, mixed> $pageRecord Must include perms_userid, perms_groupid,
-     *                                         perms_user, perms_group, perms_everybody and doktype
+     * @param array<string, mixed> $pageRecord must be the full pages row: besides
+     *                                         perms_userid/perms_groupid/perms_user/perms_group/
+     *                                         perms_everybody and doktype, hasRecordEditAccess()
+     *                                         also needs editlock and sys_language_uid
      */
     public function hasPageEditAccess(array $pageRecord): bool
     {
@@ -125,7 +128,11 @@ final class BackendUserService
             return false;
         }
 
-        return $backendUser->check('pagetypes_select', (string) ($pageRecord['doktype'] ?? 1));
+        if (!$backendUser->check('pagetypes_select', (string) ($pageRecord['doktype'] ?? 1))) {
+            return false;
+        }
+
+        return $this->hasRecordEditAccess('pages', $pageRecord);
     }
 
     /**
