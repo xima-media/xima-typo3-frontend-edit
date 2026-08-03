@@ -16,6 +16,9 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Authentication;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
+use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Type\Bitmask\Permission;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 
@@ -31,6 +34,7 @@ final class BackendUserServiceTest extends TestCase
     protected function tearDown(): void
     {
         unset($GLOBALS['BE_USER']);
+        GeneralUtility::purgeInstances();
     }
 
     #[Test]
@@ -232,6 +236,154 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    public function hasPageEditAccessReturnsFalseWhenNoBackendUser(): void
+    {
+        unset($GLOBALS['BE_USER']);
+
+        $service = new BackendUserService();
+
+        self::assertFalse($service->hasPageEditAccess(['uid' => 1]));
+    }
+
+    #[Test]
+    public function hasPageEditAccessReturnsFalseWhenUserDataIsNull(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = null;
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertFalse($service->hasPageEditAccess(['uid' => 1]));
+    }
+
+    #[Test]
+    public function hasPageEditAccessReturnsTrueForAdminRegardlessOfPermissionBits(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('isAdmin')->willReturn(true);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertTrue($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
+    }
+
+    #[Test]
+    public function hasPageEditAccessReturnsFalseWhenTablesModifyDeniesPages(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('isAdmin')->willReturn(false);
+        $backendUser->method('check')->with('tables_modify', 'pages')->willReturn(false);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertFalse($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
+    }
+
+    #[Test]
+    public function hasPageEditAccessReturnsFalseWhenPageEditPermissionBitIsMissing(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('isAdmin')->willReturn(false);
+        $backendUser->method('check')->with('tables_modify', 'pages')->willReturn(true);
+        $backendUser->method('calcPerms')->willReturn(Permission::PAGE_SHOW);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertFalse($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
+    }
+
+    #[Test]
+    public function hasPageEditAccessReturnsFalseWhenPagetypesSelectDeniesDoktype(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('isAdmin')->willReturn(false);
+        $backendUser->method('calcPerms')->willReturn(Permission::PAGE_EDIT);
+        $backendUser->method('check')->willReturnMap([
+            ['tables_modify', 'pages', true],
+            ['pagetypes_select', '1', false],
+        ]);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertFalse($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
+    }
+
+    #[Test]
+    public function hasPageEditAccessReturnsFalseWhenRecordEditAccessDenies(): void
+    {
+        $this->registerVersion13();
+
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('isAdmin')->willReturn(false);
+        $backendUser->method('calcPerms')->willReturn(Permission::PAGE_EDIT);
+        $backendUser->method('check')->willReturnMap([
+            ['tables_modify', 'pages', true],
+            ['pagetypes_select', '1', true],
+        ]);
+        // e.g. editlock or a restricted language on the page record itself -
+        // tables_modify/PAGE_EDIT/pagetypes_select all pass, but the record
+        // itself is still locked, which only hasRecordEditAccess() catches.
+        $backendUser->method('recordEditAccessInternals')->willReturn(false);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertFalse($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
+    }
+
+    #[Test]
+    public function hasPageEditAccessReturnsTrueWhenAllChecksPass(): void
+    {
+        $this->registerVersion13();
+
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('isAdmin')->willReturn(false);
+        $backendUser->method('calcPerms')->willReturn(Permission::PAGE_EDIT);
+        $backendUser->method('check')->willReturnMap([
+            ['tables_modify', 'pages', true],
+            ['pagetypes_select', '1', true],
+        ]);
+        $backendUser->method('recordEditAccessInternals')->willReturn(true);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertTrue($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
+    }
+
+    #[Test]
+    public function hasPageEditAccessDefaultsDoktypeToStandardWhenMissing(): void
+    {
+        $this->registerVersion13();
+
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('isAdmin')->willReturn(false);
+        $backendUser->method('calcPerms')->willReturn(Permission::PAGE_EDIT);
+        $backendUser->method('check')->willReturnMap([
+            ['tables_modify', 'pages', true],
+            ['pagetypes_select', '1', true],
+        ]);
+        $backendUser->method('recordEditAccessInternals')->willReturn(true);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertTrue($service->hasPageEditAccess(['uid' => 1]));
+    }
+
+    #[Test]
     public function hasFieldAccessReturnsFalseWhenNoBackendUser(): void
     {
         unset($GLOBALS['BE_USER']);
@@ -265,5 +417,20 @@ final class BackendUserServiceTest extends TestCase
         $service = new BackendUserService();
 
         self::assertFalse($service->hasFieldAccess('tt_content', 'hidden'));
+    }
+
+    /**
+     * hasRecordEditAccess() (used by hasPageEditAccess()) branches on the installed
+     * TYPO3 version: recordEditAccessInternals() on 13, checkRecordEditAccess() on
+     * 14.2+ (see BackendUserUtility). The latter returns a final AccessCheckResult,
+     * which PHPUnit cannot double for an unstubbed call - so tests that need a
+     * deterministic hasRecordEditAccess() result force the v13 branch, exactly like
+     * BackendUserUtilityTest already does for the same reason.
+     */
+    private function registerVersion13(): void
+    {
+        $versionMock = $this->createMock(Typo3Version::class);
+        $versionMock->method('getMajorVersion')->willReturn(13);
+        GeneralUtility::addInstance(Typo3Version::class, $versionMock);
     }
 }
