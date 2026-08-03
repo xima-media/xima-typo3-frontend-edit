@@ -103,6 +103,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         // after the previous element (first element → column top).
         $showInsertButtons = $this->settingsService->isShowInsertButtons($request);
         $previousSiblingByUid = $this->buildPreviousSiblingMap($filteredElements, $showInsertButtons);
+        $canHide = $this->backendUserService->hasFieldAccess('tt_content', 'hidden');
 
         $result = [];
         foreach ($filteredElements as $contentElement) {
@@ -117,7 +118,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
                 continue;
             }
 
-            $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request, $contextualUrl, $showInsertButtons);
+            $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request, $contextualUrl, $showInsertButtons, $canHide);
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
             /** @var FrontendEditDropdownModifyEvent $event */
@@ -222,6 +223,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         ServerRequestInterface $request,
         ?string $contextualUrl = null,
         bool $showInsertButtons = true,
+        bool $canHide = true,
     ): Button {
         if (!$this->settingsService->isShowContextMenu($request)) {
             return $this->contentElementButtonBuilder->createSimpleEditButton(
@@ -237,7 +239,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
         $this->contentElementButtonBuilder->addInfoSection($menuButton, $contentElement, $contentElementConfig);
         $this->contentElementButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor, $contextualUrl);
-        $this->contentElementButtonBuilder->addActionSection($menuButton, $contentElement, $languageUid, $returnUrlAnchor, $showInsertButtons);
+        $this->contentElementButtonBuilder->addActionSection($menuButton, $contentElement, $languageUid, $returnUrlAnchor, $showInsertButtons, $canHide);
 
         return $menuButton;
     }

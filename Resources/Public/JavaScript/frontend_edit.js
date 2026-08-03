@@ -42,6 +42,26 @@
   };
 
   /**
+   * Icon registry - resolves the short keys the backend substitutes for
+   * repeated icon markup in the editInformation response (element.ctypeIcon,
+   * menu button .icon) back to their actual SVG markup. See issue #217:
+   * without this, the same handful of icons (edit, info, history, ...) are
+   * repeated once per button per content element, dominating the payload
+   * on any page with more than a handful of elements.
+   */
+  const Icons = {
+    map: {},
+
+    populate(icons) {
+      Object.assign(this.map, icons || {});
+    },
+
+    resolve(key) {
+      return this.map[key] || '';
+    }
+  };
+
+  /**
    * DOM attribute helpers.
    *
    * Read id/class from the content attribute instead of the IDL property to
@@ -588,6 +608,25 @@
 
       // Fallback to original element
       return idElement;
+    },
+
+    /**
+     * Locate the DOM anchor for a content element uid: the id="c{uid}"
+     * pattern first (existing behavior, unchanged), falling back to
+     * data-frontend-edit="tt_content:{uid}" - a direct target, since a
+     * hand-placed data attribute is never an anchor-sibling placeholder the
+     * way an empty <a id="c123"></a> is.
+     *
+     * @returns {{element: Element, isDirectTarget: boolean}|null}
+     */
+    findAnchor(uid) {
+      const idElement = document.querySelector(`#c${uid}`);
+      if (idElement) return { element: idElement, isDirectTarget: false };
+
+      const dataElement = document.querySelector(`[data-frontend-edit="tt_content:${uid}"]`);
+      if (dataElement) return { element: dataElement, isDirectTarget: true };
+
+      return null;
     }
   };
 
@@ -849,11 +888,13 @@
       const container = document.createElement('div');
       container.className = 'frontend-edit__toolbar-label';
 
-      // Icons are trusted HTML from TYPO3 backend (IconFactory)
-      if (contentElement.element.ctypeIcon) {
+      // Icons are trusted HTML from TYPO3 backend (IconFactory), delivered as
+      // a dedup key resolved via Icons - see the Icons registry above.
+      const ctypeIconMarkup = Icons.resolve(contentElement.element.ctypeIcon);
+      if (ctypeIconMarkup) {
         const iconWrapper = document.createElement('span');
         iconWrapper.className = 'frontend-edit__toolbar-icon';
-        iconWrapper.innerHTML = contentElement.element.ctypeIcon;
+        iconWrapper.innerHTML = ctypeIconMarkup;
         container.appendChild(iconWrapper);
       }
 
@@ -1042,9 +1083,10 @@
           el.dataset.recordUid = contentElement.element?.uid || uid;
         }
 
-        if (action.icon) {
+        const actionIconMarkup = Icons.resolve(action.icon);
+        if (actionIconMarkup) {
           const iconWrapper = document.createElement('span');
-          iconWrapper.innerHTML = action.icon;
+          iconWrapper.innerHTML = actionIconMarkup;
           el.appendChild(iconWrapper);
         }
 
@@ -1310,9 +1352,17 @@
    * Data Service
    */
   const DataService = {
+    /**
+     * Walks up from a .frontend-edit__data element to its owning content
+     * element - either the id="c{uid}" anchor or a data-frontend-edit="tt_content:{uid}"
+     * element - so <xfe:data> additional-data entries also resolve on content
+     * elements that only expose the data attribute.
+     */
     getClosestContentElement(element) {
       if (!element) return null;
-      while (element && !/^c\d+$/.test(Dom.id(element))) {
+      const isContentElement = (el) =>
+        /^c\d+$/.test(Dom.id(el)) || /^tt_content:\d+$/.test(el.getAttribute('data-frontend-edit') || '');
+      while (element && !isContentElement(element)) {
         element = element.parentElement;
       }
       return element;
@@ -1340,6 +1390,25 @@
 
       Logger.log(`Found ${allUids.size} content elements in DOM with id="c{uid}" pattern`);
 
+      // Second matching channel: data-frontend-edit="tt_content:{uid}" - for
+      // templates that cannot carry the id="c{uid}" anchor (DCE, custom Fluid
+      // templates; see the <xfe:editable> ViewHelper). These are direct
+      // targets: Renderer.render() skips anchor-sibling resolution for them.
+      const beforeDataAttributeScan = allUids.size;
+      document.querySelectorAll('[data-frontend-edit]').forEach(element => {
+        const match = (element.getAttribute('data-frontend-edit') || '').match(/^tt_content:(\d+)$/);
+        if (match) {
+          const uid = parseInt(match[1], 10);
+          if (uid > 0) {
+            allUids.add(uid);
+          }
+        }
+      });
+
+      if (allUids.size > beforeDataAttributeScan) {
+        Logger.log(`Found ${allUids.size - beforeDataAttributeScan} additional content element(s) via data-frontend-edit attribute`);
+      }
+
       // Collect additional data from .frontend-edit__data elements
       const dataElements = document.querySelectorAll('.frontend-edit__data');
 
@@ -1349,18 +1418,18 @@
         const closestElement = this.getClosestContentElement(element);
         if (!closestElement) return;
 
-        const id = Dom.id(closestElement).replace('c', '');
-        const uid = parseInt(id, 10);
+        // The owning element was found via either channel (see
+        // getClosestContentElement) - resolve the uid from whichever matched.
+        const idMatch = Dom.id(closestElement).match(/^c(\d+)$/);
+        const dataMatch = idMatch ? null : (closestElement.getAttribute('data-frontend-edit') || '').match(/^tt_content:(\d+)$/);
+        const uid = parseInt((idMatch || dataMatch)?.[1] ?? '', 10);
+        if (!(uid > 0)) return;
 
         if (!dataItems[uid]) dataItems[uid] = [];
 
         const parsedData = JSON.parse(element.value);
         dataItems[uid].push(parsedData);
-
-        // Ensure this UID is included
-        if (uid > 0) {
-          allUids.add(uid);
-        }
+        allUids.add(uid);
 
         Logger.log(`Additional data element ${index + 1}: Found content element c${uid}`, { parsedData });
       });
@@ -1473,7 +1542,9 @@
           continue;
         }
 
-        let idElement = document.querySelector(`#c${uid}`);
+        // id="c{uid}" anchor first, falling back to
+        // data-frontend-edit="tt_content:{uid}" (see ElementResolver.findAnchor).
+        let resolved = ElementResolver.findAnchor(uid);
 
         // Handle translation mapping. In connected/overlay mode the DOM anchor
         // carries the default-language uid (l18n_parent), so the response uid
@@ -1481,24 +1552,28 @@
         // anchor even when the primary lookup missed. Prefer l18n_parent (the
         // canonical connected-mode pointer) over l10n_source (chained translations).
         // Coerce to number: DB values may arrive as strings, and "0" is truthy in JS.
+        // The empty-anchor check only applies to the id="c{uid}" pattern - a
+        // data-frontend-edit direct target is never a placeholder anchor.
         const anchorUid = Number(contentElement.element.l18n_parent) || Number(contentElement.element.l10n_source);
-        if (anchorUid > 0 && (!idElement || idElement.tagName.toLowerCase() === 'a')) {
-          const anchorElement = document.querySelector(`#c${anchorUid}`);
-          if (anchorElement) {
+        const needsTranslationFallback = !resolved || (!resolved.isDirectTarget && resolved.element.tagName.toLowerCase() === 'a');
+        if (anchorUid > 0 && needsTranslationFallback) {
+          const fallbackResolved = ElementResolver.findAnchor(anchorUid);
+          if (fallbackResolved) {
             Logger.log(`Translation mapping: c${uid} → c${anchorUid}`);
             uid = anchorUid;
-            idElement = anchorElement;
+            resolved = fallbackResolved;
           }
         }
 
-        if (!idElement) {
+        if (!resolved) {
           failed++;
           Logger.log(`DOM assignment failed: Element c${uid} not found`, null, 'warn');
           continue;
         }
 
-        // Resolve actual content element (handles anchor pattern)
-        const targetElement = ElementResolver.resolveContentElement(idElement);
+        // Resolve actual content element (handles the anchor pattern; a
+        // data-frontend-edit match is already the direct target).
+        const targetElement = resolved.isDirectTarget ? resolved.element : ElementResolver.resolveContentElement(resolved.element);
 
         successful++;
         this.setupContentElement(targetElement, uid, contentElement, showContextMenu, enableOutline);
@@ -1508,7 +1583,7 @@
           ctypeLabel: contentElement.element.ctypeLabel,
           showContextMenu,
           enableOutline,
-          usedSibling: targetElement !== idElement
+          usedSibling: targetElement !== resolved.element
         });
       }
 
@@ -2073,6 +2148,7 @@
           const dataItems = DataService.collectDataItems();
           const response = await DataService.fetchContentElements(dataItems);
 
+          Icons.populate(response.icons);
           Renderer.render(response.contentElements || {});
           ColumnTargetRenderer.render(response.columnTargets || []);
           Dropdown.setupGlobalHandler();
