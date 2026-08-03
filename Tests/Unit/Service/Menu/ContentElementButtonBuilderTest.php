@@ -220,6 +220,22 @@ final class ContentElementButtonBuilderTest extends TestCase
         self::assertArrayHasKey('delete', $children);
     }
 
+    #[Test]
+    public function addActionSectionOmitsHideButtonWhenNotPermitted(): void
+    {
+        $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
+        $menuButton = new Button('Menu', ButtonType::Menu);
+
+        $builder->addActionSection($menuButton, ['uid' => 1, 'pid' => 1], 0, '/return', true, false);
+
+        $children = $menuButton->getChildren();
+        self::assertArrayNotHasKey('hide', $children);
+        self::assertArrayHasKey('info', $children);
+        self::assertArrayHasKey('move', $children);
+        self::assertArrayHasKey('history', $children);
+        self::assertArrayHasKey('delete', $children);
+    }
+
     /**
      * Lazily constructed: #[WithSingleton] only takes effect once the test method starts running, after setUp().
      */

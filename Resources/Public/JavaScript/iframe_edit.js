@@ -121,12 +121,43 @@
     return url;
   }
 
+  /**
+   * Resolves the linkPolicy action for a URL - see PublicApi.openBackendView
+   * in frontend_edit.js. First matching rule wins; no match returns null.
+   */
+  function matchLinkPolicy(rules, href) {
+    if (!Array.isArray(rules)) return null;
+    for (const rule of rules) {
+      if (!rule || !rule.action) continue;
+      const isMatch = rule.match instanceof RegExp
+        ? rule.match.test(href)
+        : (typeof rule.match === 'string' && href.includes(rule.match));
+      if (isMatch) return rule.action;
+    }
+    return null;
+  }
+
+  /**
+   * Only a plain CSS length is accepted (no arbitrary CSS injection via the
+   * public API's `width` option) - a bare number is treated as pixels.
+   */
+  function sanitizeWidth(value) {
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) return `${value}px`;
+    if (typeof value === 'string' && /^\d+(\.\d+)?(px|%|vw|rem|em)$/.test(value.trim())) return value.trim();
+    return '';
+  }
+
   // ── Modal ──────────────────────────────────────────────────────────
 
   const Modal = {
     element: null,
     iframe: null,
     closeTimer: null,
+    // Set by open() only when called with options (PublicApi.openBackendView);
+    // stays null for the classic edit/wizard flow via LinkInterceptor, which
+    // calls open(url) with no second argument - so none of the behavior below
+    // ever engages for those.
+    view: null,
 
     getOrCreate() {
       if (this.element) return this.element;
@@ -161,7 +192,7 @@
       return modal;
     },
 
-    open(url) {
+    open(url, options) {
       // Ensure the returnUrl carries tx_ximatypo3frontendedit_iframe=1
       // so the post-save redirect to the frontend URL does not consume the
       // flash message queue inside the iframe — the parent reload picks
@@ -189,15 +220,27 @@
       IframeHandler.overrideContentContainer(iframe);
       iframe.src = url;
 
+      const opts = options || {};
+      this.view = (opts.title || opts.width || opts.onClose || opts.linkPolicy || opts.reloadOnClose !== undefined) ? {
+        onClose: typeof opts.onClose === 'function' ? opts.onClose : null,
+        linkPolicy: opts.linkPolicy ? (Array.isArray(opts.linkPolicy) ? opts.linkPolicy : [opts.linkPolicy]) : null,
+        reloadOnClose: opts.reloadOnClose !== false,
+      } : null;
+
       // Keep the close button always reachable as an escape route (ESC and
       // backdrop click aren't discoverable if the TYPO3-native close fails
       // to render). Only hide the title text for edit forms, where the
-      // record title lives inside the iframe's own header.
-      const showTitle = /record\/(info|history)|move_element/.test(url);
+      // record title lives inside the iframe's own header - unless a
+      // consumer-supplied title should be shown instead.
+      const showTitle = !!opts.title || /record\/(info|history)|move_element/.test(url);
       const title = this.element.querySelector('.frontend-edit__modal-title');
       if (title) {
+        title.textContent = opts.title || '';
         title.style.display = showTitle ? '' : 'none';
       }
+
+      const panel = this.element.querySelector('.frontend-edit__modal-panel');
+      if (panel) panel.style.width = sanitizeWidth(opts.width);
 
       setTimeout(() => this.element.classList.add('frontend-edit__modal--open'), ANIMATION_DELAY_MS);
 
@@ -233,6 +276,12 @@
       Logger.log('Closing modal');
       this.element.classList.remove('frontend-edit__modal--open');
 
+      // Captured now (not read from `this` inside the timeout) so a fresh
+      // open() during the close animation can't retroactively change which
+      // view's callback/reload-preference fires for THIS close.
+      const view = this.view;
+      this.view = null;
+
       // Replace any previous pending cleanup with a fresh one so we never
       // have two racing timeouts. The callback also double-checks that the
       // modal is still closed before wiping the iframe, so a re-open()
@@ -246,6 +295,13 @@
         if (this.iframe) {
           this.iframe.src = 'about:blank';
           this.iframe.style.opacity = '0.5';
+        }
+        // Only the generic-view path (view set by PublicApi.openBackendView)
+        // reaches here - the classic edit/wizard flow never sets `view`, so
+        // it keeps its existing "close without reloading" behavior unchanged.
+        if (view) {
+          if (typeof view.onClose === 'function') view.onClose({ reason: 'close' });
+          if (view.reloadOnClose) window.location.reload();
         }
       }, ANIMATION_DURATION_MS);
     }
@@ -487,6 +543,7 @@
           this._handleSaveClick.bind(this),
           this._handleFileSelectorClick.bind(this),
           this._handleNativeBrowserModalClick.bind(this),
+          this._handleLinkPolicyClick.bind(this),
           this._handleEditFormCloseClick.bind(this),
           this._handlePageLayoutNavClick.bind(this),
           this._handleFrontendLinkClick.bind(this),
@@ -535,6 +592,35 @@
       // TYPO3 form engine controls (link popup, element browser, etc.) open
       // their own Modal natively — don't interfere.
       return !!e.target.closest('.t3js-element-browser, a[href*="wizard/link"]');
+    },
+
+    /**
+     * Applies the consumer-supplied linkPolicy (PublicApi.openBackendView) for
+     * a generic backend view. No-op when the modal was opened without one -
+     * which is always the case for the classic edit/wizard flow, so those
+     * links keep falling through to the handlers below unchanged.
+     * 'stay' (including "no rule matched") intentionally does nothing here,
+     * letting the existing handlers decide - which already keep navigation
+     * inside the iframe for backend/frontend/wizard links today.
+     */
+    _handleLinkPolicyClick(e) {
+      const linkPolicy = Modal.view?.linkPolicy;
+      if (!linkPolicy) return false;
+      const link = e.target.closest('a[href]');
+      if (!link) return false;
+
+      const action = matchLinkPolicy(linkPolicy, link.href);
+      if (!action || action === 'stay') return false;
+
+      e.preventDefault();
+      e.stopPropagation();
+      if (action === 'external') {
+        window.open(link.href, '_blank');
+      } else if (action === 'close') {
+        Modal.close();
+      }
+      // 'ignore' — already prevented, nothing further to do.
+      return true;
     },
 
     _handleEditFormCloseClick(e) {
@@ -784,6 +870,11 @@
   });
 
   // ── Init ───────────────────────────────────────────────────────────
+
+  // Export for the public API's openBackendView() (frontend_edit.js) - the
+  // only way to reach this modal from outside this IIFE.
+  window.XimaFrontendEdit = window.XimaFrontendEdit || {};
+  window.XimaFrontendEdit.openModal = Modal.open.bind(Modal);
 
   LinkInterceptor.init();
   Logger.log('Modal edit system initialized');

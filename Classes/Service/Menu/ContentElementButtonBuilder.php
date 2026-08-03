@@ -159,12 +159,16 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         int $languageUid,
         string $returnUrlAnchor,
         bool $showInsertButtons = true,
+        bool $canHide = true,
     ): void {
         $this->addButton($menuButton, 'div_action', ButtonType::Divider);
 
-        // Hide button
-        $hideUrl = $this->urlBuilderService->buildHideUrl($contentElement['uid'], $returnUrlAnchor);
-        $this->addButton($menuButton, 'hide', ButtonType::Link, url: $hideUrl, icon: 'actions-toggle-on');
+        // Hide button — gated on non_exclude_fields access to tt_content:hidden;
+        // showing it regardless would let the click fail in the DataHandler.
+        if ($canHide) {
+            $hideUrl = $this->urlBuilderService->buildHideUrl($contentElement['uid'], $returnUrlAnchor);
+            $this->addButton($menuButton, 'hide', ButtonType::Link, url: $hideUrl, icon: 'actions-toggle-on');
+        }
 
         // Info button
         $infoUrl = $this->urlBuilderService->buildInfoUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
@@ -200,7 +204,10 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
             $this->addButton($menuButton, 'new_content_after', ButtonType::Link, url: $newContentUrl, icon: 'actions-add');
         }
 
-        // Delete button
+        // Delete button — needs no field-level gate like hide: for tt_content,
+        // the page permission "edit content" (already checked via hasRecordEditAccess()
+        // in ContentElementFilter) covers delete access too; there is no separate
+        // non_exclude_fields dimension for deleting a record, unlike hiding it.
         $deleteUrl = $this->urlBuilderService->buildDeleteUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
         $this->addButton($menuButton, 'delete', ButtonType::Link, url: $deleteUrl, icon: 'actions-delete');
     }
