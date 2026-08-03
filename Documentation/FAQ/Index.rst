@@ -46,7 +46,10 @@ Nothing appears in the frontend
 
         Content element IDs
             The rendered HTML must expose a "c-id" per element, e.g.
-            ``id="c908"``. See :ref:`how-it-works`.
+            ``id="c908"`` - or use the ``data-frontend-edit`` attribute instead.
+            See :ref:`how-it-works` and :ref:`Setup requirements & limits
+            <setup-requirements-and-limits>` (headless/SPA frontends are an
+            explicit non-goal, for the same reason).
 
         Content element on the current page
             Only elements belonging to the current page are editable. Inherited
@@ -87,6 +90,15 @@ Nothing appears in the frontend
             domains (a session is tied to a single TYPO3 instance); use
             ``multisite_belogin`` where a shared cookie is unsuitable.
 
+        A cross-domain setup can also cause a :code:`returnUrl` to be
+        rejected with an HTTP 400 error instead of silently redirecting to
+        the root page: the extension only accepts a :code:`returnUrl` whose
+        host matches the current request or one of the site's configured
+        base URLs (including per-language bases). A rejected return url is a
+        sign to check your site configuration's base URLs rather than a bug
+        — see :ref:`Setup requirements & limits
+        <setup-requirements-and-limits>` for the full picture.
+
     ..  accordion-item:: The edit button is missing on EXT:container or EXT:dce elements
         :name: faqThirdPartyCe
         :header-level: 3
@@ -101,6 +113,17 @@ Nothing appears in the frontend
 
         ..  note::
             Styling problems may occur with nested content elements.
+
+        Alternatively, add the ``data-frontend-edit`` attribute instead (see
+        :ref:`how-it-works`) - it avoids the "c-id" naming collision risk
+        entirely and needs no sibling resolution:
+
+        ..  code-block:: html
+            :caption: DCE Template
+
+            <div class="dce"<xfe:editable uid="{contentObject.uid}" />>
+                Your template goes here...
+            </div>
 
     ..  accordion-item:: The menu is missing on inherited content (e.g. a shared footer)
         :name: faqInheritedContent
@@ -130,6 +153,10 @@ Problems with the edit form
         page ID and language via the
         :ref:`Return URL generation <extconf-forceReturnUrlGeneration>`
         extension setting.
+
+        See :ref:`Setup requirements & limits <setup-requirements-and-limits>`
+        for the full picture of multi-domain setups, including ``SameSite``
+        and ``returnUrl`` behavior.
 
     ..  accordion-item:: I cannot change the language inside a content element
         :name: faqLanguageSwitch

@@ -19,7 +19,7 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
+use Xima\XimaTypo3FrontendEdit\Event\{FrontendEditDataEnrichmentEvent, FrontendEditDropdownModifyEvent};
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
@@ -90,6 +90,8 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
         $filteredElements = $this->contentElementFilter->filterContentElements($contentElements, $backendUser, $request);
 
+        $dataEnrichmentEvent = $this->dispatchDataEnrichmentEvent($filteredElements, $pid, $languageUid, $returnUrl);
+
         $enableScrollToElement = $this->settingsService->isEnableScrollToElement($request);
 
         // Remove existing URL fragment to prevent accumulation (e.g. page.html#c123#c456)
@@ -103,6 +105,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         // after the previous element (first element → column top).
         $showInsertButtons = $this->settingsService->isShowInsertButtons($request);
         $previousSiblingByUid = $this->buildPreviousSiblingMap($filteredElements, $showInsertButtons);
+        $canHide = $this->backendUserService->hasFieldAccess('tt_content', 'hidden');
 
         $result = [];
         foreach ($filteredElements as $contentElement) {
@@ -117,7 +120,9 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
                 continue;
             }
 
-            $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request, $contextualUrl, $showInsertButtons);
+            $this->applyElementDataEnrichment($contentElement, $dataEnrichmentEvent);
+
+            $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request, $contextualUrl, $showInsertButtons, $canHide);
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
             /** @var FrontendEditDropdownModifyEvent $event */
@@ -141,6 +146,39 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         }
 
         return $this->renderMenuButtons($result);
+    }
+
+    /**
+     * Dispatched once with the full filtered list (not per element) so a
+     * listener backed by a database can resolve its data in a single query
+     * instead of being invoked N times with no way to batch.
+     *
+     * @param array<int, array<string, mixed>> $filteredElements
+     */
+    private function dispatchDataEnrichmentEvent(array $filteredElements, int $pid, int $languageUid, string $returnUrl): FrontendEditDataEnrichmentEvent
+    {
+        $elementsByUid = [];
+        foreach ($filteredElements as $element) {
+            $elementsByUid[(int) $element['uid']] = $element;
+        }
+
+        /** @var FrontendEditDataEnrichmentEvent $event */
+        $event = $this->eventDispatcher->dispatch(
+            new FrontendEditDataEnrichmentEvent($elementsByUid, $pid, $languageUid, $returnUrl),
+        );
+
+        return $event;
+    }
+
+    /**
+     * @param array<string, mixed> $contentElement
+     */
+    private function applyElementDataEnrichment(array &$contentElement, FrontendEditDataEnrichmentEvent $event): void
+    {
+        $elementData = $event->getElementData((int) $contentElement['uid']);
+        if ([] !== $elementData) {
+            $contentElement['_ext'] = $elementData;
+        }
     }
 
     /**
@@ -222,6 +260,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         ServerRequestInterface $request,
         ?string $contextualUrl = null,
         bool $showInsertButtons = true,
+        bool $canHide = true,
     ): Button {
         if (!$this->settingsService->isShowContextMenu($request)) {
             return $this->contentElementButtonBuilder->createSimpleEditButton(
@@ -237,7 +276,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
         $this->contentElementButtonBuilder->addInfoSection($menuButton, $contentElement, $contentElementConfig);
         $this->contentElementButtonBuilder->addEditSection($menuButton, $contentElement, $languageUid, $pid, $returnUrlAnchor, $contextualUrl);
-        $this->contentElementButtonBuilder->addActionSection($menuButton, $contentElement, $languageUid, $returnUrlAnchor, $showInsertButtons);
+        $this->contentElementButtonBuilder->addActionSection($menuButton, $contentElement, $languageUid, $returnUrlAnchor, $showInsertButtons, $canHide);
 
         return $menuButton;
     }

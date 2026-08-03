@@ -51,7 +51,7 @@ Inline editing — the edit form opens next to the page:
 
 ## 🚀 Quick Start
 
-Requires **TYPO3 13.4 – 14.x** and **PHP 8.2 – 8.5** ([version matrix](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Installation/Index.html#version-matrix)).
+Requires **TYPO3 13.4 – 14.x** and **PHP 8.2 – 8.5** ([version matrix](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Installation/Index.html#version-matrix)). See [Setup requirements & limits](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Configuration/SetupRequirementsAndLimits.html) for multi-domain setups, external caches (Varnish/CDN), and other operational topics.
 
 **1. Install**
 

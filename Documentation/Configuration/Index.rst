@@ -40,3 +40,4 @@ There are three configuration layers, each answering a different question:
     SiteSettings
     UserTSconfig
     ExtensionConfiguration
+    SetupRequirementsAndLimits

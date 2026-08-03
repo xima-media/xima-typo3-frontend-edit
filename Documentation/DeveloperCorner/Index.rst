@@ -50,6 +50,8 @@ How the extension works internally, and the APIs it offers to extend it.
     Looking for the template side? :ref:`integration` covers the required
     content element IDs, column markers and custom styling.
 
+For UI that needs to run in the browser, see the :ref:`JavaScript API <javascript-api>`.
+
 ..  toctree::
     :hidden:
 
@@ -57,3 +59,4 @@ How the extension works internally, and the APIs it offers to extend it.
     Events
     DataAttributes
     Languages
+    JavaScriptApi

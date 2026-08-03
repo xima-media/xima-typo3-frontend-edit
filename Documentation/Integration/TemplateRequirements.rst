@@ -77,6 +77,69 @@ c-id means no edit button for that element.
     Styling problems may occur with nested content elements, because the
     injected UI is positioned relative to the wrapping element.
 
+..  _data-frontend-edit-attribute:
+
+Alternative: the ``data-frontend-edit`` attribute
+==================================================
+
+For templates that cannot carry the c-id anchor - dynamic content element
+extensions (DCE), other custom Fluid templates - a second matching channel
+exists: a ``data-frontend-edit="tt_content:{uid}"`` attribute on the content
+element's own wrapping HTML element.
+
+..  code-block:: html
+    :caption: Example HTML output using the data attribute instead
+
+    <div data-frontend-edit="tt_content:10" class="my-custom-wrapper">
+        ...
+    </div>
+
+The bundled ``<xfe:editable>`` ViewHelper renders this attribute for you:
+
+..  code-block:: html
+    :caption: Custom Fluid Template
+
+    <div class="my-custom-wrapper"<xfe:editable record="{data}" />>
+        ...
+    </div>
+
+Both patterns can be mixed freely on the same page; an element only needs one
+of them. Unlike the c-id anchor pattern, a ``data-frontend-edit`` element is
+always treated as the content element itself - no sibling resolution is
+attempted.
+
+..  _editing-foreign-records:
+
+Editing foreign records (news, addresses, ...)
+================================================
+
+The ``data-frontend-edit`` attribute also works for records from **any other
+table** - not just ``tt_content`` - by adding a ``table`` prefix:
+``data-frontend-edit="{table}:{uid}"``. This covers the classic case of
+editing foreign records displayed on a detail page, e.g. a news detail page
+rendered by EXT:news:
+
+..  code-block:: html
+    :caption: News detail template (Detail.html)
+
+    <div class="news-detail"<xfe:editable record="{newsItem}" table="tx_news_domain_model_news" />>
+        <h1>{newsItem.title}</h1>
+        ...
+    </div>
+
+This is deliberately thin: the menu offers exactly **edit, info and
+history** - no hide, delete or move, since those are meaningful only for
+tables this extension understands specifically (``tt_content``, ``pages``).
+Permissions are checked the same way as everywhere else in the extension (the
+backend user's actual edit rights on that record); a table the current user
+cannot edit - or that TYPO3 does not know at all - never gets a menu.
+Translated records resolve to the current frontend language automatically,
+the same way ``tt_content`` does.
+
+Extend the menu the same way as for content elements, via the
+:ref:`FrontendEditDropdownModifyEvent <events>` - the record row carries a
+``_table`` key so a listener can tell it apart from a ``tt_content`` row.
+
 ..  _template-requirements-optional:
 
 Optional markers
