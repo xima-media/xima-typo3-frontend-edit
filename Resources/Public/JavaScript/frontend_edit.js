@@ -42,6 +42,26 @@
   };
 
   /**
+   * Icon registry - resolves the short keys the backend substitutes for
+   * repeated icon markup in the editInformation response (element.ctypeIcon,
+   * menu button .icon) back to their actual SVG markup. See issue #217:
+   * without this, the same handful of icons (edit, info, history, ...) are
+   * repeated once per button per content element, dominating the payload
+   * on any page with more than a handful of elements.
+   */
+  const Icons = {
+    map: {},
+
+    populate(icons) {
+      Object.assign(this.map, icons || {});
+    },
+
+    resolve(key) {
+      return this.map[key] || '';
+    }
+  };
+
+  /**
    * DOM attribute helpers.
    *
    * Read id/class from the content attribute instead of the IDL property to
@@ -776,11 +796,13 @@
       const container = document.createElement('div');
       container.className = 'frontend-edit__toolbar-label';
 
-      // Icons are trusted HTML from TYPO3 backend (IconFactory)
-      if (contentElement.element.ctypeIcon) {
+      // Icons are trusted HTML from TYPO3 backend (IconFactory), delivered as
+      // a dedup key resolved via Icons - see the Icons registry above.
+      const ctypeIconMarkup = Icons.resolve(contentElement.element.ctypeIcon);
+      if (ctypeIconMarkup) {
         const iconWrapper = document.createElement('span');
         iconWrapper.className = 'frontend-edit__toolbar-icon';
-        iconWrapper.innerHTML = contentElement.element.ctypeIcon;
+        iconWrapper.innerHTML = ctypeIconMarkup;
         container.appendChild(iconWrapper);
       }
 
@@ -969,9 +991,10 @@
           el.dataset.recordUid = contentElement.element?.uid || uid;
         }
 
-        if (action.icon) {
+        const actionIconMarkup = Icons.resolve(action.icon);
+        if (actionIconMarkup) {
           const iconWrapper = document.createElement('span');
-          iconWrapper.innerHTML = action.icon;
+          iconWrapper.innerHTML = actionIconMarkup;
           el.appendChild(iconWrapper);
         }
 
@@ -1814,6 +1837,7 @@
           const dataItems = DataService.collectDataItems();
           const response = await DataService.fetchContentElements(dataItems);
 
+          Icons.populate(response.icons);
           Renderer.render(response.contentElements || {});
           ColumnTargetRenderer.render(response.columnTargets || []);
           Dropdown.setupGlobalHandler();

@@ -25,6 +25,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\{ContentMoveService, EmptyColumnService};
 use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Service\Security\ReturnUrlValidator;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\IconDeduplicationService;
 
 use function in_array;
 use function is_array;
@@ -46,6 +47,7 @@ readonly class AjaxController
         private SettingsService $settingsService,
         private ContentMoveService $contentMoveService,
         private ReturnUrlValidator $returnUrlValidator,
+        private IconDeduplicationService $iconDeduplicationService,
     ) {}
 
     /**
@@ -136,6 +138,7 @@ readonly class AjaxController
         }
 
         $dropdown = $this->contentElementMenuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
+        $deduplicated = $this->iconDeduplicationService->deduplicate($dropdown);
 
         $columnTargets = $this->emptyColumnService->getColumnTargets(
             $pid,
@@ -146,8 +149,9 @@ readonly class AjaxController
         );
 
         return new JsonResponse([
-            'contentElements' => $dropdown,
+            'contentElements' => $deduplicated['contentElements'],
             'columnTargets' => $columnTargets,
+            'icons' => $deduplicated['icons'],
         ]);
     }
 
