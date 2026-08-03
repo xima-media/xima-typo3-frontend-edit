@@ -91,13 +91,33 @@ visible at a glance rather than only on hover. :code:`spec`:
 ------------------------------------
 
 Opens a backend URL in the version-appropriate container: the contextual
-sidebar (v14.2+, when enabled), the v13 iframe modal, or a new tab as a
-fallback. :code:`options.target = 'tab'` forces a new tab regardless of
-version.
+sidebar (v14.2+, when enabled and available), the v13 iframe modal, or a new
+tab as a fallback - no version checks needed in consumer code. The returnUrl
+flash-message deferral mechanism used by edit forms is applied automatically.
+:code:`options`:
+
+- ``target`` - :code:`'tab'` forces a new tab regardless of version
+- ``title`` - shown in the container's header
+- ``width`` - a CSS length (e.g. :code:`'600px'`, :code:`'50%'`); invalid values are ignored
+- ``onClose`` - called with :code:`{ reason }` when the container closes (:code:`reason` is :code:`'close'`, or :code:`'saved'` for the sidebar's own save flow)
+- ``reloadOnClose`` - reload the parent page on close (default :code:`true`)
+- ``linkPolicy`` - a rule or array of rules :code:`{ match: string | RegExp, action }`, evaluated against link clicks inside the embedded document. :code:`action` is one of:
+
+  - ``stay`` (default when nothing matches) - keep navigation inside the container, same as today's built-in behavior
+  - ``close`` - close the container
+  - ``ignore`` - swallow the click, do nothing
+  - ``external`` - open the link in a new tab
+
+  The policy only ever governs plain link clicks - the built-in save/close buttons of an actual edit form keep working exactly as before.
 
 ..  code-block:: javascript
 
-    window.XimaFrontendEdit.openBackendView(commentsBackendUrl, { target: 'tab' });
+    window.XimaFrontendEdit.openBackendView(commentsBackendUrl, {
+        title: 'Comments',
+        width: '480px',
+        linkPolicy: { match: '/typo3/module/web/layout', action: 'close' },
+        onClose: ({ reason }) => console.log('comments panel closed:', reason),
+    });
 
 Lifecycle events
 ==================
