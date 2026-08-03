@@ -1131,6 +1131,22 @@
         }
       });
 
+      // Roving focus (tabindex="-1" on every item) keeps Tab out of the menu
+      // by design (APG menu-button pattern) - but the menu must then close
+      // itself once focus actually leaves it, or it stays open with no
+      // visible focus inside.
+      dropdown.addEventListener('focusout', (e) => {
+        // If focus moves to a kebab trigger (the user clicking it to toggle the
+        // menu shut), leave the close decision to that button's click handler -
+        // closing here first would make the click read a closed menu and reopen it.
+        if (e.relatedTarget && e.relatedTarget.closest('.frontend-edit__btn--kebab')) {
+          return;
+        }
+        if (!dropdown.contains(e.relatedTarget)) {
+          Dropdown.closeAll();
+        }
+      });
+
       return dropdown;
     },
 

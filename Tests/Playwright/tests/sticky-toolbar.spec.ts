@@ -49,4 +49,60 @@ test.describe('sticky toolbar', () => {
 
     // afterEach re-enables it — no need to duplicate that here.
   });
+
+  test('the page options menu follows the APG menu-button pattern: aria-expanded, arrow-key navigation, Escape and focus-out all work', async ({ page }) => {
+    await page.goto('/');
+
+    const menuBtn = page.locator('.frontend-edit__sticky-btn--menu');
+    const dropdown = page.locator('.frontend-edit__sticky-dropdown');
+    const items = dropdown.locator('[role="menuitem"]');
+
+    await expect(menuBtn).toHaveAttribute('aria-haspopup', 'menu');
+    await expect(menuBtn).toHaveAttribute('aria-expanded', 'false');
+    await expect(dropdown).toHaveAttribute('role', 'menu');
+
+    // Opening focuses the first item - the roving tabindex="-1" on every item
+    // means Tab alone could never reach the menu otherwise.
+    await menuBtn.click();
+    await expect(menuBtn).toHaveAttribute('aria-expanded', 'true');
+    await expect(items.first()).toBeFocused();
+
+    await page.keyboard.press('ArrowDown');
+    await expect(items.nth(1)).toBeFocused();
+
+    await page.keyboard.press('ArrowUp');
+    await expect(items.first()).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(dropdown).not.toHaveClass(/frontend-edit__sticky-dropdown--visible/);
+    await expect(menuBtn).toHaveAttribute('aria-expanded', 'false');
+    await expect(menuBtn).toBeFocused();
+
+    // Re-open, then move focus out via keyboard (not a click) - the menu must
+    // close itself once focus actually leaves it, since Tab never lands on
+    // one of its own (tabindex="-1") items.
+    await menuBtn.click();
+    await expect(items.first()).toBeFocused();
+    await page.locator('a[href="/about-us"]').first().focus();
+    await expect(dropdown).not.toHaveClass(/frontend-edit__sticky-dropdown--visible/);
+  });
+
+  test('clicking the menu button while an item is focused closes the menu', async ({ page }) => {
+    await page.goto('/');
+
+    const menuBtn = page.locator('.frontend-edit__sticky-btn--menu');
+    const dropdown = page.locator('.frontend-edit__sticky-dropdown');
+    const items = dropdown.locator('[role="menuitem"]');
+
+    await menuBtn.click();
+    await expect(items.first()).toBeFocused();
+
+    // Clicking the trigger fires focusout (focus leaving the item to the button)
+    // BEFORE click. If focusout closed the menu, the click handler would read a
+    // closed menu and reopen it — the trigger must close the open menu instead.
+    await menuBtn.click();
+
+    await expect(dropdown).not.toHaveClass(/frontend-edit__sticky-dropdown--visible/);
+    await expect(menuBtn).toHaveAttribute('aria-expanded', 'false');
+  });
 });
