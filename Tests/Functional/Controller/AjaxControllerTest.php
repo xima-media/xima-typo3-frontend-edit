@@ -178,6 +178,33 @@ final class AjaxControllerTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function editInformationActionReturns400OnForeignReturnUrlHost(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $response = $this->subject->editInformationAction($this->createRequest([
+            'pid' => '1',
+            'returnUrl' => 'https://evil.example/',
+        ]));
+
+        self::assertSame(400, $response->getStatusCode());
+        self::assertArrayHasKey('error', $this->decode($response));
+    }
+
+    #[Test]
+    public function editInformationActionAcceptsSameOriginAbsoluteReturnUrl(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $response = $this->subject->editInformationAction($this->createRequest([
+            'pid' => '1',
+            'returnUrl' => 'https://example.com/return',
+        ]));
+
+        self::assertSame(200, $response->getStatusCode());
+    }
+
+    #[Test]
     public function editInformationActionReturns400OnInvalidJsonBody(): void
     {
         $this->setUpBackendUser(1);

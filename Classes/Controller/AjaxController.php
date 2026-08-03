@@ -24,6 +24,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\{ContentMoveService, EmptyColumnService};
 use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator;
+use Xima\XimaTypo3FrontendEdit\Service\Security\ReturnUrlValidator;
 
 use function in_array;
 use function is_array;
@@ -44,6 +45,7 @@ readonly class AjaxController
         private EmptyColumnService $emptyColumnService,
         private SettingsService $settingsService,
         private ContentMoveService $contentMoveService,
+        private ReturnUrlValidator $returnUrlValidator,
     ) {}
 
     /**
@@ -118,6 +120,9 @@ readonly class AjaxController
         $returnUrl = (string) ($params['returnUrl'] ?? '');
         if ('' === $returnUrl) {
             return new JsonResponse(['error' => 'Missing required parameter: returnUrl'], 400);
+        }
+        if (!$this->returnUrlValidator->isValid($returnUrl, $request, $pid)) {
+            return new JsonResponse(['error' => 'Invalid parameter: returnUrl host not allowed'], 400);
         }
 
         if (!$this->backendUserService->hasPageAccess($pid)) {
