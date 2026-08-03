@@ -16,6 +16,7 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Functional\Controller;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Http\{ServerRequest, Stream};
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Controller\AjaxController;
@@ -46,7 +47,7 @@ final class AjaxControllerTest extends FunctionalTestCase
 
     protected function tearDown(): void
     {
-        unset($GLOBALS['BE_USER']);
+        unset($GLOBALS['BE_USER'], $GLOBALS['LANG']);
 
         parent::tearDown();
     }
@@ -241,6 +242,27 @@ final class AjaxControllerTest extends FunctionalTestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertArrayHasKey('contentElements', $payload);
         self::assertArrayHasKey('columnTargets', $payload);
+    }
+
+    #[Test]
+    public function editInformationActionOmitsHideButtonForRestrictedEditor(): void
+    {
+        $this->importCSVDataSet(__DIR__.'/Fixtures/be_groups.csv');
+        $this->importCSVDataSet(__DIR__.'/Fixtures/tt_content.csv');
+        $backendUser = $this->setUpBackendUser(2);
+        $GLOBALS['LANG'] = $this->get(LanguageServiceFactory::class)->createFromUserPreferences($backendUser);
+
+        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '1', 'returnUrl' => '/']));
+
+        $payload = $this->decode($response);
+        $menuChildren = $payload['contentElements'][10]['menu']['children'] ?? [];
+
+        self::assertArrayNotHasKey('hide', $menuChildren);
+        self::assertArrayHasKey('delete', $menuChildren);
+        $menuChildren = $payload['contentElements'][10]['menu']['children'] ?? [];
+
+        self::assertArrayNotHasKey('hide', $menuChildren);
+        self::assertArrayHasKey('delete', $menuChildren);
     }
 
     #[Test]
