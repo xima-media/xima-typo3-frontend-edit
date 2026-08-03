@@ -16,6 +16,7 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Functional\Controller;
 use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Http\{ServerRequest, Stream};
+use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Controller\AjaxController;
@@ -46,7 +47,7 @@ final class AjaxControllerTest extends FunctionalTestCase
 
     protected function tearDown(): void
     {
-        unset($GLOBALS['BE_USER']);
+        unset($GLOBALS['BE_USER'], $GLOBALS['LANG']);
 
         parent::tearDown();
     }
@@ -178,6 +179,33 @@ final class AjaxControllerTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function editInformationActionReturns400OnForeignReturnUrlHost(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $response = $this->subject->editInformationAction($this->createRequest([
+            'pid' => '1',
+            'returnUrl' => 'https://evil.example/',
+        ]));
+
+        self::assertSame(400, $response->getStatusCode());
+        self::assertArrayHasKey('error', $this->decode($response));
+    }
+
+    #[Test]
+    public function editInformationActionAcceptsSameOriginAbsoluteReturnUrl(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $response = $this->subject->editInformationAction($this->createRequest([
+            'pid' => '1',
+            'returnUrl' => 'https://example.com/return',
+        ]));
+
+        self::assertSame(200, $response->getStatusCode());
+    }
+
+    #[Test]
     public function editInformationActionReturns400OnInvalidJsonBody(): void
     {
         $this->setUpBackendUser(1);
@@ -214,6 +242,103 @@ final class AjaxControllerTest extends FunctionalTestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertArrayHasKey('contentElements', $payload);
         self::assertArrayHasKey('columnTargets', $payload);
+        self::assertArrayHasKey('records', $payload);
+    }
+
+    #[Test]
+    public function editInformationActionBuildsAThinMenuForAForeignRecord(): void
+    {
+        $this->importCSVDataSet(__DIR__.'/Fixtures/sys_category.csv');
+        $backendUser = $this->setUpBackendUser(1);
+        // RecordButtonBuilder resolves the table label via $GLOBALS['LANG'];
+        // in a real backend AJAX request the middleware stack provides it.
+        $GLOBALS['LANG'] = $this->get(LanguageServiceFactory::class)->createFromUserPreferences($backendUser);
+
+        $response = $this->subject->editInformationAction(
+            $this->createRecordsRequest(['sys_category:1']),
+        );
+
+        $payload = $this->decode($response);
+
+        self::assertArrayHasKey('sys_category:1', $payload['records']);
+        $menu = $payload['records']['sys_category:1']['menu'];
+        $children = $menu['children'];
+        self::assertArrayHasKey('edit', $children);
+        self::assertArrayHasKey('info', $children);
+        self::assertArrayHasKey('history', $children);
+        self::assertArrayNotHasKey('hide', $children);
+        self::assertArrayNotHasKey('delete', $children);
+        self::assertArrayNotHasKey('move', $children);
+    }
+
+    #[Test]
+    public function editInformationActionResolvesTheTranslatedForeignRecord(): void
+    {
+        $this->importCSVDataSet(__DIR__.'/Fixtures/sys_category.csv');
+        $backendUser = $this->setUpBackendUser(1);
+        $GLOBALS['LANG'] = $this->get(LanguageServiceFactory::class)->createFromUserPreferences($backendUser);
+
+        $request = $this->createRecordsRequest(['sys_category:1'])
+            ->withQueryParams(['pid' => '1', 'returnUrl' => '/', 'language' => '1']);
+        $response = $this->subject->editInformationAction($request);
+
+        $payload = $this->decode($response);
+
+        // Requested uid 1 (default language) is the response key, but the
+        // resolved element data is the language-1 translation (uid 2) - same
+        // "translated analogous to tt_content" contract as the anchor pattern.
+        self::assertSame(2, $payload['records']['sys_category:1']['element']['uid']);
+    }
+
+    #[Test]
+    public function editInformationActionOmitsUnknownTableFromRecords(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $response = $this->subject->editInformationAction(
+            $this->createRecordsRequest(['tx_unknown_extension_table:1']),
+        );
+
+        $payload = $this->decode($response);
+
+        self::assertSame([], $payload['records']);
+    }
+
+    #[Test]
+    public function editInformationActionOmitsTtContentFromRecords(): void
+    {
+        $this->setUpBackendUser(1);
+
+        // tt_content stays on the existing contentElements path - _records
+        // must not become a second way to reach it.
+        $response = $this->subject->editInformationAction(
+            $this->createRecordsRequest(['tt_content:1']),
+        );
+
+        $payload = $this->decode($response);
+
+        self::assertSame([], $payload['records']);
+    }
+
+    #[Test]
+    public function editInformationActionOmitsHideButtonForRestrictedEditor(): void
+    {
+        $this->importCSVDataSet(__DIR__.'/Fixtures/be_groups.csv');
+        $this->importCSVDataSet(__DIR__.'/Fixtures/tt_content.csv');
+        $backendUser = $this->setUpBackendUser(2);
+        $GLOBALS['LANG'] = $this->get(LanguageServiceFactory::class)->createFromUserPreferences($backendUser);
+
+        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '1', 'returnUrl' => '/']));
+
+        $payload = $this->decode($response);
+        $menuChildren = $payload['contentElements'][10]['menu']['children'] ?? [];
+
+        self::assertArrayNotHasKey('hide', $menuChildren);
+        self::assertArrayHasKey('delete', $menuChildren);
+        $menuChildren = $payload['contentElements'][10]['menu']['children'] ?? [];
+
+        self::assertArrayNotHasKey('hide', $menuChildren);
+        self::assertArrayHasKey('delete', $menuChildren);
     }
 
     #[Test]
@@ -267,6 +392,17 @@ final class AjaxControllerTest extends FunctionalTestCase
 
         self::assertSame(400, $response->getStatusCode());
         self::assertStringContainsString('targetContainerUid', (string) $this->decode($response)['error']);
+    }
+
+    /**
+     * @param list<string> $records
+     */
+    private function createRecordsRequest(array $records): ServerRequestInterface
+    {
+        return (new ServerRequest('https://example.com/', 'POST'))
+            ->withQueryParams(['pid' => '1', 'returnUrl' => '/'])
+            ->withHeader('Content-Type', 'application/json')
+            ->withBody($this->stream((string) json_encode(['_records' => $records])));
     }
 
     /**

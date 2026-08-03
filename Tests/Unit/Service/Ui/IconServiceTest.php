@@ -27,6 +27,11 @@ use Xima\XimaTypo3FrontendEdit\Service\Ui\IconService;
 #[CoversClass(IconService::class)]
 final class IconServiceTest extends TestCase
 {
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['TCA']);
+    }
+
     #[Test]
     public function getIconReturnsIconFromFactory(): void
     {
@@ -76,5 +81,64 @@ final class IconServiceTest extends TestCase
 
         self::assertSame($iconOpen, $service->getIcon('actions-open'));
         self::assertSame($iconClose, $service->getIcon('actions-close'));
+    }
+
+    #[Test]
+    public function getIconIdentifierForRecordResolvesViaTypeiconColumn(): void
+    {
+        $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['typeicon_column'] = 'CType';
+        $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['typeicon_classes'] = [
+            'default' => 'content-news',
+            'foo' => 'content-news-foo',
+        ];
+
+        $service = new IconService($this->createMock(IconFactory::class));
+
+        self::assertSame(
+            'content-news-foo',
+            $service->getIconIdentifierForRecord('tx_news_domain_model_news', ['CType' => 'foo']),
+        );
+    }
+
+    #[Test]
+    public function getIconIdentifierForRecordFallsBackToDefaultWhenColumnValueUnknown(): void
+    {
+        $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['typeicon_column'] = 'CType';
+        $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['typeicon_classes'] = [
+            'default' => 'content-news',
+        ];
+
+        $service = new IconService($this->createMock(IconFactory::class));
+
+        self::assertSame(
+            'content-news',
+            $service->getIconIdentifierForRecord('tx_news_domain_model_news', ['CType' => 'unknown']),
+        );
+    }
+
+    #[Test]
+    public function getIconIdentifierForRecordUsesDefaultWhenNoTypeiconColumnConfigured(): void
+    {
+        $GLOBALS['TCA']['sys_category']['ctrl']['typeicon_classes'] = [
+            'default' => 'mimetypes-x-sys_category',
+        ];
+
+        $service = new IconService($this->createMock(IconFactory::class));
+
+        self::assertSame(
+            'mimetypes-x-sys_category',
+            $service->getIconIdentifierForRecord('sys_category', ['uid' => 1]),
+        );
+    }
+
+    #[Test]
+    public function getIconIdentifierForRecordFallsBackToGenericIdentifierWhenTableHasNoIconConfig(): void
+    {
+        $service = new IconService($this->createMock(IconFactory::class));
+
+        self::assertSame(
+            'mimetypes-other-other',
+            $service->getIconIdentifierForRecord('tx_unknown_extension_table', ['uid' => 1]),
+        );
     }
 }

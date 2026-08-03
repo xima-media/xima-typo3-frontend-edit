@@ -21,6 +21,9 @@
 			<trans-unit id="info">
 				<source>Info</source>
 			</trans-unit>
+			<trans-unit id="edit">
+				<source>Edit</source>
+			</trans-unit>
 			<trans-unit id="hide">
 				<source>Hide</source>
 			</trans-unit>
@@ -44,6 +47,9 @@
 			</trans-unit>
 			<trans-unit id="page_menu">
 				<source>Page menu</source>
+			</trans-unit>
+			<trans-unit id="record_menu">
+				<source>Record menu</source>
 			</trans-unit>
 			<trans-unit id="edit_page_properties">
 				<source>Edit page properties</source>

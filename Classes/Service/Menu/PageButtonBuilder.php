@@ -70,14 +70,19 @@ final readonly class PageButtonBuilder extends AbstractMenuButtonBuilder
         int $languageUid,
         string $returnUrl,
         ?string $contextualUrl = null,
+        bool $canEditPageProperties = true,
     ): void {
         $this->addButton($menuButton, 'div_edit', ButtonType::Divider);
 
-        $editUrl = $this->urlBuilderService->buildEditUrl($pageId, 'pages', $languageUid, $returnUrl).'&tx_ximatypo3frontendedit';
-        $this->addButton($menuButton, 'edit_page_properties', ButtonType::Link, url: $editUrl, icon: 'actions-page-open');
+        // Gated on hasPageEditAccess() (tables_modify, PAGE_EDIT permission bit,
+        // pagetypes_select) — see PageMenuGenerator::getDropdown().
+        if ($canEditPageProperties) {
+            $editUrl = $this->urlBuilderService->buildEditUrl($pageId, 'pages', $languageUid, $returnUrl).'&tx_ximatypo3frontendedit';
+            $this->addButton($menuButton, 'edit_page_properties', ButtonType::Link, url: $editUrl, icon: 'actions-page-open');
 
-        if (null !== $contextualUrl) {
-            $menuButton->getChildren()['edit_page_properties']->setContextualUrl($contextualUrl);
+            if (null !== $contextualUrl) {
+                $menuButton->getChildren()['edit_page_properties']->setContextualUrl($contextualUrl);
+            }
         }
 
         // Edit page (Backend Page Layout)

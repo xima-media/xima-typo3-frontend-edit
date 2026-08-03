@@ -14,6 +14,8 @@ Three opportunities exist to extend the Edit Menu with custom entries:
 
 Additionally, you can provide a :ref:`custom css <custom-styling>` file to adjust the styling.
 
+For UI that needs to run in the browser, see the :ref:`JavaScript API <javascript-api>`.
+
 ..  toctree::
     :maxdepth: 3
 
@@ -21,3 +23,4 @@ Additionally, you can provide a :ref:`custom css <custom-styling>` file to adjus
     DataAttributes
     EmptyColumns
     CustomStyling
+    JavaScriptApi
