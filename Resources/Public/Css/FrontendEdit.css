@@ -609,6 +609,7 @@
     border-radius: 4px;
     color: var(--xfe-toolbar-text);
     cursor: pointer;
+    text-decoration: none;
     transition: background 0.15s ease, transform 0.1s ease;
     padding: 0;
 }
