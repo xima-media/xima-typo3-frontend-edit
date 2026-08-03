@@ -1,0 +1,3 @@
+"be_groups"
+,"uid","pid","title","non_exclude_fields","explicit_allowdeny","deleted","hidden"
+,1,0,"Restricted Editors","","tt_content:CType:text",0,0

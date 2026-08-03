@@ -230,4 +230,40 @@ final class BackendUserServiceTest extends TestCase
 
         self::assertTrue($service->isFrontendEditAllowed());
     }
+
+    #[Test]
+    public function hasFieldAccessReturnsFalseWhenNoBackendUser(): void
+    {
+        unset($GLOBALS['BE_USER']);
+
+        $service = new BackendUserService();
+
+        self::assertFalse($service->hasFieldAccess('tt_content', 'hidden'));
+    }
+
+    #[Test]
+    public function hasFieldAccessDelegatesToBackendUserNonExcludeFieldsCheck(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('check')->with('non_exclude_fields', 'tt_content:hidden')->willReturn(true);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertTrue($service->hasFieldAccess('tt_content', 'hidden'));
+    }
+
+    #[Test]
+    public function hasFieldAccessReturnsFalseWhenCheckDenies(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('check')->willReturn(false);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        $service = new BackendUserService();
+
+        self::assertFalse($service->hasFieldAccess('tt_content', 'hidden'));
+    }
 }

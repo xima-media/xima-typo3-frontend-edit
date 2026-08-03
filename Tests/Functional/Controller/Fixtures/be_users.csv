@@ -1,3 +1,4 @@
 "be_users"
-,"uid","pid","username","admin","disable","deleted"
-,1,0,"admin",1,0,0
+,"uid","pid","username","admin","disable","deleted","usergroup","db_mountpoints"
+,1,0,"admin",1,0,0,,
+,2,0,"editor",0,0,0,1,1
