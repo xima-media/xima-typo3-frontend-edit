@@ -42,6 +42,26 @@
   };
 
   /**
+   * Icon registry - resolves the short keys the backend substitutes for
+   * repeated icon markup in the editInformation response (element.ctypeIcon,
+   * menu button .icon) back to their actual SVG markup. See issue #217:
+   * without this, the same handful of icons (edit, info, history, ...) are
+   * repeated once per button per content element, dominating the payload
+   * on any page with more than a handful of elements.
+   */
+  const Icons = {
+    map: {},
+
+    populate(icons) {
+      Object.assign(this.map, icons || {});
+    },
+
+    resolve(key) {
+      return this.map[key] || '';
+    }
+  };
+
+  /**
    * DOM attribute helpers.
    *
    * Read id/class from the content attribute instead of the IDL property to
@@ -58,6 +78,53 @@
       return element && typeof element.getAttribute === 'function'
         ? (element.getAttribute('id') || '')
         : '';
+    }
+  };
+
+  /**
+   * Dispatches the public `xfe:*` lifecycle events (see PublicApi below) on
+   * `document`, so third-party listeners can use standard event delegation.
+   */
+  const Events = {
+    dispatch(name, detail) {
+      document.dispatchEvent(new CustomEvent(name, { detail }));
+    }
+  };
+
+  /**
+   * Registry - Tracks rendered content elements for the public API
+   * (PublicApi.getElementInfo/registerBadge/registerToolbarItem) and the
+   * `xfe:ready` element snapshot.
+   *
+   * Entries are stored under both the DOM anchor uid and the record's own
+   * uid (see Renderer.render()'s translation mapping) so consumers can look
+   * elements up by either.
+   */
+  const Registry = {
+    entries: new Map(), // Map<number uid, {uid, element, payload, overlay, toolbar, dropdown}>
+
+    set(uid, entry) {
+      this.entries.set(Number(uid), entry);
+    },
+
+    get(uid) {
+      return this.entries.get(Number(uid)) || null;
+    },
+
+    /**
+     * Plain-object snapshot for `xfe:ready`, keyed by the record's own uid and
+     * deduplicated so translation-mapped entries (registered under two uids)
+     * appear once.
+     */
+    snapshot() {
+      const seen = new Set();
+      const out = {};
+      this.entries.forEach((entry) => {
+        if (seen.has(entry)) return;
+        seen.add(entry);
+        out[entry.uid] = { uid: entry.uid, element: entry.element, payload: entry.payload };
+      });
+      return out;
     }
   };
 
@@ -160,6 +227,12 @@
 
     closeAll() {
       document.querySelectorAll('.frontend-edit__dropdown').forEach(d => {
+        // Only fire xfe:dropdown-close for dropdowns that were actually open.
+        // closeAll() also runs on every hover switch (OverlayManager.updateActiveFromPointer),
+        // so firing unconditionally would spam the event on plain mouse movement.
+        if (d.style.display === 'block') {
+          Events.dispatch('xfe:dropdown-close', { uid: Number(d.dataset.cid) });
+        }
         d.style.display = 'none';
       });
       document.querySelectorAll('.frontend-edit__btn--kebab').forEach(btn => {
@@ -795,11 +868,13 @@
       const container = document.createElement('div');
       container.className = 'frontend-edit__toolbar-label';
 
-      // Icons are trusted HTML from TYPO3 backend (IconFactory)
-      if (contentElement.element.ctypeIcon) {
+      // Icons are trusted HTML from TYPO3 backend (IconFactory), delivered as
+      // a dedup key resolved via Icons - see the Icons registry above.
+      const ctypeIconMarkup = Icons.resolve(contentElement.element.ctypeIcon);
+      if (ctypeIconMarkup) {
         const iconWrapper = document.createElement('span');
         iconWrapper.className = 'frontend-edit__toolbar-icon';
-        iconWrapper.innerHTML = contentElement.element.ctypeIcon;
+        iconWrapper.innerHTML = ctypeIconMarkup;
         container.appendChild(iconWrapper);
       }
 
@@ -988,9 +1063,10 @@
           el.dataset.recordUid = contentElement.element?.uid || uid;
         }
 
-        if (action.icon) {
+        const actionIconMarkup = Icons.resolve(action.icon);
+        if (actionIconMarkup) {
           const iconWrapper = document.createElement('span');
-          iconWrapper.innerHTML = action.icon;
+          iconWrapper.innerHTML = actionIconMarkup;
           el.appendChild(iconWrapper);
         }
 
@@ -1077,6 +1153,154 @@
       return name.replace(/[^a-zA-Z0-9_-]/g, '');
     }
   };
+
+  /**
+   * Public API - the stable surface exposed on window.XimaFrontendEdit for
+   * third-party extensions (see Documentation/DeveloperCorner/JavaScriptApi.rst).
+   * Internal refactors of this file must not change these method signatures
+   * or the `xfe:*` event detail shapes.
+   */
+  const PublicApi = {
+    /**
+     * Resolves target element + payload for a uid, so consumers never re-do
+     * DOM resolution. Returns null if the uid is unknown (not rendered, or
+     * frontend editing is disabled).
+     */
+    getElementInfo(uid) {
+      const entry = Registry.get(uid);
+      if (!entry) return null;
+      return { uid: entry.uid, element: entry.element, payload: entry.payload };
+    },
+
+    /**
+     * Shows a toast notification, reusing the internal Notification manager.
+     */
+    notify(message) {
+      Notification.show(message || {});
+    },
+
+    /**
+     * Adds a button to a content element's hover toolbar actions.
+     * buttonSpec: { html, label, href, onClick }
+     * Returns the created button, or null if the uid is unknown.
+     */
+    registerToolbarItem(uid, buttonSpec) {
+      const entry = Registry.get(uid);
+      const actions = entry?.toolbar?.querySelector('.frontend-edit__toolbar-actions');
+      if (!actions) return null;
+
+      const spec = buttonSpec || {};
+      const btn = document.createElement(spec.href ? 'a' : 'button');
+      btn.className = 'frontend-edit__btn frontend-edit__btn--custom';
+      if (!spec.href) btn.type = 'button';
+      if (spec.html) btn.innerHTML = spec.html;
+      if (spec.label) {
+        btn.setAttribute('aria-label', spec.label);
+        btn.dataset.tooltip = spec.label;
+        Tooltip.attach(btn);
+      }
+      if (spec.href && UI.isValidUrl(spec.href)) btn.href = spec.href;
+      if (typeof spec.onClick === 'function') btn.addEventListener('click', spec.onClick);
+
+      actions.appendChild(btn);
+      return btn;
+    },
+
+    /**
+     * Renders a persistent, hover-independent indicator on a content element's
+     * overlay. spec: { html | element, position, onClick }; position is one of
+     * 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' (default 'top-right').
+     * Returns the created badge, or null if the uid is unknown.
+     *
+     * This is deliberately minimal: stacking of multiple badges per element and
+     * a dedicated always-on-top badge layer are covered by a later iteration
+     * (issue #211); this appends directly into the existing position-tracked
+     * overlay, which is enough for a single badge per element today.
+     */
+    registerBadge(uid, spec) {
+      const entry = Registry.get(uid);
+      if (!entry) return null;
+
+      const badgeSpec = spec || {};
+      const badge = document.createElement('span');
+      badge.className = 'frontend-edit__badge frontend-edit__badge--' + (badgeSpec.position || 'top-right');
+      if (badgeSpec.element instanceof Element) {
+        badge.appendChild(badgeSpec.element);
+      } else if (badgeSpec.html) {
+        badge.innerHTML = badgeSpec.html;
+      }
+      if (typeof badgeSpec.onClick === 'function') {
+        badge.style.pointerEvents = 'auto';
+        badge.style.cursor = 'pointer';
+        badge.addEventListener('click', badgeSpec.onClick);
+      }
+
+      entry.overlay.appendChild(badge);
+      return badge;
+    },
+
+    /**
+     * Opens a backend URL in the version-appropriate container: the contextual
+     * sidebar (v14.2+, when enabled and available), the v13 iframe modal (via
+     * the export iframe_edit.js attaches to this namespace), or a new tab as
+     * a fallback. options:
+     * - target: 'tab' forces a new tab regardless of version
+     * - title, width: container chrome (width accepts a CSS length, e.g. '600px')
+     * - onClose({ reason }): called when the container closes
+     * - reloadOnClose: reload the parent page on close (default true)
+     * - linkPolicy: a rule or array of rules `{ match: string|RegExp, action }`,
+     *   action one of 'stay' | 'close' | 'ignore' | 'external', evaluated
+     *   against link clicks inside the embedded document. Only 'stay' (the
+     *   default when no rule matches) is honored for the built-in save/close
+     *   buttons of an actual edit form - those keep working unchanged.
+     */
+    openBackendView(url, options) {
+      if (!UI.isValidUrl(url)) return false;
+      const opts = options || {};
+
+      if (opts.target === 'tab') {
+        window.open(url, '_blank');
+        return true;
+      }
+
+      // Apply the same returnUrl flash-deferral marker record_edit forms get
+      // (see backend_stubs.js/ensureReturnUrl) to every view opened through
+      // this primitive, not only edit forms.
+      const finalUrl = typeof window.XimaFrontendEdit?.ensureReturnUrl === 'function'
+        ? window.XimaFrontendEdit.ensureReturnUrl(url)
+        : url;
+      const containerOptions = {
+        title: opts.title,
+        width: opts.width,
+        onClose: opts.onClose,
+        linkPolicy: opts.linkPolicy,
+        reloadOnClose: opts.reloadOnClose,
+      };
+
+      // FRONTEND_EDIT_SIDEBAR_EDIT (not the broader "contextual editing
+      // enabled" setting) is the correct gate: it is only true when the
+      // contextual sidebar route is actually available (v14.2+). On v13 it
+      // stays false even with contextual editing enabled, so the iframe
+      // modal below handles it instead - see
+      // ResourceRendererService::addSettingsConfig().
+      if (window.FRONTEND_EDIT_SIDEBAR_EDIT === true && window.ContextualEdit && window.ContextualEdit.sidebar) {
+        window.ContextualEdit.open(finalUrl, null, false, containerOptions);
+        return true;
+      }
+      if (typeof window.XimaFrontendEdit?.openModal === 'function') {
+        window.XimaFrontendEdit.openModal(finalUrl, containerOptions);
+        return true;
+      }
+      window.open(url, '_blank');
+      return true;
+    }
+  };
+
+  // Merge onto window.XimaFrontendEdit rather than assigning: backend_stubs.js
+  // (loaded first when the v13 iframe modal is enabled) already sets internal
+  // helpers (IFRAME_ID, ensureReturnUrl, openWizardOverlay) on this namespace -
+  // those are not part of the public API but must survive.
+  window.XimaFrontendEdit = Object.assign(window.XimaFrontendEdit || {}, PublicApi);
 
   /**
    * Data Service
@@ -1330,7 +1554,7 @@
       const effectiveShowContextMenu = showContextMenu && hasMenuChildren && !contentElement.menu.url;
 
       // Create overlay with toolbar
-      const { toolbar } = OverlayManager.createOverlay(uid, targetElement, contentElement, effectiveShowContextMenu, enableOutline);
+      const { overlay, toolbar } = OverlayManager.createOverlay(uid, targetElement, contentElement, effectiveShowContextMenu, enableOutline);
 
       // Create dropdown if needed
       let dropdown = null;
@@ -1341,6 +1565,17 @@
       }
       // Hover highlighting is handled centrally by OverlayManager's pointer
       // tracking (no per-element mouseenter/leave needed).
+
+      // Register under both the DOM anchor uid and the record's own uid (they
+      // differ when Renderer.render() applied translation mapping) so the
+      // public API can resolve elements by either.
+      const domUid = Number(uid);
+      const recordUid = Number(contentElement.element.uid) || domUid;
+      const entry = { uid: recordUid, element: targetElement, payload: contentElement, overlay, toolbar, dropdown };
+      Registry.set(domUid, entry);
+      if (recordUid !== domUid) Registry.set(recordUid, entry);
+
+      Events.dispatch('xfe:element-rendered', { uid: recordUid, element: targetElement, payload: contentElement, overlay, toolbar, dropdown });
     },
 
     setupKebabEvents(toolbar, dropdown) {
@@ -1360,6 +1595,7 @@
           await Dropdown.position(kebabBtn, dropdown);
           const firstItem = dropdown.querySelector('[role="menuitem"]');
           if (firstItem) firstItem.focus();
+          Events.dispatch('xfe:dropdown-open', { uid: Number(toolbar.dataset.cid) });
         }
       });
     }
@@ -1866,12 +2102,17 @@
           const dataItems = DataService.collectDataItems();
           const response = await DataService.fetchContentElements(dataItems);
 
+          Icons.populate(response.icons);
           Renderer.render(response.contentElements || {});
           ColumnTargetRenderer.render(response.columnTargets || []);
           Dropdown.setupGlobalHandler();
           DeleteHandler.init();
           DragReorder.init();
         }
+
+        // Fired unconditionally (even when frontend editing is disabled, with an
+        // empty element map) so consumers always get one reliable ready signal.
+        Events.dispatch('xfe:ready', { elements: Registry.snapshot() });
 
         Logger.log(`Frontend Edit initialization completed in ${Math.round(performance.now() - startTime)}ms`);
       } catch (error) {

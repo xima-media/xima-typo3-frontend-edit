@@ -49,6 +49,10 @@ After closing the edit form, I am redirected to the wrong frontend location (e.g
 
 This could be caused by a strict referer header in your request. If the return url could not be determined correctly, you can force the url generation by pid and language in the extension setting: :code:`forceReturnUrlGeneration`.
 
+**Cross-domain setups**
+
+If your frontend and backend run on different domains, the extension only accepts a :code:`returnUrl` whose host matches the current request or one of the site's configured base URLs (including per-language bases). A :code:`returnUrl` pointing at any other host is rejected with an HTTP 400 error instead of silently redirecting to the root page, so a rejected return url is a sign to check your site configuration's base URLs rather than a bug.
+
 .. rst-class:: panel panel-default
 
 I can't change the language within a content element.
