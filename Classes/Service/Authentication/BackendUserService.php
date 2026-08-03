@@ -78,6 +78,22 @@ final class BackendUserService
     }
 
     /**
+     * Check field-level access (non_exclude_fields), e.g. whether the user may
+     * change tt_content's "hidden" field. Distinct from hasRecordEditAccess(),
+     * which covers language access and editlock but not individual fields.
+     */
+    public function hasFieldAccess(string $table, string $field): bool
+    {
+        $backendUser = $this->getBackendUser();
+
+        if (null === $backendUser || null === $backendUser->user) {
+            return false;
+        }
+
+        return $backendUser->check('non_exclude_fields', $table.':'.$field);
+    }
+
+    /**
      * Check if frontend edit is disabled by the user's toggle (UC state).
      *
      * This reflects the user's personal on/off toggle and can be changed
