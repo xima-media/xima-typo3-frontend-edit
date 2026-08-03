@@ -19,7 +19,7 @@ use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
+use Xima\XimaTypo3FrontendEdit\Event\{FrontendEditDataEnrichmentEvent, FrontendEditDropdownModifyEvent};
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
@@ -90,6 +90,8 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
         $filteredElements = $this->contentElementFilter->filterContentElements($contentElements, $backendUser, $request);
 
+        $dataEnrichmentEvent = $this->dispatchDataEnrichmentEvent($filteredElements, $pid, $languageUid, $returnUrl);
+
         $enableScrollToElement = $this->settingsService->isEnableScrollToElement($request);
 
         // Remove existing URL fragment to prevent accumulation (e.g. page.html#c123#c456)
@@ -118,6 +120,8 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
                 continue;
             }
 
+            $this->applyElementDataEnrichment($contentElement, $dataEnrichmentEvent);
+
             $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request, $contextualUrl, $showInsertButtons, $canHide);
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
 
@@ -142,6 +146,39 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         }
 
         return $this->renderMenuButtons($result);
+    }
+
+    /**
+     * Dispatched once with the full filtered list (not per element) so a
+     * listener backed by a database can resolve its data in a single query
+     * instead of being invoked N times with no way to batch.
+     *
+     * @param array<int, array<string, mixed>> $filteredElements
+     */
+    private function dispatchDataEnrichmentEvent(array $filteredElements, int $pid, int $languageUid, string $returnUrl): FrontendEditDataEnrichmentEvent
+    {
+        $elementsByUid = [];
+        foreach ($filteredElements as $element) {
+            $elementsByUid[(int) $element['uid']] = $element;
+        }
+
+        /** @var FrontendEditDataEnrichmentEvent $event */
+        $event = $this->eventDispatcher->dispatch(
+            new FrontendEditDataEnrichmentEvent($elementsByUid, $pid, $languageUid, $returnUrl),
+        );
+
+        return $event;
+    }
+
+    /**
+     * @param array<string, mixed> $contentElement
+     */
+    private function applyElementDataEnrichment(array &$contentElement, FrontendEditDataEnrichmentEvent $event): void
+    {
+        $elementData = $event->getElementData((int) $contentElement['uid']);
+        if ([] !== $elementData) {
+            $contentElement['_ext'] = $elementData;
+        }
     }
 
     /**

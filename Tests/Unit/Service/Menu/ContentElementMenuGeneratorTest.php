@@ -31,7 +31,7 @@ use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
-use Xima\XimaTypo3FrontendEdit\Event\FrontendEditDropdownModifyEvent;
+use Xima\XimaTypo3FrontendEdit\Event\{FrontendEditDataEnrichmentEvent, FrontendEditDropdownModifyEvent};
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
@@ -267,9 +267,13 @@ final class ContentElementMenuGeneratorTest extends TestCase
 
         $replacementButton = new Button('replaced', \Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType::Link, '/replaced');
         $eventDispatcher = $this->createMock(EventDispatcher::class);
+        // getDropdown() also dispatches FrontendEditDataEnrichmentEvent - this
+        // callback must tolerate both event types, not just the one under test.
         $eventDispatcher->method('dispatch')->willReturnCallback(
-            static function (FrontendEditDropdownModifyEvent $event) use ($replacementButton): FrontendEditDropdownModifyEvent {
-                $event->setMenuButton($replacementButton);
+            static function (object $event) use ($replacementButton): object {
+                if ($event instanceof FrontendEditDropdownModifyEvent) {
+                    $event->setMenuButton($replacementButton);
+                }
 
                 return $event;
             },
@@ -281,6 +285,51 @@ final class ContentElementMenuGeneratorTest extends TestCase
 
         self::assertArrayHasKey(88, $result);
         self::assertSame('/replaced', $result[88]['menu']['url']);
+    }
+
+    #[Test]
+    public function getDropdownMergesDataEnrichmentEventDataIntoElement(): void
+    {
+        $this->setUpAuthenticatedBackendUser();
+        $this->setUpLanguageService();
+        $this->setUpTca();
+
+        $element = $this->createContentElementRecord(88);
+        $connectionPool = $this->createConnectionPoolReturning([$element]);
+
+        $eventDispatcher = $this->createMock(EventDispatcher::class);
+        $eventDispatcher->method('dispatch')->willReturnCallback(
+            static function (object $event): object {
+                if ($event instanceof FrontendEditDataEnrichmentEvent) {
+                    $event->addElementData(88, 'my_ext', ['color' => '#ff0000', 'count' => 3]);
+                }
+
+                return $event;
+            },
+        );
+
+        $generator = $this->createGenerator($connectionPool, $eventDispatcher);
+
+        $result = $generator->getDropdown(1, '/return', 0, $this->createRequestMock());
+
+        self::assertSame(['my_ext' => ['color' => '#ff0000', 'count' => 3]], $result[88]['element']['_ext']);
+    }
+
+    #[Test]
+    public function getDropdownOmitsExtKeyWhenNoListenerAttachedData(): void
+    {
+        $this->setUpAuthenticatedBackendUser();
+        $this->setUpLanguageService();
+        $this->setUpTca();
+
+        $element = $this->createContentElementRecord(88);
+        $connectionPool = $this->createConnectionPoolReturning([$element]);
+
+        $generator = $this->createGenerator($connectionPool);
+
+        $result = $generator->getDropdown(1, '/return', 0, $this->createRequestMock());
+
+        self::assertArrayNotHasKey('_ext', $result[88]['element']);
     }
 
     private function createRequestMock(): ServerRequestInterface
