@@ -1390,23 +1390,37 @@
 
       Logger.log(`Found ${allUids.size} content elements in DOM with id="c{uid}" pattern`);
 
-      // Second matching channel: data-frontend-edit="tt_content:{uid}" - for
+      // Second matching channel: data-frontend-edit="{table}:{uid}" - for
       // templates that cannot carry the id="c{uid}" anchor (DCE, custom Fluid
-      // templates; see the <xfe:editable> ViewHelper). These are direct
-      // targets: Renderer.render() skips anchor-sibling resolution for them.
+      // templates; see the <xfe:editable> ViewHelper). tt_content matches join
+      // the same _uids list as the anchor pattern (Renderer.render() skips
+      // anchor-sibling resolution for them - they are direct targets); any
+      // other table is a foreign record (see issue #216) collected separately,
+      // since the backend resolves and renders those through a different,
+      // deliberately thin edit+info+history-only path (Renderer.renderRecords()).
       const beforeDataAttributeScan = allUids.size;
+      const recordRefs = new Set();
       document.querySelectorAll('[data-frontend-edit]').forEach(element => {
-        const match = (element.getAttribute('data-frontend-edit') || '').match(/^tt_content:(\d+)$/);
-        if (match) {
-          const uid = parseInt(match[1], 10);
-          if (uid > 0) {
-            allUids.add(uid);
-          }
+        const match = (element.getAttribute('data-frontend-edit') || '').match(/^([a-z][a-z0-9_]*):(\d+)$/);
+        if (!match) return;
+
+        const [, table, uidString] = match;
+        const uid = parseInt(uidString, 10);
+        if (uid <= 0) return;
+
+        if ('tt_content' === table) {
+          allUids.add(uid);
+        } else {
+          recordRefs.add(`${table}:${uid}`);
         }
       });
 
       if (allUids.size > beforeDataAttributeScan) {
         Logger.log(`Found ${allUids.size - beforeDataAttributeScan} additional content element(s) via data-frontend-edit attribute`);
+      }
+      if (recordRefs.size > 0) {
+        dataItems._records = Array.from(recordRefs).sort();
+        Logger.log(`Found ${recordRefs.size} foreign record(s) via data-frontend-edit attribute`, { records: dataItems._records });
       }
 
       // Collect additional data from .frontend-edit__data elements
@@ -1643,6 +1657,47 @@
           if (firstItem) firstItem.focus();
           Events.dispatch('xfe:dropdown-open', { uid: Number(toolbar.dataset.cid) });
         }
+      });
+    },
+
+    /**
+     * Renders the deliberately thin edit+info+history menu for foreign
+     * records (see issue #216), matched exclusively via
+     * data-frontend-edit="{table}:{uid}" - never via the id="c{uid}" anchor
+     * pattern, so there is no anchor-sibling/translation-uid resolution to
+     * do here (the backend already resolved the correct-language record;
+     * the response key is always the same "{table}:{uid}" string the
+     * template rendered, so a direct attribute lookup is enough).
+     *
+     * Deliberately NOT routed through setupContentElement()/Registry: the
+     * Registry keys elements by Number(uid), which would collapse every
+     * "table:uid" string to the same NaN key. Reuses OverlayManager/UI
+     * directly instead - both already operate on the DOM element and a
+     * plain identifier, with no assumption that the identifier is numeric.
+     */
+    renderRecords(records) {
+      if (!records || 0 === Object.keys(records).length) return;
+
+      // Always the full kebab menu, regardless of FRONTEND_EDIT_SHOW_CONTEXT_MENU:
+      // unlike tt_content, a foreign record has no "simple edit href" shortcut -
+      // RecordMenuGenerator (PHP) always returns the full edit+info+history tree.
+      const enableOutline = window.FRONTEND_EDIT_ENABLE_OUTLINE !== false;
+
+      Object.entries(records).forEach(([key, record]) => {
+        if (!record || !record.menu || !record.element) return;
+
+        const targetElement = document.querySelector(`[data-frontend-edit="${key}"]`);
+        if (!targetElement) {
+          Logger.log(`Foreign record DOM assignment failed: no element for ${key}`, null, 'warn');
+          return;
+        }
+
+        const { toolbar } = OverlayManager.createOverlay(key, targetElement, record, true, enableOutline);
+        const dropdown = UI.createDropdown(key, record);
+        document.body.appendChild(dropdown);
+        this.setupKebabEvents(toolbar, dropdown);
+
+        Logger.log(`Foreign record DOM assignment successful: ${key}`);
       });
     }
   };
@@ -2150,6 +2205,7 @@
 
           Icons.populate(response.icons);
           Renderer.render(response.contentElements || {});
+          Renderer.renderRecords(response.records || {});
           ColumnTargetRenderer.render(response.columnTargets || []);
           Dropdown.setupGlobalHandler();
           DeleteHandler.init();
