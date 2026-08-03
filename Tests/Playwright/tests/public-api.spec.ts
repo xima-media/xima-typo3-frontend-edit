@@ -120,13 +120,121 @@ test('registerBadge renders a persistent indicator independent of hover', async 
     });
   }, CONTENT_ELEMENT_UID);
 
-  const badge = page.locator(`.frontend-edit__overlay[data-cid="${CONTENT_ELEMENT_UID}"] .frontend-edit__badge`);
+  const overlay = page.locator(`.frontend-edit__overlay[data-cid="${CONTENT_ELEMENT_UID}"]`);
+  const badge = overlay.locator('.frontend-edit__badge');
   await expect(badge).toHaveCount(1);
-  await expect(badge).toHaveClass(/frontend-edit__badge--top-left/);
+  await expect(overlay.locator('.frontend-edit__badge-slot--top-left')).toHaveCount(1);
 
   // Not hovering the element: the badge must stay visible, unlike the
   // hover-gated toolbar/outline (opacity 0 until OverlayManager activates it).
   await expect(badge).toBeVisible();
+});
+
+test('registerBadge: multiple badges in one corner stack instead of overlapping', async ({ page }) => {
+  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
+  await page.goto('/');
+  await editInfoResponse;
+
+  await page.evaluate((uid) => {
+    const dot = (color: string) => `<span style="display:inline-block;width:8px;height:8px;background:${color};border-radius:50%;"></span>`;
+    (window as any).XimaFrontendEdit.registerBadge(uid, { html: dot('red'), position: 'top-right' });
+    (window as any).XimaFrontendEdit.registerBadge(uid, { html: dot('blue'), position: 'top-right' });
+  }, CONTENT_ELEMENT_UID);
+
+  const slot = page.locator(`.frontend-edit__overlay[data-cid="${CONTENT_ELEMENT_UID}"] .frontend-edit__badge-slot--top-right`);
+  const badges = slot.locator('.frontend-edit__badge');
+  await expect(badges).toHaveCount(2);
+
+  // Predictable layout, not overlapping: the second badge sits to the right
+  // of the first (the slot is a flex row).
+  const firstBox = await badges.nth(0).boundingBox();
+  const secondBox = await badges.nth(1).boundingBox();
+  expect(firstBox).not.toBeNull();
+  expect(secondBox).not.toBeNull();
+  expect(secondBox!.x).toBeGreaterThan(firstBox!.x);
+});
+
+test('registerBadge: a repeat call with the same id replaces the badge in place, not a duplicate', async ({ page }) => {
+  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
+  await page.goto('/');
+  await editInfoResponse;
+
+  await page.evaluate((uid) => {
+    (window as any).XimaFrontendEdit.registerBadge(uid, { html: '<span>1</span>', id: 'comment-count', position: 'top-right' });
+    (window as any).XimaFrontendEdit.registerBadge(uid, { html: '<span>2</span>', id: 'comment-count', position: 'top-right' });
+  }, CONTENT_ELEMENT_UID);
+
+  const slot = page.locator(`.frontend-edit__overlay[data-cid="${CONTENT_ELEMENT_UID}"] .frontend-edit__badge-slot--top-right`);
+  await expect(slot.locator('.frontend-edit__badge')).toHaveCount(1);
+  await expect(slot.locator('.frontend-edit__badge')).toHaveText('2');
+});
+
+test('registerBadge: an interactive badge does not drop the toolbar highlight on hover', async ({ page }) => {
+  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
+  await page.goto('/');
+  await editInfoResponse;
+
+  await page.evaluate((uid) => {
+    (window as any).XimaFrontendEdit.registerBadge(uid, {
+      html: '<span style="display:inline-block;width:12px;height:12px;">B</span>',
+      position: 'top-right',
+      onClick: () => {},
+    });
+  }, CONTENT_ELEMENT_UID);
+
+  const hoverMenu = new HoverMenu(page);
+  await hoverMenu.hover(CONTENT_ELEMENT_UID);
+  const toolbar = hoverMenu.toolbar(CONTENT_ELEMENT_UID);
+  await expect(toolbar).toHaveCSS('opacity', '1');
+
+  const badge = page.locator(`.frontend-edit__overlay[data-cid="${CONTENT_ELEMENT_UID}"] .frontend-edit__badge`);
+  await badge.hover();
+  // Moving onto the interactive badge must not deactivate the overlay -
+  // the toolbar stays visible (see the updateActiveFromPointer guard fix).
+  await expect(toolbar).toHaveCSS('opacity', '1');
+});
+
+test('registerBadge: the badge slot stays aligned with its content element after scrolling', async ({ page }) => {
+  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
+  await page.goto('/');
+  await editInfoResponse;
+
+  await page.evaluate((uid) => {
+    (window as any).XimaFrontendEdit.registerBadge(uid, {
+      html: '<span style="display:inline-block;width:8px;height:8px;background:red;"></span>',
+      position: 'top-right',
+    });
+  }, CONTENT_ELEMENT_UID);
+
+  const element = page.locator(`#c${CONTENT_ELEMENT_UID}`);
+  const badge = page.locator(`.frontend-edit__overlay[data-cid="${CONTENT_ELEMENT_UID}"] .frontend-edit__badge`);
+
+  const offsetBefore = (await badge.boundingBox())!.y - (await element.boundingBox())!.y;
+
+  // The slot is a plain DOM child of the position-tracked overlay - no
+  // badge-specific scroll handling exists, so this proves that inherited
+  // tracking actually still applies after the CSS restructuring in this issue.
+  await page.mouse.wheel(0, 300);
+  await page.waitForTimeout(100); // OverlayManager's scroll handler is rAF-throttled
+
+  const offsetAfter = (await badge.boundingBox())!.y - (await element.boundingBox())!.y;
+  expect(Math.abs(offsetAfter - offsetBefore)).toBeLessThan(1);
+});
+
+test('setBadgeMode sets the data-xfe-badge-mode attribute for consumer CSS to key off', async ({ page }) => {
+  await page.goto('/');
+
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-xfe-badge-mode'))).toBeNull();
+
+  await page.evaluate(() => (window as any).XimaFrontendEdit.setBadgeMode('prominent'));
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-xfe-badge-mode'))).toBe('prominent');
+
+  await page.evaluate(() => (window as any).XimaFrontendEdit.setBadgeMode('subtle'));
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-xfe-badge-mode'))).toBe('subtle');
+
+  // Unknown values fall back to 'subtle' rather than setting garbage.
+  await page.evaluate(() => (window as any).XimaFrontendEdit.setBadgeMode('nonsense'));
+  expect(await page.evaluate(() => document.documentElement.getAttribute('data-xfe-badge-mode'))).toBe('subtle');
 });
 
 test('notify shows a toast notification', async ({ page }) => {

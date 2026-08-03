@@ -153,18 +153,32 @@
     opacity: 1;
 }
 
-/* Public API: persistent badge (PublicApi.registerBadge) - unlike the outline
-   and toolbar above, badges stay visible regardless of hover state. */
-.frontend-edit__badge {
+/* Public API: persistent badges (PublicApi.registerBadge) - unlike the
+   outline and toolbar above, badges stay visible regardless of hover state.
+   Each corner is its own slot; multiple badges in one corner lay out in a
+   row, in registration order, instead of overlapping. The slot itself never
+   intercepts pointer events - only individual interactive badges (onClick)
+   opt back in, scoped to the badge itself. */
+.frontend-edit__badge-slot {
     position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 4px;
     pointer-events: none;
     z-index: 2;
 }
 
-.frontend-edit__badge--top-left { top: -6px; left: -6px; }
-.frontend-edit__badge--top-right { top: -6px; right: -6px; }
-.frontend-edit__badge--bottom-left { bottom: -6px; left: -6px; }
-.frontend-edit__badge--bottom-right { bottom: -6px; right: -6px; }
+/* Offset further than the toolbar-label/-actions pills (which sit at
+   top: 0 with a translateY(-50%) straddle) so a persistent badge doesn't
+   visually collide with them while the toolbar is visible on hover. */
+.frontend-edit__badge-slot--top-left { top: -14px; left: -6px; }
+.frontend-edit__badge-slot--top-right { top: -14px; right: -6px; }
+.frontend-edit__badge-slot--bottom-left { bottom: -6px; left: -6px; }
+.frontend-edit__badge-slot--bottom-right { bottom: -6px; right: -6px; }
+
+.frontend-edit__badge {
+    pointer-events: none;
+}
 
 /* Element: toolbar - invisible container for label and actions */
 .frontend-edit__toolbar {
