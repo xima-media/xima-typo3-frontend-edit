@@ -31,7 +31,7 @@ Is the Frontend Edit site set included in your site configuration? Check the Sit
 
 **Content Element IDs**
 
-Make sure that the content element "c-ids" (Content Element IDs) are available within your frontend template, e.g. "c908".
+Make sure that the content element "c-ids" (Content Element IDs) are available within your frontend template, e.g. "c908" - or use the ``data-frontend-edit`` attribute instead. See :ref:`How it works <how-it-works>` and :ref:`Setup requirements & limits <setup-requirements-and-limits>` (headless/SPA frontends are an explicit non-goal, for the same reason).
 
 **Content Element on current Page**
 
@@ -53,6 +53,8 @@ This could be caused by a strict referer header in your request. If the return u
 
 If your frontend and backend run on different domains, the extension only accepts a :code:`returnUrl` whose host matches the current request or one of the site's configured base URLs (including per-language bases). A :code:`returnUrl` pointing at any other host is rejected with an HTTP 400 error instead of silently redirecting to the root page, so a rejected return url is a sign to check your site configuration's base URLs rather than a bug.
 
+See :ref:`Setup requirements & limits <setup-requirements-and-limits>` for the full picture of how ``returnUrl`` is validated, especially in multi-domain setups.
+
 .. rst-class:: panel panel-default
 
 I can't change the language within a content element.
@@ -72,6 +74,8 @@ You can have a look at the `cookieDomain` setting to set a more flexible domain 
 See https://docs.typo3.org/m/typo3/reference-coreapi/13.4/en-us/Configuration/Typo3ConfVars/SYS.html#confval-globals-typo3-conf-vars-sys-cookiedomain
 
 Alternatively, you can use the `multisite_belogin <https://extensions.typo3.org/extension/multisite_belogin>`__ extension, which provides backend login support across multiple domains without requiring shared cookie domains.
+
+See :ref:`Setup requirements & limits <setup-requirements-and-limits>` for the full picture of multi-domain setups (including ``SameSite`` and ``returnUrl`` behavior).
 
 .. rst-class:: panel panel-default
 
