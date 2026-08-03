@@ -23,6 +23,7 @@ use TYPO3\CMS\Core\Site\Entity\SiteLanguage;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditPageDropdownModifyEvent;
+use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\UrlBuilderService;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 
@@ -40,6 +41,7 @@ final class PageMenuGenerator extends AbstractMenuGenerator
         ExtensionConfiguration $extensionConfiguration,
         private readonly ConnectionPool $connectionPool,
         private readonly UrlBuilderService $urlBuilderService,
+        private readonly BackendUserService $backendUserService,
     ) {
         parent::__construct($extensionConfiguration);
     }
@@ -74,10 +76,15 @@ final class PageMenuGenerator extends AbstractMenuGenerator
             $this->pageButtonBuilder->addInfoSection($menuButton, $pageRecord);
         }
 
-        $contextualUrl = $this->urlBuilderService->isContextualEditRouteAvailable()
+        // Gated on the same access checks TYPO3 core enforces when the edit form is
+        // opened; showing the button regardless would let the click fail with a
+        // backend error page instead of the button simply not being there.
+        $canEditPageProperties = null !== $pageRecord && $this->backendUserService->hasPageEditAccess($pageRecord);
+
+        $contextualUrl = $canEditPageProperties && $this->urlBuilderService->isContextualEditRouteAvailable()
             ? $this->urlBuilderService->buildContextualEditUrl($pid, 'pages', $languageUid, $returnUrl)
             : null;
-        $this->pageButtonBuilder->addEditSection($menuButton, $pid, $languageUid, $returnUrl, $contextualUrl);
+        $this->pageButtonBuilder->addEditSection($menuButton, $pid, $languageUid, $returnUrl, $contextualUrl, $canEditPageProperties);
         $this->pageButtonBuilder->addActionSection($menuButton, $pid, $returnUrl);
 
         /** @var FrontendEditPageDropdownModifyEvent $event */
@@ -105,7 +112,7 @@ final class PageMenuGenerator extends AbstractMenuGenerator
             ->getQueryBuilderForTable('pages');
 
         $result = $queryBuilder
-            ->select('uid', 'title', 'doktype')
+            ->select('uid', 'title', 'doktype', 'perms_userid', 'perms_groupid', 'perms_user', 'perms_group', 'perms_everybody')
             ->from('pages')
             ->where(
                 $queryBuilder->expr()->eq('uid', $queryBuilder->createNamedParameter($pid, Connection::PARAM_INT)),
