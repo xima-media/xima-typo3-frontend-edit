@@ -47,7 +47,7 @@ final class AjaxControllerTest extends FunctionalTestCase
 
     protected function tearDown(): void
     {
-        unset($GLOBALS['BE_USER']);
+        unset($GLOBALS['BE_USER'], $GLOBALS['LANG']);
 
         parent::tearDown();
     }
@@ -179,6 +179,33 @@ final class AjaxControllerTest extends FunctionalTestCase
     }
 
     #[Test]
+    public function editInformationActionReturns400OnForeignReturnUrlHost(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $response = $this->subject->editInformationAction($this->createRequest([
+            'pid' => '1',
+            'returnUrl' => 'https://evil.example/',
+        ]));
+
+        self::assertSame(400, $response->getStatusCode());
+        self::assertArrayHasKey('error', $this->decode($response));
+    }
+
+    #[Test]
+    public function editInformationActionAcceptsSameOriginAbsoluteReturnUrl(): void
+    {
+        $this->setUpBackendUser(1);
+
+        $response = $this->subject->editInformationAction($this->createRequest([
+            'pid' => '1',
+            'returnUrl' => 'https://example.com/return',
+        ]));
+
+        self::assertSame(200, $response->getStatusCode());
+    }
+
+    #[Test]
     public function editInformationActionReturns400OnInvalidJsonBody(): void
     {
         $this->setUpBackendUser(1);
@@ -291,6 +318,27 @@ final class AjaxControllerTest extends FunctionalTestCase
         $payload = $this->decode($response);
 
         self::assertSame([], $payload['records']);
+    }
+
+    #[Test]
+    public function editInformationActionOmitsHideButtonForRestrictedEditor(): void
+    {
+        $this->importCSVDataSet(__DIR__.'/Fixtures/be_groups.csv');
+        $this->importCSVDataSet(__DIR__.'/Fixtures/tt_content.csv');
+        $backendUser = $this->setUpBackendUser(2);
+        $GLOBALS['LANG'] = $this->get(LanguageServiceFactory::class)->createFromUserPreferences($backendUser);
+
+        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '1', 'returnUrl' => '/']));
+
+        $payload = $this->decode($response);
+        $menuChildren = $payload['contentElements'][10]['menu']['children'] ?? [];
+
+        self::assertArrayNotHasKey('hide', $menuChildren);
+        self::assertArrayHasKey('delete', $menuChildren);
+        $menuChildren = $payload['contentElements'][10]['menu']['children'] ?? [];
+
+        self::assertArrayNotHasKey('hide', $menuChildren);
+        self::assertArrayHasKey('delete', $menuChildren);
     }
 
     #[Test]

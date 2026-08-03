@@ -21,6 +21,29 @@
     }
   }
 
+  // Resolves the linkPolicy action for a URL - see PublicApi.openBackendView
+  // in frontend_edit.js. First matching rule wins; no match returns null.
+  function matchLinkPolicy(rules, href) {
+    if (!Array.isArray(rules)) return null;
+    for (var i = 0; i < rules.length; i++) {
+      var rule = rules[i];
+      if (!rule || !rule.action) continue;
+      var isMatch = rule.match instanceof RegExp
+        ? rule.match.test(href)
+        : (typeof rule.match === 'string' && href.indexOf(rule.match) !== -1);
+      if (isMatch) return rule.action;
+    }
+    return null;
+  }
+
+  // Only a plain CSS length is accepted (no arbitrary CSS injection via the
+  // public API's `width` option) - a bare number is treated as pixels.
+  function sanitizeWidth(value) {
+    if (typeof value === 'number' && isFinite(value) && value > 0) return value + 'px';
+    if (typeof value === 'string' && /^\d+(\.\d+)?(px|%|vw|rem|em)$/.test(value.trim())) return value.trim();
+    return '';
+  }
+
   var ContextualEdit = {
     sidebar: null,
     iframe: null,
@@ -31,6 +54,11 @@
     hasSaved: false,
     savedRecordTitle: null,
     targetBlank: false,
+    // Set by open() only when called with options (PublicApi.openBackendView);
+    // stays null for the classic edit flow (frontend_edit.js/sticky_toolbar.js
+    // call open() with no 4th argument), so none of the behavior below ever
+    // engages for those.
+    view: null,
 
     init: function () {
       this.provideTopLevelStubs();
@@ -158,18 +186,66 @@
           }
         }
         this.enhanceIframeUI();
+        this.installLinkPolicy();
       } catch (e) {
         // Cross-origin, access error, or invalid URL
       }
     },
 
-    open: function (contextualUrl, uid, targetBlank) {
+    /**
+     * Applies the consumer-supplied linkPolicy (PublicApi.openBackendView) for
+     * a generic backend view. No-op when the sidebar was opened without one -
+     * which is always the case for the classic edit flow, so its own click
+     * handling (postMessage-based save/close) is entirely unaffected.
+     */
+    installLinkPolicy: function () {
+      if (!this.view || !this.view.linkPolicy) return;
+      try {
+        var doc = this.iframe.contentDocument;
+        if (!doc || doc._xfeLinkPolicyInstalled) return;
+        doc._xfeLinkPolicyInstalled = true;
+        var self = this;
+        doc.addEventListener('click', function (e) {
+          if (!self.view || !self.view.linkPolicy) return;
+          var link = e.target.closest ? e.target.closest('a[href]') : null;
+          if (!link) return;
+
+          var action = matchLinkPolicy(self.view.linkPolicy, link.href);
+          if (!action || action === 'stay') return;
+
+          e.preventDefault();
+          e.stopPropagation();
+          if (action === 'external') {
+            window.open(link.href, '_blank');
+          } else if (action === 'close') {
+            self.close();
+          }
+          // 'ignore' — already prevented, nothing further to do.
+        }, true);
+      } catch (e) {
+        log('Could not install link policy', { error: e.message }, 'warn');
+      }
+    },
+
+    open: function (contextualUrl, uid, targetBlank, options) {
       log('Opening contextual edit for uid ' + uid);
       this._triggerElement = document.activeElement;
       clearTimeout(this.resetTimeout);
       this.hasSaved = false;
       this.savedRecordTitle = null;
       this.targetBlank = targetBlank || false;
+
+      var opts = options || {};
+      this.view = (opts.title || opts.width || opts.onClose || opts.linkPolicy || opts.reloadOnClose !== undefined) ? {
+        onClose: typeof opts.onClose === 'function' ? opts.onClose : null,
+        linkPolicy: opts.linkPolicy ? (Array.isArray(opts.linkPolicy) ? opts.linkPolicy : [opts.linkPolicy]) : null,
+        reloadOnClose: opts.reloadOnClose !== false
+      } : null;
+
+      this.sidebar.setAttribute('aria-label', opts.title || 'Edit content');
+      this.iframe.setAttribute('title', opts.title || 'Edit content');
+      this.sidebar.style.width = sanitizeWidth(opts.width);
+
       this.closeButton.style.display = '';
       this.loader.classList.add('frontend-edit__sidebar-loader--visible');
       this.iframe.classList.remove('frontend-edit__sidebar-iframe--loaded');
@@ -188,12 +264,22 @@
       // Capture UID before destroying iframe
       var uid = this.hasSaved ? this.getEditedElementUid() : null;
 
+      // Captured now (not read from `this` below) so a fresh open() during
+      // the close sequence can't retroactively change which view's
+      // callback/reload-preference fires for THIS close.
+      var view = this.view;
+      this.view = null;
+
       // Destroy iframe immediately to prevent flash message consumption
       if (this.iframe) {
         this.iframe.src = 'about:blank';
         if (this.iframe.parentNode) {
           this.iframe.parentNode.removeChild(this.iframe);
         }
+      }
+
+      if (view && typeof view.onClose === 'function') {
+        view.onClose({ reason: this.hasSaved ? 'saved' : 'close' });
       }
 
       if (this.hasSaved) {
@@ -206,6 +292,11 @@
         } else {
           window.location.reload();
         }
+      } else if (view && view.reloadOnClose) {
+        // Only the generic-view path (view set by PublicApi.openBackendView)
+        // reaches here - the classic edit flow never sets `view`, so it keeps
+        // its existing "close without reloading" behavior unchanged.
+        window.location.reload();
       } else {
         document.body.classList.remove('frontend-edit__sidebar-active');
         this.recreateIframe();
