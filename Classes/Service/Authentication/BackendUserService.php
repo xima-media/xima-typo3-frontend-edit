@@ -94,6 +94,48 @@ final class BackendUserService
     }
 
     /**
+     * Check if the backend user can actually edit this page's properties.
+     *
+     * Combines the checks TYPO3 core's DatabaseUserPermissionCheck performs when the
+     * "Edit page properties" form is opened (tables_modify, the page's PAGE_EDIT
+     * permission bit, and pagetypes_select for its doktype) with hasRecordEditAccess()
+     * (editlock, language access, authMode fields — the same check ContentElementFilter
+     * uses for tt_content). Without this, a user missing any of these rights still sees
+     * the edit button and only learns about it from a backend error page after clicking it.
+     *
+     * @param array<string, mixed> $pageRecord must be the full pages row: besides
+     *                                         perms_userid/perms_groupid/perms_user/perms_group/
+     *                                         perms_everybody and doktype, hasRecordEditAccess()
+     *                                         also needs editlock and sys_language_uid
+     */
+    public function hasPageEditAccess(array $pageRecord): bool
+    {
+        $backendUser = $this->getBackendUser();
+
+        if (null === $backendUser || null === $backendUser->user) {
+            return false;
+        }
+
+        if ($backendUser->isAdmin()) {
+            return true;
+        }
+
+        if (!$backendUser->check('tables_modify', 'pages')) {
+            return false;
+        }
+
+        if (!(new Permission($backendUser->calcPerms($pageRecord)))->editPagePermissionIsGranted()) {
+            return false;
+        }
+
+        if (!$backendUser->check('pagetypes_select', (string) ($pageRecord['doktype'] ?? 1))) {
+            return false;
+        }
+
+        return $this->hasRecordEditAccess('pages', $pageRecord);
+    }
+
+    /**
      * Check if frontend edit is disabled by the user's toggle (UC state).
      *
      * This reflects the user's personal on/off toggle and can be changed

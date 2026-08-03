@@ -20,6 +20,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use stdClass;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
+use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Database\Query\Expression\ExpressionBuilder;
@@ -32,6 +33,7 @@ use TYPO3\CMS\Core\Routing\PageArguments;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Event\FrontendEditPageDropdownModifyEvent;
+use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\{PageButtonBuilder, PageMenuGenerator};
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
@@ -47,10 +49,15 @@ use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
 #[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class PageMenuGeneratorTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        $this->setUpBackendUserAsAdmin();
+    }
+
     protected function tearDown(): void
     {
         GeneralUtility::purgeInstances();
-        unset($GLOBALS['LANG'], $GLOBALS['TCA']);
+        unset($GLOBALS['LANG'], $GLOBALS['TCA'], $GLOBALS['BE_USER']);
     }
 
     #[Test]
@@ -132,7 +139,28 @@ final class PageMenuGeneratorTest extends TestCase
 
         self::assertArrayHasKey('children', $result);
         self::assertArrayNotHasKey('info_header', $result['children']);
-        self::assertArrayHasKey('edit_page_properties', $result['children']);
+        // Without a page record there's nothing to run the edit-access check
+        // against, so the edit button is omitted rather than shown regardless.
+        self::assertArrayNotHasKey('edit_page_properties', $result['children']);
+    }
+
+    #[Test]
+    public function getDropdownOmitsEditPagePropertiesWhenUserLacksPageEditAccess(): void
+    {
+        $this->setUpLanguageService();
+        $this->setUpTca();
+
+        $connectionPool = $this->createConnectionPoolReturning(['uid' => 5, 'title' => 'My Page', 'doktype' => 1]);
+        $this->setUpBackendUserWithoutPageEditAccess();
+        $generator = $this->createGenerator($connectionPool);
+
+        $result = $generator->getDropdown($this->createRequest(5));
+
+        self::assertArrayNotHasKey('edit_page_properties', $result['children']);
+        // Info and the Page Layout link aren't gated by page-edit access, only
+        // the record-edit action that would otherwise fail in the DataHandler.
+        self::assertArrayHasKey('info_header', $result['children']);
+        self::assertArrayHasKey('edit_page', $result['children']);
     }
 
     #[Test]
@@ -227,6 +255,28 @@ final class PageMenuGeneratorTest extends TestCase
         return $connectionPool;
     }
 
+    /**
+     * BackendUserService is final and wraps $GLOBALS['BE_USER'] directly, so tests
+     * control its behavior through a mocked BackendUserAuthentication rather than
+     * mocking the service itself (mirrors ContentElementMenuGeneratorTest).
+     */
+    private function setUpBackendUserAsAdmin(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('isAdmin')->willReturn(true);
+        $GLOBALS['BE_USER'] = $backendUser;
+    }
+
+    private function setUpBackendUserWithoutPageEditAccess(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $backendUser->method('isAdmin')->willReturn(false);
+        $backendUser->method('check')->with('tables_modify', 'pages')->willReturn(false);
+        $GLOBALS['BE_USER'] = $backendUser;
+    }
+
     private function createGenerator(
         ?ConnectionPool $connectionPool = null,
         ?EventDispatcher $eventDispatcher = null,
@@ -248,6 +298,7 @@ final class PageMenuGeneratorTest extends TestCase
             $this->createMock(ExtensionConfiguration::class),
             $connectionPool ?? $this->createMock(ConnectionPool::class),
             $urlBuilderService,
+            new BackendUserService(),
         );
     }
 }
