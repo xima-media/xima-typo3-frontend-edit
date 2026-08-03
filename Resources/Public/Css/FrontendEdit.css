@@ -153,6 +153,19 @@
     opacity: 1;
 }
 
+/* Public API: persistent badge (PublicApi.registerBadge) - unlike the outline
+   and toolbar above, badges stay visible regardless of hover state. */
+.frontend-edit__badge {
+    position: absolute;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.frontend-edit__badge--top-left { top: -6px; left: -6px; }
+.frontend-edit__badge--top-right { top: -6px; right: -6px; }
+.frontend-edit__badge--bottom-left { bottom: -6px; left: -6px; }
+.frontend-edit__badge--bottom-right { bottom: -6px; right: -6px; }
+
 /* Element: toolbar - invisible container for label and actions */
 .frontend-edit__toolbar {
     position: absolute;
