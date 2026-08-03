@@ -132,6 +132,32 @@ final class PageButtonBuilderTest extends TestCase
     }
 
     #[Test]
+    public function addEditSectionOmitsEditPagePropertiesWhenNotAllowed(): void
+    {
+        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
+        $menuButton = new Button('Menu', ButtonType::Menu);
+
+        $builder->addEditSection($menuButton, 1, 0, '/return', canEditPageProperties: false);
+
+        $children = $menuButton->getChildren();
+        self::assertArrayNotHasKey('edit_page_properties', $children);
+        // The Page Layout link isn't gated the same way — it's a module link,
+        // not a record edit action, so it stays regardless.
+        self::assertArrayHasKey('edit_page', $children);
+    }
+
+    #[Test]
+    public function addEditSectionIgnoresContextualUrlWhenNotAllowed(): void
+    {
+        $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
+        $menuButton = new Button('Menu', ButtonType::Menu);
+
+        $builder->addEditSection($menuButton, 1, 0, '/return', '/typo3/contextual', false);
+
+        self::assertArrayNotHasKey('edit_page_properties', $menuButton->getChildren());
+    }
+
+    #[Test]
     public function addActionSectionAddsInfoAndHistoryButtons(): void
     {
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());

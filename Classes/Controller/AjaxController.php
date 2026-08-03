@@ -23,11 +23,16 @@ use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\{ContentMoveService, EmptyColumnService};
-use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementMenuGenerator;
+use Xima\XimaTypo3FrontendEdit\Service\Menu\{ContentElementMenuGenerator, RecordMenuGenerator};
+use Xima\XimaTypo3FrontendEdit\Service\Security\ReturnUrlValidator;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\IconDeduplicationService;
 
+use function array_slice;
 use function in_array;
 use function is_array;
 use function is_scalar;
+use function is_string;
+use function preg_match;
 
 /**
  * AjaxController.
@@ -40,10 +45,13 @@ readonly class AjaxController
 {
     public function __construct(
         private ContentElementMenuGenerator $contentElementMenuGenerator,
+        private RecordMenuGenerator $recordMenuGenerator,
         private BackendUserService $backendUserService,
         private EmptyColumnService $emptyColumnService,
         private SettingsService $settingsService,
         private ContentMoveService $contentMoveService,
+        private ReturnUrlValidator $returnUrlValidator,
+        private IconDeduplicationService $iconDeduplicationService,
     ) {}
 
     /**
@@ -119,6 +127,9 @@ readonly class AjaxController
         if ('' === $returnUrl) {
             return new JsonResponse(['error' => 'Missing required parameter: returnUrl'], 400);
         }
+        if (!$this->returnUrlValidator->isValid($returnUrl, $request, $pid)) {
+            return new JsonResponse(['error' => 'Invalid parameter: returnUrl host not allowed'], 400);
+        }
 
         if (!$this->backendUserService->hasPageAccess($pid)) {
             return new JsonResponse([]);
@@ -131,6 +142,7 @@ readonly class AjaxController
         }
 
         $dropdown = $this->contentElementMenuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
+        $deduplicated = $this->iconDeduplicationService->deduplicate($dropdown);
 
         $columnTargets = $this->emptyColumnService->getColumnTargets(
             $pid,
@@ -140,9 +152,16 @@ readonly class AjaxController
             $this->settingsService->isShowInsertButtons($request),
         );
 
+        $recordReferences = $this->extractValidatedRecordReferences($data);
+        $records = [] !== $recordReferences
+            ? $this->recordMenuGenerator->getDropdown($recordReferences, $languageUid, $returnUrl)
+            : [];
+
         return new JsonResponse([
-            'contentElements' => $dropdown,
+            'contentElements' => $deduplicated['contentElements'],
             'columnTargets' => $columnTargets,
+            'records' => $records,
+            'icons' => $deduplicated['icons'],
         ]);
     }
 
@@ -198,6 +217,42 @@ readonly class AjaxController
     protected function getBackendUser(): ?BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'] ?? null;
+    }
+
+    /**
+     * Parses and validates `data-frontend-edit="{table}:{uid}"` references
+     * collected client-side (DataService.collectDataItems() in
+     * frontend_edit.js) for tables other than tt_content, which keeps using
+     * the existing `_uids` path.
+     *
+     * @param array<int|string, mixed> $data
+     *
+     * @return array<int, array{table: string, uid: int}>
+     */
+    private function extractValidatedRecordReferences(array $data): array
+    {
+        if (!isset($data['_records']) || !is_array($data['_records'])) {
+            return [];
+        }
+
+        $references = [];
+        $seen = [];
+        foreach ($data['_records'] as $entry) {
+            if (!is_string($entry) || 1 !== preg_match('/^([a-z][a-z0-9_]*):([1-9]\d*)$/', $entry, $matches)) {
+                continue;
+            }
+
+            $table = $matches[1];
+            if ('tt_content' === $table || isset($seen[$entry])) {
+                continue;
+            }
+
+            $seen[$entry] = true;
+            $references[] = ['table' => $table, 'uid' => (int) $matches[2]];
+        }
+
+        // Limit to 100 references to prevent DoS attacks (mirrors extractValidatedUids's 500 cap).
+        return array_slice($references, 0, 100);
     }
 
     /**

@@ -4,6 +4,9 @@
        light and dark page layouts (the brown dialog color did not). */
     --xfe-dnd-accent: #2d7ff9;
     --xfe-toolbar-bg: rgba(50, 50, 50, 0.95);
+    /* Toolbar-button border: its own value because #767676 (the page outline
+       color) only reaches ~2.8:1 on the dark fill, below the 3:1 non-text target. */
+    --xfe-toolbar-border-color: #aaaaaa;
     --xfe-toolbar-text: #ffffff;
     --xfe-toolbar-btn-hover: rgba(255, 255, 255, 0.15);
     --xfe-bg-primary: #ffffff;
@@ -11,7 +14,7 @@
     --xfe-text-primary: #1a1a1a;
     --xfe-text-secondary: #666666;
     --xfe-border-color: #e0e0e0;
-    --xfe-outline-color: #aaaaaa;
+    --xfe-outline-color: #767676;
     --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     --xfe-dialog-overlay-bg: rgba(0, 0, 0, 0.5);
     --xfe-dialog-bg: #ffffff;
@@ -33,6 +36,8 @@
 /* Light theme (explicit) */
 [data-xfe-theme="light"] {
     --xfe-toolbar-bg: rgba(245, 245, 245, 0.95);
+    /* Light toolbar fill; #767676 clears 3:1 here, so reuse the outline value. */
+    --xfe-toolbar-border-color: #767676;
     --xfe-toolbar-text: #1a1a1a;
     --xfe-toolbar-btn-hover: rgba(0, 0, 0, 0.1);
     --xfe-bg-primary: #ffffff;
@@ -40,7 +45,7 @@
     --xfe-text-primary: #1a1a1a;
     --xfe-text-secondary: #666666;
     --xfe-border-color: #e0e0e0;
-    --xfe-outline-color: #aaaaaa;
+    --xfe-outline-color: #767676;
     --xfe-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     --xfe-dialog-overlay-bg: rgba(0, 0, 0, 0.5);
     --xfe-dialog-bg: #ffffff;
@@ -151,6 +156,33 @@
 
 .frontend-edit__overlay--active .frontend-edit__outline {
     opacity: 1;
+}
+
+/* Public API: persistent badges (PublicApi.registerBadge) - unlike the
+   outline and toolbar above, badges stay visible regardless of hover state.
+   Each corner is its own slot; multiple badges in one corner lay out in a
+   row, in registration order, instead of overlapping. The slot itself never
+   intercepts pointer events - only individual interactive badges (onClick)
+   opt back in, scoped to the badge itself. */
+.frontend-edit__badge-slot {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Offset further than the toolbar-label/-actions pills (which sit at
+   top: 0 with a translateY(-50%) straddle) so a persistent badge doesn't
+   visually collide with them while the toolbar is visible on hover. */
+.frontend-edit__badge-slot--top-left { top: -14px; left: -6px; }
+.frontend-edit__badge-slot--top-right { top: -14px; right: -6px; }
+.frontend-edit__badge-slot--bottom-left { bottom: -6px; left: -6px; }
+.frontend-edit__badge-slot--bottom-right { bottom: -6px; right: -6px; }
+
+.frontend-edit__badge {
+    pointer-events: none;
 }
 
 /* Element: toolbar - invisible container for label and actions */
@@ -1021,7 +1053,7 @@
     line-height: 1;
     transition: background 0.15s ease, border-color 0.15s ease;
     border-radius: 4px;
-    border: 1px solid var(--xfe-outline-color);
+    border: 1px solid var(--xfe-toolbar-border-color);
     background: var(--xfe-toolbar-bg);
 }
 
