@@ -41,7 +41,7 @@ final class EditableViewHelperTest extends TestCase
 
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
-        $viewHelper->setArguments(['record' => null, 'uid' => 42]);
+        $viewHelper->setArguments(['record' => null, 'uid' => 42, 'table' => 'tt_content']);
 
         self::assertSame('', $viewHelper->render());
     }
@@ -57,7 +57,7 @@ final class EditableViewHelperTest extends TestCase
 
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
-        $viewHelper->setArguments(['record' => null, 'uid' => 42]);
+        $viewHelper->setArguments(['record' => null, 'uid' => 42, 'table' => 'tt_content']);
 
         self::assertSame('', $viewHelper->render());
     }
@@ -69,7 +69,7 @@ final class EditableViewHelperTest extends TestCase
 
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
-        $viewHelper->setArguments(['record' => null, 'uid' => null]);
+        $viewHelper->setArguments(['record' => null, 'uid' => null, 'table' => 'tt_content']);
 
         self::assertSame('', $viewHelper->render());
     }
@@ -81,7 +81,7 @@ final class EditableViewHelperTest extends TestCase
 
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
-        $viewHelper->setArguments(['record' => null, 'uid' => 0]);
+        $viewHelper->setArguments(['record' => null, 'uid' => 0, 'table' => 'tt_content']);
 
         self::assertSame('', $viewHelper->render());
     }
@@ -93,7 +93,7 @@ final class EditableViewHelperTest extends TestCase
 
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
-        $viewHelper->setArguments(['record' => null, 'uid' => 42]);
+        $viewHelper->setArguments(['record' => null, 'uid' => 42, 'table' => 'tt_content']);
 
         self::assertSame(' data-frontend-edit="tt_content:42"', $viewHelper->render());
     }
@@ -105,7 +105,7 @@ final class EditableViewHelperTest extends TestCase
 
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
-        $viewHelper->setArguments(['record' => ['uid' => 99, 'CType' => 'text'], 'uid' => null]);
+        $viewHelper->setArguments(['record' => ['uid' => 99, 'CType' => 'text'], 'uid' => null, 'table' => 'tt_content']);
 
         self::assertSame(' data-frontend-edit="tt_content:99"', $viewHelper->render());
     }
@@ -117,9 +117,33 @@ final class EditableViewHelperTest extends TestCase
 
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
-        $viewHelper->setArguments(['record' => ['uid' => 99], 'uid' => 42]);
+        $viewHelper->setArguments(['record' => ['uid' => 99], 'uid' => 42, 'table' => 'tt_content']);
 
         self::assertSame(' data-frontend-edit="tt_content:42"', $viewHelper->render());
+    }
+
+    #[Test]
+    public function renderReturnsDataAttributeWithCustomTable(): void
+    {
+        $this->setUpAuthenticatedBackendUser();
+
+        $viewHelper = new EditableViewHelper(new BackendUserService());
+        $viewHelper->initializeArguments();
+        $viewHelper->setArguments(['record' => null, 'uid' => 42, 'table' => 'tx_news_domain_model_news']);
+
+        self::assertSame(' data-frontend-edit="tx_news_domain_model_news:42"', $viewHelper->render());
+    }
+
+    #[Test]
+    public function renderReturnsEmptyStringForInvalidTableFormat(): void
+    {
+        $this->setUpAuthenticatedBackendUser();
+
+        $viewHelper = new EditableViewHelper(new BackendUserService());
+        $viewHelper->initializeArguments();
+        $viewHelper->setArguments(['record' => null, 'uid' => 42, 'table' => 'tt_content"><script>']);
+
+        self::assertSame('', $viewHelper->render());
     }
 
     private function setUpAuthenticatedBackendUser(): void

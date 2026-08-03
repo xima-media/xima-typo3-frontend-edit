@@ -186,6 +186,7 @@
 
     // Expose helpers used by iframe_edit.js
     window.XimaFrontendEdit = window.XimaFrontendEdit || {};
+    window.XimaFrontendEdit.IFRAME_ID = IFRAME_ID;
     window.XimaFrontendEdit.ensureReturnUrl = ensureReturnUrl;
     window.XimaFrontendEdit.openWizardOverlay = openWizardOverlay;
 

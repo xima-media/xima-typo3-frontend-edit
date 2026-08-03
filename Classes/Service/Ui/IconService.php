@@ -15,6 +15,8 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 
 use TYPO3\CMS\Core\Imaging\{Icon, IconFactory, IconSize};
 
+use function is_array;
+
 /**
  * IconService.
  *
@@ -42,5 +44,36 @@ final class IconService
         }
 
         return $this->iconCache[$identifier];
+    }
+
+    /**
+     * Resolves the icon identifier for a record's own table/type from TCA
+     * `ctrl.typeicon_column`/`typeicon_classes` - the same convention
+     * PageButtonBuilder::getDoktypeIcon() already reads directly for pages,
+     * used here instead of IconFactory::mapRecordTypeToIconIdentifier() to
+     * stay version-stable (that method's signature changed in TYPO3 v14.0 -
+     * see https://docs.typo3.org/c/typo3/cms-core/main/en-us/Changelog/14.0/Breaking-104010-TcaSchemaAwareIconFactory.html -
+     * and resolving the TcaSchema it now requires needs a fully bootstrapped
+     * DI container, unavailable in this extension's bootstrap-free unit tests).
+     * Deliberately a simplified subset (no pages-specific nav_hide/root/mask/
+     * userFunc handling) - out of scope for foreign, non-page records.
+     *
+     * @param array<string, mixed> $record
+     */
+    public function getIconIdentifierForRecord(string $table, array $record): string
+    {
+        $ctrl = $GLOBALS['TCA'][$table]['ctrl'] ?? [];
+        $typeIconClasses = is_array($ctrl['typeicon_classes'] ?? null) ? $ctrl['typeicon_classes'] : [];
+        $typeIconColumn = $ctrl['typeicon_column'] ?? null;
+
+        if (null !== $typeIconColumn) {
+            $value = $record[$typeIconColumn] ?? '';
+            $key = is_array($value) ? implode(',', $value) : (string) $value;
+            if ('' !== $key && isset($typeIconClasses[$key])) {
+                return $typeIconClasses[$key];
+            }
+        }
+
+        return $typeIconClasses['default'] ?? 'mimetypes-other-other';
     }
 }

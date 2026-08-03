@@ -58,6 +58,36 @@ resolution is attempted.
     below), so it never runs for a frontend that TYPO3 does not render HTML
     for in the first place.
 
+Editing foreign records (news, addresses, ...)
+===================================================
+
+The ``data-frontend-edit`` attribute also works for records from **any other
+table** - not just ``tt_content`` - by adding a ``table`` prefix:
+``data-frontend-edit="{table}:{uid}"``. This covers the classic case of
+editing foreign records displayed on a detail page, e.g. a news detail page
+rendered by EXT:news:
+
+..  code-block:: html
+    :caption: News detail template (Detail.html)
+
+    <div class="news-detail"<xfe:editable record="{newsItem}" table="tx_news_domain_model_news" />>
+        <h1>{newsItem.title}</h1>
+        ...
+    </div>
+
+This is deliberately thin: the menu offers exactly **edit, info and
+history** - no hide, delete or move, since those are meaningful only for
+tables this extension understands specifically (``tt_content``, ``pages``).
+Permissions are checked the same way as everywhere else in the extension
+(the backend user's actual edit rights on that record); a table the current
+user cannot edit - or that TYPO3 does not know at all - never gets a menu.
+Translated records resolve to the current frontend language automatically,
+the same way ``tt_content`` does.
+
+Extend the menu the same way as for content elements, via the
+:ref:`FrontendEditDropdownModifyEvent <events>` - the record row carries a
+``_table`` key so a listener can tell it apart from a ``tt_content`` row.
+
 The rendered Edit Menu links to the corresponding edit views in the TYPO3 backend.
 
 ..  note::
