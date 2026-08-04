@@ -121,6 +121,8 @@ Nothing appears in the frontend
         ..  code-block:: html
             :caption: DCE Template
 
+            {namespace xfe=Xima\XimaTypo3FrontendEdit\ViewHelpers}
+
             <div class="dce"<xfe:editable uid="{contentObject.uid}" />>
                 Your template goes here...
             </div>
