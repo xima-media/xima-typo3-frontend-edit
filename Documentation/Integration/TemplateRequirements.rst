@@ -99,6 +99,8 @@ The bundled ``<xfe:editable>`` ViewHelper renders this attribute for you:
 ..  code-block:: html
     :caption: Custom Fluid Template
 
+    {namespace xfe=Xima\XimaTypo3FrontendEdit\ViewHelpers}
+
     <div class="my-custom-wrapper"<xfe:editable record="{data}" />>
         ...
     </div>
@@ -121,6 +123,8 @@ rendered by EXT:news:
 
 ..  code-block:: html
     :caption: News detail template (Detail.html)
+
+    {namespace xfe=Xima\XimaTypo3FrontendEdit\ViewHelpers}
 
     <div class="news-detail"<xfe:editable record="{newsItem}" table="tx_news_domain_model_news" />>
         <h1>{newsItem.title}</h1>
