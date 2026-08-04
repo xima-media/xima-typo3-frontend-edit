@@ -36,7 +36,6 @@ This TYPO3 extension adds lightweight editing tools to the frontend, allowing ba
 
 ..  figure:: /Images/intro.gif
     :alt: Frontend Edit in action
-    :class: with-shadow
 
     Editing actions appear directly on the content element
 

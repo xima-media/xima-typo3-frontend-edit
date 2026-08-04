@@ -17,7 +17,6 @@ leaving the site.
 
 ..  figure:: /Images/screenshot.png
     :alt: Frontend Edit Preview
-    :class: with-shadow
 
     Editing actions appear directly on the content element
 

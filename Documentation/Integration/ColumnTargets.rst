@@ -10,7 +10,6 @@ The extension can display "Create new content" buttons for columns directly in t
 
 ..  figure:: /Images/empty-column.png
     :alt: Empty column marker showing a "Create new content" button in the frontend
-    :class: with-shadow
 
     A "Create new content" button appears in empty columns and at the end of filled columns when frontend editing is enabled
 

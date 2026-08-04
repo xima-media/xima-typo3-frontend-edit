@@ -199,7 +199,6 @@ Appearance Settings
 
     ..  figure:: /Images/flash-message.png
         :alt: Flash message notification in frontend
-        :class: with-shadow
 
         Flash message notification after saving a content element
 

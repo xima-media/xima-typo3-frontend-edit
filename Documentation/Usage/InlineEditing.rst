@@ -20,7 +20,6 @@ form in a panel next to the page — no detour through the backend.
 
 ..  figure:: /Images/contextual-sidebar.gif
     :alt: Screencast of inline editing
-    :class: with-shadow
 
     Editing a content element without leaving the frontend
 
@@ -69,7 +68,6 @@ configure beyond the setting above.
 
         ..  figure:: /Images/sidebar.png
             :alt: Inline editing sidebar on TYPO3 v14.2+
-            :class: with-shadow
 
             The sidebar panel on TYPO3 v14.2+
 
@@ -153,7 +151,6 @@ Setting disabled
 
     ..  figure:: /Images/classic-edit.gif
         :alt: Classic editing without inline editing
-        :class: with-shadow
 
         Editing without inline editing enabled — the edit link navigates to the full backend
 
