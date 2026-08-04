@@ -7,8 +7,13 @@ Edit Menu
 =========
 
 Each content element on the page displays an edit button when you hover over it.
+A small label also shows the content element's type and its position on the
+page.
 
-..  figure:: /Images/edit-button.jpg
+..  figure:: /Images/header.png
+    :alt: Content Element Type Label
+
+..  figure:: /Images/edit-button.png
     :alt: Edit Button
 
 Clicking this button opens the Edit Menu with various actions:
@@ -22,7 +27,7 @@ Clicking this button opens the Edit Menu with various actions:
 - **New content after** - Add a new content element after this one
 - **Delete** - Delete the content element (with confirmation dialog)
 
-..  figure:: /Images/edit-dropdown.jpg
+..  figure:: /Images/edit-dropdown.png
     :alt: Edit Menu
 
 ..  note::

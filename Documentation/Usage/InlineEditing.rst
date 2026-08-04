@@ -67,7 +67,7 @@ configure beyond the setting above.
         Creating new content still uses the slide-in modal, because the
         New Content Element Wizard is hosted in the page module.
 
-        ..  figure:: /Images/sidebar.jpg
+        ..  figure:: /Images/sidebar.png
             :alt: Inline editing sidebar on TYPO3 v14.2+
             :class: with-shadow
 
@@ -150,6 +150,12 @@ Fallback behavior
 
 Setting disabled
     All edit links navigate to the backend, exactly as without this feature.
+
+    ..  figure:: /Images/classic-edit.gif
+        :alt: Classic editing without inline editing
+        :class: with-shadow
+
+        Editing without inline editing enabled — the edit link navigates to the full backend
 
 JavaScript disabled
     Edit links fall back to their ``href`` attribute, which points to the

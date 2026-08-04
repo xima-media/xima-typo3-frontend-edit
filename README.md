@@ -16,7 +16,7 @@
 
 </div>
 
-![Frontend Edit](./Documentation/Images/screenshot.jpg)
+![Frontend Edit](./Documentation/Images/screenshot.png)
 
 > [!NOTE]
 > **Why?** TYPO3 editors constantly switch between frontend and backend just to find the right content element. This extension removes that context switch: the editing actions appear exactly where the content is displayed.
@@ -28,9 +28,9 @@ Edit menu and page toolbar:
 
 ![Frontend Edit screencast](./Documentation/Images/intro.gif)
 
-Inline editing — the edit form opens next to the page:
+Create new content — insert buttons open TYPO3's native New Content wizard:
 
-![Inline editing screencast](./Documentation/Images/inline-edit-screencast.gif)
+![New content screencast](./Documentation/Images/new-content.gif)
 
 </details>
 
