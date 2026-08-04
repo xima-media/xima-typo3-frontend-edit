@@ -11,46 +11,97 @@ Introduction
 What does it do?
 ================
 
-This extension adds editing tools to the frontend, allowing backend users to edit, hide, delete, and reorder content elements and pages without leaving the site.
+This extension adds editing tools to the frontend, allowing backend users to
+edit, hide, delete, reorder and create content elements and pages without
+leaving the site.
 
-..  figure:: /Images/screenshot.jpg
+..  figure:: /Images/screenshot.png
     :alt: Frontend Edit Preview
 
-The extension injects a small JavaScript into the frontend that generates action links to the TYPO3 backend, bridging the gap between frontend preview and backend editing.
+    Editing actions appear directly on the content element
+
+TYPO3 editors normally switch to the backend to find and change the right
+content element. The extension closes that gap: a small JavaScript is injected
+into the frontend, asks the backend which elements the current user may edit,
+and renders the matching actions right where the content is displayed.
+
+..  _features:
 
 Features
 ========
 
-- :ref:`Edit Menu <edit-menu>` - Quick access to edit, hide, delete, and move content elements
-- :ref:`Toolbar <toolbar>` - Page-level actions and toggle for frontend editing
-- :ref:`Site Settings <site-settings>` - Per-site configuration via YAML
-- :ref:`PSR-14 Events <events>` - Customize menus with custom actions
-- :ref:`Data ViewHelper <data-attributes>` - Add edit links for related records (e.g., news items)
-- Dark/Light Mode - Automatic or manual color scheme selection
-- Configurable Position - 12 toolbar positions available
-- :ref:`Save & Close <extconf-enableSaveAndCloseButton>` - Quick return to frontend after editing
-- :ref:`Inline Editing <contextual-editing>` *(experimental)* - Edit content directly in the frontend without navigating to the backend (TYPO3 v13: iframe modal, TYPO3 v14.2+: contextual sidebar)
+Editing content elements
+------------------------
 
-..  versionadded:: 2.2.0
+..  list-table::
+    :header-rows: 1
+    :widths: 30 70
 
-    **Contextual Editing Sidebar** — An experimental feature that allows editors
-    to edit content elements and page properties in a sidebar panel directly in the
-    frontend. Leverages TYPO3 v14.2's ``record_edit_contextual`` route.
-    See :ref:`contextual-editing` for details.
+    *   -   Feature
+        -   What it does
+    *   -   :ref:`Edit Menu <edit-menu>`
+        -   Edit, hide, delete, move, info and history for every content
+            element, with a confirmation dialog before deleting.
+    *   -   :ref:`Inline Editing <inline-editing>` *(experimental)*
+        -   Edit content elements and page properties in a panel next to the
+            page, without navigating to the backend.
+    *   -   :ref:`New content <empty-columns>`
+        -   Insert buttons on hover and per column, opening TYPO3's native
+            New Content Element Wizard.
+    *   -   :ref:`Drag & Drop <drag-and-drop>` *(experimental)*
+        -   Reorder elements within a column or move them into another column
+            of the same page, including EXT:container columns.
 
-    ..  figure:: /Images/sidebar.jpg
-        :alt: Contextual editing sidebar
-        :class: with-shadow
+Editing pages
+-------------
 
-..  versionadded:: 2.3.0
+..  list-table::
+    :header-rows: 1
+    :widths: 30 70
 
-    **Iframe Modal Editor** — An experimental slide-in iframe modal that brings
-    inline editing to TYPO3 v13. Opens the backend edit form in a panel directly
-    in the frontend — no configuration required.
-    See :ref:`contextual-editing` for details.
+    *   -   Feature
+        -   What it does
+    *   -   :ref:`Toolbar <toolbar>`
+        -   Page-level actions and a toggle to switch frontend editing on and
+            off, at one of 12 configurable positions.
+    *   -   :ref:`Save & Close <extconf-enableSaveAndCloseButton>`
+        -   An extra button in backend edit forms that returns straight to the
+            frontend.
+    *   -   :confval:`Flash messages <frontendEdit.enableFlashMessages>`
+        -   Backend save confirmations are shown as toast notifications in the
+            frontend.
+
+Configuration and extensibility
+-------------------------------
+
+..  list-table::
+    :header-rows: 1
+    :widths: 30 70
+
+    *   -   Feature
+        -   What it does
+    *   -   :ref:`Site Settings <site-settings>`
+        -   Per-site configuration via YAML or the site module, including
+            filters for pages, doktypes, CTypes and UIDs.
+    *   -   :ref:`UserTSconfig <user-tsconfig>`
+        -   Disable frontend editing per backend user or user group.
+    *   -   :ref:`PSR-14 Events <events>`
+        -   Add, remove or modify menu entries and attach custom data to
+            elements.
+    *   -   :ref:`ViewHelpers <data-attributes>`
+        -   Edit links for related records (e.g. news items) and column
+            markers for new-content buttons.
+    *   -   :confval:`Dark / Light mode <frontendEdit.colorScheme>`
+        -   Follows the system preference or is pinned to a fixed scheme.
 
 ..  note::
-    This is **not** a further development of the "original" extension `frontend_editing <https://extensions.typo3.org/extension/frontend_editing>`_. It is similar in some ways to the realisation of the `feedit <https://extensions.typo3.org/extension/feedit>`_ extension. This extension is an independent implementation with a different approach. See :ref:`Delineation <delineation>` for a detailed comparison with related extensions like `visual_editor <https://github.com/FriendsOfTYPO3/visual_editor>`_ and `content_preview <https://github.com/T3-UX/content_preview>`_.
+    This is **not** a further development of the "original" extension
+    `frontend_editing <https://extensions.typo3.org/extension/frontend_editing>`_.
+    It is an independent implementation with a different approach, similar in
+    some ways to `feedit <https://extensions.typo3.org/extension/feedit>`_.
+    See :ref:`delineation` for a detailed comparison with related extensions
+    like `visual_editor <https://github.com/FriendsOfTYPO3/visual_editor>`_ and
+    `content_preview <https://github.com/T3-UX/content_preview>`_.
 
 ..  _support:
 
@@ -59,7 +110,15 @@ Support
 
 There are several ways to get support for this extension:
 
-* GitHub: https://github.com/xima-media/xima-typo3-frontend-edit/issues
+*   GitHub issues: https://github.com/xima-media/xima-typo3-frontend-edit/issues
+*   :ref:`FAQ <faq>` — answers to the most common problems
+
+Security policy
+===============
+
+Please read our
+`security policy <https://github.com/xima-media/xima-typo3-frontend-edit/blob/main/SECURITY.md>`__
+if you discover a security vulnerability in this extension.
 
 License
 =======

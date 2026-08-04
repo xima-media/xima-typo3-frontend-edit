@@ -19,6 +19,11 @@ move is persisted through TYPO3's core DataHandler — the same mechanism the
 backend page module uses — so hooks, the reference index and the history behave
 exactly as they do in the backend.
 
+..  figure:: /Images/reorder.gif
+    :alt: Screencast of reordering a content element via drag & drop
+
+    Reordering a content element via drag & drop
+
 Setup
 =====
 

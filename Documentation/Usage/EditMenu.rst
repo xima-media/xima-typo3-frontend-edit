@@ -7,8 +7,13 @@ Edit Menu
 =========
 
 Each content element on the page displays an edit button when you hover over it.
+A small label also shows the content element's type and its position on the
+page.
 
-..  figure:: /Images/edit-button.jpg
+..  figure:: /Images/header.png
+    :alt: Content Element Type Label
+
+..  figure:: /Images/edit-button.png
     :alt: Edit Button
 
 Clicking this button opens the Edit Menu with various actions:
@@ -22,7 +27,7 @@ Clicking this button opens the Edit Menu with various actions:
 - **New content after** - Add a new content element after this one
 - **Delete** - Delete the content element (with confirmation dialog)
 
-..  figure:: /Images/edit-dropdown.jpg
+..  figure:: /Images/edit-dropdown.png
     :alt: Edit Menu
 
 ..  note::
@@ -52,16 +57,12 @@ so editors can verify they are deleting the correct element.
 Requirements
 ============
 
-The Edit Menu requires content elements to have a "c-id" (Content Element ID)
-in their HTML output, e.g. ``id="c908"``.
+The Edit Menu needs each content element to be identifiable in the rendered
+HTML. With ``fluid_styled_content`` this works out of the box; custom templates
+need one small addition.
 
-This is automatically provided by the ``fluid_styled_content`` extension.
-For custom templates, ensure the wrapping element includes the content element UID:
+..  seealso::
 
-..  code-block:: html
-
-    <div id="c{data.uid}">
-        ...
-    </div>
-
-See also the :ref:`faq` for common issues with the Edit Menu.
+    *   :ref:`template-requirements` — the details, including EXT:container and
+        EXT:dce
+    *   :ref:`faq` — what to check when no menu appears

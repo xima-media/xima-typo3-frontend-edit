@@ -12,7 +12,7 @@ Extension configuration
 The extension currently provides the following configuration options:
 
 Features
-=======
+========
 
 ..  _extconf-enableSaveAndCloseButton:
 
@@ -22,7 +22,7 @@ Features
 
     Enable this option to render a save and close button in the header of edit forms.
 
-    ..  figure:: /Images/save-close.jpg
+    ..  figure:: /Images/save-close.png
         :alt: Frontend Edit Save and Close Button
 
 ..  _extconf-forceReturnUrlGeneration:
@@ -54,7 +54,7 @@ Features
         But keep in mind, that with this option the return to the frontend using the "close" button will not work anymore.
 
 Debug
-=======
+=====
 
 ..  _extconf-frontendDebugMode:
 

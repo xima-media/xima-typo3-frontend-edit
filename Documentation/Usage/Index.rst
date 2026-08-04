@@ -15,6 +15,22 @@ interfaces in the frontend for logged-in backend users.
     :gap: 4
     :card-height: 100
 
+    ..  card::  First steps
+
+        New to frontend editing? A short tour of what appears in the frontend
+        and how to use it.
+
+        ..  card-footer::   :ref:`Take the tour <first-steps>`
+            :button-style: btn btn-primary stretched-link
+
+    ..  card::  Keyboard and screen readers
+
+        Which keys operate the menus and dialogs — and where support is
+        deliberately limited.
+
+        ..  card-footer::   :ref:`View keyboard support <keyboard>`
+            :button-style: btn btn-secondary stretched-link
+
     ..  card::  Edit Menu
 
         The Edit Menu appears on content elements and provides quick access
@@ -33,10 +49,10 @@ interfaces in the frontend for logged-in backend users.
 
     ..  card::  Inline Editing (experimental)
 
-        Edit content elements directly in the frontend. Uses a contextual
-        sidebar on TYPO3 v14.2+ or a slide-in iframe modal on TYPO3 v13.
+        Edit content elements and page properties in a panel next to the page,
+        without navigating to the backend at all.
 
-        ..  card-footer::   :ref:`Learn more <contextual-editing>`
+        ..  card-footer::   :ref:`Learn more <inline-editing>`
             :button-style: btn btn-secondary stretched-link
 
     ..  card::  Drag & Drop Reordering (experimental)
@@ -50,7 +66,9 @@ interfaces in the frontend for logged-in backend users.
 ..  toctree::
     :hidden:
 
+    FirstSteps
     EditMenu
     Toolbar
-    ContextualEditing
+    InlineEditing
     DragAndDrop
+    Keyboard

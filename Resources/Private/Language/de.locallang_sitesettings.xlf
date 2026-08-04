@@ -163,12 +163,12 @@
 			</trans-unit>
 
 			<trans-unit id="settings.frontendEdit.enableContextualEditing">
-				<source>[Experimental] Enable Contextual Editing</source>
-				<target>[Experimentell] Kontextuelles Bearbeiten aktivieren</target>
+				<source>[Experimental] Enable inline editing</source>
+				<target>[Experimentell] Inline-Bearbeitung aktivieren</target>
 			</trans-unit>
 			<trans-unit id="settings.description.frontendEdit.enableContextualEditing">
-				<source>Opens content element edit forms in a sidebar panel instead of navigating to the backend. Requires TYPO3 v14.2+. This feature is experimental and may change in future versions.</source>
-				<target>Öffnet Inhaltselement-Bearbeitungsformulare in einem Seitenpanel anstatt zum Backend zu navigieren. Erfordert TYPO3 v14.2+. Diese Funktion ist experimentell und kann sich in zukünftigen Versionen ändern.</target>
+				<source>Opens content element and page property edit forms in a panel next to the page instead of navigating to the backend. Also enables the New Content Element Wizard in the frontend. The presentation is chosen automatically: a sidebar on TYPO3 v14.2+, a slide-in modal on earlier versions. This feature is experimental and may change in future versions.</source>
+				<target>Öffnet Formulare für Inhaltselemente und Seiteneigenschaften in einem Panel neben der Seite, anstatt zum Backend zu navigieren. Aktiviert außerdem den Assistenten für neue Inhaltselemente im Frontend. Die Darstellung wird automatisch gewählt: eine Sidebar ab TYPO3 v14.2, ein Slide-in-Modal in früheren Versionen. Diese Funktion ist experimentell und kann sich in zukünftigen Versionen ändern.</target>
 			</trans-unit>
 
 			<trans-unit id="settings.frontendEdit.enableDragAndDrop">

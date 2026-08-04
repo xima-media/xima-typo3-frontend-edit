@@ -8,9 +8,8 @@ Column Targets
 
 The extension can display "Create new content" buttons for columns directly in the frontend — both for empty columns and at the end of columns that already contain content. This allows editors to add content without switching to the TYPO3 backend.
 
-..  figure:: /Images/empty-column.jpg
+..  figure:: /Images/empty-column.png
     :alt: Empty column marker showing a "Create new content" button in the frontend
-    :class: with-shadow
 
     A "Create new content" button appears in empty columns and at the end of filled columns when frontend editing is enabled
 
@@ -78,13 +77,13 @@ A "+" button always appears at the marker position — whether the column is emp
 
 .. note::
 
-   This feature requires contextual editing to be enabled
+   This feature requires :ref:`inline-editing` to be enabled
    (``frontendEdit.enableContextualEditing: true`` in the site settings) — the
-   wizard is hosted inside the slide-in iframe modal that this setting activates.
+   wizard is hosted inside the slide-in modal that this setting activates.
 
-On both **TYPO3 v13 and v14** the wizard opens in the slide-in iframe modal: the
-page module is loaded inside the modal and the matching wizard button is
-auto-clicked, so the editor sees TYPO3's real wizard. On v14 the contextual
+On both **TYPO3 v13 and v14** the wizard opens in the slide-in modal: the page
+module is loaded inside the modal and the matching wizard button is
+auto-clicked, so the editor sees TYPO3's real wizard. On v14.2+ the inline
 editing sidebar continues to handle editing of existing elements; creating new
 content uses the modal.
 
