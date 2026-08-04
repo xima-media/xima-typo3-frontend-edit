@@ -6,14 +6,11 @@
 Toolbar
 =======
 
-..  figure:: /Images/page.gif
+..  figure:: /Images/toolbar.gif
     :alt: Toolbar Screencast
 
 The Toolbar provides quick access to page-level actions. It appears
 at a configurable position on the screen (default: bottom-right).
-
-..  figure:: /Images/toolbar.png
-    :alt: Toolbar
 
 Actions
 =======
@@ -52,6 +49,11 @@ Disabling Frontend Edit
 
 You can temporarily disable frontend editing by clicking the toggle button
 in the Toolbar. This setting is stored per user and persists across sessions.
+
+..  figure:: /Images/disable.gif
+    :alt: Screencast of disabling frontend editing via the toolbar toggle
+
+    Disabling frontend editing via the toolbar toggle
 
 To disable the Toolbar entirely, set ``showStickyToolbar: false`` in the
 :ref:`site-settings`.

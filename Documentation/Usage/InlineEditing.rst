@@ -81,6 +81,12 @@ configure beyond the setting above.
         From an editor's perspective the workflow is the same: open, edit,
         save, close.
 
+..  figure:: /Images/new-content.gif
+    :alt: Screencast of creating new content via the New Content Element Wizard
+
+    Creating new content — insert buttons open TYPO3's native New Content
+    wizard inside the slide-in modal
+
 ..  _inline-editing-usage:
 
 Usage
