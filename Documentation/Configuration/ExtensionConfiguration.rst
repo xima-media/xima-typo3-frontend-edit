@@ -22,7 +22,7 @@ Features
 
     Enable this option to render a save and close button in the header of edit forms.
 
-    ..  figure:: /Images/save-close.jpg
+    ..  figure:: /Images/save-close.png
         :alt: Frontend Edit Save and Close Button
 
 ..  _extconf-forceReturnUrlGeneration:

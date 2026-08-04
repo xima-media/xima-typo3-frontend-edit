@@ -8,7 +8,7 @@ Column Targets
 
 The extension can display "Create new content" buttons for columns directly in the frontend — both for empty columns and at the end of columns that already contain content. This allows editors to add content without switching to the TYPO3 backend.
 
-..  figure:: /Images/empty-column.jpg
+..  figure:: /Images/empty-column.png
     :alt: Empty column marker showing a "Create new content" button in the frontend
     :class: with-shadow
 

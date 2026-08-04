@@ -15,7 +15,7 @@ This extension adds editing tools to the frontend, allowing backend users to
 edit, hide, delete, reorder and create content elements and pages without
 leaving the site.
 
-..  figure:: /Images/screenshot.jpg
+..  figure:: /Images/screenshot.png
     :alt: Frontend Edit Preview
     :class: with-shadow
 

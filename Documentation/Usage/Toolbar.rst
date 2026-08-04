@@ -12,7 +12,7 @@ Toolbar
 The Toolbar provides quick access to page-level actions. It appears
 at a configurable position on the screen (default: bottom-right).
 
-..  figure:: /Images/toolbar.jpg
+..  figure:: /Images/toolbar.png
     :alt: Toolbar
 
 Actions
@@ -26,7 +26,7 @@ The Toolbar includes:
 - **Info** - Display page information
 - **Move** - Reorder page
 
-..  figure:: /Images/toolbar-dropdown.jpg
+..  figure:: /Images/toolbar-dropdown.png
     :alt: Toolbar Menu
 
 

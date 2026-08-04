@@ -197,7 +197,7 @@ Appearance Settings
     after returning from the backend. When you use "Save & Close" in the backend, success or
     error messages will be displayed as notifications in the frontend.
 
-    ..  figure:: /Images/flash-message.jpg
+    ..  figure:: /Images/flash-message.png
         :alt: Flash message notification in frontend
         :class: with-shadow
 
