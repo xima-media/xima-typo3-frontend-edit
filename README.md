@@ -23,31 +23,16 @@ It adds an edit button to every content element, a page-level toolbar, and optio
 > [!NOTE]
 > **Why?** TYPO3 editors constantly switch between frontend and backend just to find the right content element. This extension removes that context switch: the editing actions appear exactly where the content is displayed.
 
-<details>
-<summary><b>See it in action</b></summary>
-
-Edit menu and page toolbar:
-
-![Frontend Edit screencast](./Documentation/Images/intro.gif)
-
-Create new content, using insert buttons that open TYPO3's native New Content wizard:
-
-![New content screencast](./Documentation/Images/new-content.gif)
-
-</details>
-
 ## ✨ Features
 
-| Feature | What it does |
-|---|---|
-| [Edit Menu](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html) | Edit, hide, delete, move, info and history per content element, with a confirmation dialog before deleting |
-| [Toolbar](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/Toolbar.html) | Page-level actions and a toggle to switch frontend editing on and off |
-| [Inline Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/InlineEditing.html) | (experimental, opt-in) Edit content and page properties in a panel next to the page: sidebar on TYPO3 v14.2+, slide-in modal on v13 |
-| [New content](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Integration/ColumnTargets.html) | Insert buttons on hover and per column, opening TYPO3's native New Content Element Wizard |
-| [Drag & Drop](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/DragAndDrop.html) | (experimental, opt-in) Reorder elements within a column or move them into another column, incl. `EXT:container` |
-| [Site Settings](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Configuration/SiteSettings.html) | Per-site configuration via YAML: appearance, toolbar position, and filters for pages, doktypes, CTypes and UIDs |
-| [UserTSconfig](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Configuration/UserTSconfig.html) | Disable frontend editing per backend user or user group |
-| [PSR-14 Events](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/Events.html) & [ViewHelpers](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/DataAttributes.html) | Add custom menu entries, attach data to elements, add edit links for related records |
+- [Edit Menu](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/EditMenu.html): edit, hide, delete, move, info and history per content element, with a confirmation dialog before deleting
+- [Toolbar](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/Toolbar.html): page-level actions and a toggle to switch frontend editing on and off
+- [Inline Editing](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/InlineEditing.html) (experimental, opt-in): edit content and page properties in a panel next to the page, sidebar on TYPO3 v14.2+, slide-in modal on v13
+- [New content](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Integration/ColumnTargets.html): insert buttons on hover and per column, opening TYPO3's native New Content Element Wizard
+- [Drag & Drop](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Usage/DragAndDrop.html) (experimental, opt-in): reorder elements within a column or move them into another column, incl. `EXT:container`
+- [Site Settings](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Configuration/SiteSettings.html): per-site configuration via YAML, appearance, toolbar position, and filters for pages, doktypes, CTypes and UIDs
+- [UserTSconfig](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Configuration/UserTSconfig.html): disable frontend editing per backend user or user group
+- [PSR-14 Events](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/Events.html) & [ViewHelpers](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/DeveloperCorner/DataAttributes.html): add custom menu entries, attach data to elements, add edit links for related records
 
 ## 🔥 Installation
 
@@ -85,6 +70,8 @@ Download the zip file from [TYPO3 extension repository (TER)](https://extensions
 > Nothing showing up? Custom templates need to expose a content element ID (`id="c123"`). The [FAQ](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/FAQ/Index.html) walks through the six usual causes.
 
 ## 📙 Documentation
+
+![Frontend Edit screencast](./Documentation/Images/intro.gif)
 
 [**Read the full documentation**](https://docs.typo3.org/p/xima/xima-typo3-frontend-edit/main/en-us/Index.html): installation, all configuration options, usage guide and developer reference.
 
