@@ -109,14 +109,26 @@
       this.sidebar.setAttribute('aria-modal', 'true');
       this.sidebar.setAttribute('aria-label', 'Edit content');
 
-      // Close button
+      // Header bar - mirrors the iframe modal's header (see iframe_edit.js
+      // Modal.getOrCreate()) so both containers present the same chrome;
+      // without this, editing (sidebar) looked bare next to new content
+      // (modal), which always shows its header bar.
+      this.header = document.createElement('div');
+      this.header.className = 'frontend-edit__sidebar-header';
+
+      this.titleEl = document.createElement('span');
+      this.titleEl.className = 'frontend-edit__sidebar-title';
+      this.header.appendChild(this.titleEl);
+
       this.closeButton = document.createElement('button');
       this.closeButton.type = 'button';
       this.closeButton.className = 'frontend-edit__sidebar-close';
       this.closeButton.setAttribute('aria-label', 'Close editor');
       this.closeButton.innerHTML = CLOSE_ICON;
       this.closeButton.addEventListener('click', this.requestClose.bind(this));
-      this.sidebar.appendChild(this.closeButton);
+      this.header.appendChild(this.closeButton);
+
+      this.sidebar.appendChild(this.header);
 
       // Loading spinner
       this.loader = document.createElement('div');
@@ -244,6 +256,8 @@
 
       this.sidebar.setAttribute('aria-label', opts.title || 'Edit content');
       this.iframe.setAttribute('title', opts.title || 'Edit content');
+      this.titleEl.textContent = opts.title || '';
+      this.titleEl.style.display = opts.title ? '' : 'none';
       this.sidebar.style.width = sanitizeWidth(opts.width);
 
       this.closeButton.style.display = '';
@@ -383,9 +397,6 @@
             e.stopImmediatePropagation();
             self.requestClose();
           });
-
-          // Hide extension's own close button to avoid overlap
-          self.closeButton.style.display = 'none';
         } else {
           actionsBar.appendChild(saveCloseBtn);
         }
