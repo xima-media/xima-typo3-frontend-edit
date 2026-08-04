@@ -30,6 +30,11 @@ Two things appear:
     *   -   A pencil button when you hover a content element
         -   The :ref:`Edit Menu <edit-menu>` — actions for **that element**
 
+..  figure:: /Images/edit-button.png
+    :alt: Edit button and content-type label shown when hovering a content element
+
+    Hovering a content element reveals its edit button
+
 ..  note::
 
     Visitors of your website never see any of this. Nothing is injected for
@@ -47,6 +52,11 @@ page.
 
 Save with **Save & Close** and you land back on the same spot in the frontend,
 with a confirmation message.
+
+..  figure:: /Images/save-close.png
+    :alt: Save and Close button in the TYPO3 edit form
+
+    Save & Close returns you to the same spot in the frontend
 
 ..  tip::
 
@@ -69,6 +79,11 @@ element — page properties, opening the page module, page info.
 The eye icon in the toolbar turns frontend editing off. Your choice is stored
 for your user and survives a reload, so you can check the page exactly as a
 visitor sees it and switch back when you are done.
+
+..  figure:: /Images/disable.gif
+    :alt: Screencast of disabling frontend editing via the toolbar toggle
+
+    Switching frontend editing off via the toolbar toggle
 
 ..  seealso::
 
