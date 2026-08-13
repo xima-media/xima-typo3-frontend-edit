@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e372d874d7543b2200b54505dc9baf08",
+    "content-hash": "4948cdedf1325acb08e862121d844cad",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -5214,16 +5214,16 @@
     "packages-dev": [
         {
             "name": "b13/container",
-            "version": "4.0.2",
+            "version": "4.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/b13/container.git",
-                "reference": "0f95a609776fddd6e42bebcbe85730f0406e6d39"
+                "reference": "09a041521d74efb31a88bded9a9d54d467afdefa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/b13/container/zipball/0f95a609776fddd6e42bebcbe85730f0406e6d39",
-                "reference": "0f95a609776fddd6e42bebcbe85730f0406e6d39",
+                "url": "https://api.github.com/repos/b13/container/zipball/09a041521d74efb31a88bded9a9d54d467afdefa",
+                "reference": "09a041521d74efb31a88bded9a9d54d467afdefa",
                 "shasum": ""
             },
             "require": {
@@ -5255,7 +5255,7 @@
                         "providesPackages": []
                     },
                     "app-dir": ".Build",
-                    "version": "4.0.2",
+                    "version": "4.1.0",
                     "web-dir": ".Build/Web",
                     "extension-key": "container",
                     "cms-package-dir": "{$vendor-dir}/typo3/cms"
@@ -5274,9 +5274,9 @@
             "homepage": "https://b13.com",
             "support": {
                 "issues": "https://github.com/b13/container/issues",
-                "source": "https://github.com/b13/container/tree/4.0.2"
+                "source": "https://github.com/b13/container/tree/4.1.0"
             },
-            "time": "2026-06-26T16:40:39+00:00"
+            "time": "2026-08-13T07:27:17+00:00"
         },
         {
             "name": "composer/class-map-generator",

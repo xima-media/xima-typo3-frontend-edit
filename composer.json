@@ -29,7 +29,7 @@
 		"typo3fluid/fluid": "^4.2 || ^5.0"
 	},
 	"require-dev": {
-		"b13/container": "^4.0.2",
+		"b13/container": "^4.1.0",
 		"composer/class-map-generator": "^1.7.3",
 		"eliashaeussler/version-bumper": "^4.0.4",
 		"konradmichalik/ttt": "^0.4.0",
