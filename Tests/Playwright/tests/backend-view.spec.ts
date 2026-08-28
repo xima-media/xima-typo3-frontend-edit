@@ -134,9 +134,15 @@ test('openBackendView: linkPolicy governs link clicks inside the embedded docume
     body.appendChild(close);
   });
 
+  // A native .click() call, not a synthetic pointer click: CKEditor's
+  // inspector panel (auto-attached whenever BE/debug is on, as it is in this
+  // dev environment) docks over the form and can occlude the injected link
+  // at its screen coordinates - even Playwright's `force: true` still
+  // dispatches at those coordinates and would hit the inspector instead.
+  // Calling .click() on the element directly sidesteps hit-testing entirely.
   await Promise.all([
     page.waitForEvent('load'),
-    frame.locator('#xfe-test-close-link').click(),
+    frame.locator('#xfe-test-close-link').evaluate((el: HTMLElement) => el.click()),
   ]);
 
   // 'close' action closed the modal and (default reloadOnClose) reloaded -
