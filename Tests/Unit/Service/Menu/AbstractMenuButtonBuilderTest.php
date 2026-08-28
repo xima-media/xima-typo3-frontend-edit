@@ -58,7 +58,7 @@ final class AbstractMenuButtonBuilderTest extends TestCase
     public function addButtonAppendsButtonWithProvidedValues(): void
     {
         $builder = $this->createBuilder();
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addButton($menuButton, 'edit', ButtonType::Link, 'Edit label', '/edit', 'actions-edit');
 
@@ -73,7 +73,7 @@ final class AbstractMenuButtonBuilderTest extends TestCase
     public function addButtonUsesFallbackLabelWhenLabelMissing(): void
     {
         $builder = $this->createBuilder();
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addButton($menuButton, 'delete', ButtonType::Link);
 

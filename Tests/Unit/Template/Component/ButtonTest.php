@@ -50,7 +50,7 @@ final class ButtonTest extends TestCase
     #[Test]
     public function constructorSetsDefaultValues(): void
     {
-        $button = new Button('Label', ButtonType::Menu);
+        $button = new Button('Label', ButtonType::Menu, null, null, false);
 
         self::assertNull($button->getUrl());
         self::assertNull($button->getIcon());
@@ -60,7 +60,7 @@ final class ButtonTest extends TestCase
     #[Test]
     public function setLabelChangesLabel(): void
     {
-        $button = new Button('Original', ButtonType::Link);
+        $button = new Button('Original', ButtonType::Link, null, null, false);
         $button->setLabel('Changed');
 
         self::assertSame('Changed', $button->getLabel());
@@ -69,7 +69,7 @@ final class ButtonTest extends TestCase
     #[Test]
     public function setTypeChangesType(): void
     {
-        $button = new Button('Label', ButtonType::Link);
+        $button = new Button('Label', ButtonType::Link, null, null, false);
         $button->setType(ButtonType::Divider);
 
         self::assertSame(ButtonType::Divider, $button->getType());
@@ -78,7 +78,7 @@ final class ButtonTest extends TestCase
     #[Test]
     public function setUrlChangesUrl(): void
     {
-        $button = new Button('Label', ButtonType::Link);
+        $button = new Button('Label', ButtonType::Link, null, null, false);
         $button->setUrl('https://new-url.com');
 
         self::assertSame('https://new-url.com', $button->getUrl());
@@ -87,7 +87,7 @@ final class ButtonTest extends TestCase
     #[Test]
     public function setIconChangesIcon(): void
     {
-        $button = new Button('Label', ButtonType::Link);
+        $button = new Button('Label', ButtonType::Link, null, null, false);
         $icon = $this->createStub(Icon::class);
         $button->setIcon($icon);
 
@@ -97,7 +97,7 @@ final class ButtonTest extends TestCase
     #[Test]
     public function setTargetBlankChangesTargetBlank(): void
     {
-        $button = new Button('Label', ButtonType::Link);
+        $button = new Button('Label', ButtonType::Link, null, null, false);
         $button->setTargetBlank(true);
 
         self::assertTrue($button->isTargetBlank());
@@ -106,8 +106,8 @@ final class ButtonTest extends TestCase
     #[Test]
     public function appendChildAddsChildWithKey(): void
     {
-        $button = new Button('Parent', ButtonType::Menu);
-        $child = new Button('Child', ButtonType::Link);
+        $button = new Button('Parent', ButtonType::Menu, null, null, false);
+        $child = new Button('Child', ButtonType::Link, null, null, false);
 
         $button->appendChild($child, 'child1');
 
@@ -120,8 +120,8 @@ final class ButtonTest extends TestCase
     #[Test]
     public function appendChildWithIntegerKey(): void
     {
-        $button = new Button('Parent', ButtonType::Menu);
-        $child = new Button('Child', ButtonType::Link);
+        $button = new Button('Parent', ButtonType::Menu, null, null, false);
+        $child = new Button('Child', ButtonType::Link, null, null, false);
 
         $button->appendChild($child, 0);
 
@@ -132,9 +132,9 @@ final class ButtonTest extends TestCase
     #[Test]
     public function setChildrenReplacesAllChildren(): void
     {
-        $button = new Button('Parent', ButtonType::Menu);
-        $child1 = new Button('Child 1', ButtonType::Link);
-        $child2 = new Button('Child 2', ButtonType::Link);
+        $button = new Button('Parent', ButtonType::Menu, null, null, false);
+        $child1 = new Button('Child 1', ButtonType::Link, null, null, false);
+        $child2 = new Button('Child 2', ButtonType::Link, null, null, false);
 
         $button->appendChild($child1, 'old');
         $button->setChildren(['new1' => $child2]);
@@ -148,11 +148,11 @@ final class ButtonTest extends TestCase
     #[Test]
     public function appendAfterChildInsertsAfterExistingChild(): void
     {
-        $button = new Button('Parent', ButtonType::Menu);
-        $child1 = new Button('First', ButtonType::Link);
-        $child2 = new Button('Second', ButtonType::Link);
-        $child3 = new Button('Third', ButtonType::Link);
-        $newChild = new Button('New', ButtonType::Link);
+        $button = new Button('Parent', ButtonType::Menu, null, null, false);
+        $child1 = new Button('First', ButtonType::Link, null, null, false);
+        $child2 = new Button('Second', ButtonType::Link, null, null, false);
+        $child3 = new Button('Third', ButtonType::Link, null, null, false);
+        $newChild = new Button('New', ButtonType::Link, null, null, false);
 
         $button->appendChild($child1, 'first');
         $button->appendChild($child2, 'second');
@@ -170,9 +170,9 @@ final class ButtonTest extends TestCase
     #[Test]
     public function appendAfterChildAppendsAtEndWhenKeyNotFound(): void
     {
-        $button = new Button('Parent', ButtonType::Menu);
-        $child1 = new Button('First', ButtonType::Link);
-        $newChild = new Button('New', ButtonType::Link);
+        $button = new Button('Parent', ButtonType::Menu, null, null, false);
+        $child1 = new Button('First', ButtonType::Link, null, null, false);
+        $newChild = new Button('New', ButtonType::Link, null, null, false);
 
         $button->appendChild($child1, 'first');
         $button->appendAfterChild($newChild, 'nonexistent', 'new');
@@ -185,10 +185,10 @@ final class ButtonTest extends TestCase
     #[Test]
     public function appendAfterChildInsertsAfterLastChild(): void
     {
-        $button = new Button('Parent', ButtonType::Menu);
-        $child1 = new Button('First', ButtonType::Link);
-        $child2 = new Button('Last', ButtonType::Link);
-        $newChild = new Button('New', ButtonType::Link);
+        $button = new Button('Parent', ButtonType::Menu, null, null, false);
+        $child1 = new Button('First', ButtonType::Link, null, null, false);
+        $child2 = new Button('Last', ButtonType::Link, null, null, false);
+        $newChild = new Button('New', ButtonType::Link, null, null, false);
 
         $button->appendChild($child1, 'first');
         $button->appendChild($child2, 'last');
@@ -202,9 +202,9 @@ final class ButtonTest extends TestCase
     #[Test]
     public function removeChildRemovesExistingChild(): void
     {
-        $button = new Button('Parent', ButtonType::Menu);
-        $child1 = new Button('First', ButtonType::Link);
-        $child2 = new Button('Second', ButtonType::Link);
+        $button = new Button('Parent', ButtonType::Menu, null, null, false);
+        $child1 = new Button('First', ButtonType::Link, null, null, false);
+        $child2 = new Button('Second', ButtonType::Link, null, null, false);
 
         $button->appendChild($child1, 'first');
         $button->appendChild($child2, 'second');
@@ -220,8 +220,8 @@ final class ButtonTest extends TestCase
     #[Test]
     public function removeChildDoesNothingForNonexistentKey(): void
     {
-        $button = new Button('Parent', ButtonType::Menu);
-        $child = new Button('Child', ButtonType::Link);
+        $button = new Button('Parent', ButtonType::Menu, null, null, false);
+        $child = new Button('Child', ButtonType::Link, null, null, false);
 
         $button->appendChild($child, 'child');
         $button->removeChild('nonexistent');
@@ -234,7 +234,7 @@ final class ButtonTest extends TestCase
     {
         $this->setupLanguageServiceStub();
 
-        $button = new Button('LLL:EXT:test/label', ButtonType::Link);
+        $button = new Button('LLL:EXT:test/label', ButtonType::Link, null, null, false);
         $result = $button->render();
 
         self::assertArrayHasKey('label', $result);
@@ -261,7 +261,7 @@ final class ButtonTest extends TestCase
     {
         $this->setupLanguageServiceStub();
 
-        $button = new Button('Label', ButtonType::Link, '');
+        $button = new Button('Label', ButtonType::Link, '', null, false);
         $result = $button->render();
 
         self::assertArrayNotHasKey('url', $result);
@@ -272,7 +272,7 @@ final class ButtonTest extends TestCase
     {
         $this->setupLanguageServiceStub();
 
-        $button = new Button('Label', ButtonType::Link);
+        $button = new Button('Label', ButtonType::Link, null, null, false);
         $result = $button->render();
 
         self::assertArrayNotHasKey('url', $result);
@@ -286,7 +286,7 @@ final class ButtonTest extends TestCase
         $icon = $this->createStub(Icon::class);
         $icon->method('getAlternativeMarkup')->willReturn('<svg>icon</svg>');
 
-        $button = new Button('Label', ButtonType::Link, null, $icon);
+        $button = new Button('Label', ButtonType::Link, null, $icon, false);
         $result = $button->render();
 
         self::assertArrayHasKey('icon', $result);
@@ -298,7 +298,7 @@ final class ButtonTest extends TestCase
     {
         $this->setupLanguageServiceStub();
 
-        $button = new Button('Label', ButtonType::Link);
+        $button = new Button('Label', ButtonType::Link, null, null, false);
         $result = $button->render();
 
         self::assertArrayNotHasKey('icon', $result);
@@ -309,8 +309,8 @@ final class ButtonTest extends TestCase
     {
         $this->setupLanguageServiceStub();
 
-        $parent = new Button('Parent', ButtonType::Menu);
-        $child = new Button('Child', ButtonType::Link, 'https://child.com');
+        $parent = new Button('Parent', ButtonType::Menu, null, null, false);
+        $child = new Button('Child', ButtonType::Link, 'https://child.com', null, false);
 
         $parent->appendChild($child, 'child1');
         $result = $parent->render();
@@ -326,7 +326,7 @@ final class ButtonTest extends TestCase
     {
         $this->setupLanguageServiceStub();
 
-        $button = new Button('Label', ButtonType::Menu);
+        $button = new Button('Label', ButtonType::Menu, null, null, false);
         $result = $button->render();
 
         self::assertArrayNotHasKey('children', $result);
@@ -335,7 +335,7 @@ final class ButtonTest extends TestCase
     #[Test]
     public function contextualUrlDefaultsToNull(): void
     {
-        $button = new Button('Label', ButtonType::Link, 'https://example.com');
+        $button = new Button('Label', ButtonType::Link, 'https://example.com', null, false);
 
         self::assertNull($button->getContextualUrl());
     }
@@ -343,7 +343,7 @@ final class ButtonTest extends TestCase
     #[Test]
     public function setContextualUrlChangesContextualUrl(): void
     {
-        $button = new Button('Label', ButtonType::Link);
+        $button = new Button('Label', ButtonType::Link, null, null, false);
         $button->setContextualUrl('https://contextual.com/edit');
 
         self::assertSame('https://contextual.com/edit', $button->getContextualUrl());
@@ -354,7 +354,7 @@ final class ButtonTest extends TestCase
     {
         $this->setupLanguageServiceStub();
 
-        $button = new Button('Label', ButtonType::Link, 'https://example.com');
+        $button = new Button('Label', ButtonType::Link, 'https://example.com', null, false);
         $button->setContextualUrl('https://contextual.com/edit');
         $result = $button->render();
 
@@ -367,7 +367,7 @@ final class ButtonTest extends TestCase
     {
         $this->setupLanguageServiceStub();
 
-        $button = new Button('Label', ButtonType::Link, 'https://example.com');
+        $button = new Button('Label', ButtonType::Link, 'https://example.com', null, false);
         $result = $button->render();
 
         self::assertArrayNotHasKey('contextualUrl', $result);
@@ -378,7 +378,7 @@ final class ButtonTest extends TestCase
     {
         $this->setupLanguageServiceStub();
 
-        $button = new Button('Label', ButtonType::Link, 'https://example.com');
+        $button = new Button('Label', ButtonType::Link, 'https://example.com', null, false);
         $button->setContextualUrl('');
         $result = $button->render();
 

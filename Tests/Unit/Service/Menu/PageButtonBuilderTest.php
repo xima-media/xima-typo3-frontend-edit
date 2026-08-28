@@ -58,7 +58,7 @@ final class PageButtonBuilderTest extends TestCase
         $this->setUpGlobals();
 
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addInfoSection($menuButton, ['uid' => 1, 'title' => 'Test Page', 'doktype' => 1]);
 
@@ -73,7 +73,7 @@ final class PageButtonBuilderTest extends TestCase
         $this->setUpGlobals();
 
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addInfoSection($menuButton, ['uid' => 1, 'title' => '', 'doktype' => 1]);
 
@@ -86,7 +86,7 @@ final class PageButtonBuilderTest extends TestCase
         $this->setUpGlobals();
 
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addInfoSection($menuButton, ['uid' => 1, 'doktype' => 1]);
 
@@ -99,7 +99,7 @@ final class PageButtonBuilderTest extends TestCase
         $this->setUpGlobals();
 
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addInfoSection($menuButton, ['uid' => 1]);
 
@@ -110,7 +110,7 @@ final class PageButtonBuilderTest extends TestCase
     public function addEditSectionAddsEditButtons(): void
     {
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addEditSection($menuButton, 1, 0, '/return');
 
@@ -124,7 +124,7 @@ final class PageButtonBuilderTest extends TestCase
     public function addEditSectionSetsContextualUrl(): void
     {
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addEditSection($menuButton, 1, 0, '/return', '/typo3/contextual');
 
@@ -135,7 +135,7 @@ final class PageButtonBuilderTest extends TestCase
     public function addEditSectionOmitsEditPagePropertiesWhenNotAllowed(): void
     {
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addEditSection($menuButton, 1, 0, '/return', canEditPageProperties: false);
 
@@ -150,7 +150,7 @@ final class PageButtonBuilderTest extends TestCase
     public function addEditSectionIgnoresContextualUrlWhenNotAllowed(): void
     {
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addEditSection($menuButton, 1, 0, '/return', '/typo3/contextual', false);
 
@@ -161,7 +161,7 @@ final class PageButtonBuilderTest extends TestCase
     public function addActionSectionAddsInfoAndHistoryButtons(): void
     {
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addActionSection($menuButton, 1, '/return');
 

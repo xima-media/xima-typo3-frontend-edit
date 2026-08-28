@@ -433,7 +433,7 @@ final class AdditionalDataHandlerTest extends TestCase
 
     private function createButton(): Button
     {
-        return new Button('root', ButtonType::Link);
+        return new Button('root', ButtonType::Link, null, null, false);
     }
 
     private function createHandler(BackendUserService $backendUserService): AdditionalDataHandler

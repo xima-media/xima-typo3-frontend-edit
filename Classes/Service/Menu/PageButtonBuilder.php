@@ -55,7 +55,8 @@ final readonly class PageButtonBuilder extends AbstractMenuButtonBuilder
             'info_header',
             ButtonType::Info,
             $label,
-            icon: $iconIdentifier,
+            null,
+            $iconIdentifier,
         );
     }
 
@@ -78,7 +79,7 @@ final readonly class PageButtonBuilder extends AbstractMenuButtonBuilder
         // pagetypes_select) — see PageMenuGenerator::getDropdown().
         if ($canEditPageProperties) {
             $editUrl = $this->urlBuilderService->buildEditUrl($pageId, 'pages', $languageUid, $returnUrl).'&tx_ximatypo3frontendedit';
-            $this->addButton($menuButton, 'edit_page_properties', ButtonType::Link, url: $editUrl, icon: 'actions-page-open');
+            $this->addButton($menuButton, 'edit_page_properties', ButtonType::Link, null, $editUrl, 'actions-page-open');
 
             if (null !== $contextualUrl) {
                 $menuButton->getChildren()['edit_page_properties']->setContextualUrl($contextualUrl);
@@ -87,7 +88,7 @@ final readonly class PageButtonBuilder extends AbstractMenuButtonBuilder
 
         // Edit page (Backend Page Layout)
         $pageUrl = $this->urlBuilderService->buildPageLayoutUrl($pageId, $languageUid, $returnUrl);
-        $this->addButton($menuButton, 'edit_page', ButtonType::Link, url: $pageUrl, icon: 'apps-pagetree-page-default');
+        $this->addButton($menuButton, 'edit_page', ButtonType::Link, null, $pageUrl, 'apps-pagetree-page-default');
     }
 
     /**
@@ -104,11 +105,11 @@ final readonly class PageButtonBuilder extends AbstractMenuButtonBuilder
 
         // Page info
         $infoUrl = $this->urlBuilderService->buildInfoUrl($pageId, 'pages', $returnUrl);
-        $this->addButton($menuButton, 'info', ButtonType::Link, url: $infoUrl, icon: 'actions-info');
+        $this->addButton($menuButton, 'info', ButtonType::Link, null, $infoUrl, 'actions-info');
 
         // Page history
         $historyUrl = $this->urlBuilderService->buildHistoryUrl($pageId, 'pages', $returnUrl);
-        $this->addButton($menuButton, 'history', ButtonType::Link, url: $historyUrl, icon: 'actions-history');
+        $this->addButton($menuButton, 'history', ButtonType::Link, null, $historyUrl, 'actions-history');
     }
 
     /**

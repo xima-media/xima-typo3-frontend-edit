@@ -265,7 +265,7 @@ final class ContentElementMenuGeneratorTest extends TestCase
         $element = $this->createContentElementRecord(88);
         $connectionPool = $this->createConnectionPoolReturning([$element]);
 
-        $replacementButton = new Button('replaced', \Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType::Link, '/replaced');
+        $replacementButton = new Button('replaced', \Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType::Link, '/replaced', null, false);
         $eventDispatcher = $this->createMock(EventDispatcher::class);
         // getDropdown() also dispatches FrontendEditDataEnrichmentEvent - this
         // callback must tolerate both event types, not just the one under test.

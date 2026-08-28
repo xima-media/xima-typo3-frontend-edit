@@ -59,7 +59,7 @@ final class RecordButtonBuilderTest extends TestCase
         $this->setUpGlobals();
 
         $builder = new RecordButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addInfoSection($menuButton, 'tx_news_domain_model_news', ['uid' => 42, 'title' => 'Test News']);
 
@@ -74,7 +74,7 @@ final class RecordButtonBuilderTest extends TestCase
         $this->setUpGlobals();
 
         $builder = new RecordButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addInfoSection($menuButton, 'tx_news_domain_model_news', ['uid' => 42]);
 
@@ -92,7 +92,7 @@ final class RecordButtonBuilderTest extends TestCase
         $GLOBALS['LANG'] = $languageService;
 
         $builder = new RecordButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addInfoSection($menuButton, 'tx_news_domain_model_news', ['uid' => 42]);
 
@@ -104,7 +104,7 @@ final class RecordButtonBuilderTest extends TestCase
     public function addEditSectionAddsOnlyOneEditButton(): void
     {
         $builder = new RecordButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addEditSection($menuButton, 'tx_news_domain_model_news', 42, 0, '/return');
 
@@ -118,7 +118,7 @@ final class RecordButtonBuilderTest extends TestCase
     public function addEditSectionSetsContextualUrl(): void
     {
         $builder = new RecordButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addEditSection($menuButton, 'tx_news_domain_model_news', 42, 0, '/return', '/typo3/contextual');
 
@@ -129,7 +129,7 @@ final class RecordButtonBuilderTest extends TestCase
     public function addActionSectionAddsOnlyInfoAndHistoryButtons(): void
     {
         $builder = new RecordButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addActionSection($menuButton, 'tx_news_domain_model_news', 42, '/return');
 

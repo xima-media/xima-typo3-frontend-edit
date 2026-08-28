@@ -1,2 +1,25 @@
 parameters:
-	ignoreErrors: []
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined method TYPO3\\CMS\\Core\\Authentication\\BackendUserAuthentication\:\:checkRecordEditAccess\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: ../../Classes/Utility/Compatibility/BackendUserUtility.php
+
+		-
+			message: '#^Mixed property fetch in a "\$backendUser\-\>checkRecordEditAccess\(\$table, \$record\)\-\>\.\.\." can skip important errors\. Make sure the type is known$#'
+			identifier: typePerfect.noMixedPropertyFetcher
+			count: 1
+			path: ../../Classes/Utility/Compatibility/BackendUserUtility.php
+
+		-
+			message: '#^Call to an undefined method object\:\:createInputButton\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: ../../Classes/Utility/Compatibility/ButtonFactoryUtility.php
+
+		-
+			message: '#^PHPDoc tag @var with type class\-string is not subtype of native type ''TYPO3\\\\CMS\\\\Backend…''\.$#'
+			identifier: varTag.nativeType
+			count: 1
+			path: ../../Classes/Utility/Compatibility/ButtonFactoryUtility.php

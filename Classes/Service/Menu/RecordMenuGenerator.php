@@ -107,6 +107,9 @@ final class RecordMenuGenerator extends AbstractMenuGenerator
         $menuButton = new Button(
             'LLL:EXT:'.Configuration::EXT_KEY.'/Resources/Private/Language/locallang.xlf:record_menu',
             ButtonType::Menu,
+            null,
+            null,
+            false,
         );
         $this->recordButtonBuilder->addInfoSection($menuButton, $table, $targetRecord);
         $this->recordButtonBuilder->addEditSection($menuButton, $table, $targetUid, $languageUid, $returnUrl, $contextualUrl);

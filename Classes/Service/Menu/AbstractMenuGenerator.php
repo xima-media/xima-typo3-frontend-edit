@@ -31,7 +31,7 @@ abstract class AbstractMenuGenerator
         protected readonly ExtensionConfiguration $extensionConfiguration,
     ) {}
 
-    protected function isLinkTargetBlank(): bool
+    final protected function isLinkTargetBlank(): bool
     {
         try {
             $config = $this->extensionConfiguration->get(Configuration::EXT_KEY);

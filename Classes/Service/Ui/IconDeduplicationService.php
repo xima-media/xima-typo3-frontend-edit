@@ -50,9 +50,9 @@ final class IconDeduplicationService
 
         foreach ($contentElements as $uid => $contentElement) {
             if (isset($contentElement['element']['ctypeIcon']) && is_string($contentElement['element']['ctypeIcon'])) {
-                $contentElements[$uid]['element']['ctypeIcon'] = $this->replaceWithKey($contentElement['element']['ctypeIcon'], $icons);
+                [$contentElements[$uid]['element']['ctypeIcon'], $icons] = $this->replaceWithKey($contentElement['element']['ctypeIcon'], $icons);
             }
-            $contentElements[$uid]['menu'] = $this->deduplicateMenu($contentElement['menu'], $icons);
+            [$contentElements[$uid]['menu'], $icons] = $this->deduplicateMenu($contentElement['menu'], $icons);
         }
 
         return ['contentElements' => $contentElements, 'icons' => $icons];
@@ -62,31 +62,35 @@ final class IconDeduplicationService
      * @param array<string, mixed>  $menu
      * @param array<string, string> $icons
      *
-     * @return array<string, mixed>
+     * @return array{0: array<string, mixed>, 1: array<string, string>}
      */
-    private function deduplicateMenu(array $menu, array &$icons): array
+    private function deduplicateMenu(array $menu, array $icons): array
     {
         if (isset($menu['icon']) && is_string($menu['icon'])) {
-            $menu['icon'] = $this->replaceWithKey($menu['icon'], $icons);
+            [$menu['icon'], $icons] = $this->replaceWithKey($menu['icon'], $icons);
         }
 
         if (isset($menu['children']) && is_array($menu['children'])) {
             foreach ($menu['children'] as $key => $child) {
-                $menu['children'][$key] = is_array($child) ? $this->deduplicateMenu($child, $icons) : $child;
+                if (is_array($child)) {
+                    [$menu['children'][$key], $icons] = $this->deduplicateMenu($child, $icons);
+                }
             }
         }
 
-        return $menu;
+        return [$menu, $icons];
     }
 
     /**
      * @param array<string, string> $icons
+     *
+     * @return array{0: string, 1: array<string, string>}
      */
-    private function replaceWithKey(string $markup, array &$icons): string
+    private function replaceWithKey(string $markup, array $icons): array
     {
         $key = substr(hash('xxh128', $markup), 0, 8);
         $icons[$key] ??= $markup;
 
-        return $key;
+        return [$key, $icons];
     }
 }

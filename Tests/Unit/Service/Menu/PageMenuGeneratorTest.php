@@ -171,7 +171,7 @@ final class PageMenuGeneratorTest extends TestCase
 
         $connectionPool = $this->createConnectionPoolReturning(['uid' => 3, 'title' => 'Page', 'doktype' => 1]);
 
-        $replacement = new Button('replaced', ButtonType::Link, '/replaced-page');
+        $replacement = new Button('replaced', ButtonType::Link, '/replaced-page', null, false);
         $eventDispatcher = $this->createMock(EventDispatcher::class);
         $eventDispatcher->method('dispatch')->willReturnCallback(
             static function (FrontendEditPageDropdownModifyEvent $event) use ($replacement): FrontendEditPageDropdownModifyEvent {
