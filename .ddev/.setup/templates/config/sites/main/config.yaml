@@ -1,4 +1,4 @@
-base: 'https://__VERSION__.__EXTENSION_NAME__.ddev.site'
+base: 'https://__VERSION__.__SITENAME__.ddev.site'
 dependencies:
   - bootstrap-package/full
   - xima/xima-typo3-frontend-edit
