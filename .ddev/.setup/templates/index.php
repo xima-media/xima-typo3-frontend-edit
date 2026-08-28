@@ -5,13 +5,13 @@
 declare(strict_types=1);
 
 $extensionKey = getenv('EXTENSION_NAME');
-$siteHostname = getenv('DDEV_SITENAME') . '.' . getenv('DDEV_TLD');
+$siteHostname = getenv('DDEV_SITENAME').'.'.getenv('DDEV_TLD');
 $typo3AdminUser = getenv('TYPO3_SETUP_ADMIN_USERNAME');
 $typo3AdminPassword = getenv('TYPO3_SETUP_ADMIN_PASSWORD');
 $supportedVersions = explode(' ', getenv('TYPO3_VERSIONS'));
 
 // Read the git branch/commit/dirname written by the post-start hook, if present.
-$gitInfoPath = __DIR__ . '/.git-info';
+$gitInfoPath = __DIR__.'/.git-info';
 $gitBranch = '';
 $gitCommit = '';
 if (file_exists($gitInfoPath)) {
@@ -21,7 +21,7 @@ if (file_exists($gitInfoPath)) {
 }
 
 // Check if composer.json exists
-$composerJsonPath = __DIR__ . '/../composer.json';
+$composerJsonPath = __DIR__.'/../composer.json';
 if (file_exists($composerJsonPath)) {
     $composerJsonContent = file_get_contents($composerJsonPath);
     $composerData = json_decode($composerJsonContent, true);
@@ -53,8 +53,8 @@ if (file_exists($composerJsonPath)) {
         <?php echo $extensionKey; ?></h1>
     <p>
         <code><?php echo htmlspecialchars($siteHostname); ?></code>
-        <?php if ($gitBranch !== ''): ?> &middot; branch <code><?php echo htmlspecialchars($gitBranch); ?></code><?php endif; ?>
-        <?php if ($gitCommit !== ''): ?> &middot; commit <code><?php echo htmlspecialchars($gitCommit); ?></code><?php endif; ?>
+        <?php if ('' !== $gitBranch) { ?> &middot; branch <code><?php echo htmlspecialchars($gitBranch); ?></code><?php } ?>
+        <?php if ('' !== $gitCommit) { ?> &middot; commit <code><?php echo htmlspecialchars($gitCommit); ?></code><?php } ?>
     </p>
 </header>
 <main class="container">
@@ -63,11 +63,11 @@ if (file_exists($composerJsonPath)) {
     <p>Run <code>ddev install all</code> to install all TYPO3 instances below:</p>
     <?php
     foreach ($supportedVersions as $version) {
-        $directoryPath = '/var/www/html/.Build/' . $version;
+        $directoryPath = '/var/www/html/.Build/'.$version;
         if (is_dir($directoryPath)) {
             // Read the install-mode marker so the intro page shows whether a
             // version slot was built in composer (default) or classic mode.
-            $modeFile = $directoryPath . '/.install-mode';
+            $modeFile = $directoryPath.'/.install-mode';
             $mode = is_file($modeFile) ? trim(file_get_contents($modeFile)) : 'composer';
             echo "<article class='flex'><kbd>{$version}</kbd><div><small>{$mode}</small></div><div><strong>Frontend</strong><br/><strong>Backend</strong></div><div><a target='_blank' href='https://{$version}.{$siteHostname}'>https://{$version}.{$siteHostname}</a><br/><a target='_blank' href='https://{$version}.{$siteHostname}/typo3/?u={$typo3AdminUser}&p={$typo3AdminPassword}'>https://{$version}.{$siteHostname}/typo3</a></div></article>";
         } else {
@@ -89,7 +89,7 @@ foreach ($directories as $directory) {
         $filePath = $fileInfo->getPathname();
         $fileName = $fileInfo->getFilename();
 
-        if ($fileName[0] === '.' || $fileInfo->isDir()) {
+        if ('.' === $fileName[0] || $fileInfo->isDir()) {
             continue;
         }
 
