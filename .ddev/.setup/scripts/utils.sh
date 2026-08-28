@@ -170,12 +170,12 @@ function post_setup() {
   _progress " ├─ Setup site configuration"
     setup_site_config
   _done
+  _progress " ├─ Update TYPO3"
+    update_typo3
+  _done
   _progress " ├─ Import data"
     import_xml_data
     import_sql_data
-  _done
-  _progress " ├─ Update TYPO3"
-    update_typo3
   _done
   printf " └─ \033[33mTYPO3 $VERSION setup completed!\033[0m Open in your browser: https://$VERSION.${EXTENSION_NAME}.ddev.site\n"
 }
