@@ -264,14 +264,6 @@ function post_setup() {
     fi
   _done
 
-  _progress " ├─ Setup site configuration"
-    setup_site_config
-  _done
-
-  _progress " ├─ Update TYPO3"
-    update_typo3
-  _done
-
   run_hook "post-typo3-setup"
 
   if [ -n "$DEMO_PROFILE" ]; then
@@ -279,6 +271,17 @@ function post_setup() {
       install_demo
     _done
   fi
+
+  # After install_demo(): the "introduction" profile wipes config/sites/main
+  # to make room for its own site, which would otherwise clobber the
+  # repo-owned config copied here.
+  _progress " ├─ Setup site configuration"
+    setup_site_config
+  _done
+
+  _progress " ├─ Update TYPO3"
+    update_typo3
+  _done
 
   _progress " ├─ Import data"
     import_xml_data
@@ -375,6 +378,10 @@ function classic_post_setup() {
     for entry in "${TYPO3_SETTINGS[@]}"; do
         eval "classic_configuration_set $entry"
     done
+  _done
+
+  _progress " ├─ Setup site configuration"
+    setup_site_config
   _done
 
   _progress " ├─ Import data"
