@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## #ddev-generated
 ## Description: Exec command for all TYPO3 instances.
@@ -12,7 +12,28 @@ mapfile -t versions < <(get_supported_typo3_versions)
 
 for version in "${versions[@]}"; do
     TYPO3_PATH="/var/www/html/.Build/${version}"
-    if [ -d "$TYPO3_PATH" ]; then
+    if [ ! -d "$TYPO3_PATH" ]; then
+        message red "TYPO3 instance not found for version ${version}"
+        continue
+    fi
+
+    # Per-slot mode detection: classic instances live in public/ and use the
+    # core CLI binary, Composer instances use vendor/bin. Reset tempCommand each
+    # iteration so a non-typo3 command does not carry over from a previous slot.
+    mode=$(cat "${TYPO3_PATH}/.install-mode" 2>/dev/null || echo composer)
+    tempCommand="$command"
+    exec_dir="$TYPO3_PATH"
+
+    if [ "$mode" = "classic" ]; then
+        exec_dir="${TYPO3_PATH}/public"
+        if [[ $command == composer* ]]; then
+            message yellow "[TYPO3 v${version} (classic)] skipping 'composer' (non-Composer instance)"
+            continue
+        fi
+        if [[ $command == typo3* ]]; then
+            tempCommand="/usr/bin/php typo3/sysext/core/bin/${command}"
+        fi
+    else
         if [[ $command == typo3* ]]; then
             if [[ $version == 11 ]]; then
                 tempCommand="/usr/bin/php vendor/bin/typo3cms${command:5}"
@@ -20,10 +41,9 @@ for version in "${versions[@]}"; do
                 tempCommand="/usr/bin/php vendor/bin/${command}"
             fi
         fi
-        cd $TYPO3_PATH
-        message magenta "[TYPO3 v${version}] ${tempCommand}"
-        $tempCommand
-    else
-        message red "TYPO3 instance not found for version ${version}"
     fi
+
+    cd "$exec_dir"
+    message magenta "[TYPO3 v${version} (${mode})] ${tempCommand}"
+    $tempCommand
 done

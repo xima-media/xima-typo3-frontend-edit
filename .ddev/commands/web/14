@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+## #ddev-generated
 ## Description: Exec command for TYPO3 instance 14.
 ## Usage: 14
 ## Example: "ddev 14 composer du -o" or "ddev 14 typo3 cache:flush"
@@ -8,16 +9,34 @@
 
 command=$@
 version=14
-
-if [[ $command == typo3* ]]; then
-    command="/usr/bin/php vendor/bin/${command}"
-fi
-
 TYPO3_PATH=".Build/${version}"
-if [ -d "$TYPO3_PATH" ]; then
-    message magenta "[TYPO3 v${version}] ${command}"
-    cd $TYPO3_PATH
-    $command
-else
-    message red "TYPO3 binary not found for version ${version}"
+
+if [ ! -d "$TYPO3_PATH" ]; then
+    message red "TYPO3 instance not found for version ${version}"
+    exit 1
 fi
+
+# Read the mode marker written at install time to pick the right binary and
+# working directory. A missing marker means a Composer instance.
+mode=$(cat "${TYPO3_PATH}/.install-mode" 2>/dev/null || echo composer)
+
+if [ "$mode" = "classic" ]; then
+    exec_dir="${TYPO3_PATH}/public"
+    if [[ $command == composer* ]]; then
+        message red "Version ${version} is installed in classic (non-Composer) mode."
+        message yellow "Run 'ddev install ${version}' to switch it back to a Composer instance."
+        exit 1
+    fi
+    if [[ $command == typo3* ]]; then
+        command="/usr/bin/php typo3/sysext/core/bin/${command}"
+    fi
+else
+    exec_dir="${TYPO3_PATH}"
+    if [[ $command == typo3* ]]; then
+        command="/usr/bin/php vendor/bin/${command}"
+    fi
+fi
+
+message magenta "[TYPO3 v${version} (${mode})] ${command}"
+cd "$exec_dir"
+$command
