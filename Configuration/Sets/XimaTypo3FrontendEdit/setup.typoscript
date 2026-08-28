@@ -21,6 +21,6 @@
 # flattens to an *empty* TypoScript constant, which would turn an unquoted
 # comparison into `[ == 1]`.
 #
-[backend.user.isLoggedIn && '{$frontendEdit.markerBasedDetection}' == '1']
+[backend.user.isLoggedIn && '{$frontendEdit.enabled}' == '1' && '{$frontendEdit.markerBasedDetection}' == '1']
     tt_content.stdWrap.xfeMarkers = 1
 [END]
