@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+## #ddev-generated
+## Description: Regenerate this project's additional_hostnames so a git worktree checkout doesn't collide with the primary checkout's hostnames.
+## Usage: worktree-init
+## Example: "ddev worktree-init"
+
+set -eo pipefail
+
+COMPOSE_FILE=".ddev/docker-compose.typo3-setup.yaml"
+if [ ! -f "$COMPOSE_FILE" ]; then
+    echo "Could not find $COMPOSE_FILE - is the typo3-multi-version-extension add-on installed?"
+    exit 1
+fi
+
+# A project-owned docker-compose.zz-project.yaml (see docs/configuration.md)
+# survives ddev add-on get updates and can override TYPO3_VERSIONS, so it
+# takes precedence over the add-on-managed docker-compose.typo3-setup.yaml -
+# mirrors the same lookup in install.yaml's config.typo3-setup.yaml step.
+OVERRIDE_COMPOSE_FILE=".ddev/docker-compose.zz-project.yaml"
+typo3_versions=""
+# The `|| true` on each lookup keeps a no-match grep from tripping set -e via
+# pipefail, which would otherwise abort the script here instead of falling
+# through to the next lookup (or the explicit error below).
+if [ -f "$OVERRIDE_COMPOSE_FILE" ]; then
+    typo3_versions=$(grep -oE 'TYPO3_VERSIONS=[0-9 ]+' "$OVERRIDE_COMPOSE_FILE" | head -1 | cut -d= -f2) || true
+fi
+if [ -z "$typo3_versions" ]; then
+    typo3_versions=$(grep -oE 'TYPO3_VERSIONS=[0-9 ]+' "$COMPOSE_FILE" | head -1 | cut -d= -f2) || true
+fi
+if [ -z "$typo3_versions" ]; then
+    echo "Could not read TYPO3_VERSIONS from $COMPOSE_FILE - refusing to guess. Check the file for a valid 'TYPO3_VERSIONS=<versions>' entry."
+    exit 1
+fi
+
+override_file=".ddev/config.zz-worktree.local.yaml"
+
+{
+    echo "#ddev-generated"
+    echo "override_config: true"
+    echo "additional_hostnames:"
+    for version in $typo3_versions; do
+        echo "  - ${version}.${DDEV_PROJECT}"
+    done
+} >"$override_file"
+
+echo "Wrote ${override_file} with hostnames for project '${DDEV_PROJECT}' (versions: ${typo3_versions})."
+echo "Run 'ddev restart' to apply it, then 'ddev install all' to install the TYPO3 instances."
+echo "If you get a bare '404 page not found' right after restarting, that's the ddev router not yet having a route for this new project - run 'ddev restart' once more."

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+## #ddev-generated
+## Description: Tear down this worktree's DDEV project (unregister, drop database/images/volumes). Run the printed git commands from the primary checkout afterwards to remove the worktree itself.
+## Usage: worktree-remove
+## Example: "ddev worktree-remove"
+
+set -eo pipefail
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "Not a git repository - nothing to do."
+    exit 1
+fi
+
+git_dir="$(cd "$(git rev-parse --git-dir)" && pwd -P)"
+common_dir="$(cd "$(git rev-parse --git-common-dir)" && pwd -P)"
+if [ "$git_dir" = "$common_dir" ]; then
+    echo "Run this command from a linked git worktree, not the primary checkout."
+    exit 1
+fi
+
+worktree_path="$(pwd)"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+
+echo "Deleting DDEV project '${DDEV_PROJECT}' (unregister + drop database, images, volumes)..."
+ddev delete -Oy
+
+echo ""
+echo "DDEV project removed. This command cannot remove the worktree itself while running"
+echo "from inside it - from your PRIMARY checkout, run:"
+echo ""
+echo "  git worktree remove --force '${worktree_path}'"
+echo "  git branch -D '${branch}'"
