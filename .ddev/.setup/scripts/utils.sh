@@ -264,6 +264,10 @@ function post_setup() {
     fi
   _done
 
+  _progress " ├─ Update TYPO3"
+    update_typo3
+  _done
+
   run_hook "post-typo3-setup"
 
   if [ -n "$DEMO_PROFILE" ]; then
@@ -277,9 +281,6 @@ function post_setup() {
     import_sql_data
     import_site_configs
     run_fixture_scripts
-  _done
-  _progress " ├─ Update TYPO3"
-    update_typo3
   _done
   run_hook "post-install"
 
