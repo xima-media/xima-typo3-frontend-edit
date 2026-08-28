@@ -1,0 +1,26 @@
+#
+# Marker-based content element detection (opt-in).
+#
+# Sets a sentinel key on the shared tt_content stdWrap configuration. The key is
+# unknown to the Core and therefore never executed as a stdWrap function -- it
+# only signals ContentElementMarkerEventListener to wrap the rendered element in
+# comment markers.
+#
+# Why a sentinel key instead of writing the markers here directly: wrap-type
+# stdWrap properties are single scalars, so any site package setting the same key
+# silently replaces ours. bk2k/bootstrap-package does exactly that via
+# lib.dynamicContent's renderObj.stdWrap.dataWrap. A separate key survives the
+# array_replace_recursive() in ContentObjectRenderer::mergeTSRef().
+#
+# Cache safety rests entirely on this condition: TypoScript condition verdicts are
+# part of the page cache identifier, so backend users and anonymous visitors get
+# separate cache entries natively. The listener itself must never check the backend
+# user, because PHP behaviour does not vary the cache identifier.
+#
+# The constant is quoted on purpose. A site setting of type bool with value false
+# flattens to an *empty* TypoScript constant, which would turn an unquoted
+# comparison into `[ == 1]`.
+#
+[backend.user.isLoggedIn && '{$frontendEdit.markerBasedDetection}' == '1']
+    tt_content.stdWrap.xfeMarkers = 1
+[END]

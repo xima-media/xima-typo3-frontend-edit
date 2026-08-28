@@ -171,6 +171,15 @@
 				<target>Öffnet Formulare für Inhaltselemente und Seiteneigenschaften in einem Panel neben der Seite, anstatt zum Backend zu navigieren. Aktiviert außerdem den Assistenten für neue Inhaltselemente im Frontend. Die Darstellung wird automatisch gewählt: eine Sidebar ab TYPO3 v14.2, ein Slide-in-Modal in früheren Versionen. Diese Funktion ist experimentell und kann sich in zukünftigen Versionen ändern.</target>
 			</trans-unit>
 
+			<trans-unit id="settings.frontendEdit.markerBasedDetection">
+				<source>[Experimental] Enable marker-based element detection</source>
+				<target>[Experimentell] Marker-basierte Elementerkennung aktivieren</target>
+			</trans-unit>
+			<trans-unit id="settings.description.frontendEdit.markerBasedDetection">
+				<source>Wraps every rendered content element in invisible HTML comment markers, so elements become editable even when their template emits no id="c{uid}" anchor and no data-frontend-edit attribute. Markers are only rendered for logged-in backend users and are cached separately from anonymous output. HTML minifiers that strip comments disable this channel; the existing anchor and data-attribute detection then applies unchanged. Experimental.</source>
+				<target>Umschließt jedes gerenderte Inhaltselement mit unsichtbaren HTML-Kommentar-Markern. Dadurch werden Elemente auch dann bearbeitbar, wenn ihr Template keinen id="c{uid}"-Anker und kein data-frontend-edit-Attribut ausgibt. Marker werden ausschließlich für angemeldete Backend-Benutzer gerendert und getrennt von der anonymen Ausgabe zwischengespeichert. HTML-Minifier, die Kommentare entfernen, deaktivieren diesen Kanal; die bestehende Anker- und Datenattribut-Erkennung greift dann unverändert. Experimentell.</target>
+			</trans-unit>
+
 			<trans-unit id="settings.frontendEdit.enableDragAndDrop">
 				<source>[Experimental] Enable drag &amp; drop reordering</source>
 				<target>[Experimentell] Umsortieren per Drag &amp; Drop aktivieren</target>
