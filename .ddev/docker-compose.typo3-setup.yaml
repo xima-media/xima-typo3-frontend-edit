@@ -6,8 +6,10 @@ services:
             - EXTENSION_NAME=xima-typo3-frontend-edit
             - PACKAGE_NAME=xima/xima-typo3-frontend-edit
             - TYPO3_VERSIONS=13 14
+            - SYMLINK_EXCLUSIONS=Documentation Documentation-GENERATED-temp var vendor public
+            - TYPO3_CONTEXT=Development
 
-            # TYPO3 v13 config
+            # TYPO3 v13 and v14 config
             - TYPO3_DB_DRIVER=mysqli
             - TYPO3_DB_USERNAME=root
             - TYPO3_DB_PASSWORD=root
@@ -16,4 +18,3 @@ services:
             - TYPO3_SETUP_ADMIN_USERNAME=admin
             - TYPO3_SETUP_ADMIN_PASSWORD=Password1!
             - TYPO3_PROJECT_NAME=EXT:xima-typo3-frontend-edit Dev Environment
-            - TYPO3_SERVER_TYPE=apache

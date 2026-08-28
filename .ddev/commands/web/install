@@ -1,13 +1,50 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ## #ddev-generated
-## Description: Install TYPO3 instances.
-## Usage: install
-## Example: "ddev install" or "ddev install 12" or "ddev install all"
+## Description: Install TYPO3 instances. Pass -v/--verbose to stream all command output, --demo[=profile] to install demo content.
+## Usage: install [version|all] [-v|--verbose] [--demo[=profile]]
+## Example: "ddev install" or "ddev install 12" or "ddev install all --demo" or "ddev install 14 -v"
+## MutagenSync: true
 
-TYPO3=${1}
+TYPO3=""
+# MODE selects the installation flavour: "composer" (default) builds a regular
+# Composer instance, "classic" rebuilds the same version slot as a Composer-free
+# (TER-style) instance. It is exported so the sourced .install-<v> wrappers and
+# pre_setup pick it up.
+export MODE="composer"
+DEMO_PROFILE=""
+for arg in "$@"; do
+    case "$arg" in
+        -v|--verbose) export VERBOSE=1 ;;
+        --classic)    export MODE=classic ;;
+        --demo) DEMO_PROFILE="introduction" ;;
+        --demo=*)
+            DEMO_PROFILE="${arg#--demo=}"
+            if [ -z "$DEMO_PROFILE" ]; then
+                echo "Empty demo profile. Use --demo or --demo=<profile>."
+                exit 1
+            fi
+            ;;
+        -*)
+            echo "Unknown option '$arg'."
+            exit 1
+            ;;
+        *) [ -z "$TYPO3" ] && TYPO3="$arg" ;;
+    esac
+done
+export MODE
+[ -n "$DEMO_PROFILE" ] && export DEMO_PROFILE
 
 . .ddev/.setup/scripts/utils.sh
+
+# Classic mode is a per-version, v12+ feature — reject the combinations it does
+# not support before dispatching. "all" is caught up front; the v11 guard runs
+# after the version has been resolved so it also covers the implicit lowest
+# version (`ddev install --classic`).
+if [ "$MODE" = "classic" ] && [ "$TYPO3" = "all" ]; then
+    message red "Classic mode is per-version only, e.g. 'ddev install 13 --classic'."
+    exit 1
+fi
 
 if [ "$TYPO3" == "all" ]; then
     mapfile -t versions < <(get_supported_typo3_versions)
@@ -21,6 +58,10 @@ else
         if ! check_typo3_version "$TYPO3"; then
             exit 1
         fi
+    fi
+    if [ "$MODE" = "classic" ] && [ "$TYPO3" = "11" ]; then
+        message red "Classic mode requires TYPO3 v12 or higher."
+        exit 1
     fi
     ".ddev/commands/web/.install-$TYPO3"
 fi

@@ -1,25 +1,37 @@
 name: typo3-multi-version-extension
-repository: ../ddev-typo3-multi-version-extension
-version: ""
-install_date: "2025-03-07T13:53:02+01:00"
+repository: konradmichalik/ddev-typo3-multi-version-extension
+version: 0.4.1
+install_date: "2026-08-28T09:21:46+02:00"
 project_files:
-    - .typo3-setup/scripts/utils.sh
-    - .typo3-setup/templates/index.php
-    - .typo3-setup/Tests/.typo3-setup/
+    - .setup/scripts/utils.sh
+    - .setup/scripts/write-git-info.sh
+    - .setup/project.sh.example
+    - .setup/docker-compose.zz-project.yaml.example
+    - .setup/templates/index.php
+    - .setup/Tests/Acceptance/Fixtures/
     - apache/10.conf
     - apache/20.conf
+    - nginx_full/nginx-site.conf
     - commands/host/launch
+    - commands/host/worktree-init
+    - commands/host/worktree-remove
     - commands/web/.install-11
     - commands/web/.install-12
     - commands/web/.install-13
+    - commands/web/.install-14
     - commands/web/11
     - commands/web/12
     - commands/web/13
+    - commands/web/14
     - commands/web/all
     - commands/web/install
     - docker-compose.typo3-setup.yaml
 global_files: []
 removal_actions:
-    - rm ${DDEV_APPROOT}/.ddev/config.typo3-setup.yaml
-    - rm -f ${DDEV_APPROOT}/.ddev/.typo3-setup/
-    - rm -rf ${DDEV_APPROOT}/Tests/.typo3-setup/
+    - rm -f ${DDEV_APPROOT}/.ddev/config.typo3-setup.yaml
+    - rm -f "${DDEV_APPROOT}/.ddev/config.zz-worktree.local.yaml"
+    - rm -rf "${DDEV_APPROOT}/.ddev/.setup/scripts"
+    - rm -rf "${DDEV_APPROOT}/.ddev/.setup/templates"
+    - rm -rf "${DDEV_APPROOT}/.ddev/.setup/Tests"
+    - rm -f "${DDEV_APPROOT}/.ddev/.setup/project.sh.example"
+    - rm -f "${DDEV_APPROOT}/.ddev/.setup/docker-compose.zz-project.yaml.example"
