@@ -121,7 +121,7 @@ final readonly class EmptyColumnService
                         'colPos' => $colPos,
                         'isEmpty' => 0 === ($counts[$containerUid][$colPos] ?? 0),
                         'containerUid' => $containerUid,
-                        'newContentUrl' => $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl, containerUid: $containerUid),
+                        'newContentUrl' => $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl, null, $containerUid),
                     ];
                 } catch (RouteNotFoundException) {
                 }

@@ -69,6 +69,9 @@ final class PageMenuGenerator extends AbstractMenuGenerator
         $menuButton = new Button(
             'LLL:EXT:'.Configuration::EXT_KEY.'/Resources/Private/Language/locallang.xlf:page_menu',
             ButtonType::Menu,
+            null,
+            null,
+            false,
         );
 
         $pageRecord = $this->getPageRecord($pid);

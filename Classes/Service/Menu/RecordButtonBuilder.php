@@ -59,7 +59,8 @@ final readonly class RecordButtonBuilder extends AbstractMenuButtonBuilder
             'info_header',
             ButtonType::Info,
             $label,
-            icon: $iconIdentifier,
+            null,
+            $iconIdentifier,
         );
     }
 
@@ -77,7 +78,7 @@ final readonly class RecordButtonBuilder extends AbstractMenuButtonBuilder
         $this->addButton($menuButton, 'div_edit', ButtonType::Divider);
 
         $editUrl = $this->urlBuilderService->buildEditUrl($uid, $table, $languageUid, $returnUrl);
-        $this->addButton($menuButton, 'edit', ButtonType::Link, url: $editUrl, icon: 'actions-open');
+        $this->addButton($menuButton, 'edit', ButtonType::Link, null, $editUrl, 'actions-open');
 
         if (null !== $contextualUrl) {
             $menuButton->getChildren()['edit']->setContextualUrl($contextualUrl);
@@ -96,9 +97,9 @@ final readonly class RecordButtonBuilder extends AbstractMenuButtonBuilder
         $this->addButton($menuButton, 'div_action', ButtonType::Divider);
 
         $infoUrl = $this->urlBuilderService->buildInfoUrl($uid, $table, $returnUrl);
-        $this->addButton($menuButton, 'info', ButtonType::Link, url: $infoUrl, icon: 'actions-info');
+        $this->addButton($menuButton, 'info', ButtonType::Link, null, $infoUrl, 'actions-info');
 
         $historyUrl = $this->urlBuilderService->buildHistoryUrl($uid, $table, $returnUrl);
-        $this->addButton($menuButton, 'history', ButtonType::Link, url: $historyUrl, icon: 'actions-history');
+        $this->addButton($menuButton, 'history', ButtonType::Link, null, $historyUrl, 'actions-history');
     }
 }

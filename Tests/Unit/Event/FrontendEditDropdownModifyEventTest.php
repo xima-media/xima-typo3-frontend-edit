@@ -46,7 +46,7 @@ final class FrontendEditDropdownModifyEventTest extends TestCase
             'CType' => 'text',
             'header' => 'Test Header',
         ];
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
         $returnUrl = 'https://example.com/return';
 
         $event = new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrl);
@@ -65,7 +65,7 @@ final class FrontendEditDropdownModifyEventTest extends TestCase
             'CType' => 'textmedia',
             'bodytext' => 'Some content',
         ];
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $event = new FrontendEditDropdownModifyEvent($contentElement, $menuButton, '/return');
 
@@ -77,8 +77,8 @@ final class FrontendEditDropdownModifyEventTest extends TestCase
     public function setMenuButtonReplacesMenuButton(): void
     {
         $contentElement = ['uid' => 1];
-        $originalButton = new Button('Original', ButtonType::Menu);
-        $newButton = new Button('New', ButtonType::Menu);
+        $originalButton = new Button('Original', ButtonType::Menu, null, null, false);
+        $newButton = new Button('New', ButtonType::Menu, null, null, false);
 
         $event = new FrontendEditDropdownModifyEvent($contentElement, $originalButton, '/return');
         $event->setMenuButton($newButton);
@@ -91,7 +91,7 @@ final class FrontendEditDropdownModifyEventTest extends TestCase
     public function getReturnUrlReturnsReturnUrl(): void
     {
         $contentElement = ['uid' => 1];
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
         $returnUrl = '/typo3/module/page?id=1';
 
         $event = new FrontendEditDropdownModifyEvent($contentElement, $menuButton, $returnUrl);
@@ -103,7 +103,7 @@ final class FrontendEditDropdownModifyEventTest extends TestCase
     public function eventWorksWithEmptyContentElement(): void
     {
         $contentElement = [];
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $event = new FrontendEditDropdownModifyEvent($contentElement, $menuButton, '/return');
 
@@ -114,7 +114,7 @@ final class FrontendEditDropdownModifyEventTest extends TestCase
     public function eventWorksWithEmptyReturnUrl(): void
     {
         $contentElement = ['uid' => 1];
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $event = new FrontendEditDropdownModifyEvent($contentElement, $menuButton, '');
 

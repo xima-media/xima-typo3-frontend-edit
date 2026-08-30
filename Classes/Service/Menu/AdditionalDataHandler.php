@@ -79,6 +79,9 @@ final readonly class AdditionalDataHandler
             new Button(
                 'LLL:EXT:'.Configuration::EXT_KEY.'/Resources/Private/Language/locallang.xlf:div_data',
                 ButtonType::Divider,
+                null,
+                null,
+                false,
             ),
             'div_data',
         );
@@ -219,6 +222,7 @@ final readonly class AdditionalDataHandler
             ButtonType::Link,
             $url,
             $icon,
+            false,
         );
 
         $button->appendChild($dataButton, 'data_'.$key);

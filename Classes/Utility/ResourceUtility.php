@@ -34,15 +34,16 @@ class ResourceUtility
     public static function getResources(array $attributes = []): array
     {
         $additionalResources = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalFrontendResources'] ?? [];
-        array_walk($additionalResources, static function (&$resource) {
+        $additionalResources = array_map(static function (string $resource): string {
             if (str_ends_with($resource, '.css')) {
-                $resource = self::getCssTag($resource, []);
-            } elseif (str_ends_with($resource, '.js')) {
-                $resource = self::getJsTag($resource, []);
-            } else {
-                $resource = '';
+                return self::getCssTag($resource, []);
             }
-        });
+            if (str_ends_with($resource, '.js')) {
+                return self::getJsTag($resource, []);
+            }
+
+            return '';
+        }, $additionalResources);
 
         return array_merge([
             'css' => self::getCssTag('EXT:'.Configuration::EXT_KEY.'/Resources/Public/Css/FrontendEdit.css', $attributes),
@@ -91,7 +92,12 @@ class ResourceUtility
     {
         $absolutePath = GeneralUtility::getFileAbsFileName($fileLocation);
         $webPath = PathUtility::getAbsoluteWebPath($absolutePath);
-        $modificationTime = @filemtime($absolutePath);
+
+        if (!is_file($absolutePath)) {
+            return $webPath;
+        }
+
+        $modificationTime = filemtime($absolutePath);
 
         return false !== $modificationTime ? $webPath.'?'.$modificationTime : $webPath;
     }

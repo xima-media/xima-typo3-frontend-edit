@@ -70,18 +70,18 @@ final readonly class ResourceRendererService
             $isIframeModalEnabled = $this->settingsService->isContextualEditingEnabled($request);
 
             if ($isIframeModalEnabled) {
-                $this->addBackendStubs($resources, $nonceValue);
+                $resources = $this->addBackendStubs($resources, $nonceValue);
             }
-            $this->addFloatingUiResource($resources, $nonceAttribute);
-            $this->addSettingsConfig($resources, $nonceAttribute, $request);
-            $this->addDebugConfig($resources, $nonceAttribute);
+            $resources = $this->addFloatingUiResource($resources, $nonceAttribute);
+            $resources = $this->addSettingsConfig($resources, $nonceAttribute, $request);
+            $resources = $this->addDebugConfig($resources, $nonceAttribute);
             if ($isIframeModalEnabled) {
-                $this->addIframeEditResource($resources, $nonceAttribute);
+                $resources = $this->addIframeEditResource($resources, $nonceAttribute);
             }
-            $this->addContextualEditResourceIfEnabled($resources, $request, $nonceAttribute);
-            $this->addToolbarConfig($resources, $request);
-            $this->addStickyToolbarResourcesIfEnabled($resources, $request, $nonceAttribute);
-            $this->addFlashMessagesConfig($resources, $nonceAttribute, $flashMessages);
+            $resources = $this->addContextualEditResourceIfEnabled($resources, $request, $nonceAttribute);
+            $resources = $this->addToolbarConfig($resources, $request);
+            $resources = $this->addStickyToolbarResourcesIfEnabled($resources, $request, $nonceAttribute);
+            $resources = $this->addFlashMessagesConfig($resources, $nonceAttribute, $flashMessages);
 
             return $this->renderView($template, ['resources' => $resources], $request);
         } catch (Throwable $exception) {
@@ -91,8 +91,10 @@ final readonly class ResourceRendererService
 
     /**
      * @param array<string, string> $resources
+     *
+     * @return array<string, string>
      */
-    private function addFloatingUiResource(array &$resources, string $nonceAttribute): void
+    private function addFloatingUiResource(array $resources, string $nonceAttribute): array
     {
         $floatingUiPath = PathUtility::getAbsoluteWebPath(
             GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/vendor/floating-ui.dom.bundle.js'),
@@ -102,12 +104,16 @@ final readonly class ResourceRendererService
             $nonceAttribute,
             $floatingUiPath,
         );
+
+        return $resources;
     }
 
     /**
      * @param array<string, string> $resources
+     *
+     * @return array<string, string>
      */
-    private function addSettingsConfig(array &$resources, string $nonceAttribute, ?ServerRequestInterface $request): void
+    private function addSettingsConfig(array $resources, string $nonceAttribute, ?ServerRequestInterface $request): array
     {
         $colorScheme = null !== $request ? $this->settingsService->getColorScheme($request) : 'auto';
         $showContextMenu = $this->jsBool($request, $this->settingsService->isShowContextMenu(...));
@@ -174,6 +180,8 @@ final readonly class ResourceRendererService
             htmlspecialchars($moveUrl, \ENT_QUOTES, 'UTF-8'),
             $dragAndDropLabels,
         );
+
+        return $resources;
     }
 
     /**
@@ -186,26 +194,32 @@ final readonly class ResourceRendererService
 
     /**
      * @param array<string, string> $resources
+     *
+     * @return array<string, string>
      */
-    private function addDebugConfig(array &$resources, string $nonceAttribute): void
+    private function addDebugConfig(array $resources, string $nonceAttribute): array
     {
         if (!$this->settingsService->isFrontendDebugModeEnabled()) {
-            return;
+            return $resources;
         }
 
         $resources['debug_config'] = sprintf(
             '<script%s>window.FRONTEND_EDIT_DEBUG = true;</script>',
             $nonceAttribute,
         );
+
+        return $resources;
     }
 
     /**
      * @param array<string, string> $resources
+     *
+     * @return array<string, string>
      */
-    private function addContextualEditResourceIfEnabled(array &$resources, ?ServerRequestInterface $request, string $nonceAttribute): void
+    private function addContextualEditResourceIfEnabled(array $resources, ?ServerRequestInterface $request, string $nonceAttribute): array
     {
         if (null === $request || !$this->settingsService->isContextualEditingEnabled($request)) {
-            return;
+            return $resources;
         }
 
         $contextualEditPath = PathUtility::getAbsoluteWebPath(
@@ -216,6 +230,8 @@ final readonly class ResourceRendererService
             $nonceAttribute,
             $contextualEditPath,
         );
+
+        return $resources;
     }
 
     /**
@@ -225,16 +241,20 @@ final readonly class ResourceRendererService
      * stubs, AJAX URLs, and language labels for the editing iframe.
      *
      * @param array<string, string> $resources
+     *
+     * @return array<string, string>
      */
-    private function addBackendStubs(array &$resources, string $nonceValue): void
+    private function addBackendStubs(array $resources, string $nonceValue): array
     {
-        $resources = ['backend_stubs' => $this->backendSettingsService->getSettingsScript($nonceValue)] + $resources;
+        return ['backend_stubs' => $this->backendSettingsService->getSettingsScript($nonceValue)] + $resources;
     }
 
     /**
      * @param array<string, string> $resources
+     *
+     * @return array<string, string>
      */
-    private function addIframeEditResource(array &$resources, string $nonceAttribute): void
+    private function addIframeEditResource(array $resources, string $nonceAttribute): array
     {
         $iframeEditPath = PathUtility::getAbsoluteWebPath(
             GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/iframe_edit.js'),
@@ -244,6 +264,8 @@ final readonly class ResourceRendererService
             $nonceAttribute,
             $iframeEditPath,
         );
+
+        return $resources;
     }
 
     /**
@@ -251,11 +273,13 @@ final readonly class ResourceRendererService
      *
      * @param array<string, string>                                          $resources
      * @param array<array{title: string, message: string, severity: string}> $flashMessages
+     *
+     * @return array<string, string>
      */
-    private function addFlashMessagesConfig(array &$resources, string $nonceAttribute, array $flashMessages): void
+    private function addFlashMessagesConfig(array $resources, string $nonceAttribute, array $flashMessages): array
     {
         if ([] === $flashMessages) {
-            return;
+            return $resources;
         }
 
         $resources['flash_messages_config'] = sprintf(
@@ -263,14 +287,18 @@ final readonly class ResourceRendererService
             $nonceAttribute,
             json_encode($flashMessages, \JSON_THROW_ON_ERROR | \JSON_HEX_TAG | \JSON_HEX_AMP),
         );
+
+        return $resources;
     }
 
     /**
      * @param array<string, string> $resources
      *
+     * @return array<string, string>
+     *
      * @throws RouteNotFoundException
      */
-    private function addToolbarConfig(array &$resources, ?ServerRequestInterface $request): void
+    private function addToolbarConfig(array $resources, ?ServerRequestInterface $request): array
     {
         $isDisabled = $this->backendUserService->isFrontendEditDisabled();
         $editInfoUrl = $this->urlBuilderService->buildEditInformationUrl();
@@ -282,28 +310,34 @@ final readonly class ResourceRendererService
             $pageInfo['pid'],
             $pageInfo['language'],
         );
+
+        return $resources;
     }
 
     /**
      * @param array<string, string> $resources
      *
+     * @return array<string, string>
+     *
      * @throws JsonException
      */
-    private function addStickyToolbarResourcesIfEnabled(array &$resources, ?ServerRequestInterface $request, string $nonceAttribute): void
+    private function addStickyToolbarResourcesIfEnabled(array $resources, ?ServerRequestInterface $request, string $nonceAttribute): array
     {
         if (null === $request || !$this->settingsService->isShowStickyToolbar($request)) {
-            return;
+            return $resources;
         }
 
-        $this->addStickyToolbarResources($resources, $request, $nonceAttribute);
+        return $this->addStickyToolbarResources($resources, $request, $nonceAttribute);
     }
 
     /**
      * @param array<string, string> $resources
      *
+     * @return array<string, string>
+     *
      * @throws JsonException
      */
-    private function addStickyToolbarResources(array &$resources, ServerRequestInterface $request, string $nonceAttribute): void
+    private function addStickyToolbarResources(array $resources, ServerRequestInterface $request, string $nonceAttribute): array
     {
         $toolbarPosition = $this->settingsService->getToolbarPosition($request);
         $toggleUrl = $this->urlBuilderService->buildToggleUrl();
@@ -341,6 +375,8 @@ final readonly class ResourceRendererService
             $nonceAttribute,
             $stickyToolbarPath,
         );
+
+        return $resources;
     }
 
     /**
@@ -372,10 +408,11 @@ final readonly class ResourceRendererService
     private function renderView(string $template, array $values, ?ServerRequestInterface $request = null): string
     {
         $viewFactoryData = new ViewFactoryData(
-            templateRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Templates/'],
-            partialRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Partials/'],
-            layoutRootPaths: ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Layouts/'],
-            request: $request,
+            ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Templates/'],
+            ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Partials/'],
+            ['EXT:'.Configuration::EXT_KEY.'/Resources/Private/Layouts/'],
+            null,
+            $request,
         );
 
         $viewFactory = GeneralUtility::makeInstance(ViewFactoryInterface::class);

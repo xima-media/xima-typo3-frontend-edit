@@ -35,7 +35,7 @@ class Button
 
     protected ?string $contextualUrl = null;
 
-    public function __construct(protected string $label, protected ButtonType $type, protected ?string $url = null, protected ?Icon $icon = null, protected bool $targetBlank = false)
+    public function __construct(protected string $label, protected ButtonType $type, protected ?string $url, protected ?Icon $icon, protected bool $targetBlank)
     {
         $this->children = [];
     }

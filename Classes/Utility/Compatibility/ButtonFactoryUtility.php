@@ -28,7 +28,8 @@ class ButtonFactoryUtility
     public static function createInputButton(ButtonBar $buttonBar): InputButton
     {
         if (VersionUtility::is14OrHigher()) {
-            // @phpstan-ignore method.notFound (ComponentFactory only exists in TYPO3 v14+)
+            // ComponentFactory only exists in TYPO3 v14+; suppressed in phpstan-baseline.neon
+            // because it can't be statically resolved against a single TYPO3 version's stubs.
             return self::getComponentFactory()->createInputButton();
         }
 
@@ -38,7 +39,7 @@ class ButtonFactoryUtility
     private static function getComponentFactory(): object
     {
         /** @var class-string $factoryClass */
-        $factoryClass = 'TYPO3\\CMS\\Backend\\Template\\Components\\ComponentFactory'; // @phpstan-ignore varTag.nativeType
+        $factoryClass = 'TYPO3\\CMS\\Backend\\Template\\Components\\ComponentFactory';
 
         return GeneralUtility::makeInstance($factoryClass);
     }

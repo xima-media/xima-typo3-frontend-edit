@@ -120,7 +120,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
                 continue;
             }
 
-            $this->applyElementDataEnrichment($contentElement, $dataEnrichmentEvent);
+            $contentElement = $this->applyElementDataEnrichment($contentElement, $dataEnrichmentEvent);
 
             $menuButton = $this->createMenuButton($contentElement, $languageUid, $pid, $returnUrlAnchor, $contentElementConfig, $request, $contextualUrl, $showInsertButtons, $canHide);
             $this->handleAdditionalData($menuButton, $contentElement, $contentElementConfig, $data, $languageUid, $returnUrlAnchor);
@@ -136,7 +136,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
             $iconIdentifier = $contentElementConfig['icon'] ?? 'content-textpic';
             $contentElement['ctypeIcon'] = (string) $this->iconService->getIcon($iconIdentifier);
 
-            $this->addInsertButtonUrls($contentElement, $showInsertButtons, $previousSiblingByUid, $pid, $languageUid, $returnUrlAnchor);
+            $contentElement = $this->addInsertButtonUrls($contentElement, $showInsertButtons, $previousSiblingByUid, $pid, $languageUid, $returnUrlAnchor);
 
             // Use potentially modified button from event listeners
             $result[$contentElement['uid']] = [
@@ -172,13 +172,17 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
     /**
      * @param array<string, mixed> $contentElement
+     *
+     * @return array<string, mixed>
      */
-    private function applyElementDataEnrichment(array &$contentElement, FrontendEditDataEnrichmentEvent $event): void
+    private function applyElementDataEnrichment(array $contentElement, FrontendEditDataEnrichmentEvent $event): array
     {
         $elementData = $event->getElementData((int) $contentElement['uid']);
         if ([] !== $elementData) {
             $contentElement['_ext'] = $elementData;
         }
+
+        return $contentElement;
     }
 
     /**
@@ -223,11 +227,13 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
      *
      * @param array<string, mixed> $contentElement
      * @param array<int, int|null> $previousSiblingByUid
+     *
+     * @return array<string, mixed>
      */
-    private function addInsertButtonUrls(array &$contentElement, bool $enabled, array $previousSiblingByUid, int $pid, int $languageUid, string $returnUrl): void
+    private function addInsertButtonUrls(array $contentElement, bool $enabled, array $previousSiblingByUid, int $pid, int $languageUid, string $returnUrl): array
     {
         if (!$enabled) {
-            return;
+            return $contentElement;
         }
 
         $uid = (int) $contentElement['uid'];
@@ -238,11 +244,13 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
         $previousUid = $previousSiblingByUid[$uid] ?? null;
 
         try {
-            $contentElement['newAfterUrl'] = $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl, uidAfter: $uid, containerUid: $containerUid);
-            $contentElement['newBeforeUrl'] = $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl, uidAfter: $previousUid, containerUid: $containerUid);
+            $contentElement['newAfterUrl'] = $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl, $uid, $containerUid);
+            $contentElement['newBeforeUrl'] = $this->urlBuilderService->buildNewContentWizardUrl($pid, $colPos, $languageUid, $returnUrl, $previousUid, $containerUid);
         } catch (RouteNotFoundException) {
             // Leave the URLs unset; the frontend simply skips the buttons.
         }
+
+        return $contentElement;
     }
 
     /**

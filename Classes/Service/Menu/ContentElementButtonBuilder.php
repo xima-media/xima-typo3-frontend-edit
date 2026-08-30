@@ -64,7 +64,9 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         return new Button(
             'LLL:EXT:'.Configuration::EXT_KEY.'/Resources/Private/Language/locallang.xlf:edit_menu',
             ButtonType::Menu,
-            icon: $this->iconService->getIcon('actions-open'),
+            null,
+            $this->iconService->getIcon('actions-open'),
+            false,
         );
     }
 
@@ -98,7 +100,8 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
             'info_header',
             ButtonType::Info,
             $label,
-            icon: $iconIdentifier,
+            null,
+            $iconIdentifier,
         );
     }
 
@@ -145,7 +148,7 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
             $returnUrlAnchor,
             (int) $contentElement['uid'],
         );
-        $this->addButton($menuButton, 'edit_page', ButtonType::Link, url: $pageUrl, icon: 'apps-pagetree-page-default');
+        $this->addButton($menuButton, 'edit_page', ButtonType::Link, null, $pageUrl, 'apps-pagetree-page-default');
     }
 
     /**
@@ -167,12 +170,12 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         // showing it regardless would let the click fail in the DataHandler.
         if ($canHide) {
             $hideUrl = $this->urlBuilderService->buildHideUrl($contentElement['uid'], $returnUrlAnchor);
-            $this->addButton($menuButton, 'hide', ButtonType::Link, url: $hideUrl, icon: 'actions-toggle-on');
+            $this->addButton($menuButton, 'hide', ButtonType::Link, null, $hideUrl, 'actions-toggle-on');
         }
 
         // Info button
         $infoUrl = $this->urlBuilderService->buildInfoUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
-        $this->addButton($menuButton, 'info', ButtonType::Link, url: $infoUrl, icon: 'actions-info');
+        $this->addButton($menuButton, 'info', ButtonType::Link, null, $infoUrl, 'actions-info');
 
         // Move button
         $moveUrl = $this->urlBuilderService->buildMoveUrl(
@@ -181,11 +184,11 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
             (int) $contentElement['pid'],
             $returnUrlAnchor,
         );
-        $this->addButton($menuButton, 'move', ButtonType::Link, url: $moveUrl, icon: 'actions-move');
+        $this->addButton($menuButton, 'move', ButtonType::Link, null, $moveUrl, 'actions-move');
 
         // History button
         $historyUrl = $this->urlBuilderService->buildHistoryUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
-        $this->addButton($menuButton, 'history', ButtonType::Link, url: $historyUrl, icon: 'actions-history');
+        $this->addButton($menuButton, 'history', ButtonType::Link, null, $historyUrl, 'actions-history');
 
         // New content after button — opens the native New Content Element Wizard
         // (type-picker grid) positioned after this element. Same route on v13/v14.
@@ -196,12 +199,12 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
                 (int) ($contentElement['colPos'] ?? 0),
                 $languageUid,
                 $returnUrlAnchor,
-                uidAfter: (int) $contentElement['uid'],
-                containerUid: (int) ($contentElement['tx_container_parent'] ?? 0) > 0
+                (int) $contentElement['uid'],
+                (int) ($contentElement['tx_container_parent'] ?? 0) > 0
                     ? (int) $contentElement['tx_container_parent']
                     : null,
             );
-            $this->addButton($menuButton, 'new_content_after', ButtonType::Link, url: $newContentUrl, icon: 'actions-add');
+            $this->addButton($menuButton, 'new_content_after', ButtonType::Link, null, $newContentUrl, 'actions-add');
         }
 
         // Delete button — needs no field-level gate like hide: for tt_content,
@@ -209,6 +212,6 @@ final readonly class ContentElementButtonBuilder extends AbstractMenuButtonBuild
         // in ContentElementFilter) covers delete access too; there is no separate
         // non_exclude_fields dimension for deleting a record, unlike hiding it.
         $deleteUrl = $this->urlBuilderService->buildDeleteUrl($contentElement['uid'], 'tt_content', $returnUrlAnchor);
-        $this->addButton($menuButton, 'delete', ButtonType::Link, url: $deleteUrl, icon: 'actions-delete');
+        $this->addButton($menuButton, 'delete', ButtonType::Link, null, $deleteUrl, 'actions-delete');
     }
 }

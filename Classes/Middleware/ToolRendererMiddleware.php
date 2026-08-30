@@ -93,7 +93,7 @@ class ToolRendererMiddleware implements MiddlewareInterface
             return $response;
         }
 
-        $injection = $this->resourceRendererService->render(request: $request, flashMessages: $flashMessages);
+        $injection = $this->resourceRendererService->render($request, $flashMessages);
         $content = substr_replace($contents, $injection.'</body>', $position, strlen('</body>'));
 
         $body = new Stream('php://temp', 'rw');

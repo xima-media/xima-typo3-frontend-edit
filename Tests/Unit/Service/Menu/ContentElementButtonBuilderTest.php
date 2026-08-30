@@ -115,7 +115,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     public function addInfoSectionAddsChildrenToMenuButton(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
         $languageService->method('sL')->willReturn('Translated');
@@ -134,7 +134,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     public function addInfoSectionHandlesEmptyHeader(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
         $languageService->method('sL')->willReturn('Translated');
@@ -151,7 +151,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     public function addInfoSectionHandlesMissingHeader(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
         $languageService->method('sL')->willReturn('Translated');
@@ -168,7 +168,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     public function addEditSectionAddsEditAndPageButtons(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addEditSection($menuButton, ['uid' => 1, 'CType' => 'text'], 0, 1, '/return');
 
@@ -182,7 +182,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     public function addEditSectionSetsContextualUrlOnEditButton(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addEditSection($menuButton, ['uid' => 1, 'CType' => 'text'], 0, 1, '/return', '/typo3/contextual');
 
@@ -193,7 +193,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     public function addActionSectionAddsAllActionButtons(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addActionSection($menuButton, ['uid' => 1, 'pid' => 1], 0, '/return');
 
@@ -210,7 +210,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     public function addActionSectionOmitsNewContentButtonWhenInsertButtonsDisabled(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addActionSection($menuButton, ['uid' => 1, 'pid' => 1], 0, '/return', false);
 
@@ -224,7 +224,7 @@ final class ContentElementButtonBuilderTest extends TestCase
     public function addActionSectionOmitsHideButtonWhenNotPermitted(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
         $builder->addActionSection($menuButton, ['uid' => 1, 'pid' => 1], 0, '/return', true, false);
 

@@ -32,7 +32,7 @@ abstract readonly class AbstractMenuButtonBuilder
         protected UrlBuilderService $urlBuilderService,
     ) {}
 
-    public function addButton(
+    final public function addButton(
         Button $menuButton,
         string $identifier,
         ButtonType $type,
@@ -54,7 +54,7 @@ abstract readonly class AbstractMenuButtonBuilder
         $menuButton->appendChild($button, $identifier);
     }
 
-    protected function getLanguageService(): LanguageService
+    final protected function getLanguageService(): LanguageService
     {
         return $GLOBALS['LANG'];
     }

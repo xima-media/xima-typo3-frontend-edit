@@ -42,7 +42,7 @@ final class FrontendEditPageDropdownModifyEventTest extends TestCase
     {
         $pageId = 42;
         $languageUid = 1;
-        $menuButton = new Button('Page Menu', ButtonType::Menu);
+        $menuButton = new Button('Page Menu', ButtonType::Menu, null, null, false);
         $returnUrl = 'https://example.com/return';
 
         $event = new FrontendEditPageDropdownModifyEvent($pageId, $languageUid, $menuButton, $returnUrl);
@@ -56,7 +56,7 @@ final class FrontendEditPageDropdownModifyEventTest extends TestCase
     #[Test]
     public function getPageIdReturnsPageId(): void
     {
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
         $event = new FrontendEditPageDropdownModifyEvent(123, 0, $menuButton, '/return');
 
         self::assertSame(123, $event->getPageId());
@@ -65,7 +65,7 @@ final class FrontendEditPageDropdownModifyEventTest extends TestCase
     #[Test]
     public function getLanguageUidReturnsLanguageUid(): void
     {
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
         $event = new FrontendEditPageDropdownModifyEvent(1, 2, $menuButton, '/return');
 
         self::assertSame(2, $event->getLanguageUid());
@@ -74,8 +74,8 @@ final class FrontendEditPageDropdownModifyEventTest extends TestCase
     #[Test]
     public function setMenuButtonReplacesMenuButton(): void
     {
-        $originalButton = new Button('Original', ButtonType::Menu);
-        $newButton = new Button('New', ButtonType::Menu);
+        $originalButton = new Button('Original', ButtonType::Menu, null, null, false);
+        $newButton = new Button('New', ButtonType::Menu, null, null, false);
 
         $event = new FrontendEditPageDropdownModifyEvent(1, 0, $originalButton, '/return');
         $event->setMenuButton($newButton);
@@ -87,7 +87,7 @@ final class FrontendEditPageDropdownModifyEventTest extends TestCase
     #[Test]
     public function getReturnUrlReturnsReturnUrl(): void
     {
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
         $returnUrl = '/typo3/module/page?id=1';
 
         $event = new FrontendEditPageDropdownModifyEvent(1, 0, $menuButton, $returnUrl);
@@ -98,7 +98,7 @@ final class FrontendEditPageDropdownModifyEventTest extends TestCase
     #[Test]
     public function eventWorksWithZeroPageId(): void
     {
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
         $event = new FrontendEditPageDropdownModifyEvent(0, 0, $menuButton, '/return');
 
         self::assertSame(0, $event->getPageId());
@@ -107,7 +107,7 @@ final class FrontendEditPageDropdownModifyEventTest extends TestCase
     #[Test]
     public function eventWorksWithDefaultLanguage(): void
     {
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
         $event = new FrontendEditPageDropdownModifyEvent(1, 0, $menuButton, '/return');
 
         self::assertSame(0, $event->getLanguageUid());
@@ -116,7 +116,7 @@ final class FrontendEditPageDropdownModifyEventTest extends TestCase
     #[Test]
     public function eventWorksWithEmptyReturnUrl(): void
     {
-        $menuButton = new Button('Menu', ButtonType::Menu);
+        $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
         $event = new FrontendEditPageDropdownModifyEvent(1, 0, $menuButton, '');
 
         self::assertSame('', $event->getReturnUrl());
