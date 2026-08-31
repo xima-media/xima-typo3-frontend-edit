@@ -36,12 +36,10 @@ final class IconService
 
     public function getIcon(string $identifier): Icon
     {
-        if (!isset($this->iconCache[$identifier])) {
-            $this->iconCache[$identifier] = $this->iconFactory->getIcon(
-                $identifier,
-                IconSize::SMALL,
-            );
-        }
+        $this->iconCache[$identifier] ??= $this->iconFactory->getIcon(
+            $identifier,
+            IconSize::SMALL,
+        );
 
         return $this->iconCache[$identifier];
     }
