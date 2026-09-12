@@ -6,7 +6,7 @@ on:
 
 jobs:
   ter-publish:
-    uses: konradmichalik/reusable-github-actions/.github/workflows/release-typo3.yml@main
+    uses: konradmichalik/reusable-github-actions/.github/workflows/release-typo3.yml@ac6ac4d7829d8e8f85956c7474ee3ff99b98c9ed # 0.0.1
     permissions:
       contents: write
     secrets:
