@@ -7,7 +7,7 @@ on:
 
 jobs:
   tests:
-    uses: konradmichalik/reusable-github-actions/.github/workflows/tests.yml@c460c0166a646cb65fd059c8d2f7d895ff3c787b # 0.1.0
+    uses: konradmichalik/reusable-github-actions/.github/workflows/tests-typo3.yml@c460c0166a646cb65fd059c8d2f7d895ff3c787b # 0.1.0
     with:
       php-versions: '["8.2", "8.3", "8.4", "8.5"]'
       typo3-versions: '["13.4", "14.3"]'
