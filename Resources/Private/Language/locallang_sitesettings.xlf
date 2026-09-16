@@ -105,6 +105,13 @@
                 <source>Opens content element and page property edit forms in a panel next to the page instead of navigating to the backend. Also enables the New Content Element Wizard in the frontend. The presentation is chosen automatically: a sidebar on TYPO3 v14.2+, a slide-in modal on earlier versions. This feature is experimental and may change in future versions.</source>
             </trans-unit>
 
+            <trans-unit id="settings.frontendEdit.markerBasedDetection">
+                <source>[Experimental] Enable marker-based element detection</source>
+            </trans-unit>
+            <trans-unit id="settings.description.frontendEdit.markerBasedDetection">
+                <source>Wraps every rendered content element in invisible HTML comment markers, so elements become editable even when their template emits no id="c{uid}" anchor and no data-frontend-edit attribute. Markers are only rendered for logged-in backend users and are cached separately from anonymous output. HTML minifiers that strip comments disable this channel; the existing anchor and data-attribute detection then applies unchanged. Experimental.</source>
+            </trans-unit>
+
             <trans-unit id="settings.frontendEdit.enableDragAndDrop">
                 <source>[Experimental] Enable drag &amp; drop reordering</source>
             </trans-unit>
