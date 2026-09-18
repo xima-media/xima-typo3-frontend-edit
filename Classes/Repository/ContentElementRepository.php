@@ -50,9 +50,17 @@ final readonly class ContentElementRepository
     public function __construct(
         private ConnectionPool $connectionPool,
     ) {
-        $this->rootlineCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
-        $this->configCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
-        $this->tcaItemMapCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
+        /** @var ArrayObject<string, list<int>> $rootlineCache */
+        $rootlineCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
+        $this->rootlineCache = $rootlineCache;
+
+        /** @var ArrayObject<string, array<string, mixed>|false> $configCache */
+        $configCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
+        $this->configCache = $configCache;
+
+        /** @var ArrayObject<string, array<string, array<string, mixed>>> $tcaItemMapCache */
+        $tcaItemMapCache = new ArrayObject([], ArrayObject::ARRAY_AS_PROPS);
+        $this->tcaItemMapCache = $tcaItemMapCache;
     }
 
     /**
