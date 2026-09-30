@@ -77,6 +77,36 @@ test('an element with only marker comments receives an overlay/menu, without an 
   await expect(toolbar).toHaveCSS('opacity', '1');
 });
 
+test('a marker range with more than one root element receives no overlay', async ({ page }) => {
+  // Without a single root element the range cannot be mapped to one element.
+  // Reaching for a wrapper would put the toolbar on the surrounding column.
+  await page.addInitScript((uid) => {
+    document.addEventListener('DOMContentLoaded', () => {
+      const first = document.createElement('h2');
+      first.textContent = 'Marker test heading';
+      const second = document.createElement('p');
+      second.textContent = 'Marker test text';
+
+      document.body.prepend(
+        document.createComment(`xfe:b:tt_content:${uid}`),
+        first,
+        second,
+        document.createComment(`xfe:e:tt_content:${uid}`),
+      );
+    });
+  }, MARKER_ONLY_UID);
+
+  const editInfoRequest = page.waitForRequest((request) => request.url().includes('/ajax/xima-frontend-edit/edit-information'));
+  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
+  await page.goto('/');
+  const requestedUids: number[] = (await editInfoRequest).postDataJSON()._uids;
+  await editInfoResponse;
+
+  expect(requestedUids).not.toContain(MARKER_ONLY_UID);
+  await expect(page.locator(`.frontend-edit__toolbar[data-cid="${MARKER_ONLY_UID}"]`)).toHaveCount(0);
+  await expect(new HoverMenu(page).toolbar(ANCHOR_UID)).toHaveCount(1);
+});
+
 test('an unbalanced marker is ignored and leaves the rest of the page working', async ({ page }) => {
   // A begin marker whose end never arrives, which is what an HTML minifier or
   // table foster-parenting produces. It must not swallow the document or throw.
