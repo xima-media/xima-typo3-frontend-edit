@@ -94,16 +94,21 @@ element's own wrapping HTML element.
         ...
     </div>
 
-The bundled ``<xfe:editable>`` ViewHelper renders this attribute for you:
+The bundled ``xfe:editable`` ViewHelper renders this attribute for you:
 
 ..  code-block:: html
     :caption: Custom Fluid Template
 
     {namespace xfe=Xima\XimaTypo3FrontendEdit\ViewHelpers}
 
-    <div class="my-custom-wrapper"<xfe:editable record="{data}" />>
+    <div class="my-custom-wrapper"{xfe:editable(record: data)}>
         ...
     </div>
+
+The ViewHelper renders only the attribute, so it goes inside the opening tag
+in inline notation. The tag notation ``<div <xfe:editable record="{data}" />>``
+renders the same output, but it is not valid HTML and breaks IDEs, formatters
+and linters.
 
 Both patterns can be mixed freely on the same page; an element only needs one
 of them. Unlike the c-id anchor pattern, a ``data-frontend-edit`` element is
@@ -167,10 +172,14 @@ rendered by EXT:news:
 
     {namespace xfe=Xima\XimaTypo3FrontendEdit\ViewHelpers}
 
-    <div class="news-detail"<xfe:editable record="{newsItem}" table="tx_news_domain_model_news" />>
+    <div class="news-detail"{xfe:editable(record: newsItem, table: 'tx_news_domain_model_news')}>
         <h1>{newsItem.title}</h1>
         ...
     </div>
+
+``record`` takes a record array such as ``{data}`` or an object with a
+``getUid()`` method, such as an Extbase model or a core Record object.
+Alternatively, pass the ``uid`` directly.
 
 This is deliberately thin: the menu offers exactly **edit, info and
 history** - no hide, delete or move, since those are meaningful only for

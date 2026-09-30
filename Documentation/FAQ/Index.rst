@@ -125,7 +125,7 @@ Nothing appears in the frontend
 
             {namespace xfe=Xima\XimaTypo3FrontendEdit\ViewHelpers}
 
-            <div class="dce"<xfe:editable uid="{contentObject.uid}" />>
+            <div class="dce"{xfe:editable(uid: contentObject.uid)}>
                 Your template goes here...
             </div>
 
