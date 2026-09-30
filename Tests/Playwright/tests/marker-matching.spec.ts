@@ -11,8 +11,11 @@ const ANCHOR_UID = 2;
 // data-attribute-matching.spec.ts.
 const MARKER_ONLY_UID = 7;
 
-// "Left Column Child" on the /container page, with no anchor on the Home page.
+// "Two Column Container" and its two children on the /container page. The
+// children have no anchor on the Home page.
+const CONTAINER_UID = 30;
 const CONTAINER_CHILD_UID = 31;
+const CONTAINER_SECOND_CHILD_UID = 32;
 
 const EDIT_INFORMATION_URL = '/ajax/xima-frontend-edit/edit-information';
 
@@ -146,4 +149,13 @@ test('an anchor with content but without href stays the element and keeps its de
   await gotoAndCollectUids(page);
 
   await expect(new HoverMenu(page).overlay(MARKER_ONLY_UID)).toHaveClass(NESTED);
+});
+
+test('container children on the demo page are nested, the container is not', async ({ page }) => {
+  await gotoAndCollectUids(page, '/container');
+
+  const hoverMenu = new HoverMenu(page);
+  await expect(hoverMenu.overlay(CONTAINER_UID)).not.toHaveClass(NESTED);
+  await expect(hoverMenu.overlay(CONTAINER_CHILD_UID)).toHaveClass(NESTED);
+  await expect(hoverMenu.overlay(CONTAINER_SECOND_CHILD_UID)).toHaveClass(NESTED);
 });
