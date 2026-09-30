@@ -2,9 +2,9 @@
 # Marker-based content element detection (opt-in).
 #
 # Sets a sentinel key on the shared tt_content stdWrap configuration. The key is
-# unknown to the Core and therefore never executed as a stdWrap function -- it
-# only signals ContentElementMarkerEventListener to wrap the rendered element in
-# comment markers.
+# unknown to the Core and therefore never executed as a stdWrap function. It only
+# signals ContentElementMarkerEventListener to wrap the rendered element in comment
+# markers.
 #
 # Why a sentinel key instead of writing the markers here directly: wrap-type
 # stdWrap properties are single scalars, so any site package setting the same key
@@ -12,15 +12,20 @@
 # lib.dynamicContent's renderObj.stdWrap.dataWrap. A separate key survives the
 # array_replace_recursive() in ContentObjectRenderer::mergeTSRef().
 #
-# Cache safety rests entirely on this condition: TypoScript condition verdicts are
-# part of the page cache identifier, so backend users and anonymous visitors get
-# separate cache entries natively. The listener itself must never check the backend
-# user, because PHP behaviour does not vary the cache identifier.
+# Cache safety rests on this condition: TypoScript condition verdicts are part of
+# the page cache identifier, so backend users and anonymous visitors get separate
+# page cache entries. The listener itself must never check the backend user,
+# because PHP behaviour does not vary the cache identifier. This does not cover
+# stdWrap.cache on a parent cObject (e.g. a cached footer rendering tt_content via
+# CONTENT): its cache_hash entry keeps whatever markers the first rendering had.
 #
-# The constant is quoted on purpose. A site setting of type bool with value false
-# flattens to an *empty* TypoScript constant, which would turn an unquoted
+# Only page type 0 gets markers. Other page types (JSON, RSS, EXT:headless) are
+# not HTML documents, and a comment would corrupt their output.
+#
+# The constants are quoted on purpose. A site setting of type bool with value
+# false flattens to an *empty* TypoScript constant, which would turn an unquoted
 # comparison into `[ == 1]`.
 #
-[backend.user.isLoggedIn && '{$frontendEdit.enabled}' == '1' && '{$frontendEdit.markerBasedDetection}' == '1']
-    tt_content.stdWrap.xfeMarkers = 1
+[backend.user.isLoggedIn && request.getPageArguments().getPageType() == '0' && '{$frontendEdit.enabled}' == '1' && '{$frontendEdit.markerBasedDetection}' == '1']
+tt_content.stdWrap.xfeMarkers = 1
 [END]
