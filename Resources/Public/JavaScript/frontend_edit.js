@@ -571,6 +571,10 @@
    * more than once yields several instances. Consumers use the first, since
    * Registry and the AJAX response are keyed by uid.
    *
+   * instances is in document order. Elements found only via anchor or data
+   * attribute have no instance, so ordering a mix of both needs
+   * Node.compareDocumentPosition() rather than the index position.
+   *
    * Absent markers are the normal case (feature off, or an HTML minifier stripped
    * the comments). Every lookup then returns null and the caller falls back to the
    * anchor and data-attribute channels.
