@@ -576,7 +576,9 @@
    * anchor and data-attribute channels.
    */
   const MarkerIndex = {
-    PATTERN: /^xfe:([be]):([a-z][a-z0-9_]*):(\d+)$/,
+    // Only tt_content is emitted. Other tables would need a table-aware index,
+    // since byUid and every lookup are keyed by uid alone.
+    PATTERN: /^xfe:([be]):tt_content:(\d+)$/,
 
     instances: [],
     byUid: new Map(),
@@ -585,15 +587,14 @@
     /**
      * Single TreeWalker pass, stack-based pairing.
      */
-    build(root) {
+    build() {
       this.instances = [];
       this.byUid = new Map();
       this.byElement = new Map();
 
-      const scope = root || document.body;
-      if (!scope) return this;
+      if (!document.body) return this;
 
-      const walker = document.createTreeWalker(scope, NodeFilter.SHOW_COMMENT);
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_COMMENT);
       const stack = [];
       let node;
 
@@ -601,52 +602,13 @@
         const match = (node.nodeValue || '').trim().match(this.PATTERN);
         if (!match) continue;
 
-        const [, kind, table, uidString] = match;
-        const uid = parseInt(uidString, 10);
+        const uid = parseInt(match[2], 10);
         if (!(uid > 0)) continue;
 
-        if ('b' === kind) {
-          // Registered on the start marker, so instances come out in document
-          // order. End markers close inside-out and would reverse nested pairs.
-          const instance = {
-            table,
-            uid,
-            startNode: node,
-            endNode: null,
-            depth: stack.length,
-            parentInstance: stack.length > 0 ? stack[stack.length - 1] : null,
-            element: null
-          };
-          stack.push(instance);
-          this.instances.push(instance);
-          if (!this.byUid.has(uid)) this.byUid.set(uid, []);
-          this.byUid.get(uid).push(instance);
-          continue;
-        }
-
-        // End marker: find its start from the top of the stack. Anything above the
-        // match is a start whose end never arrived: a minifier removed it, or
-        // table foster-parenting moved it out of the pair. Those stay unresolved
-        // (element === null) rather than swallowing the rest of the document.
-        let matchAt = -1;
-        for (let i = stack.length - 1; i >= 0; i--) {
-          if (stack[i].uid === uid && stack[i].table === table) {
-            matchAt = i;
-            break;
-          }
-        }
-
-        if (matchAt < 0) continue;
-
-        const instance = stack[matchAt];
-        stack.length = matchAt;
-
-        instance.endNode = node;
-        instance.element = this.resolveElement(instance);
-
-        // First instance wins the element mapping, matching the uid-keyed lookups.
-        if (instance.element && !this.byElement.has(instance.element)) {
-          this.byElement.set(instance.element, instance);
+        if ('b' === match[1]) {
+          this.openInstance(stack, uid, node);
+        } else {
+          this.closeInstance(stack, uid, node);
         }
       }
 
@@ -657,6 +619,55 @@
       }
 
       return this;
+    },
+
+    /**
+     * Registered on the start marker, so instances come out in document order.
+     * End markers close inside-out and would reverse nested pairs.
+     */
+    openInstance(stack, uid, startNode) {
+      const instance = { uid, startNode, endNode: null, depth: stack.length, element: null };
+      stack.push(instance);
+      this.instances.push(instance);
+      if (!this.byUid.has(uid)) this.byUid.set(uid, []);
+      this.byUid.get(uid).push(instance);
+    },
+
+    /**
+     * Finds the start from the top of the stack. Anything above the match is a
+     * start whose end never arrived: a minifier removed it, or table
+     * foster-parenting moved it out of the pair. Those stay unresolved
+     * (element === null) rather than swallowing the rest of the document.
+     */
+    closeInstance(stack, uid, endNode) {
+      const matchAt = stack.map(instance => instance.uid).lastIndexOf(uid);
+      if (matchAt < 0) return;
+
+      const instance = stack[matchAt];
+      stack.length = matchAt;
+
+      instance.endNode = endNode;
+      instance.element = this.resolveElement(instance);
+
+      // First instance wins the element mapping, matching the uid-keyed lookups.
+      if (instance.element && !this.byElement.has(instance.element)) {
+        this.byElement.set(instance.element, instance);
+      }
+    },
+
+    /**
+     * Adds the uid of every resolved instance. Unresolved instances are skipped,
+     * as no element could receive their toolbar. If one has an anchor, the anchor
+     * scan in collectDataItems still picks it up.
+     *
+     * @returns {number} count of uids added
+     */
+    collectUids(allUids) {
+      const before = allUids.size;
+      this.instances
+        .filter(instance => instance.element)
+        .forEach(instance => allUids.add(instance.uid));
+      return allUids.size - before;
     },
 
     /**
@@ -1563,20 +1574,12 @@
       // anchor and without a data attribute are found too. The index is built
       // first because findAnchor reads it later, but it only adds uids: the
       // channels below stay active and unchanged, and allUids deduplicates.
-      // Unresolved instances are skipped, as no element could receive their
-      // toolbar. If one has an anchor, the anchor scan below still picks it up.
-      const markerInstances = MarkerIndex.build().instances;
-      let markerUids = 0;
-      markerInstances.forEach(instance => {
-        if ('tt_content' === instance.table && instance.element && !allUids.has(instance.uid)) {
-          allUids.add(instance.uid);
-          markerUids++;
-        }
-      });
+      const markerIndex = MarkerIndex.build();
+      const markerUids = markerIndex.collectUids(allUids);
 
-      if (markerInstances.length > 0) {
+      if (markerIndex.instances.length > 0) {
         Logger.log(`Found ${markerUids} content element(s) via render markers`, {
-          instances: markerInstances.length
+          instances: markerIndex.instances.length
         });
       }
 
