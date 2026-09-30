@@ -29,6 +29,13 @@ test('new content form in the modal uses the contextual sidebar header', async (
   await expect(header.locator('.contextual-record-edit-actions [name="_saveandclosedok"]')).toBeVisible();
   await expect(header.locator('.contextual-record-edit-actions .t3js-editform-close')).toBeVisible();
 
+  await expect(header.locator('.contextual-record-edit-actions [name="_saveandclosedok"]')).toHaveText('Save & Close');
+
   await expect(modal.locator('.t3js-module-docheader-navigation')).toBeHidden();
   await expect(modal.locator('#EditDocumentController h1')).toHaveCount(0);
+  // The expand action moves next to the title, as in the sidebar.
+  await expect(page.locator('.frontend-edit__modal-expand')).toBeHidden();
+
+  await header.locator('.contextual-record-edit-title-group button').click();
+  await page.waitForURL((url) => url.pathname.includes('/typo3/record/edit'));
 });

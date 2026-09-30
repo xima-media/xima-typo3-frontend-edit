@@ -1377,7 +1377,11 @@
 }
 
 .frontend-edit__modal-close {
-    font-size: 20px;
+    margin-left: auto;
+}
+
+.frontend-edit__modal--contextual .frontend-edit__modal-expand {
+    display: none;
 }
 
 .frontend-edit__modal-expand svg {
