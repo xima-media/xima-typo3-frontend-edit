@@ -11,6 +11,10 @@ export class HoverMenu {
     return this.page.locator(`.frontend-edit__toolbar[data-cid="${uid}"]`);
   }
 
+  overlay(uid: number): Locator {
+    return this.page.locator(`.frontend-edit__overlay[data-cid="${uid}"]`);
+  }
+
   editButton(uid: number): Locator {
     return this.toolbar(uid).locator('.frontend-edit__btn--edit');
   }

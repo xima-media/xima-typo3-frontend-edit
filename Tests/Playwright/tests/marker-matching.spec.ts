@@ -11,7 +11,12 @@ const ANCHOR_UID = 2;
 // data-attribute-matching.spec.ts.
 const MARKER_ONLY_UID = 7;
 
+// "Left Column Child" on the /container page, with no anchor on the Home page.
+const CONTAINER_CHILD_UID = 31;
+
 const EDIT_INFORMATION_URL = '/ajax/xima-frontend-edit/edit-information';
+
+const NESTED = /frontend-edit__overlay--nested/;
 
 /**
  * Wraps markup in a marker pair, mirroring what
@@ -79,18 +84,25 @@ test('an element with only marker comments receives an overlay/menu, without an 
   await expect(toolbar).toHaveCSS('opacity', '1');
 });
 
-test('a marker range with more than one root element receives no overlay', async ({ page }) => {
-  // Without a single root element the range cannot be mapped to one element.
-  // Reaching for a wrapper would put the toolbar on the surrounding column.
-  await injectHtml(page, marked(MARKER_ONLY_UID, '<h2>Marker test heading</h2><p>Marker test text</p>'));
+// Without a single root element the range cannot be mapped to one element.
+// Reaching for a wrapper would put the toolbar on the surrounding column. Only
+// the element's own empty anchor is ignored, a foreign one keeps the range
+// ambiguous.
+for (const [name, html] of [
+  ['more than one root element', '<h2>Marker test heading</h2><p>Marker test text</p>'],
+  ['a foreign empty anchor', '<a id="c99"></a><div>Marker test element</div>'],
+]) {
+  test(`a marker range with ${name} receives no overlay`, async ({ page }) => {
+    await injectHtml(page, marked(MARKER_ONLY_UID, html));
 
-  const requestedUids = await gotoAndCollectUids(page);
+    const requestedUids = await gotoAndCollectUids(page);
 
-  const hoverMenu = new HoverMenu(page);
-  expect(requestedUids).not.toContain(MARKER_ONLY_UID);
-  await expect(hoverMenu.toolbar(MARKER_ONLY_UID)).toHaveCount(0);
-  await expect(hoverMenu.toolbar(ANCHOR_UID)).toHaveCount(1);
-});
+    const hoverMenu = new HoverMenu(page);
+    expect(requestedUids).not.toContain(MARKER_ONLY_UID);
+    await expect(hoverMenu.toolbar(MARKER_ONLY_UID)).toHaveCount(0);
+    await expect(hoverMenu.toolbar(ANCHOR_UID)).toHaveCount(1);
+  });
+}
 
 test('an unbalanced marker is ignored and leaves the rest of the page working', async ({ page }) => {
   // A begin marker whose end never arrives, which is what an HTML minifier or
@@ -108,4 +120,30 @@ test('an unbalanced marker is ignored and leaves the rest of the page working', 
   expect(requestedUids).not.toContain(MARKER_ONLY_UID);
   await expect(new HoverMenu(page).toolbar(ANCHOR_UID)).toHaveCount(1);
   expect(consoleErrors).toEqual([]);
+});
+
+// The outer element has no anchor at all, so the id="c{uid}" walk cannot see
+// the nesting: only the marker tree reports the inner element as nested.
+test('an element in the empty-anchor pattern takes its nesting depth from the markers', async ({ page }) => {
+  const inner = marked(MARKER_ONLY_UID, `<a id="c${MARKER_ONLY_UID}"></a><div id="xfe-test-inner">Inner element</div>`);
+  await injectHtml(page, marked(CONTAINER_CHILD_UID, `<div>Outer element${inner}</div>`));
+
+  await gotoAndCollectUids(page);
+
+  const hoverMenu = new HoverMenu(page);
+  await expect(hoverMenu.overlay(MARKER_ONLY_UID)).toHaveClass(NESTED);
+  await expect(hoverMenu.overlay(CONTAINER_CHILD_UID)).not.toHaveClass(NESTED);
+
+  // The toolbar sits on the element next to the anchor, not on the anchor.
+  await page.hover('#xfe-test-inner', { force: true });
+  await expect(hoverMenu.toolbar(MARKER_ONLY_UID)).toHaveCSS('opacity', '1');
+});
+
+test('an anchor with content but without href stays the element and keeps its depth', async ({ page }) => {
+  const inner = marked(MARKER_ONLY_UID, `<a id="c${MARKER_ONLY_UID}">Teaser without href</a>`);
+  await injectHtml(page, marked(CONTAINER_CHILD_UID, `<div>Outer element${inner}</div>`));
+
+  await gotoAndCollectUids(page);
+
+  await expect(new HoverMenu(page).overlay(MARKER_ONLY_UID)).toHaveClass(NESTED);
 });
