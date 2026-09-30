@@ -5,7 +5,7 @@ import { HoverMenu } from '../support/frontend-edit/hover-menu';
 // anchor (Tests/Acceptance/Fixtures/demo-content.sql).
 const ANCHOR_UID = 2;
 
-// "Our Mission" - lives on the About Us page and has no id="c7" anchor on the
+// "Our Mission" lives on the About Us page and has no id="c7" anchor on the
 // Home page, so it is a real, fetchable tt_content record with nothing else
 // already competing for the marker matching under test. Same rationale as in
 // data-attribute-matching.spec.ts.
@@ -15,7 +15,7 @@ const MARKER_ONLY_UID = 7;
  * Places a marker pair around a synthetic element, mirroring what
  * ContentElementMarkerEventListener emits during rendering. Registered before
  * navigation and driven by DOMContentLoaded, which fires before
- * frontend_edit.js's own bootstrap - so the nodes exist in time for
+ * frontend_edit.js's own bootstrap, so the nodes exist in time for
  * MarkerIndex.build() inside DataService.collectDataItems().
  */
 async function injectMarkerPair(
@@ -51,7 +51,7 @@ test('the rendered page carries marker pairs for a logged-in backend user', asyn
   // Proves the whole server-side chain: the TypoScript condition set the sentinel
   // key, and the listener wrapped the element. The demo site renders content
   // through bootstrap-package's lib.dynamicContent, which sets
-  // renderObj.stdWrap.dataWrap itself - so this simultaneously guards against the
+  // renderObj.stdWrap.dataWrap itself, so this simultaneously guards against the
   // collision that made a dataWrap-based implementation silently emit nothing.
   const beginMarkers = html.match(/<!--xfe:b:tt_content:\d+-->/g) ?? [];
   const endMarkers = html.match(/<!--xfe:e:tt_content:\d+-->/g) ?? [];
@@ -78,20 +78,27 @@ test('an element with only marker comments receives an overlay/menu, without an 
 });
 
 test('an unbalanced marker is ignored and leaves the rest of the page working', async ({ page }) => {
-  // A begin marker whose end never arrives - what an HTML minifier or table
-  // foster-parenting produces. It must not swallow the document or throw.
-  await page.addInitScript(() => {
+  // A begin marker whose end never arrives, which is what an HTML minifier or
+  // table foster-parenting produces. It must not swallow the document or throw.
+  // A real uid without anchor or attribute, so only the marker could have added
+  // it to the request.
+  await page.addInitScript((uid) => {
     document.addEventListener('DOMContentLoaded', () => {
-      document.body.prepend(document.createComment('xfe:b:tt_content:4242'));
+      document.body.prepend(document.createComment(`xfe:b:tt_content:${uid}`));
     });
-  });
+  }, MARKER_ONLY_UID);
 
   const consoleErrors: string[] = [];
   page.on('pageerror', (error) => consoleErrors.push(error.message));
 
+  const editInfoRequest = page.waitForRequest((request) => request.url().includes('/ajax/xima-frontend-edit/edit-information'));
   const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
   await page.goto('/');
+  const requestedUids: number[] = (await editInfoRequest).postDataJSON()._uids;
   await editInfoResponse;
+
+  expect(requestedUids).toContain(ANCHOR_UID);
+  expect(requestedUids).not.toContain(MARKER_ONLY_UID);
 
   const hoverMenu = new HoverMenu(page);
   await expect(hoverMenu.toolbar(ANCHOR_UID)).toHaveCount(1);

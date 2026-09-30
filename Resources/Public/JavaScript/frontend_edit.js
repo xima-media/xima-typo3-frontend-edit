@@ -1559,15 +1559,17 @@
       const dataItems = {};
       const allUids = new Set();
 
-      // Primary channel: paired comment markers emitted during rendering (site
-      // setting frontendEdit.markerBasedDetection). Deterministic and independent
-      // of how the site's templates are built, so elements without an id="c{uid}"
-      // anchor and without a data attribute are found too. The channels below stay
-      // active and unchanged - allUids deduplicates, so no special casing needed.
+      // Paired comment markers emitted during rendering (site setting
+      // frontendEdit.markerBasedDetection), so elements without an id="c{uid}"
+      // anchor and without a data attribute are found too. The index is built
+      // first because findAnchor reads it later, but it only adds uids: the
+      // channels below stay active and unchanged, and allUids deduplicates.
+      // Unresolved instances are skipped, as no element could receive their
+      // toolbar. If one has an anchor, the anchor scan below still picks it up.
       const markerInstances = MarkerIndex.build().instances;
       let markerUids = 0;
       markerInstances.forEach(instance => {
-        if ('tt_content' === instance.table && !allUids.has(instance.uid)) {
+        if ('tt_content' === instance.table && instance.element && !allUids.has(instance.uid)) {
           allUids.add(instance.uid);
           markerUids++;
         }
