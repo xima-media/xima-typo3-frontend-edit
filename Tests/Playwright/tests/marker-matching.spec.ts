@@ -56,6 +56,16 @@ async function gotoAndCollectUids(page: Page, path = '/'): Promise<number[]> {
   return uids;
 }
 
+/**
+ * Collects uncaught page errors. A malformed marker structure must never break
+ * the bootstrap.
+ */
+function collectPageErrors(page: Page): string[] {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  return errors;
+}
+
 test('the rendered page carries marker pairs for a logged-in backend user', async ({ page }) => {
   await page.goto('/');
   const html = await page.content();
@@ -114,15 +124,14 @@ test('an unbalanced marker is ignored and leaves the rest of the page working', 
   // it to the request.
   await injectHtml(page, `<!--xfe:b:tt_content:${MARKER_ONLY_UID}-->`);
 
-  const consoleErrors: string[] = [];
-  page.on('pageerror', (error) => consoleErrors.push(error.message));
+  const pageErrors = collectPageErrors(page);
 
   const requestedUids = await gotoAndCollectUids(page);
 
   expect(requestedUids).toContain(ANCHOR_UID);
   expect(requestedUids).not.toContain(MARKER_ONLY_UID);
   await expect(new HoverMenu(page).toolbar(ANCHOR_UID)).toHaveCount(1);
-  expect(consoleErrors).toEqual([]);
+  expect(pageErrors).toEqual([]);
 });
 
 // The outer element has no anchor at all, so the id="c{uid}" walk cannot see
@@ -158,4 +167,86 @@ test('container children on the demo page are nested, the container is not', asy
   await expect(hoverMenu.overlay(CONTAINER_UID)).not.toHaveClass(NESTED);
   await expect(hoverMenu.overlay(CONTAINER_CHILD_UID)).toHaveClass(NESTED);
   await expect(hoverMenu.overlay(CONTAINER_SECOND_CHILD_UID)).toHaveClass(NESTED);
+});
+
+test('a uid rendered twice gets one overlay, on its first instance', async ({ page }) => {
+  await injectHtml(page, marked(MARKER_ONLY_UID, '<div id="xfe-test-first">First instance</div>')
+    + marked(MARKER_ONLY_UID, '<div id="xfe-test-second">Second instance</div>'));
+  const pageErrors = collectPageErrors(page);
+
+  const requestedUids = await gotoAndCollectUids(page);
+
+  const toolbar = new HoverMenu(page).toolbar(MARKER_ONLY_UID);
+  expect(requestedUids.filter((uid) => uid === MARKER_ONLY_UID)).toHaveLength(1);
+  await expect(toolbar).toHaveCount(1);
+  await page.hover('#xfe-test-first', { force: true });
+  await expect(toolbar).toHaveCSS('opacity', '1');
+  expect(pageErrors).toEqual([]);
+});
+
+test('without markers, as after a comment-stripping minifier, anchor and data attribute still resolve', async ({ page }) => {
+  await injectHtml(page, `<div id="xfe-test-attribute" data-frontend-edit="tt_content:${MARKER_ONLY_UID}">Data attribute element</div>`);
+  await page.addInitScript(() => {
+    document.addEventListener('DOMContentLoaded', () => {
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_COMMENT);
+      const markers: Comment[] = [];
+      while (walker.nextNode()) {
+        if ((walker.currentNode.nodeValue || '').startsWith('xfe:')) markers.push(walker.currentNode as Comment);
+      }
+      markers.forEach((marker) => marker.remove());
+    });
+  });
+
+  const requestedUids = await gotoAndCollectUids(page);
+
+  const hoverMenu = new HoverMenu(page);
+  expect(await page.content()).not.toContain('<!--xfe:');
+  expect(requestedUids).toEqual(expect.arrayContaining([ANCHOR_UID, MARKER_ONLY_UID]));
+  await expect(hoverMenu.toolbar(ANCHOR_UID)).toHaveCount(1);
+  await expect(hoverMenu.toolbar(MARKER_ONLY_UID)).toHaveCount(1);
+});
+
+// An element that is not allowed inside a table is foster-parented in front of
+// it, while the comments stay inside. The markers are then no siblings of the
+// element, and the range must stay unresolved instead of reaching for the table.
+test('a content element foster-parented out of a table receives no overlay', async ({ page }) => {
+  await injectHtml(page, `<table id="xfe-test-table">${marked(MARKER_ONLY_UID, '<div>Fostered element</div>')}</table>`);
+  const pageErrors = collectPageErrors(page);
+
+  const requestedUids = await gotoAndCollectUids(page);
+
+  expect(requestedUids).not.toContain(MARKER_ONLY_UID);
+  await expect(new HoverMenu(page).toolbar(MARKER_ONLY_UID)).toHaveCount(0);
+  await expect(new HoverMenu(page).toolbar(ANCHOR_UID)).toHaveCount(1);
+  expect(pageErrors).toEqual([]);
+});
+
+// The cell is sized so the toolbar, which sits over the element's top edge,
+// does not cover the hover point.
+test('a table row wrapped in markers resolves to the row', async ({ page }) => {
+  await injectHtml(page, `<table><tbody>${marked(MARKER_ONLY_UID, '<tr id="xfe-test-row"><td style="width: 600px; height: 120px">Row element</td></tr>')}</tbody></table>`);
+
+  await gotoAndCollectUids(page);
+
+  const toolbar = new HoverMenu(page).toolbar(MARKER_ONLY_UID);
+  await page.hover('#xfe-test-row', { force: true });
+  await expect(toolbar).toHaveCSS('opacity', '1');
+});
+
+// None of the three levels carries an anchor on the Home page, so the nesting
+// is only visible through the marker tree.
+test('three nested levels report nesting below the first level, innermost wins the hover', async ({ page }) => {
+  const levelThree = marked(MARKER_ONLY_UID, '<div id="xfe-test-level-three">Level three</div>');
+  const levelTwo = marked(CONTAINER_SECOND_CHILD_UID, `<div>Level two${levelThree}</div>`);
+  await injectHtml(page, marked(CONTAINER_CHILD_UID, `<div>Level one${levelTwo}</div>`));
+
+  await gotoAndCollectUids(page);
+
+  const hoverMenu = new HoverMenu(page);
+  await expect(hoverMenu.overlay(CONTAINER_CHILD_UID)).not.toHaveClass(NESTED);
+  await expect(hoverMenu.overlay(CONTAINER_SECOND_CHILD_UID)).toHaveClass(NESTED);
+  await expect(hoverMenu.overlay(MARKER_ONLY_UID)).toHaveClass(NESTED);
+
+  await page.hover('#xfe-test-level-three', { force: true });
+  await expect(hoverMenu.toolbar(MARKER_ONLY_UID)).toHaveCSS('opacity', '1');
 });
