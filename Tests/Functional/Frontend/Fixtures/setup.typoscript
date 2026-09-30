@@ -1,0 +1,39 @@
+# Content is rendered the way bk2k/bootstrap-package's lib.dynamicContent does
+# it: a reference to tt_content with a local renderObj.stdWrap.dataWrap. A
+# marker implementation based on dataWrap would be silently replaced here.
+#
+# No HTML skeleton: without a closing body tag ToolRendererMiddleware leaves the
+# response untouched, see ContentElementMarkerRenderingTest.
+page = PAGE
+page {
+    config.disableAllHeaderCode = 1
+    10 = CONTENT
+    10 {
+        table = tt_content
+        select {
+            orderBy = sorting
+            where = {#colPos} = 0
+        }
+        renderObj =< tt_content
+        renderObj.stdWrap.dataWrap = <div class="site-wrap">|</div>
+    }
+}
+
+feed = PAGE
+feed {
+    typeNum = 99
+    config.disableAllHeaderCode = 1
+    10 < page.10
+}
+
+tt_content = CASE
+tt_content {
+    key.field = CType
+    text = TEXT
+    text.field = bodytext
+    xfe_uncached = COA_INT
+    xfe_uncached {
+        10 = TEXT
+        10.value = uncached-output
+    }
+}
