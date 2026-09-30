@@ -389,6 +389,7 @@
       this.interceptIframeClicks(iframe);
       this.detectFrontendNavigation(iframe);
       this.hideUnnecessaryButtons(iframe);
+      this.applyContextualHeader(iframe);
     },
 
     /**
@@ -434,6 +435,57 @@
         const doc = iframe.contentWindow?.document;
         if (!doc) return;
         doc.querySelectorAll('.t3js-editform-view').forEach(el => el.remove());
+      } catch (_) { /* cross-origin */ }
+    },
+
+    /**
+     * On v14.2+ edits open in the core contextual sidebar, but new records
+     * still land in the full EditDocumentController here, because
+     * ContextualRecordEditController only accepts existing records. Rebuild
+     * the docheader with the core's contextual-record-edit markup so both
+     * flows share the same compact header and the core stylesheet does the
+     * styling. On v13 the modal handles both flows, so it stays untouched.
+     */
+    applyContextualHeader(iframe) {
+      if (window.FRONTEND_EDIT_SIDEBAR_EDIT !== true) return;
+      try {
+        const doc = iframe.contentWindow?.document;
+        const form = doc?.getElementById('EditDocumentController');
+        const module = doc?.querySelector('.module');
+        // The module is a grid with a moduleDocHeader area, so the header has
+        // to live in the wrapper to stay on top.
+        const docHeaderWrapper = module?.querySelector('.module-docheader-wrapper');
+        if (!form || !docHeaderWrapper || module.classList.contains('contextual-record-edit')) return;
+
+        const header = doc.createElement('div');
+        header.className = 'contextual-record-edit-header';
+
+        const titleGroup = doc.createElement('div');
+        titleGroup.className = 'contextual-record-edit-title-group';
+        const title = doc.createElement('span');
+        title.className = 'contextual-record-edit-title';
+        const heading = form.querySelector('h1');
+        title.textContent = heading?.textContent.trim() || '';
+        heading?.remove();
+        titleGroup.appendChild(title);
+
+        const actions = doc.createElement('div');
+        actions.className = 'contextual-record-edit-actions';
+        const buttonBar = docHeaderWrapper.querySelector('.t3js-module-docheader-buttons');
+        buttonBar?.querySelector('[name="_savedok"]')?.classList.replace('btn-default', 'btn-primary');
+        ['.t3js-toggle-review-panel', '[name="_savedok"]', '[name="_saveandclosedok"]', '.t3js-editform-close']
+          .map((selector) => buttonBar?.querySelector(selector))
+          .filter(Boolean)
+          .forEach((button) => {
+            button.classList.remove('btn-sm');
+            actions.appendChild(button);
+          });
+
+        header.append(titleGroup, actions);
+        module.classList.add('contextual-record-edit');
+        docHeaderWrapper.querySelectorAll('.module-docheader').forEach((el) => { el.style.display = 'none'; });
+        docHeaderWrapper.appendChild(header);
+        Logger.log('Contextual header applied');
       } catch (_) { /* cross-origin */ }
     },
 
