@@ -70,13 +70,55 @@ Matching a content element in the frontend HTML to its backend record
 requires either the ``id="c{uid}"`` anchor pattern or the
 ``data-frontend-edit="{table}:{uid}"`` attribute to be present in the
 rendered markup - see :ref:`How it works <how-it-works>` for both patterns
-and how to add them to a custom template.
+and how to add them to a custom template. As an experimental third option,
+:ref:`render markers <render-markers>` detect content elements without any
+template change.
 
 Headless/SPA frontends are an explicit non-goal: the script that performs
 this matching is injected server-side into TYPO3's own rendered HTML (via a
 PSR-15 middleware). It never runs for a frontend that TYPO3 itself does not
 render HTML for - there is no client-side integration path for a
 JSON-API/decoupled frontend.
+
+..  _setup-render-markers:
+
+Render markers
+==============
+
+:ref:`Render markers <render-markers>`, enabled through
+:confval:`frontendEdit.markerBasedDetection`, have these operational limits:
+
+Site Set
+    The markers are configured by the TypoScript of the Frontend Edit site
+    set. A site that does not include the set gets no markers.
+
+Backend users and page type
+    Markers are only rendered for logged-in backend users on page type ``0``.
+    Other page types (JSON, RSS, EXT:headless) are left untouched. Backend
+    users get their own page cache entries while the setting is active.
+
+UserTSconfig
+    Disabling frontend edit for a user through :ref:`user-tsconfig` does not
+    suppress the markers, because all backend users share one page cache
+    entry.
+
+``stdWrap.cache`` on a parent object
+    A cached parent object, e.g. a footer that renders content elements via
+    ``CONTENT`` with ``stdWrap.cache``, stores the markers of its first
+    rendering. Anonymous visitors then receive these markers from the cache.
+    The comments only contain table and UID.
+
+HTML minifiers
+    A minifier that strips comments disables this channel. The c-id and the
+    ``data-frontend-edit`` attribute keep working.
+
+Duplicate UIDs
+    A record rendered more than once on a page gets its menu on the first
+    instance only.
+
+Shadow DOM
+    Markers inside a shadow root are not found, since the scan only walks the
+    regular document.
 
 Preview links (``ADMCMD_prev``)
 ====================================
