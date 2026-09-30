@@ -561,19 +561,19 @@
   };
 
   /**
-   * Marker Index - reads the paired HTML comment markers emitted by
+   * Marker Index: reads the paired HTML comment markers emitted by
    * ContentElementMarkerEventListener (site setting frontendEdit.markerBasedDetection):
    *
    *   <!--xfe:b:tt_content:12-->...<!--xfe:e:tt_content:12-->
    *
    * Unlike the id="c{uid}" anchor this identifies elements deterministically and
    * nests properly, so container structures form a real tree. A record rendered
-   * more than once yields several instances; consumers in 2.x use the first, since
+   * more than once yields several instances. Consumers use the first, since
    * Registry and the AJAX response are keyed by uid.
    *
    * Absent markers are the normal case (feature off, or an HTML minifier stripped
-   * the comments) - every lookup then returns null and the caller falls back to the
-   * anchor / data-attribute channels.
+   * the comments). Every lookup then returns null and the caller falls back to the
+   * anchor and data-attribute channels.
    */
   const MarkerIndex = {
     PATTERN: /^xfe:([be]):([a-z][a-z0-9_]*):(\d+)$/,
@@ -607,7 +607,7 @@
 
         if ('b' === kind) {
           // Registered on the start marker, so instances come out in document
-          // order - end markers close inside-out and would reverse nested pairs.
+          // order. End markers close inside-out and would reverse nested pairs.
           const instance = {
             table,
             uid,
@@ -625,7 +625,7 @@
         }
 
         // End marker: find its start from the top of the stack. Anything above the
-        // match is a start whose end never arrived - a minifier removed it, or
+        // match is a start whose end never arrived: a minifier removed it, or
         // table foster-parenting moved it out of the pair. Those stay unresolved
         // (element === null) rather than swallowing the rest of the document.
         let matchAt = -1;
@@ -661,7 +661,7 @@
 
     /**
      * A marker pair delimits a range, but every consumer (overlay, hover hit-test,
-     * drag & drop) needs one concrete element - so only an unambiguous range, with
+     * drag & drop) needs one concrete element. So only an unambiguous range, with
      * exactly one element and nothing else in it, is accepted. Giving up falls back
      * to the anchor channel, whereas a wrapper-less range would break hover and
      * dragging silently, and reaching for the parent would put the toolbar on the
@@ -684,7 +684,7 @@
         }
       }
 
-      // Markers are not siblings - the HTML parser relocated one of them.
+      // Markers are not siblings: the HTML parser relocated one of them.
       if (!reachedEnd) return null;
 
       return 1 === elements.length && !hasLooseText ? elements[0] : null;
@@ -692,7 +692,7 @@
 
     /**
      * The uid arrives as a string from Object.entries() over the AJAX response,
-     * while the index keys it numerically - Map lookups are type-strict, so it has
+     * while the index keys it numerically. Map lookups are type-strict, so it has
      * to be normalised here.
      *
      * @returns {Element|null}
@@ -766,17 +766,15 @@
     /**
      * Locate the DOM anchor for a content element uid: the id="c{uid}"
      * pattern first (existing behavior, unchanged), then
-     * data-frontend-edit="tt_content:{uid}" - a direct target, since a
+     * data-frontend-edit="tt_content:{uid}" (a direct target, since a
      * hand-placed data attribute is never an anchor-sibling placeholder the
-     * way an empty <a id="c123"></a> is - and render markers last.
+     * way an empty <a id="c123"></a> is), and render markers last.
      *
      * Markers come last on purpose. They only need to answer the case the other
      * two cannot: an element carrying neither anchor nor attribute. Consulting
-     * them first would also re-target elements that already resolve today - where
-     * a marker wraps an outer frame while the anchor sits on an inner node, the
-     * toolbar would silently move - so the deterministic channel is additive here
-     * rather than authoritative. Marker precedence belongs with the switch to
-     * instance identity, which is a breaking change anyway.
+     * them first would re-target elements that already resolve today. Where a
+     * marker wraps an outer frame while the anchor sits on an inner node, the
+     * toolbar would silently move.
      *
      * @returns {{element: Element, isDirectTarget: boolean}|null}
      */
@@ -811,9 +809,10 @@
      * Used to apply different toolbar positioning for nested elements
      */
     isNestedContentElement(targetElement) {
-      // Markers form a real tree, so their depth is authoritative where available.
-      // The id="c{uid}" walk below cannot see nesting for elements that carry only
-      // markers, and would report them as top-level.
+      // Unlike findAnchor, nesting prefers markers: they form a real tree, while
+      // the id="c{uid}" walk below cannot see nesting for elements that carry only
+      // markers. An element resolved via anchor has no marker instance mapped to
+      // it and still takes the walk.
       const instance = MarkerIndex.instanceForElement(targetElement);
       if (instance) return instance.depth > 0;
 

@@ -66,8 +66,8 @@ final class ContentElementMarkerEventListenerTest extends TestCase
     }
 
     /**
-     * An empty element -- suppressed by stdWrap.required, or a plugin returning
-     * nothing -- must not produce an empty marker pair.
+     * An empty element (suppressed by stdWrap.required, or a plugin returning
+     * nothing) must not produce an empty marker pair.
      */
     #[Test]
     public function contentIsUnchangedWhenContentIsEmpty(): void

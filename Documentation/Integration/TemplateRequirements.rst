@@ -110,6 +110,46 @@ of them. Unlike the c-id anchor pattern, a ``data-frontend-edit`` element is
 always treated as the content element itself - no sibling resolution is
 attempted.
 
+..  _render-markers:
+
+Alternative: render markers (experimental)
+==========================================
+
+Templates you cannot or do not want to change, e.g. Content Blocks without the
+``fluid_styled_content`` layout, can be detected through the site setting
+:confval:`frontendEdit.markerBasedDetection`.
+While it is active, every rendered content element is wrapped in a pair of HTML
+comments:
+
+..  code-block:: html
+    :caption: Rendered HTML with render markers
+
+    <!--xfe:b:tt_content:10-->
+    <div class="my-custom-wrapper">
+        ...
+    </div>
+    <!--xfe:e:tt_content:10-->
+
+The markers are an addition to the other two patterns. An element that
+already has a c-id or a ``data-frontend-edit`` attribute keeps using it.
+
+Keep these limits in mind:
+
+*   The output of the content element needs exactly **one** root element.
+    With several root elements, or with loose text next to the root element,
+    the markers cannot point at a single element and are ignored.
+*   Markers are only rendered for logged-in backend users on page type ``0``.
+    Other page types (JSON, RSS, EXT:headless) are left untouched. Backend
+    users get their own page cache entries.
+*   ``stdWrap.cache`` on a parent object, e.g. a cached footer that renders
+    content elements via ``CONTENT``, stores the markers of its first
+    rendering. Anonymous visitors then receive these markers from the cache.
+    The comments only contain table and UID.
+*   Disabling frontend edit for a user through UserTSconfig does not suppress
+    the markers, because all backend users share one page cache entry.
+*   An HTML minifier that strips comments disables this channel. The c-id and
+    the ``data-frontend-edit`` attribute keep working.
+
 ..  _editing-foreign-records:
 
 Editing foreign records (news, addresses, ...)

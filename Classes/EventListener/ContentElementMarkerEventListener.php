@@ -26,9 +26,11 @@ use function sprintf;
  *
  * Activation happens purely through TypoScript: the sentinel key is set inside a
  * condition (see Configuration/Sets/XimaTypo3FrontendEdit/setup.typoscript). This
- * listener must never check the backend user itself -- TypoScript condition verdicts
+ * listener must never check the backend user itself. TypoScript condition verdicts
  * are part of the page cache identifier, PHP behaviour is not, so a check here would
- * serve marker-laden output to anonymous visitors from the shared page cache.
+ * serve marker-laden output to anonymous visitors from the shared page cache. For
+ * the same reason the UserTSconfig switch that hides frontend edit for a user does
+ * not suppress markers: all backend users share one page cache entry.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
@@ -38,7 +40,7 @@ final readonly class ContentElementMarkerEventListener
 {
     /**
      * stdWrap key signalling that markers are wanted. Unknown to the Core, therefore
-     * never executed as a stdWrap function -- it only carries the opt-in verdict.
+     * never executed as a stdWrap function. It only carries the opt-in verdict.
      *
      * A dedicated key is required rather than writing markers via stdWrap.dataWrap:
      * wrap-type properties are single scalars, so a site package setting the same key
