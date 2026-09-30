@@ -17,6 +17,8 @@ use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractViewHelper;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 
 use function is_array;
+use function is_object;
+use function method_exists;
 use function preg_match;
 use function sprintf;
 
@@ -46,7 +48,7 @@ class EditableViewHelper extends AbstractViewHelper
 
     public function initializeArguments(): void
     {
-        $this->registerArgument('record', 'array', 'The record (or any array containing at least "uid")');
+        $this->registerArgument('record', 'mixed', 'The record: an array with "uid", or an object with getUid() such as an Extbase model');
         $this->registerArgument('uid', 'int', 'Record uid, alternative to "record"');
         $this->registerArgument('table', 'string', 'Database table of the record', false, 'tt_content');
     }
@@ -81,6 +83,12 @@ class EditableViewHelper extends AbstractViewHelper
         $record = $this->arguments['record'] ?? null;
         if (is_array($record) && isset($record['uid'])) {
             return (int) $record['uid'];
+        }
+
+        // Duck-typed, because EXT:extbase is not a dependency: covers Extbase
+        // models as well as core Record objects.
+        if (is_object($record) && method_exists($record, 'getUid')) {
+            return (int) $record->getUid();
         }
 
         return null;

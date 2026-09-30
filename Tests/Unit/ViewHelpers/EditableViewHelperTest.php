@@ -15,6 +15,7 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\ViewHelpers;
 
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
@@ -108,6 +109,38 @@ final class EditableViewHelperTest extends TestCase
         $viewHelper->setArguments(['record' => ['uid' => 99, 'CType' => 'text'], 'uid' => null, 'table' => 'tt_content']);
 
         self::assertSame(' data-frontend-edit="tt_content:99"', $viewHelper->render());
+    }
+
+    #[Test]
+    public function renderReturnsDataAttributeFromRecordObject(): void
+    {
+        $this->setUpAuthenticatedBackendUser();
+
+        // Stands in for Extbase models and core Record objects, both expose getUid().
+        $record = new class {
+            public function getUid(): int
+            {
+                return 7;
+            }
+        };
+
+        $viewHelper = new EditableViewHelper(new BackendUserService());
+        $viewHelper->initializeArguments();
+        $viewHelper->setArguments(['record' => $record, 'uid' => null, 'table' => 'tx_news_domain_model_news']);
+
+        self::assertSame(' data-frontend-edit="tx_news_domain_model_news:7"', $viewHelper->render());
+    }
+
+    #[Test]
+    public function renderReturnsEmptyStringForRecordObjectWithoutUid(): void
+    {
+        $this->setUpAuthenticatedBackendUser();
+
+        $viewHelper = new EditableViewHelper(new BackendUserService());
+        $viewHelper->initializeArguments();
+        $viewHelper->setArguments(['record' => new stdClass(), 'uid' => null, 'table' => 'tt_content']);
+
+        self::assertSame('', $viewHelper->render());
     }
 
     #[Test]
