@@ -571,6 +571,10 @@
    * more than once yields several instances. Consumers use the first, since
    * Registry and the AJAX response are keyed by uid.
    *
+   * instances is in document order. Elements found only via anchor or data
+   * attribute have no instance, so ordering a mix of both needs
+   * Node.compareDocumentPosition() rather than the index position.
+   *
    * Absent markers are the normal case (feature off, or an HTML minifier stripped
    * the comments). Every lookup then returns null and the caller falls back to the
    * anchor and data-attribute channels.
@@ -689,7 +693,10 @@
           break;
         }
         if (Node.ELEMENT_NODE === node.nodeType) {
-          elements.push(node);
+          // The element's own empty <a id="c{uid}"></a> is a jump target, not
+          // content. Counting it would leave every anchor-pattern template
+          // unresolved and without nesting depth.
+          if (!this.isOwnEmptyAnchor(node, instance.uid)) elements.push(node);
         } else if (Node.TEXT_NODE === node.nodeType && '' !== (node.nodeValue || '').trim()) {
           hasLooseText = true;
         }
@@ -699,6 +706,18 @@
       if (!reachedEnd) return null;
 
       return 1 === elements.length && !hasLooseText ? elements[0] : null;
+    },
+
+    /**
+     * Stricter than ElementResolver.isEmptyAnchor(), which also accepts an anchor
+     * without href but with content. Such an anchor can be the element itself,
+     * e.g. <a id="c12">Teaser</a>, and must keep counting.
+     */
+    isOwnEmptyAnchor(element, uid) {
+      return Dom.id(element) === `c${uid}`
+        && 'a' === element.tagName.toLowerCase()
+        && 0 === element.children.length
+        && '' === element.textContent.trim();
     },
 
     /**

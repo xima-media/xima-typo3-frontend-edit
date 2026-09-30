@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { HoverMenu } from '../support/frontend-edit/hover-menu';
 
 // "About This Demo" text element on the Home page, with its usual id="c2"
@@ -11,37 +11,49 @@ const ANCHOR_UID = 2;
 // data-attribute-matching.spec.ts.
 const MARKER_ONLY_UID = 7;
 
-/**
- * Places a marker pair around a synthetic element, mirroring what
- * ContentElementMarkerEventListener emits during rendering. Registered before
- * navigation and driven by DOMContentLoaded, which fires before
- * frontend_edit.js's own bootstrap, so the nodes exist in time for
- * MarkerIndex.build() inside DataService.collectDataItems().
- */
-async function injectMarkerPair(
-  page: import('@playwright/test').Page,
-  elementId: string,
-  uid: number,
-): Promise<void> {
-  await page.addInitScript(
-    ({ elementId, uid }) => {
-      document.addEventListener('DOMContentLoaded', () => {
-        const begin = document.createComment(`xfe:b:tt_content:${uid}`);
-        const element = document.createElement('div');
-        element.id = elementId;
-        element.textContent = 'Marker test element';
-        const end = document.createComment(`xfe:e:tt_content:${uid}`);
+// "Two Column Container" and its two children on the /container page. The
+// children have no anchor on the Home page.
+const CONTAINER_UID = 30;
+const CONTAINER_CHILD_UID = 31;
+const CONTAINER_SECOND_CHILD_UID = 32;
 
-        // Prepended in reverse so the resulting order is begin, element, end.
-        // Prepended rather than appended because a fixed cookie-consent banner
-        // sits at the bottom of the page and would intercept hover hit-testing.
-        document.body.prepend(end);
-        document.body.prepend(element);
-        document.body.prepend(begin);
-      });
-    },
-    { elementId, uid },
-  );
+const EDIT_INFORMATION_URL = '/ajax/xima-frontend-edit/edit-information';
+
+const NESTED = /frontend-edit__overlay--nested/;
+
+/**
+ * Wraps markup in a marker pair, mirroring what
+ * ContentElementMarkerEventListener emits during rendering.
+ */
+const marked = (uid: number, html: string): string => `<!--xfe:b:tt_content:${uid}-->${html}<!--xfe:e:tt_content:${uid}-->`;
+
+/**
+ * Prepends markup to the body. Registered before navigation and driven by
+ * DOMContentLoaded, which fires before frontend_edit.js's own bootstrap, so the
+ * nodes exist in time for MarkerIndex.build() inside
+ * DataService.collectDataItems(). Prepended rather than appended because a
+ * fixed cookie-consent banner sits at the bottom of the page and would
+ * intercept hover hit-testing.
+ */
+async function injectHtml(page: Page, html: string): Promise<void> {
+  await page.addInitScript((markup) => {
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.prepend(document.createRange().createContextualFragment(markup));
+    });
+  }, html);
+}
+
+/**
+ * Navigates and waits for the edit information response, after which the
+ * overlays exist. Returns the uids the page requested.
+ */
+async function gotoAndCollectUids(page: Page, path = '/'): Promise<number[]> {
+  const request = page.waitForRequest((candidate) => candidate.url().includes(EDIT_INFORMATION_URL));
+  const response = page.waitForResponse((candidate) => candidate.url().includes(EDIT_INFORMATION_URL));
+  await page.goto(path);
+  const uids: number[] = (await request).postDataJSON()._uids;
+  await response;
+  return uids;
 }
 
 test('the rendered page carries marker pairs for a logged-in backend user', async ({ page }) => {
@@ -61,13 +73,11 @@ test('the rendered page carries marker pairs for a logged-in backend user', asyn
 });
 
 test('an element with only marker comments receives an overlay/menu, without an id anchor or data attribute', async ({ page }) => {
-  await injectMarkerPair(page, 'xfe-test-marker-target', MARKER_ONLY_UID);
+  await injectHtml(page, marked(MARKER_ONLY_UID, '<div id="xfe-test-marker-target">Marker test element</div>'));
 
-  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
-  await page.goto('/');
-  await editInfoResponse;
+  await gotoAndCollectUids(page);
 
-  const toolbar = page.locator(`.frontend-edit__toolbar[data-cid="${MARKER_ONLY_UID}"]`);
+  const toolbar = new HoverMenu(page).toolbar(MARKER_ONLY_UID);
   await expect(toolbar).toHaveCount(1);
   await expect(toolbar).toHaveCSS('opacity', '0');
 
@@ -77,60 +87,75 @@ test('an element with only marker comments receives an overlay/menu, without an 
   await expect(toolbar).toHaveCSS('opacity', '1');
 });
 
-test('a marker range with more than one root element receives no overlay', async ({ page }) => {
-  // Without a single root element the range cannot be mapped to one element.
-  // Reaching for a wrapper would put the toolbar on the surrounding column.
-  await page.addInitScript((uid) => {
-    document.addEventListener('DOMContentLoaded', () => {
-      const first = document.createElement('h2');
-      first.textContent = 'Marker test heading';
-      const second = document.createElement('p');
-      second.textContent = 'Marker test text';
+// Without a single root element the range cannot be mapped to one element.
+// Reaching for a wrapper would put the toolbar on the surrounding column. Only
+// the element's own empty anchor is ignored, a foreign one keeps the range
+// ambiguous.
+for (const [name, html] of [
+  ['more than one root element', '<h2>Marker test heading</h2><p>Marker test text</p>'],
+  ['a foreign empty anchor', '<a id="c99"></a><div>Marker test element</div>'],
+]) {
+  test(`a marker range with ${name} receives no overlay`, async ({ page }) => {
+    await injectHtml(page, marked(MARKER_ONLY_UID, html));
 
-      document.body.prepend(
-        document.createComment(`xfe:b:tt_content:${uid}`),
-        first,
-        second,
-        document.createComment(`xfe:e:tt_content:${uid}`),
-      );
-    });
-  }, MARKER_ONLY_UID);
+    const requestedUids = await gotoAndCollectUids(page);
 
-  const editInfoRequest = page.waitForRequest((request) => request.url().includes('/ajax/xima-frontend-edit/edit-information'));
-  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
-  await page.goto('/');
-  const requestedUids: number[] = (await editInfoRequest).postDataJSON()._uids;
-  await editInfoResponse;
-
-  expect(requestedUids).not.toContain(MARKER_ONLY_UID);
-  await expect(page.locator(`.frontend-edit__toolbar[data-cid="${MARKER_ONLY_UID}"]`)).toHaveCount(0);
-  await expect(new HoverMenu(page).toolbar(ANCHOR_UID)).toHaveCount(1);
-});
+    const hoverMenu = new HoverMenu(page);
+    expect(requestedUids).not.toContain(MARKER_ONLY_UID);
+    await expect(hoverMenu.toolbar(MARKER_ONLY_UID)).toHaveCount(0);
+    await expect(hoverMenu.toolbar(ANCHOR_UID)).toHaveCount(1);
+  });
+}
 
 test('an unbalanced marker is ignored and leaves the rest of the page working', async ({ page }) => {
   // A begin marker whose end never arrives, which is what an HTML minifier or
   // table foster-parenting produces. It must not swallow the document or throw.
   // A real uid without anchor or attribute, so only the marker could have added
   // it to the request.
-  await page.addInitScript((uid) => {
-    document.addEventListener('DOMContentLoaded', () => {
-      document.body.prepend(document.createComment(`xfe:b:tt_content:${uid}`));
-    });
-  }, MARKER_ONLY_UID);
+  await injectHtml(page, `<!--xfe:b:tt_content:${MARKER_ONLY_UID}-->`);
 
   const consoleErrors: string[] = [];
   page.on('pageerror', (error) => consoleErrors.push(error.message));
 
-  const editInfoRequest = page.waitForRequest((request) => request.url().includes('/ajax/xima-frontend-edit/edit-information'));
-  const editInfoResponse = page.waitForResponse((response) => response.url().includes('/ajax/xima-frontend-edit/edit-information'));
-  await page.goto('/');
-  const requestedUids: number[] = (await editInfoRequest).postDataJSON()._uids;
-  await editInfoResponse;
+  const requestedUids = await gotoAndCollectUids(page);
 
   expect(requestedUids).toContain(ANCHOR_UID);
   expect(requestedUids).not.toContain(MARKER_ONLY_UID);
+  await expect(new HoverMenu(page).toolbar(ANCHOR_UID)).toHaveCount(1);
+  expect(consoleErrors).toEqual([]);
+});
+
+// The outer element has no anchor at all, so the id="c{uid}" walk cannot see
+// the nesting: only the marker tree reports the inner element as nested.
+test('an element in the empty-anchor pattern takes its nesting depth from the markers', async ({ page }) => {
+  const inner = marked(MARKER_ONLY_UID, `<a id="c${MARKER_ONLY_UID}"></a><div id="xfe-test-inner">Inner element</div>`);
+  await injectHtml(page, marked(CONTAINER_CHILD_UID, `<div>Outer element${inner}</div>`));
+
+  await gotoAndCollectUids(page);
 
   const hoverMenu = new HoverMenu(page);
-  await expect(hoverMenu.toolbar(ANCHOR_UID)).toHaveCount(1);
-  expect(consoleErrors).toEqual([]);
+  await expect(hoverMenu.overlay(MARKER_ONLY_UID)).toHaveClass(NESTED);
+  await expect(hoverMenu.overlay(CONTAINER_CHILD_UID)).not.toHaveClass(NESTED);
+
+  // The toolbar sits on the element next to the anchor, not on the anchor.
+  await page.hover('#xfe-test-inner', { force: true });
+  await expect(hoverMenu.toolbar(MARKER_ONLY_UID)).toHaveCSS('opacity', '1');
+});
+
+test('an anchor with content but without href stays the element and keeps its depth', async ({ page }) => {
+  const inner = marked(MARKER_ONLY_UID, `<a id="c${MARKER_ONLY_UID}">Teaser without href</a>`);
+  await injectHtml(page, marked(CONTAINER_CHILD_UID, `<div>Outer element${inner}</div>`));
+
+  await gotoAndCollectUids(page);
+
+  await expect(new HoverMenu(page).overlay(MARKER_ONLY_UID)).toHaveClass(NESTED);
+});
+
+test('container children on the demo page are nested, the container is not', async ({ page }) => {
+  await gotoAndCollectUids(page, '/container');
+
+  const hoverMenu = new HoverMenu(page);
+  await expect(hoverMenu.overlay(CONTAINER_UID)).not.toHaveClass(NESTED);
+  await expect(hoverMenu.overlay(CONTAINER_CHILD_UID)).toHaveClass(NESTED);
+  await expect(hoverMenu.overlay(CONTAINER_SECOND_CHILD_UID)).toHaveClass(NESTED);
 });
