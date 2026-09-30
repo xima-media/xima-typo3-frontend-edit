@@ -236,9 +236,9 @@ final readonly class UrlBuilderService
     /**
      * @throws RouteNotFoundException
      */
-    public function buildToggleUrl(): string
+    public function buildToggleUrl(bool $notify = false): string
     {
-        return $this->buildRoute('ajax_frontendEdit_toggle');
+        return $this->buildRoute('ajax_frontendEdit_toggle', $notify ? ['notify' => 1] : []);
     }
 
     /**

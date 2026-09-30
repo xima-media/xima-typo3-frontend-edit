@@ -25,7 +25,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\{ContentMoveService, EmptyColumnService};
 use Xima\XimaTypo3FrontendEdit\Service\Menu\{ContentElementMenuGenerator, RecordMenuGenerator};
 use Xima\XimaTypo3FrontendEdit\Service\Security\ReturnUrlValidator;
-use Xima\XimaTypo3FrontendEdit\Service\Ui\IconDeduplicationService;
+use Xima\XimaTypo3FrontendEdit\Service\Ui\{FlashMessageService, IconDeduplicationService};
 
 use function array_slice;
 use function in_array;
@@ -52,6 +52,7 @@ readonly class AjaxController
         private ContentMoveService $contentMoveService,
         private ReturnUrlValidator $returnUrlValidator,
         private IconDeduplicationService $iconDeduplicationService,
+        private FlashMessageService $flashMessageService,
     ) {}
 
     /**
@@ -81,6 +82,7 @@ readonly class AjaxController
         // Update user configuration and persist
         $backendUser->uc[Configuration::UC_KEY_DISABLED] = $newValue;
         $backendUser->writeUC();
+        $this->flashMessageService->queueToggleNotification($request, $newValue);
 
         return new JsonResponse([
             'success' => true,

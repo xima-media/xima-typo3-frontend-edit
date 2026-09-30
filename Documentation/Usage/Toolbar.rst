@@ -49,6 +49,8 @@ Disabling Frontend Edit
 
 You can temporarily disable frontend editing by clicking the toggle button
 in the Toolbar. This setting is stored per user and persists across sessions.
+After the page reloads, a notification explains the new state, provided
+:confval:`frontendEdit.enableFlashMessages` is active.
 
 ..  figure:: /Images/disable.gif
     :alt: Screencast of disabling frontend editing via the toolbar toggle

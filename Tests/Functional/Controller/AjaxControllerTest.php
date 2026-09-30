@@ -17,6 +17,8 @@ use PHPUnit\Framework\Attributes\Test;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Http\{ServerRequest, Stream};
 use TYPO3\CMS\Core\Localization\LanguageServiceFactory;
+use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Controller\AjaxController;
@@ -120,6 +122,39 @@ final class AjaxControllerTest extends FunctionalTestCase
         $this->subject->toggleAction($this->createToggleRequest());
 
         self::assertTrue((bool) $backendUser->uc[Configuration::UC_KEY_DISABLED]);
+    }
+
+    #[Test]
+    public function toggleActionQueuesExplanationForTheFollowingPageReload(): void
+    {
+        $backendUser = $this->setUpBackendUser(1);
+        $GLOBALS['LANG'] = $this->get(LanguageServiceFactory::class)->createFromUserPreferences($backendUser);
+
+        $request = $this->createToggleRequest()->withQueryParams(['notify' => '1']);
+        $this->subject->toggleAction($request);
+        $this->subject->toggleAction($request);
+
+        $messages = array_map(
+            static fn (string $message): array => json_decode($message, true, 512, \JSON_THROW_ON_ERROR),
+            $backendUser->getSessionData(FlashMessageQueue::NOTIFICATION_QUEUE) ?? [],
+        );
+
+        self::assertSame(
+            ['Frontend editing disabled', 'Frontend editing enabled'],
+            array_column($messages, 'title'),
+        );
+        self::assertSame(ContextualFeedbackSeverity::INFO->value, $messages[0]['severity']);
+        self::assertSame(ContextualFeedbackSeverity::OK->value, $messages[1]['severity']);
+    }
+
+    #[Test]
+    public function toggleActionQueuesNothingWhenFrontendFlashMessagesAreOff(): void
+    {
+        $backendUser = $this->setUpBackendUser(1);
+
+        $this->subject->toggleAction($this->createToggleRequest());
+
+        self::assertEmpty($backendUser->getSessionData(FlashMessageQueue::NOTIFICATION_QUEUE));
     }
 
     #[Test]

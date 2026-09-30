@@ -105,6 +105,18 @@
 			<trans-unit id="notification.contentCreated">
 				<source>Content element created</source>
 			</trans-unit>
+			<trans-unit id="toggle.disabled">
+				<source>Frontend editing disabled</source>
+			</trans-unit>
+			<trans-unit id="toggle.disabled.message">
+				<source>Edit buttons are hidden on all pages. Use the toolbar button to turn them back on.</source>
+			</trans-unit>
+			<trans-unit id="toggle.enabled">
+				<source>Frontend editing enabled</source>
+			</trans-unit>
+			<trans-unit id="toggle.enabled.message">
+				<source>Hover over a content element to edit it right from the frontend.</source>
+			</trans-unit>
 			<trans-unit id="dnd.handle">
 				<source>Drag to reorder</source>
 			</trans-unit>

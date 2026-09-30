@@ -340,7 +340,7 @@ final readonly class ResourceRendererService
     private function addStickyToolbarResources(array $resources, ServerRequestInterface $request, string $nonceAttribute): array
     {
         $toolbarPosition = $this->settingsService->getToolbarPosition($request);
-        $toggleUrl = $this->urlBuilderService->buildToggleUrl();
+        $toggleUrl = $this->urlBuilderService->buildToggleUrl($this->settingsService->isEnableFlashMessages($request));
 
         // Get translated tooltip strings
         $tooltipEnable = $this->translate('tooltip.enable', 'Enable frontend editing mode');
