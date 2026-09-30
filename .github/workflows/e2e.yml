@@ -6,16 +6,20 @@ on:
       - main
     paths:
       - 'Classes/**'
+      - 'Configuration/**'
       - 'Resources/**'
       - 'Tests/Playwright/**'
       - 'Tests/Acceptance/Fixtures/**'
+      - '.ddev/**'
       - '.github/workflows/e2e.yml'
   pull_request:
     paths:
       - 'Classes/**'
+      - 'Configuration/**'
       - 'Resources/**'
       - 'Tests/Playwright/**'
       - 'Tests/Acceptance/Fixtures/**'
+      - '.ddev/**'
       - '.github/workflows/e2e.yml'
 
 jobs:
