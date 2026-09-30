@@ -188,6 +188,29 @@ Appearance Settings
         frontendEdit:
           enableDragAndDrop: true
 
+..  confval:: frontendEdit.markerBasedDetection
+
+    :type: bool
+    :Default: false
+
+    ..  versionadded:: 2.6.0
+
+    ..  note::
+
+        This feature is **experimental**.
+
+    Wraps every rendered content element in invisible HTML comment markers, so
+    elements become editable even when their template renders neither a c-id
+    nor a ``data-frontend-edit`` attribute.
+
+    See :ref:`render-markers` for how the markers work and where they reach
+    their limits.
+
+    ..  code-block:: yaml
+
+        frontendEdit:
+          markerBasedDetection: true
+
 ..  confval:: frontendEdit.enableFlashMessages
 
     :type: bool

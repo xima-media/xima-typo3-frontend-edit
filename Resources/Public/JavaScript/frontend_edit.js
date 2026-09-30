@@ -561,6 +561,170 @@
   };
 
   /**
+   * Marker Index: reads the paired HTML comment markers emitted by
+   * ContentElementMarkerEventListener (site setting frontendEdit.markerBasedDetection):
+   *
+   *   <!--xfe:b:tt_content:12-->...<!--xfe:e:tt_content:12-->
+   *
+   * Unlike the id="c{uid}" anchor this identifies elements deterministically and
+   * nests properly, so container structures form a real tree. A record rendered
+   * more than once yields several instances. Consumers use the first, since
+   * Registry and the AJAX response are keyed by uid.
+   *
+   * Absent markers are the normal case (feature off, or an HTML minifier stripped
+   * the comments). Every lookup then returns null and the caller falls back to the
+   * anchor and data-attribute channels.
+   */
+  const MarkerIndex = {
+    // Only tt_content is emitted. Other tables would need a table-aware index,
+    // since byUid and every lookup are keyed by uid alone.
+    PATTERN: /^xfe:([be]):tt_content:(\d+)$/,
+
+    instances: [],
+    byUid: new Map(),
+    byElement: new Map(),
+
+    /**
+     * Single TreeWalker pass, stack-based pairing.
+     */
+    build() {
+      this.instances = [];
+      this.byUid = new Map();
+      this.byElement = new Map();
+
+      if (!document.body) return this;
+
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_COMMENT);
+      const stack = [];
+      let node;
+
+      while ((node = walker.nextNode())) {
+        const match = (node.nodeValue || '').trim().match(this.PATTERN);
+        if (!match) continue;
+
+        const uid = parseInt(match[2], 10);
+        if (!(uid > 0)) continue;
+
+        if ('b' === match[1]) {
+          this.openInstance(stack, uid, node);
+        } else {
+          this.closeInstance(stack, uid, node);
+        }
+      }
+
+      if (this.instances.length > 0) {
+        Logger.log(`Marker index built: ${this.instances.length} instance(s)`, {
+          resolved: this.byElement.size
+        });
+      }
+
+      return this;
+    },
+
+    /**
+     * Registered on the start marker, so instances come out in document order.
+     * End markers close inside-out and would reverse nested pairs.
+     */
+    openInstance(stack, uid, startNode) {
+      const instance = { uid, startNode, endNode: null, depth: stack.length, element: null };
+      stack.push(instance);
+      this.instances.push(instance);
+      if (!this.byUid.has(uid)) this.byUid.set(uid, []);
+      this.byUid.get(uid).push(instance);
+    },
+
+    /**
+     * Finds the start from the top of the stack. Anything above the match is a
+     * start whose end never arrived: a minifier removed it, or table
+     * foster-parenting moved it out of the pair. Those stay unresolved
+     * (element === null) rather than swallowing the rest of the document.
+     */
+    closeInstance(stack, uid, endNode) {
+      const matchAt = stack.map(instance => instance.uid).lastIndexOf(uid);
+      if (matchAt < 0) return;
+
+      const instance = stack[matchAt];
+      stack.length = matchAt;
+
+      instance.endNode = endNode;
+      instance.element = this.resolveElement(instance);
+
+      // First instance wins the element mapping, matching the uid-keyed lookups.
+      if (instance.element && !this.byElement.has(instance.element)) {
+        this.byElement.set(instance.element, instance);
+      }
+    },
+
+    /**
+     * Adds the uid of every resolved instance. Unresolved instances are skipped,
+     * as no element could receive their toolbar. If one has an anchor, the anchor
+     * scan in collectDataItems still picks it up.
+     *
+     * @returns {number} count of uids added
+     */
+    collectUids(allUids) {
+      const before = allUids.size;
+      this.instances
+        .filter(instance => instance.element)
+        .forEach(instance => allUids.add(instance.uid));
+      return allUids.size - before;
+    },
+
+    /**
+     * A marker pair delimits a range, but every consumer (overlay, hover hit-test,
+     * drag & drop) needs one concrete element. So only an unambiguous range, with
+     * exactly one element and nothing else in it, is accepted. Giving up falls back
+     * to the anchor channel, whereas a wrapper-less range would break hover and
+     * dragging silently, and reaching for the parent would put the toolbar on the
+     * surrounding column.
+     */
+    resolveElement(instance) {
+      const elements = [];
+      let hasLooseText = false;
+      let reachedEnd = false;
+
+      for (let node = instance.startNode.nextSibling; node; node = node.nextSibling) {
+        if (node === instance.endNode) {
+          reachedEnd = true;
+          break;
+        }
+        if (Node.ELEMENT_NODE === node.nodeType) {
+          elements.push(node);
+        } else if (Node.TEXT_NODE === node.nodeType && '' !== (node.nodeValue || '').trim()) {
+          hasLooseText = true;
+        }
+      }
+
+      // Markers are not siblings: the HTML parser relocated one of them.
+      if (!reachedEnd) return null;
+
+      return 1 === elements.length && !hasLooseText ? elements[0] : null;
+    },
+
+    /**
+     * The uid arrives as a string from Object.entries() over the AJAX response,
+     * while the index keys it numerically. Map lookups are type-strict, so it has
+     * to be normalised here.
+     *
+     * @returns {Element|null}
+     */
+    firstElementForUid(uid) {
+      const key = Number(uid);
+      if (!Number.isInteger(key)) return null;
+
+      const instances = this.byUid.get(key);
+      if (!instances) return null;
+
+      const resolved = instances.find(instance => instance.element);
+      return resolved ? resolved.element : null;
+    },
+
+    instanceForElement(element) {
+      return this.byElement.get(element) || null;
+    }
+  };
+
+  /**
    * Element Resolver - Handles anchor patterns and finds the actual content element
    */
   const ElementResolver = {
@@ -612,10 +776,16 @@
 
     /**
      * Locate the DOM anchor for a content element uid: the id="c{uid}"
-     * pattern first (existing behavior, unchanged), falling back to
-     * data-frontend-edit="tt_content:{uid}" - a direct target, since a
+     * pattern first (existing behavior, unchanged), then
+     * data-frontend-edit="tt_content:{uid}" (a direct target, since a
      * hand-placed data attribute is never an anchor-sibling placeholder the
-     * way an empty <a id="c123"></a> is.
+     * way an empty <a id="c123"></a> is), and render markers last.
+     *
+     * Markers come last on purpose. They only need to answer the case the other
+     * two cannot: an element carrying neither anchor nor attribute. Consulting
+     * them first would re-target elements that already resolve today. Where a
+     * marker wraps an outer frame while the anchor sits on an inner node, the
+     * toolbar would silently move.
      *
      * @returns {{element: Element, isDirectTarget: boolean}|null}
      */
@@ -625,6 +795,10 @@
 
       const dataElement = document.querySelector(`[data-frontend-edit="tt_content:${uid}"]`);
       if (dataElement) return { element: dataElement, isDirectTarget: true };
+
+      // Resolved to the real element already, never to an anchor placeholder.
+      const markerElement = MarkerIndex.firstElementForUid(uid);
+      if (markerElement) return { element: markerElement, isDirectTarget: true };
 
       return null;
     }
@@ -646,6 +820,13 @@
      * Used to apply different toolbar positioning for nested elements
      */
     isNestedContentElement(targetElement) {
+      // Unlike findAnchor, nesting prefers markers: they form a real tree, while
+      // the id="c{uid}" walk below cannot see nesting for elements that carry only
+      // markers. An element resolved via anchor has no marker instance mapped to
+      // it and still takes the walk.
+      const instance = MarkerIndex.instanceForElement(targetElement);
+      if (instance) return instance.depth > 0;
+
       let parent = targetElement.parentElement;
       while (parent) {
         // Check if parent has content element ID pattern
@@ -1387,6 +1568,20 @@
     collectDataItems() {
       const dataItems = {};
       const allUids = new Set();
+
+      // Paired comment markers emitted during rendering (site setting
+      // frontendEdit.markerBasedDetection), so elements without an id="c{uid}"
+      // anchor and without a data attribute are found too. The index is built
+      // first because findAnchor reads it later, but it only adds uids: the
+      // channels below stay active and unchanged, and allUids deduplicates.
+      const markerIndex = MarkerIndex.build();
+      const markerUids = markerIndex.collectUids(allUids);
+
+      if (markerIndex.instances.length > 0) {
+        Logger.log(`Found ${markerUids} content element(s) via render markers`, {
+          instances: markerIndex.instances.length
+        });
+      }
 
       // Scan DOM for all content elements by id="c{uid}" pattern
       // This enables editing content from other pages (onepager scenarios).

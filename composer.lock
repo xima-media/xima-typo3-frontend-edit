@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ff927ccdcc38310b48eb053c36bce364",
+    "content-hash": "f225761c4e2338a7e8ff21fdd48ae85c",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -5101,6 +5101,76 @@
             "time": "2026-07-14T12:21:38+00:00"
         },
         {
+            "name": "typo3/cms-frontend",
+            "version": "v13.4.33",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/TYPO3-CMS/frontend.git",
+                "reference": "d03f4e72f9f6d2a4d23b41fa4a9889949ed21a2a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/TYPO3-CMS/frontend/zipball/d03f4e72f9f6d2a4d23b41fa4a9889949ed21a2a",
+                "reference": "d03f4e72f9f6d2a4d23b41fa4a9889949ed21a2a",
+                "shasum": ""
+            },
+            "require": {
+                "ext-libxml": "*",
+                "typo3/cms-core": "13.4.33"
+            },
+            "conflict": {
+                "typo3/cms": "*"
+            },
+            "suggest": {
+                "typo3/cms-adminpanel": "Provides additional information and functionality for backend users in the frontend."
+            },
+            "type": "typo3-cms-framework",
+            "extra": {
+                "typo3/cms": {
+                    "Package": {
+                        "protected": true,
+                        "serviceProvider": "TYPO3\\CMS\\Frontend\\ServiceProvider",
+                        "partOfFactoryDefault": true,
+                        "partOfMinimalUsableSystem": true
+                    },
+                    "extension-key": "frontend"
+                },
+                "branch-alias": {
+                    "dev-main": "13.4.x-dev"
+                },
+                "typo3/class-alias-loader": {
+                    "class-alias-maps": [
+                        "Migrations/Code/ClassAliasMap.php"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "TYPO3\\CMS\\Frontend\\": "Classes/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "TYPO3 Core Team",
+                    "email": "typo3cms@typo3.org",
+                    "role": "Developer"
+                }
+            ],
+            "description": "TYPO3 CMS Frontend",
+            "homepage": "https://typo3.org",
+            "support": {
+                "chat": "https://typo3.org/help",
+                "docs": "https://docs.typo3.org",
+                "issues": "https://forge.typo3.org",
+                "source": "https://github.com/typo3/typo3"
+            },
+            "time": "2026-07-14T12:21:38+00:00"
+        },
+        {
             "name": "typo3/html-sanitizer",
             "version": "v2.3.2",
             "source": {
@@ -8874,76 +8944,6 @@
             "support": {
                 "chat": "https://typo3.org/help",
                 "docs": "https://docs.typo3.org/c/typo3/cms-form/main/en-us",
-                "issues": "https://forge.typo3.org",
-                "source": "https://github.com/typo3/typo3"
-            },
-            "time": "2026-07-14T12:21:38+00:00"
-        },
-        {
-            "name": "typo3/cms-frontend",
-            "version": "v13.4.33",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/TYPO3-CMS/frontend.git",
-                "reference": "d03f4e72f9f6d2a4d23b41fa4a9889949ed21a2a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/TYPO3-CMS/frontend/zipball/d03f4e72f9f6d2a4d23b41fa4a9889949ed21a2a",
-                "reference": "d03f4e72f9f6d2a4d23b41fa4a9889949ed21a2a",
-                "shasum": ""
-            },
-            "require": {
-                "ext-libxml": "*",
-                "typo3/cms-core": "13.4.33"
-            },
-            "conflict": {
-                "typo3/cms": "*"
-            },
-            "suggest": {
-                "typo3/cms-adminpanel": "Provides additional information and functionality for backend users in the frontend."
-            },
-            "type": "typo3-cms-framework",
-            "extra": {
-                "typo3/cms": {
-                    "Package": {
-                        "protected": true,
-                        "serviceProvider": "TYPO3\\CMS\\Frontend\\ServiceProvider",
-                        "partOfFactoryDefault": true,
-                        "partOfMinimalUsableSystem": true
-                    },
-                    "extension-key": "frontend"
-                },
-                "branch-alias": {
-                    "dev-main": "13.4.x-dev"
-                },
-                "typo3/class-alias-loader": {
-                    "class-alias-maps": [
-                        "Migrations/Code/ClassAliasMap.php"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "TYPO3\\CMS\\Frontend\\": "Classes/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-2.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "TYPO3 Core Team",
-                    "email": "typo3cms@typo3.org",
-                    "role": "Developer"
-                }
-            ],
-            "description": "TYPO3 CMS Frontend",
-            "homepage": "https://typo3.org",
-            "support": {
-                "chat": "https://typo3.org/help",
-                "docs": "https://docs.typo3.org",
                 "issues": "https://forge.typo3.org",
                 "source": "https://github.com/typo3/typo3"
             },
