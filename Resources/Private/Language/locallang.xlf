@@ -105,6 +105,12 @@
 			<trans-unit id="notification.contentCreated">
 				<source>Content element created</source>
 			</trans-unit>
+			<trans-unit id="modal.expand">
+				<source>Open in backend</source>
+			</trans-unit>
+			<trans-unit id="modal.close">
+				<source>Close</source>
+			</trans-unit>
 			<trans-unit id="toggle.disabled">
 				<source>Frontend editing disabled</source>
 			</trans-unit>

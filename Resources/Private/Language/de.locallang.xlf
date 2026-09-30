@@ -139,6 +139,14 @@
 				<source />
 				<target>Inhaltselement angelegt</target>
 			</trans-unit>
+			<trans-unit id="modal.expand">
+				<source />
+				<target>Im Backend öffnen</target>
+			</trans-unit>
+			<trans-unit id="modal.close">
+				<source />
+				<target>Schließen</target>
+			</trans-unit>
 			<trans-unit id="toggle.disabled">
 				<source />
 				<target>Frontend-Bearbeitung deaktiviert</target>

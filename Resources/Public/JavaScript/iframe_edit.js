@@ -52,6 +52,15 @@
   const WIZARD_SELECTORS = 'typo3-backend-new-record-wizard, typo3-backend-new-content-element-wizard';
 
   // Feather "external-link" icon (MIT) — used for the expand-to-backend button.
+  // Translated by ResourceRendererService::addSettingsConfig(), English as fallback.
+  const MODAL_LABELS = { expand: 'Open in backend', close: 'Close', ...window.FRONTEND_EDIT_MODAL_LABELS };
+
+  // Icon-only buttons: the tooltip doubles as the screen reader name.
+  function setAccessibleName(button, label) {
+    button.title = label;
+    button.setAttribute('aria-label', label);
+  }
+
   // Same icon as the contextual sidebar close button (contextual_edit.js).
   const CLOSE_ICON = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06z"/></svg>';
 
@@ -213,9 +222,9 @@
         '<div class="frontend-edit__modal-overlay"></div>' +
         '<div class="frontend-edit__modal-panel">' +
           '<div class="frontend-edit__modal-header">' +
-            '<button class="frontend-edit__modal-expand" title="Open in backend">' + EXPAND_ICON + '</button>' +
+            '<button type="button" class="frontend-edit__modal-expand">' + EXPAND_ICON + '</button>' +
             '<span class="frontend-edit__modal-title"></span>' +
-            '<button type="button" class="frontend-edit__modal-close" title="Close" aria-label="Close">' + CLOSE_ICON + '</button>' +
+            '<button type="button" class="frontend-edit__modal-close">' + CLOSE_ICON + '</button>' +
           '</div>' +
           '<div class="frontend-edit__modal-content">' +
             '<div class="frontend-edit__modal-loader">' +
@@ -225,6 +234,8 @@
           '</div>' +
         '</div>';
       document.body.appendChild(modal);
+      setAccessibleName(modal.querySelector('.frontend-edit__modal-expand'), MODAL_LABELS.expand);
+      setAccessibleName(modal.querySelector('.frontend-edit__modal-close'), MODAL_LABELS.close);
 
       const close = () => this.close();
       modal.querySelector('.frontend-edit__modal-overlay').addEventListener('click', close);
@@ -491,8 +502,7 @@
       const expand = doc.createElement('button');
       expand.type = 'button';
       expand.className = 'btn btn-default btn-borderless';
-      expand.title = 'Open in backend';
-      expand.setAttribute('aria-label', expand.title);
+      setAccessibleName(expand, MODAL_LABELS.expand);
       expand.innerHTML = '<typo3-backend-icon identifier="actions-expand" size="small"></typo3-backend-icon>';
       expand.addEventListener('click', () => Modal.expandToBackend());
 

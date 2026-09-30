@@ -162,9 +162,14 @@ final readonly class ResourceRendererService
         $notificationLabels = json_encode([
             'contentCreated' => $this->translate('notification.contentCreated', 'Content element created'),
         ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
+        $modalLabels = json_encode([
+            'expand' => $this->translate('modal.expand', 'Open in backend'),
+            'close' => $this->translate('modal.close', 'Close'),
+        ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
         $resources['settings_config'] = sprintf(
-            '<script%s>window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_SIDEBAR_EDIT = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s; window.FRONTEND_EDIT_NOTIFICATION_LABELS = %s; window.FRONTEND_EDIT_SHOW_INSERT_BUTTONS = %s; window.FRONTEND_EDIT_ENABLE_DND = %s; window.FRONTEND_EDIT_MOVE_URL = "%s"; window.FRONTEND_EDIT_DND_LABELS = %s;</script>',
+            '<script%s>window.FRONTEND_EDIT_MODAL_LABELS = %s; window.FRONTEND_EDIT_COLOR_SCHEME = "%s"; window.FRONTEND_EDIT_SHOW_CONTEXT_MENU = %s; window.FRONTEND_EDIT_ENABLE_OUTLINE = %s; window.FRONTEND_EDIT_ENABLE_SCROLL_TO_ELEMENT = %s; window.FRONTEND_EDIT_CONTEXTUAL_EDITING = %s; window.FRONTEND_EDIT_SIDEBAR_EDIT = %s; window.FRONTEND_EDIT_DISABLED = %s; window.FRONTEND_EDIT_DELETE_LABELS = %s; window.FRONTEND_EDIT_COLUMN_LABELS = %s; window.FRONTEND_EDIT_NOTIFICATION_LABELS = %s; window.FRONTEND_EDIT_SHOW_INSERT_BUTTONS = %s; window.FRONTEND_EDIT_ENABLE_DND = %s; window.FRONTEND_EDIT_MOVE_URL = "%s"; window.FRONTEND_EDIT_DND_LABELS = %s;</script>',
             $nonceAttribute,
+            $modalLabels,
             $colorScheme,
             $showContextMenu,
             $enableOutline,
