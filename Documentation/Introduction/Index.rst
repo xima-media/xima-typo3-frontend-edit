@@ -88,6 +88,8 @@ Configuration and extensibility
     *   -   :ref:`PSR-14 Events <events>`
         -   Add, remove or modify menu entries and attach custom data to
             elements.
+    *   -   :ref:`Render markers <render-markers>`
+        -   Detect content elements without template changes (experimental).
     *   -   :ref:`ViewHelpers <data-attributes>`
         -   Edit links for related records (e.g. news items) and column
             markers for new-content buttons.

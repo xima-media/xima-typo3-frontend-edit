@@ -47,6 +47,8 @@ Nothing appears in the frontend
         Content element IDs
             The rendered HTML must expose a "c-id" per element, e.g.
             ``id="c908"`` - or use the ``data-frontend-edit`` attribute instead.
+            Without template changes, the experimental
+            :ref:`render markers <render-markers>` are an alternative.
             See :ref:`how-it-works` and :ref:`Setup requirements & limits
             <setup-requirements-and-limits>` (headless/SPA frontends are an
             explicit non-goal, for the same reason).

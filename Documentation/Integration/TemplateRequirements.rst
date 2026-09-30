@@ -133,22 +133,23 @@ comments:
 The markers are an addition to the other two patterns. An element that
 already has a c-id or a ``data-frontend-edit`` attribute keeps using it.
 
-Keep these limits in mind:
+The output of the content element needs exactly **one** root element. With
+several root elements, or with loose text next to the root element, the
+markers cannot point at a single element and are ignored. The element's own
+empty anchor is not counted, so the anchor pattern
+``<a id="c10"></a><div>...</div>`` works.
 
-*   The output of the content element needs exactly **one** root element.
-    With several root elements, or with loose text next to the root element,
-    the markers cannot point at a single element and are ignored.
-*   Markers are only rendered for logged-in backend users on page type ``0``.
-    Other page types (JSON, RSS, EXT:headless) are left untouched. Backend
-    users get their own page cache entries.
-*   ``stdWrap.cache`` on a parent object, e.g. a cached footer that renders
-    content elements via ``CONTENT``, stores the markers of its first
-    rendering. Anonymous visitors then receive these markers from the cache.
-    The comments only contain table and UID.
-*   Disabling frontend edit for a user through UserTSconfig does not suppress
-    the markers, because all backend users share one page cache entry.
-*   An HTML minifier that strips comments disables this channel. The c-id and
-    the ``data-frontend-edit`` attribute keep working.
+Two features still rely on the c-id and do not work for elements that are only
+detected through markers or the ``data-frontend-edit`` attribute:
+
+*   Jumping back to the element after saving
+    (:confval:`frontendEdit.enableScrollToElement`), which uses the fragment
+    ``#c{uid}`` of the return URL.
+*   :ref:`drag-and-drop`, which collects the movable elements of a column by
+    their c-id.
+
+:ref:`setup-render-markers` lists the operational limits, such as caching,
+minifiers and non-HTML output.
 
 ..  _editing-foreign-records:
 

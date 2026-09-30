@@ -20,6 +20,11 @@ Request flow
     but only if a backend user is logged in. For regular visitors the response
     is untouched.
 
+#.  With :confval:`frontendEdit.markerBasedDetection` enabled, the PSR-14
+    listener ``ContentElementMarkerEventListener`` wraps every rendered content
+    element in :ref:`render markers <render-markers>`. A TypoScript condition
+    limits this to backend users, so their pages are cached separately.
+
 #.  On page load the script collects the :ref:`content element IDs
     <template-requirements>` from the DOM and calls the AJAX endpoint
     :code:`/typo3/ajax/xima-frontend-edit/edit-information`.

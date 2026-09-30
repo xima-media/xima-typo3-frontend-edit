@@ -16,6 +16,7 @@ Guidance for coding agents working in this repository.
 - `Classes/Controller/`: `AjaxController` with the toggle, edit information and move (drag and drop) endpoints
 - `Classes/Service/`: menu generators and button builders, `SettingsService`, `BackendUserService`, `UrlBuilderService`, `IconService`, `FlashMessageService`, `ResourceRendererService`, `Content/ContentMoveService`
 - `Classes/Event/`: PSR-14 events `FrontendEditDropdownModifyEvent` and `FrontendEditPageDropdownModifyEvent`
+- `Classes/EventListener/ContentElementMarkerEventListener.php`: wraps rendered `tt_content` records in HTML comment markers for the site setting `frontendEdit.markerBasedDetection`. The TypoScript condition in `Configuration/Sets/XimaTypo3FrontendEdit/setup.typoscript` gates it, so backend users get their own page cache entries. The listener itself must never check the backend user
 - `Classes/EventListener/`, `Classes/Repository/`, `Classes/Enumerations/`, `Classes/Template/`, `Classes/Utility/`, `Classes/ViewHelpers/`
 - `Configuration/`: `RequestMiddlewares.php`, `JavaScriptModules.php`, `Sets/XimaTypo3FrontendEdit/`
 - `Resources/`: templates, language files, public assets
