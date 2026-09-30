@@ -139,6 +139,30 @@
 				<source />
 				<target>Inhaltselement angelegt</target>
 			</trans-unit>
+			<trans-unit id="modal.expand">
+				<source />
+				<target>Im Backend öffnen</target>
+			</trans-unit>
+			<trans-unit id="modal.close">
+				<source />
+				<target>Schließen</target>
+			</trans-unit>
+			<trans-unit id="toggle.disabled">
+				<source />
+				<target>Frontend-Bearbeitung deaktiviert</target>
+			</trans-unit>
+			<trans-unit id="toggle.disabled.message">
+				<source />
+				<target>Die Bearbeiten-Buttons sind auf allen Seiten ausgeblendet. Über den Button in der Toolbar schaltest du sie wieder ein.</target>
+			</trans-unit>
+			<trans-unit id="toggle.enabled">
+				<source />
+				<target>Frontend-Bearbeitung aktiviert</target>
+			</trans-unit>
+			<trans-unit id="toggle.enabled.message">
+				<source />
+				<target>Fahre mit der Maus über ein Inhaltselement, um es direkt aus dem Frontend zu bearbeiten.</target>
+			</trans-unit>
 			<trans-unit id="dnd.handle">
 				<source />
 				<target>Zum Umsortieren ziehen</target>

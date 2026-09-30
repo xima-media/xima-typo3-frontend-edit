@@ -52,6 +52,18 @@
   const WIZARD_SELECTORS = 'typo3-backend-new-record-wizard, typo3-backend-new-content-element-wizard';
 
   // Feather "external-link" icon (MIT) — used for the expand-to-backend button.
+  // Translated by ResourceRendererService::addSettingsConfig(), English as fallback.
+  const MODAL_LABELS = { expand: 'Open in backend', close: 'Close', ...window.FRONTEND_EDIT_MODAL_LABELS };
+
+  // Icon-only buttons: the tooltip doubles as the screen reader name.
+  function setAccessibleName(button, label) {
+    button.title = label;
+    button.setAttribute('aria-label', label);
+  }
+
+  // Same icon as the contextual sidebar close button (contextual_edit.js).
+  const CLOSE_ICON = '<svg viewBox="0 0 16 16" fill="currentColor"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06z"/></svg>';
+
   const EXPAND_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
 
   /**
@@ -210,9 +222,9 @@
         '<div class="frontend-edit__modal-overlay"></div>' +
         '<div class="frontend-edit__modal-panel">' +
           '<div class="frontend-edit__modal-header">' +
-            '<button class="frontend-edit__modal-expand" title="Open in backend">' + EXPAND_ICON + '</button>' +
+            '<button type="button" class="frontend-edit__modal-expand">' + EXPAND_ICON + '</button>' +
             '<span class="frontend-edit__modal-title"></span>' +
-            '<button class="frontend-edit__modal-close" title="Close">&times;</button>' +
+            '<button type="button" class="frontend-edit__modal-close">' + CLOSE_ICON + '</button>' +
           '</div>' +
           '<div class="frontend-edit__modal-content">' +
             '<div class="frontend-edit__modal-loader">' +
@@ -222,6 +234,8 @@
           '</div>' +
         '</div>';
       document.body.appendChild(modal);
+      setAccessibleName(modal.querySelector('.frontend-edit__modal-expand'), MODAL_LABELS.expand);
+      setAccessibleName(modal.querySelector('.frontend-edit__modal-close'), MODAL_LABELS.close);
 
       const close = () => this.close();
       modal.querySelector('.frontend-edit__modal-overlay').addEventListener('click', close);
@@ -274,6 +288,7 @@
       }
 
       this.getOrCreate();
+      this.element.classList.remove('frontend-edit__modal--contextual');
       IframeHandler._wizardAutoClicked = false;
       // A modal opened with a #colPos hash is a "new content" (create) flow;
       // remembered so the post-save success flash can be relabelled "created".
@@ -389,6 +404,7 @@
       this.interceptIframeClicks(iframe);
       this.detectFrontendNavigation(iframe);
       this.hideUnnecessaryButtons(iframe);
+      this.applyContextualHeader(iframe);
     },
 
     /**
@@ -435,6 +451,88 @@
         if (!doc) return;
         doc.querySelectorAll('.t3js-editform-view').forEach(el => el.remove());
       } catch (_) { /* cross-origin */ }
+    },
+
+    /**
+     * On v14.2+ edits open in the core contextual sidebar, but new records
+     * still land in the full EditDocumentController here, because
+     * ContextualRecordEditController only accepts existing records. Rebuild
+     * the docheader with the core's contextual-record-edit markup so both
+     * flows share the same compact header and the core stylesheet does the
+     * styling. On v13 the modal handles both flows, so it stays untouched.
+     */
+    applyContextualHeader(iframe) {
+      if (window.FRONTEND_EDIT_SIDEBAR_EDIT !== true) return;
+      try {
+        const doc = iframe.contentWindow?.document;
+        const form = doc?.getElementById('EditDocumentController');
+        const module = doc?.querySelector('.module');
+        // The module is a grid with a moduleDocHeader area, so the header has
+        // to live in the wrapper to stay on top.
+        const docHeaderWrapper = module?.querySelector('.module-docheader-wrapper');
+        if (!form || !docHeaderWrapper || module.classList.contains('contextual-record-edit')) return;
+
+        const header = doc.createElement('div');
+        header.className = 'contextual-record-edit-header';
+        header.append(
+          this.buildContextualTitleGroup(doc, form),
+          this.buildContextualActions(doc, docHeaderWrapper.querySelector('.t3js-module-docheader-buttons')),
+        );
+
+        module.classList.add('contextual-record-edit');
+        module.querySelector('.module-body')?.classList.add('contextual-record-edit-body');
+        docHeaderWrapper.querySelectorAll('.module-docheader').forEach((el) => { el.style.display = 'none'; });
+        docHeaderWrapper.appendChild(header);
+        // The expand action now sits next to the title, as in the sidebar.
+        Modal.element?.classList.add('frontend-edit__modal--contextual');
+        Logger.log('Contextual header applied');
+      } catch (_) { /* cross-origin */ }
+    },
+
+    buildContextualTitleGroup(doc, form) {
+      const titleGroup = doc.createElement('div');
+      titleGroup.className = 'contextual-record-edit-title-group';
+
+      const title = doc.createElement('span');
+      title.className = 'contextual-record-edit-title';
+      const heading = form.querySelector('h1');
+      title.textContent = heading?.textContent.trim() || '';
+      heading?.remove();
+
+      const expand = doc.createElement('button');
+      expand.type = 'button';
+      expand.className = 'btn btn-default btn-borderless';
+      setAccessibleName(expand, MODAL_LABELS.expand);
+      expand.innerHTML = '<typo3-backend-icon identifier="actions-expand" size="small"></typo3-backend-icon>';
+      expand.addEventListener('click', () => Modal.expandToBackend());
+
+      titleGroup.append(title, expand);
+      return titleGroup;
+    },
+
+    buildContextualActions(doc, buttonBar) {
+      const actions = doc.createElement('div');
+      actions.className = 'contextual-record-edit-actions';
+      if (!buttonBar) return actions;
+
+      const save = buttonBar.querySelector('[name="_savedok"]');
+      const saveClose = buttonBar.querySelector('[name="_saveandclosedok"]');
+      const close = buttonBar.querySelector('.t3js-editform-close');
+      save?.classList.replace('btn-default', 'btn-primary');
+
+      // Same label as the sidebar builds it in contextual_edit.js enhanceIframeUI().
+      const labelNode = saveClose && [...saveClose.childNodes].reverse().find((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+      if (labelNode && save && close) {
+        labelNode.textContent = ` ${save.textContent.trim()} & ${close.textContent.trim()}`;
+      }
+
+      [buttonBar.querySelector('.t3js-toggle-review-panel'), save, saveClose, close]
+        .filter(Boolean)
+        .forEach((button) => {
+          button.classList.remove('btn-sm');
+          actions.appendChild(button);
+        });
+      return actions;
     },
 
     /**

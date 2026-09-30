@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
+use TYPO3\CMS\Core\Messaging\{FlashMessageQueue, FlashMessageService as CoreFlashMessageService};
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\FlashMessageService;
 
@@ -41,7 +41,7 @@ final class FlashMessageServiceTest extends TestCase
     {
         unset($GLOBALS['BE_USER']);
 
-        $service = new FlashMessageService($this->createMock(LoggerInterface::class));
+        $service = $this->createSubject();
 
         self::assertSame([], $service->collectFromSession());
     }
@@ -53,7 +53,7 @@ final class FlashMessageServiceTest extends TestCase
         $backendUser->user = null;
         $GLOBALS['BE_USER'] = $backendUser;
 
-        $service = new FlashMessageService($this->createMock(LoggerInterface::class));
+        $service = $this->createSubject();
 
         self::assertSame([], $service->collectFromSession());
     }
@@ -66,7 +66,7 @@ final class FlashMessageServiceTest extends TestCase
         $backendUser->method('getSessionData')->willReturn([]);
         $GLOBALS['BE_USER'] = $backendUser;
 
-        $service = new FlashMessageService($this->createMock(LoggerInterface::class));
+        $service = $this->createSubject();
 
         self::assertSame([], $service->collectFromSession());
     }
@@ -91,7 +91,7 @@ final class FlashMessageServiceTest extends TestCase
             ->with(FlashMessageQueue::NOTIFICATION_QUEUE, null);
         $GLOBALS['BE_USER'] = $backendUser;
 
-        $service = new FlashMessageService($this->createMock(LoggerInterface::class));
+        $service = $this->createSubject();
 
         $result = $service->collectFromSession();
 
@@ -114,7 +114,7 @@ final class FlashMessageServiceTest extends TestCase
         ]);
         $GLOBALS['BE_USER'] = $backendUser;
 
-        $service = new FlashMessageService($this->createMock(LoggerInterface::class));
+        $service = $this->createSubject();
 
         $result = $service->collectFromSession();
 
@@ -137,7 +137,7 @@ final class FlashMessageServiceTest extends TestCase
         ]);
         $GLOBALS['BE_USER'] = $backendUser;
 
-        $service = new FlashMessageService($this->createMock(LoggerInterface::class));
+        $service = $this->createSubject();
 
         $result = $service->collectFromSession();
 
@@ -158,7 +158,7 @@ final class FlashMessageServiceTest extends TestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::once())->method('warning');
 
-        $service = new FlashMessageService($logger);
+        $service = $this->createSubject($logger);
 
         self::assertSame([], $service->collectFromSession());
     }
@@ -175,7 +175,7 @@ final class FlashMessageServiceTest extends TestCase
         $logger = $this->createMock(LoggerInterface::class);
         $logger->expects(self::exactly(2))->method('error');
 
-        $service = new FlashMessageService($logger);
+        $service = $this->createSubject($logger);
 
         self::assertSame([], $service->collectFromSession());
     }
@@ -188,8 +188,16 @@ final class FlashMessageServiceTest extends TestCase
         $backendUser->method('getSessionData')->willReturn(null);
         $GLOBALS['BE_USER'] = $backendUser;
 
-        $service = new FlashMessageService($this->createMock(LoggerInterface::class));
+        $service = $this->createSubject();
 
         self::assertSame([], $service->collectFromSession());
+    }
+
+    private function createSubject(?LoggerInterface $logger = null): FlashMessageService
+    {
+        return new FlashMessageService(
+            $logger ?? $this->createMock(LoggerInterface::class),
+            new CoreFlashMessageService(),
+        );
     }
 }

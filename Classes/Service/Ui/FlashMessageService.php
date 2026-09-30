@@ -14,11 +14,15 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 
 use JsonException;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
-use TYPO3\CMS\Core\Messaging\FlashMessageQueue;
+use TYPO3\CMS\Core\Localization\LanguageService;
+use TYPO3\CMS\Core\Messaging\{FlashMessage, FlashMessageQueue};
+use TYPO3\CMS\Core\Messaging\FlashMessageService as CoreFlashMessageService;
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
+use Xima\XimaTypo3FrontendEdit\Configuration;
 
 use function is_array;
 
@@ -32,7 +36,37 @@ final readonly class FlashMessageService
 {
     public function __construct(
         private LoggerInterface $logger,
+        private CoreFlashMessageService $coreFlashMessageService,
     ) {}
+
+    /**
+     * The toolbar reloads the page after toggling, so the explanation goes
+     * into the session-backed notification queue and collectFromSession()
+     * picks it up on that reload.
+     *
+     * The toolbar adds the notify parameter only when the site shows flash
+     * messages, since this AJAX request has no site to read
+     * frontendEdit.enableFlashMessages from. Queuing without it would surface
+     * the message later as a stale notification in the backend.
+     */
+    public function queueToggleNotification(ServerRequestInterface $request, bool $disabled): void
+    {
+        if (!isset($request->getQueryParams()['notify'])) {
+            return;
+        }
+
+        $key = $disabled ? 'toggle.disabled' : 'toggle.enabled';
+        $message = new FlashMessage(
+            $this->translate($key.'.message'),
+            $this->translate($key),
+            $disabled ? ContextualFeedbackSeverity::INFO : ContextualFeedbackSeverity::OK,
+            true,
+        );
+
+        $this->coreFlashMessageService
+            ->getMessageQueueByIdentifier(FlashMessageQueue::NOTIFICATION_QUEUE)
+            ->enqueue($message);
+    }
 
     /**
      * Collect flash messages from the backend user session.
@@ -104,5 +138,15 @@ final readonly class FlashMessageService
         }
 
         return $result;
+    }
+
+    private function translate(string $key): string
+    {
+        $languageService = $GLOBALS['LANG'] ?? null;
+        if (!$languageService instanceof LanguageService) {
+            return '';
+        }
+
+        return $languageService->sL('LLL:EXT:'.Configuration::EXT_KEY.'/Resources/Private/Language/locallang.xlf:'.$key);
     }
 }
