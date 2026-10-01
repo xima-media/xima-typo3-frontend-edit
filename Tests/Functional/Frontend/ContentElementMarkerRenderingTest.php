@@ -17,6 +17,9 @@ use PHPUnit\Framework\Attributes\{DataProvider, Test};
 use TYPO3\CMS\Core\Cache\Backend\Typo3DatabaseBackend;
 use TYPO3\CMS\Core\Cache\CacheManager;
 use TYPO3\CMS\Core\Configuration\SiteWriter;
+use TYPO3\CMS\Core\Core\SystemEnvironmentBuilder;
+use TYPO3\CMS\Core\Http\ServerRequest;
+use TYPO3\CMS\Extbase\Configuration\ConfigurationManagerInterface;
 use TYPO3\TestingFramework\Core\Functional\Framework\Frontend\{InternalRequest, InternalRequestContext};
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
@@ -166,6 +169,29 @@ final class ContentElementMarkerRenderingTest extends FunctionalTestCase
         $this->render(asBackendUser: true);
 
         self::assertSame(1, $this->countPageCacheEntries());
+    }
+
+    /**
+     * Extbase backend modules (log, extension list) evaluate the frontend
+     * TypoScript of the site, conditions included, against a backend request.
+     * That request carries no PageArguments, and a failing condition is
+     * rethrown by the Core instead of being treated as false.
+     */
+    #[Test]
+    public function conditionEvaluatesToFalseForBackendModuleRequest(): void
+    {
+        $this->configureSite(enabled: true, markerBasedDetection: true);
+        $this->setUpBackendUser(self::BACKEND_USER_ID);
+
+        $request = (new ServerRequest('http://localhost/typo3/module/system/log'))
+            ->withQueryParams(['id' => 1])
+            ->withAttribute('applicationType', SystemEnvironmentBuilder::REQUESTTYPE_BE);
+        $configurationManager = $this->get(ConfigurationManagerInterface::class);
+        $configurationManager->setRequest($request);
+
+        $setup = $configurationManager->getConfiguration(ConfigurationManagerInterface::CONFIGURATION_TYPE_FULL_TYPOSCRIPT);
+
+        self::assertArrayNotHasKey('xfeMarkers', $setup['tt_content.']['stdWrap.'] ?? []);
     }
 
     private function configureSite(bool $enabled, bool $markerBasedDetection): void
