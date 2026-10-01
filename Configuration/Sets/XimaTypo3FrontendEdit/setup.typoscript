@@ -20,12 +20,15 @@
 # CONTENT): its cache_hash entry keeps whatever markers the first rendering had.
 #
 # Only page type 0 gets markers. Other page types (JSON, RSS, EXT:headless) are
-# not HTML documents, and a comment would corrupt their output.
+# not HTML documents, and a comment would corrupt their output. The call is
+# nullsafe because Extbase backend modules evaluate this setup against a backend
+# request without PageArguments, and the Core turns a failing condition into an
+# exception instead of false.
 #
 # The constants are quoted on purpose. A site setting of type bool with value
 # false flattens to an *empty* TypoScript constant, which would turn an unquoted
 # comparison into `[ == 1]`.
 #
-[backend.user.isLoggedIn && request.getPageArguments().getPageType() == '0' && '{$frontendEdit.enabled}' == '1' && '{$frontendEdit.markerBasedDetection}' == '1']
+[backend.user.isLoggedIn && request.getPageArguments()?.getPageType() == '0' && '{$frontendEdit.enabled}' == '1' && '{$frontendEdit.markerBasedDetection}' == '1']
 tt_content.stdWrap.xfeMarkers = 1
 [END]
