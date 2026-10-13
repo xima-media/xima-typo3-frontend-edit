@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e5fdf7a26e319ef14b25eb2e58ad10ac",
+    "content-hash": "2ecd7c12db846d9ed6074cdc9a174020",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -5285,20 +5285,21 @@
     "packages-dev": [
         {
             "name": "b13/container",
-            "version": "4.1.0",
+            "version": "4.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/b13/container.git",
-                "reference": "09a041521d74efb31a88bded9a9d54d467afdefa"
+                "reference": "cfbc22c0b70bba34c656e1adf9c60d838f936b0e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/b13/container/zipball/09a041521d74efb31a88bded9a9d54d467afdefa",
-                "reference": "09a041521d74efb31a88bded9a9d54d467afdefa",
+                "url": "https://api.github.com/repos/b13/container/zipball/cfbc22c0b70bba34c656e1adf9c60d838f936b0e",
+                "reference": "cfbc22c0b70bba34c656e1adf9c60d838f936b0e",
                 "shasum": ""
             },
             "require": {
-                "typo3/cms-backend": "^13.4 || ^14.3"
+                "typo3/cms-backend": "^13.4 || ^14.3",
+                "typo3/cms-core": "^13.4 || ^14.3"
             },
             "replace": {
                 "typo3-ter/container": "self.version"
@@ -5326,7 +5327,7 @@
                         "providesPackages": []
                     },
                     "app-dir": ".Build",
-                    "version": "4.1.0",
+                    "version": "4.1.1",
                     "web-dir": ".Build/Web",
                     "extension-key": "container",
                     "cms-package-dir": "{$vendor-dir}/typo3/cms"
@@ -5345,9 +5346,9 @@
             "homepage": "https://b13.com",
             "support": {
                 "issues": "https://github.com/b13/container/issues",
-                "source": "https://github.com/b13/container/tree/4.1.0"
+                "source": "https://github.com/b13/container/tree/4.1.1"
             },
-            "time": "2026-08-13T07:27:17+00:00"
+            "time": "2026-10-09T13:30:57+00:00"
         },
         {
             "name": "composer/class-map-generator",
