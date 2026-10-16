@@ -32,7 +32,9 @@
 			"typo3/class-alias-loader": false,
 			"typo3/cms-composer-installers": false
 		},
-		"lock": false,
+		"platform": {
+			"php": "8.2"
+		},
 		"sort-packages": true
 	},
 	"scripts": {
