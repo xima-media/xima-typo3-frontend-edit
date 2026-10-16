@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "345ae142b36119e5da786c6e93b10c22",
+    "content-hash": "93556a260aef16cff1e83ef44f76dad0",
     "packages": [],
     "packages-dev": [
         {
@@ -1606,29 +1606,29 @@
         },
         {
             "name": "konradmichalik/phpstan-typo3-preset",
-            "version": "0.4.0",
+            "version": "0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/konradmichalik/phpstan-typo3-preset.git",
-                "reference": "d718fa1818d5c4b6d896d84f851a14a5c465eecb"
+                "reference": "2d599d477c2a1fdcd66a60cf5e33faa6515536c7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/konradmichalik/phpstan-typo3-preset/zipball/d718fa1818d5c4b6d896d84f851a14a5c465eecb",
-                "reference": "d718fa1818d5c4b6d896d84f851a14a5c465eecb",
+                "url": "https://api.github.com/repos/konradmichalik/phpstan-typo3-preset/zipball/2d599d477c2a1fdcd66a60cf5e33faa6515536c7",
+                "reference": "2d599d477c2a1fdcd66a60cf5e33faa6515536c7",
                 "shasum": ""
             },
             "require": {
-                "ergebnis/phpstan-rules": "^2.5",
+                "ergebnis/phpstan-rules": "^2.13",
                 "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
-                "phpstan/phpstan": "^1.9 || ^2.0",
-                "phpstan/phpstan-deprecation-rules": "^1.1 || ^2.0",
-                "phpstan/phpstan-strict-rules": "^1.4 || ^2.0",
-                "rector/type-perfect": "^1.0 || ^2.0",
-                "saschaegerer/phpstan-typo3": "^1.10 || ^2.0 || ^3.0",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "rector/type-perfect": "^2.0",
+                "saschaegerer/phpstan-typo3": "^2.0 || ^3.0",
                 "spaze/phpstan-disallowed-calls": "^4.0",
-                "tomasvotruba/cognitive-complexity": "0.2.3 || ^1.0 <1.2.0",
-                "tomasvotruba/type-coverage": "^1.0 || ^2.0 <2.3.0"
+                "tomasvotruba/cognitive-complexity": "^1.0",
+                "tomasvotruba/type-coverage": "^2.0.1 <2.3.0"
             },
             "require-dev": {
                 "armin/editorconfig-cli": "^2.0",
@@ -1656,9 +1656,9 @@
             "description": "TYPO3 preset configuration for PHPStan",
             "support": {
                 "issues": "https://github.com/konradmichalik/phpstan-typo3-preset/issues",
-                "source": "https://github.com/konradmichalik/phpstan-typo3-preset/tree/0.4.0"
+                "source": "https://github.com/konradmichalik/phpstan-typo3-preset/tree/0.5.0"
             },
-            "time": "2026-08-19T10:19:15+00:00"
+            "time": "2026-10-02T08:48:00+00:00"
         },
         {
             "name": "league/flysystem",
@@ -6200,5 +6200,5 @@
     "platform-overrides": {
         "php": "8.2"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
