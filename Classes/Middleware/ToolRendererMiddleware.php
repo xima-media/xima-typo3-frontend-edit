@@ -23,6 +23,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{FlashMessageService, ResourceRendererService};
 
+use function in_array;
 use function is_array;
 use function strlen;
 
@@ -49,6 +50,12 @@ class ToolRendererMiddleware implements MiddlewareInterface
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $response = $handler->handle($request);
+
+        // Framed pages are not the editing context. Browsers without Fetch
+        // Metadata (plain HTTP) keep the previous behavior.
+        if (in_array($request->getHeaderLine('Sec-Fetch-Dest'), ['iframe', 'frame'], true)) {
+            return $response;
+        }
 
         // Cheapest gate first: bail out immediately for anonymous frontend traffic
         // before resolving any site settings.
