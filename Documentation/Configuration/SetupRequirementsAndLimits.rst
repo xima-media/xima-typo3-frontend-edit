@@ -129,3 +129,13 @@ editing UI is shown for such a viewer: there is no active backend user
 session behind an ``ADMCMD_prev`` link, and the extension's access checks
 require one. This is expected behavior, not a bug - a preview link is
 meant for reviewing content, not editing it.
+
+Pages embedded in a frame
+=========================
+
+No frontend editing UI is rendered for a page that the browser loads into an
+:html:`<iframe>` or :html:`<frame>`, e.g. a styleguide that embeds content
+elements, or a preview inside the backend such as the View module. The
+extension reads the ``Sec-Fetch-Dest`` request header for this. Browsers only
+send it in secure contexts (HTTPS or ``localhost``), so on plain HTTP the
+tools are still injected.
