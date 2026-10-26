@@ -7,6 +7,6 @@ on:
 
 jobs:
   security:
-    uses: konradmichalik/reusable-github-actions/.github/workflows/security.yml@c460c0166a646cb65fd059c8d2f7d895ff3c787b # 0.1.0
+    uses: konradmichalik/reusable-github-actions/.github/workflows/security.yml@b207c7a6eb8db6c385156a57cdacaaa1c7d3cd0b # 0.2.0
     permissions:
       contents: read
