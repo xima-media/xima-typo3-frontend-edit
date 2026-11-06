@@ -29,7 +29,7 @@ test('link browser applies a page link to the RTE selection', async ({ page }) =
   await homeNode.hover();
   await homeNode.locator('.node-action').click();
 
-  await expect(editFrame.locator('.ck-editor__editable a[href^="t3://page?uid="]').first()).toBeVisible();
+  await expect(editFrame.locator('.ck-editor__editable a[href="t3://page?uid=1"]').first()).toBeVisible();
   // TYPO3 13.4 keeps the modal element after applying a link, also in the plain backend.
   if (resolveTypo3Version() !== '13') {
     await expect(editFrame.locator('iframe[src*="/typo3/rte/wizard/browselinks"]')).toBeHidden();
