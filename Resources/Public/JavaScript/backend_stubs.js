@@ -226,9 +226,7 @@
         window.TYPO3.Backend.ContentContainer = {
             setUrl: function (url) {
                 if (url && url.indexOf('/typo3/wizard/') !== -1) {
-                    if (window.TYPO3.Modal && window.TYPO3.Modal.advanced) {
-                        window.TYPO3.Modal.advanced({ content: url });
-                    }
+                    openWizardOverlay(url);
                     return Promise.resolve({});
                 }
                 const iframe = getIframe();
@@ -253,7 +251,7 @@
     // Also used: Modal.dismiss() when the wizard closes.
     // confirm() is kept because TCA delete/inline confirmations call it.
     if (!window.TYPO3.Modal) {
-        window.TYPO3.Modal = {
+        const stubModal = {
             advanced: function (config) {
                 const url = config && (config.content || config.url || '');
                 if (url && url.indexOf('/typo3/wizard/') !== -1) {
@@ -271,6 +269,24 @@
             },
             currentModal: null
         };
+
+        // Trigger: TYPO3 14.3.10 modal.js resolves TYPO3.Modal via the outermost
+        //   window with a TYPO3 object (this page). The stub lacks
+        //   initializeMarkupTrigger(), so the link browser got an empty Modal and
+        //   RteLinkBrowser threw "Cannot read properties of null (reading 'userData')".
+        // Hand out the edit iframe's real Modal once it exists, the stub before.
+        const iframeModal = function () {
+            for (const iframe of document.querySelectorAll('iframe[src*="/typo3/"]')) {
+                try {
+                    const modal = iframe.contentWindow.TYPO3.Modal;
+                    if (modal && typeof modal.initializeMarkupTrigger === 'function') return modal;
+                } catch (_) { /* not loaded yet */ }
+            }
+            return null;
+        };
+        Object.defineProperty(window.TYPO3, 'Modal', {
+            get: function () { return iframeModal() || stubModal; }
+        });
     }
 
     // Hydrate TYPO3.settings and TYPO3.lang from the JSON data block
