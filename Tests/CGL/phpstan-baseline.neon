@@ -1,6 +1,36 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^Class cognitive complexity is 46, keep it under 40$#'
+			identifier: complexity.classLike
+			count: 1
+			path: ../../Classes/Controller/AjaxController.php
+
+		-
+			message: '#^Cognitive complexity for "Xima\\XimaTypo3FrontendEdit\\Service\\Content\\ContainerContextResolver\:\:resolve\(\)" is 11, keep it under 10$#'
+			identifier: complexity.functionLike
+			count: 1
+			path: ../../Classes/Service/Content/ContainerContextResolver.php
+
+		-
+			message: '#^Class cognitive complexity is 43, keep it under 40$#'
+			identifier: complexity.classLike
+			count: 1
+			path: ../../Classes/Service/Content/EmptyColumnService.php
+
+		-
+			message: '#^Cognitive complexity for "Xima\\XimaTypo3FrontendEdit\\Service\\Menu\\ContentElementMenuGenerator\:\:getDropdown\(\)" is 13, keep it under 10$#'
+			identifier: complexity.functionLike
+			count: 1
+			path: ../../Classes/Service/Menu/ContentElementMenuGenerator.php
+
+		-
+			message: '#^Cognitive complexity for "Xima\\XimaTypo3FrontendEdit\\Service\\Ui\\FlashMessageService\:\:collectFromSession\(\)" is 16, keep it under 10$#'
+			identifier: complexity.functionLike
+			count: 1
+			path: ../../Classes/Service/Ui/FlashMessageService.php
+
+		-
 			message: '#^Call to an undefined method TYPO3\\CMS\\Core\\Authentication\\BackendUserAuthentication\:\:checkRecordEditAccess\(\)\.$#'
 			identifier: method.notFound
 			count: 1
