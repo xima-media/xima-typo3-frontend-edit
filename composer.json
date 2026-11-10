@@ -30,8 +30,8 @@
 		"typo3fluid/fluid": "^4.2 || ^5.0"
 	},
 	"require-dev": {
-		"b13/container": "^4.1.1",
-		"composer/class-map-generator": "^1.8.0",
+		"b13/container": "^4.1.2",
+		"composer/class-map-generator": "^1.9.0",
 		"eliashaeussler/version-bumper": "^4.1.2",
 		"konradmichalik/ttt": "^0.6.0",
 		"phpunit/phpcov": "^9.0 || ^10.0 || ^11.0 || ^13.0",
