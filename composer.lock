@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2dbfd0e02bbb6593d82b8c4e3a74ff44",
+    "content-hash": "0717bb902ab552c094050685db92ad5a",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -5851,22 +5851,22 @@
         },
         {
             "name": "eliashaeussler/version-bumper",
-            "version": "4.1.2",
+            "version": "4.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/eliashaeussler/version-bumper.git",
-                "reference": "5a942f60ff67a795fd1de0a1f02522a8c14ec81a"
+                "reference": "36133b8da82898ecd691bb062d1164a0291047f9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/eliashaeussler/version-bumper/zipball/5a942f60ff67a795fd1de0a1f02522a8c14ec81a",
-                "reference": "5a942f60ff67a795fd1de0a1f02522a8c14ec81a",
+                "url": "https://api.github.com/repos/eliashaeussler/version-bumper/zipball/36133b8da82898ecd691bb062d1164a0291047f9",
+                "reference": "36133b8da82898ecd691bb062d1164a0291047f9",
                 "shasum": ""
             },
             "require": {
                 "composer-plugin-api": "^2.0",
                 "cuyz/valinor": "^2.0",
-                "cypresslab/gitelephant": "^4.5",
+                "cypresslab/gitelephant": "^4.5 || ^5.0",
                 "eliashaeussler/task-runner": "^1.2",
                 "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
                 "symfony/console": "^5.4 || ^6.4 || ^7.0 || ^8.0",
@@ -5880,15 +5880,15 @@
             },
             "require-dev": {
                 "armin/editorconfig-cli": "^2.0",
-                "composer/composer": "~2.2.28 || ~2.10.0",
+                "composer/composer": "~2.2.28 || ~2.11.0",
                 "eliashaeussler/php-cs-fixer-config": "^3.0",
                 "eliashaeussler/phpstan-config": "^4.0",
-                "eliashaeussler/rector-config": "^4.0",
                 "ergebnis/composer-normalize": "^2.47",
                 "phpstan/extension-installer": "^1.3",
                 "phpstan/phpstan-phpunit": "^2.0",
                 "phpstan/phpstan-symfony": "^2.0",
                 "phpunit/phpunit": "^11.0 || ^12.0 || ^13.0",
+                "rector/rector": "^2.8",
                 "shipmonk/composer-dependency-analyser": "^1.8",
                 "symfony/deprecation-contracts": "^2.5 || ^3.0"
             },
@@ -5916,10 +5916,10 @@
             "description": "Composer plugin to bump project versions during release preparations",
             "support": {
                 "issues": "https://github.com/eliashaeussler/version-bumper/issues",
-                "source": "https://github.com/eliashaeussler/version-bumper/tree/4.1.2"
+                "source": "https://github.com/eliashaeussler/version-bumper/tree/4.1.3"
             },
-            "time": "2026-09-17T06:18:06+00:00",
-            "published-time": "2026-09-17T06:22:21+00:00"
+            "time": "2026-11-14T20:46:51+00:00",
+            "published-time": "2026-11-14T20:48:04+00:00"
         },
         {
             "name": "konradmichalik/ttt",
