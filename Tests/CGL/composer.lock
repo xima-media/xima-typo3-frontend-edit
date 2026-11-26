@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bfe3999c623cfbc32906278edac80685",
+    "content-hash": "2a8a62b642055c4595ce32c22d8689ed",
     "packages": [],
     "packages-dev": [
         {
@@ -1851,65 +1851,6 @@
             },
             "time": "2026-11-10T09:01:58+00:00",
             "published-time": "2026-11-10T09:02:32+00:00"
-        },
-        {
-            "name": "konradmichalik/ttt-phpstan",
-            "version": "0.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/konradmichalik/ttt-phpstan.git",
-                "reference": "1dbc122c65300de49c83b7615be771d164677c49"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/konradmichalik/ttt-phpstan/zipball/1dbc122c65300de49c83b7615be771d164677c49",
-                "reference": "1dbc122c65300de49c83b7615be771d164677c49",
-                "shasum": ""
-            },
-            "require": {
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
-                "phpstan/phpstan": "^2.1"
-            },
-            "require-dev": {
-                "armin/editorconfig-cli": "^2.0",
-                "ergebnis/composer-normalize": "^2.44",
-                "phpunit/phpunit": "^11.5 || ^12.0"
-            },
-            "suggest": {
-                "konradmichalik/ttt": "The attributes the rules point to, a rule stays silent for attributes that are not installed (WithTca needs 0.4 or newer)"
-            },
-            "type": "phpstan-extension",
-            "extra": {
-                "phpstan": {
-                    "includes": [
-                        "rules.neon"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "KonradMichalik\\TttPhpStan\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "Konrad Michalik",
-                    "email": "hej@konradmichalik.dev",
-                    "role": "Maintainer"
-                }
-            ],
-            "description": "PHPStan rules that point to ttt attributes instead of hand-written test state",
-            "support": {
-                "issues": "https://github.com/konradmichalik/ttt-phpstan/issues",
-                "source": "https://github.com/konradmichalik/ttt-phpstan/tree/0.1.0"
-            },
-            "abandoned": true,
-            "time": "2026-11-24T20:00:09+00:00",
-            "published-time": "2026-11-24T20:02:20+00:00"
         },
         {
             "name": "league/flysystem",
