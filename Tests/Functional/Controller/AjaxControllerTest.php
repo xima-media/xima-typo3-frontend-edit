@@ -162,7 +162,7 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         unset($GLOBALS['BE_USER']);
 
-        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '1', 'returnUrl' => '/']));
+        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '1', 'returnUrl' => 'https://example.com/']));
 
         self::assertSame([], $this->decode($response));
     }
@@ -172,7 +172,7 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         $this->setUpBackendUser(1);
 
-        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '0', 'returnUrl' => '/']));
+        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '0', 'returnUrl' => 'https://example.com/']));
 
         self::assertSame(400, $response->getStatusCode());
         self::assertArrayHasKey('error', $this->decode($response));
@@ -183,7 +183,7 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         $this->setUpBackendUser(1);
 
-        $response = $this->subject->editInformationAction($this->createRequest(['returnUrl' => '/']));
+        $response = $this->subject->editInformationAction($this->createRequest(['returnUrl' => 'https://example.com/']));
 
         self::assertSame(400, $response->getStatusCode());
     }
@@ -196,7 +196,7 @@ final class AjaxControllerTest extends FunctionalTestCase
         $response = $this->subject->editInformationAction($this->createRequest([
             'pid' => '1',
             'language' => '-5',
-            'returnUrl' => '/',
+            'returnUrl' => 'https://example.com/',
         ]));
 
         self::assertSame(400, $response->getStatusCode());
@@ -245,7 +245,7 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         $this->setUpBackendUser(1);
 
-        $request = $this->createRequest(['pid' => '1', 'returnUrl' => '/'])
+        $request = $this->createRequest(['pid' => '1', 'returnUrl' => 'https://example.com/'])
             ->withHeader('Content-Type', 'application/json')
             ->withBody($this->stream('{invalid json'));
 
@@ -260,7 +260,7 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         $this->setUpBackendUser(1);
 
-        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '999', 'returnUrl' => '/']));
+        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '999', 'returnUrl' => 'https://example.com/']));
 
         self::assertSame([], $this->decode($response));
     }
@@ -270,7 +270,7 @@ final class AjaxControllerTest extends FunctionalTestCase
     {
         $this->setUpBackendUser(1);
 
-        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '1', 'returnUrl' => '/']));
+        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '1', 'returnUrl' => 'https://example.com/']));
 
         $payload = $this->decode($response);
 
@@ -314,7 +314,7 @@ final class AjaxControllerTest extends FunctionalTestCase
         $GLOBALS['LANG'] = $this->get(LanguageServiceFactory::class)->createFromUserPreferences($backendUser);
 
         $request = $this->createRecordsRequest(['sys_category:1'])
-            ->withQueryParams(['pid' => '1', 'returnUrl' => '/', 'language' => '1']);
+            ->withQueryParams(['pid' => '1', 'returnUrl' => 'https://example.com/', 'language' => '1']);
         $response = $this->subject->editInformationAction($request);
 
         $payload = $this->decode($response);
@@ -363,7 +363,7 @@ final class AjaxControllerTest extends FunctionalTestCase
         $backendUser = $this->setUpBackendUser(2);
         $GLOBALS['LANG'] = $this->get(LanguageServiceFactory::class)->createFromUserPreferences($backendUser);
 
-        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '1', 'returnUrl' => '/']));
+        $response = $this->subject->editInformationAction($this->createRequest(['pid' => '1', 'returnUrl' => 'https://example.com/']));
 
         $payload = $this->decode($response);
         $menuChildren = $payload['contentElements'][10]['menu']['children'] ?? [];
@@ -435,7 +435,7 @@ final class AjaxControllerTest extends FunctionalTestCase
     private function createRecordsRequest(array $records): ServerRequestInterface
     {
         return (new ServerRequest('https://example.com/', 'POST'))
-            ->withQueryParams(['pid' => '1', 'returnUrl' => '/'])
+            ->withQueryParams(['pid' => '1', 'returnUrl' => 'https://example.com/'])
             ->withHeader('Content-Type', 'application/json')
             ->withBody($this->stream((string) json_encode(['_records' => $records])));
     }

@@ -13,13 +13,15 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Security;
 
-use PHPUnit\Framework\Attributes\{CoversClass, Test};
+use KonradMichalik\Ttt\Attribute\WithEnvironment;
+use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Http\Uri;
 use TYPO3\CMS\Core\Site\Entity\{Site, SiteLanguage};
 use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Service\Security\ReturnUrlValidator;
 
 /**
@@ -29,8 +31,30 @@ use Xima\XimaTypo3FrontendEdit\Service\Security\ReturnUrlValidator;
  * @license GPL-2.0-or-later
  */
 #[CoversClass(ReturnUrlValidator::class)]
+#[WithEnvironment(context: 'Testing')]
 final class ReturnUrlValidatorTest extends TestCase
 {
+    /** @var array<string, mixed> */
+    private array $originalServer = [];
+
+    protected function setUp(): void
+    {
+        // GeneralUtility::sanitizeLocalUrl() compares against the current web request.
+        $this->originalServer = $_SERVER;
+        $_SERVER['HTTP_HOST'] = 'example.com';
+        $_SERVER['HTTPS'] = 'on';
+        $_SERVER['SCRIPT_NAME'] = '/index.php';
+        $_SERVER['SCRIPT_FILENAME'] = '/var/www/html/public/index.php';
+        $_SERVER['REQUEST_URI'] = '/';
+        GeneralUtility::flushInternalRuntimeCaches();
+    }
+
+    protected function tearDown(): void
+    {
+        $_SERVER = $this->originalServer;
+        GeneralUtility::flushInternalRuntimeCaches();
+    }
+
     #[Test]
     public function isValidReturnsTrueForRelativeUrl(): void
     {
@@ -39,6 +63,35 @@ final class ReturnUrlValidatorTest extends TestCase
         $validator = new ReturnUrlValidator($siteFinder);
 
         self::assertTrue($validator->isValid('/some/path', $this->createRequest('https://example.com/'), 1));
+    }
+
+    #[Test]
+    #[DataProvider('nonLocalUrlWithoutHostDataProvider')]
+    public function isValidReturnsFalseForUrlWithoutHostThatIsNotLocal(string $returnUrl): void
+    {
+        $siteFinder = $this->createMock(SiteFinder::class);
+        $siteFinder->expects(self::never())->method('getSiteByPageId');
+        $validator = new ReturnUrlValidator($siteFinder);
+
+        self::assertFalse($validator->isValid($returnUrl, $this->createRequest('https://example.com/'), 1));
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function nonLocalUrlWithoutHostDataProvider(): iterable
+    {
+        yield 'javascript scheme' => ['javascript:alert(1)'];
+        yield 'backslash authority' => ['/\\evil.com'];
+        yield 'scheme without authority' => ['https:evil.com'];
+    }
+
+    #[Test]
+    public function isValidReturnsFalseForNonHttpSchemeWithSameHost(): void
+    {
+        $validator = new ReturnUrlValidator($this->createMock(SiteFinder::class));
+
+        self::assertFalse($validator->isValid('javascript://example.com/%0aalert(1)', $this->createRequest('https://example.com/'), 1));
     }
 
     #[Test]
