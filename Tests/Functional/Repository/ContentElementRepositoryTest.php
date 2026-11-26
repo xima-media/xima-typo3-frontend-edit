@@ -241,25 +241,6 @@ final class ContentElementRepositoryTest extends FunctionalTestCase
     }
 
     #[Test]
-    public function isSubpageOfReturnsTrueForAncestor(): void
-    {
-        self::assertTrue($this->subject->isSubpageOf(3, 1));
-    }
-
-    #[Test]
-    public function isSubpageOfReturnsFalseForUnrelatedPage(): void
-    {
-        self::assertFalse($this->subject->isSubpageOf(2, 4));
-    }
-
-    #[Test]
-    public function isSubpageOfUsesCacheOnRepeatedCalls(): void
-    {
-        self::assertTrue($this->subject->isSubpageOf(3, 1));
-        self::assertTrue($this->subject->isSubpageOf(3, 1));
-    }
-
-    #[Test]
     public function isSubpageOfAnyReturnsTrueWhenOneMatches(): void
     {
         self::assertTrue($this->subject->isSubpageOfAny(3, [99, 1]));

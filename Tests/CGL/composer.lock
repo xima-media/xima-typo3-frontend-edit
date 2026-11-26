@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "65a82bbce2cd47a8b7dfe0fa91cd2d5e",
+    "content-hash": "bfe3999c623cfbc32906278edac80685",
     "packages": [],
     "packages-dev": [
         {
@@ -1741,6 +1741,62 @@
             "time": "2026-09-28T09:09:31+00:00"
         },
         {
+            "name": "konradmichalik/phpstan-typo3-dead-code",
+            "version": "0.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/konradmichalik/phpstan-typo3-dead-code.git",
+                "reference": "2690dbf106af40bb2ade38756aad56725b8f6248"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/konradmichalik/phpstan-typo3-dead-code/zipball/2690dbf106af40bb2ade38756aad56725b8f6248",
+                "reference": "2690dbf106af40bb2ade38756aad56725b8f6248",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
+                "phpstan/phpstan": "^2.1.41",
+                "shipmonk/dead-code-detector": "^1.4"
+            },
+            "require-dev": {
+                "armin/editorconfig-cli": "^2.0",
+                "ergebnis/composer-normalize": "^2.44",
+                "phpunit/phpunit": "^11.5 || ^12.0"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "rules.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "KonradMichalik\\PhpStanTypo3DeadCode\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Konrad Michalik",
+                    "email": "hej@konradmichalik.dev",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "TYPO3 entry points for shipmonk/dead-code-detector: DI constructors, route targets and TypoScript userFunc",
+            "support": {
+                "issues": "https://github.com/konradmichalik/phpstan-typo3-dead-code/issues",
+                "source": "https://github.com/konradmichalik/phpstan-typo3-dead-code/tree/0.1.1"
+            },
+            "time": "2026-11-24T20:31:40+00:00",
+            "published-time": "2026-11-24T20:37:01+00:00"
+        },
+        {
             "name": "konradmichalik/phpstan-typo3-preset",
             "version": "0.6.1",
             "source": {
@@ -1795,6 +1851,65 @@
             },
             "time": "2026-11-10T09:01:58+00:00",
             "published-time": "2026-11-10T09:02:32+00:00"
+        },
+        {
+            "name": "konradmichalik/ttt-phpstan",
+            "version": "0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/konradmichalik/ttt-phpstan.git",
+                "reference": "1dbc122c65300de49c83b7615be771d164677c49"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/konradmichalik/ttt-phpstan/zipball/1dbc122c65300de49c83b7615be771d164677c49",
+                "reference": "1dbc122c65300de49c83b7615be771d164677c49",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
+                "phpstan/phpstan": "^2.1"
+            },
+            "require-dev": {
+                "armin/editorconfig-cli": "^2.0",
+                "ergebnis/composer-normalize": "^2.44",
+                "phpunit/phpunit": "^11.5 || ^12.0"
+            },
+            "suggest": {
+                "konradmichalik/ttt": "The attributes the rules point to, a rule stays silent for attributes that are not installed (WithTca needs 0.4 or newer)"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "rules.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "KonradMichalik\\TttPhpStan\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Konrad Michalik",
+                    "email": "hej@konradmichalik.dev",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "PHPStan rules that point to ttt attributes instead of hand-written test state",
+            "support": {
+                "issues": "https://github.com/konradmichalik/ttt-phpstan/issues",
+                "source": "https://github.com/konradmichalik/ttt-phpstan/tree/0.1.0"
+            },
+            "abandoned": true,
+            "time": "2026-11-24T20:00:09+00:00",
+            "published-time": "2026-11-24T20:02:20+00:00"
         },
         {
             "name": "league/flysystem",
@@ -3596,6 +3711,96 @@
                 "source": "https://github.com/shipmonk-rnd/composer-dependency-analyser/tree/1.8.4"
             },
             "time": "2025-11-25T14:38:16+00:00"
+        },
+        {
+            "name": "shipmonk/dead-code-detector",
+            "version": "1.4.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/shipmonk-rnd/dead-code-detector.git",
+                "reference": "431c13453eeb1790e15c8674ad4d6318218849bc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/shipmonk-rnd/dead-code-detector/zipball/431c13453eeb1790e15c8674ad4d6318218849bc",
+                "reference": "431c13453eeb1790e15c8674ad4d6318218849bc",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "phpstan/phpstan": "^2.1.41"
+            },
+            "require-dev": {
+                "behat/behat": "^3.14",
+                "composer-runtime-api": "^2.0",
+                "composer/semver": "^3.4",
+                "doctrine/orm": "^2.19 || ^3.0",
+                "editorconfig-checker/editorconfig-checker": "^10.7.0",
+                "ergebnis/composer-normalize": "^2.48.1",
+                "laravel/framework": "^10.0 || ^11.0 || ^12.0",
+                "nette/application": "^3.1",
+                "nette/component-model": "^3.0",
+                "nette/neon": "^3.4",
+                "nette/tester": "^2.4",
+                "nette/utils": "^3.0 || ^4.0",
+                "nikic/php-parser": "^5.4.0",
+                "phpat/phpat": "^0.12",
+                "phpbench/phpbench": "^1.2",
+                "phpstan/phpstan-phpunit": "^2.0.16",
+                "phpstan/phpstan-strict-rules": "^2.0.10",
+                "phpstan/phpstan-symfony": "^2.0.15",
+                "phpunit/phpcov": "^9.0.2",
+                "phpunit/phpunit": "^10.5.46",
+                "shipmonk/coding-standard": "^0.3.0",
+                "shipmonk/composer-dependency-analyser": "^1.8.4",
+                "shipmonk/coverage-guard": "^1.1.0",
+                "shipmonk/name-collision-detector": "^2.1.1",
+                "shipmonk/phpstan-dev": "^0.1.6",
+                "shipmonk/phpstan-rules": "^4.3.6",
+                "symfony/contracts": "^2.5 || ^3.0 || ^4.0",
+                "symfony/dependency-injection": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/doctrine-bridge": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/event-dispatcher": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/form": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/framework-bundle": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/http-kernel": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/routing": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/scheduler": "^6.3 || ^7.0 || ^8.0",
+                "symfony/ux-live-component": "^2.34",
+                "symfony/ux-twig-component": "^2.34",
+                "symfony/validator": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "twig/twig": "^3.0"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "rules.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ShipMonk\\PHPStan\\DeadCode\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Dead code detector to find unused PHP code via PHPStan extension. Can automatically remove dead PHP code. Supports libraries like Symfony, Doctrine, PHPUnit etc. Detects dead cycles. Can detect dead code that is tested.",
+            "keywords": [
+                "PHPStan",
+                "dead code",
+                "static analysis",
+                "unused code"
+            ],
+            "support": {
+                "issues": "https://github.com/shipmonk-rnd/dead-code-detector/issues",
+                "source": "https://github.com/shipmonk-rnd/dead-code-detector/tree/1.4.2"
+            },
+            "time": "2026-09-18T07:50:08+00:00",
+            "published-time": "2026-09-21T13:58:14+00:00"
         },
         {
             "name": "spaze/phpstan-disallowed-calls",

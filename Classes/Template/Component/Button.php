@@ -23,6 +23,8 @@ use function array_slice;
 /**
  * Button.
  *
+ * @api
+ *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
