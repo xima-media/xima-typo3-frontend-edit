@@ -43,6 +43,8 @@ use function array_values;
  * the existing FrontendEditDropdownModifyEvent (the record row carries a
  * `_table` marker so listeners can tell it apart from a tt_content row).
  *
+ * @phpstan-type RecordLookup array{requested: array<string, array<int, array<string, mixed>>>, default: array<string, array<int, array<string, mixed>>>, translated: array<string, array<int, array<string, mixed>>>}
+ *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
@@ -100,7 +102,7 @@ final class RecordMenuGenerator extends AbstractMenuGenerator
      *
      * @param array<int, array{table: string, uid: int}> $references
      *
-     * @return array{requested: array<string, array<int, array<string, mixed>>>, default: array<string, array<int, array<string, mixed>>>, translated: array<string, array<int, array<string, mixed>>>}
+     * @return RecordLookup
      */
     private function loadRecords(array $references, int $languageUid): array
     {
@@ -131,7 +133,7 @@ final class RecordMenuGenerator extends AbstractMenuGenerator
     }
 
     /**
-     * @param array{requested: array<string, array<int, array<string, mixed>>>, default: array<string, array<int, array<string, mixed>>>, translated: array<string, array<int, array<string, mixed>>>} $records
+     * @param RecordLookup $records
      *
      * @return array{element: array<string, mixed>, menu: array<string, mixed>}|null
      */
@@ -188,8 +190,8 @@ final class RecordMenuGenerator extends AbstractMenuGenerator
      * (analogous to tt_content's fallback rendering - never the requested
      * record verbatim when it is itself in neither language).
      *
-     * @param array<string, mixed>                                                                                                                                                                     $requestedRecord
-     * @param array{requested: array<string, array<int, array<string, mixed>>>, default: array<string, array<int, array<string, mixed>>>, translated: array<string, array<int, array<string, mixed>>>} $records
+     * @param array<string, mixed> $requestedRecord
+     * @param RecordLookup         $records
      *
      * @return array<string, mixed>
      */
