@@ -52,6 +52,27 @@ class ResourceUtility
     }
 
     /**
+     * Web path with a modification-time cache buster.
+     *
+     * The published _assets URL is stable and served with a far-future cache
+     * header, so without a version query browsers keep a stale copy after an
+     * extension update. Appending the file's mtime invalidates it on change.
+     */
+    public static function versionedWebPath(string $fileLocation): string
+    {
+        $absolutePath = GeneralUtility::getFileAbsFileName($fileLocation);
+        $webPath = PathUtility::getAbsoluteWebPath($absolutePath);
+
+        if (!is_file($absolutePath)) {
+            return $webPath;
+        }
+
+        $modificationTime = filemtime($absolutePath);
+
+        return false !== $modificationTime ? $webPath.'?'.$modificationTime : $webPath;
+    }
+
+    /**
      * @param array<string, string> $attributes
      */
     protected static function getCssTag(string $cssFileLocation, array $attributes): string
@@ -79,26 +100,5 @@ class ResourceUtility
                 'src' => self::versionedWebPath($jsFileLocation),
             ], true),
         );
-    }
-
-    /**
-     * Web path with a modification-time cache buster.
-     *
-     * The published _assets URL is stable and served with a far-future cache
-     * header, so without a version query browsers keep a stale copy after an
-     * extension update. Appending the file's mtime invalidates it on change.
-     */
-    protected static function versionedWebPath(string $fileLocation): string
-    {
-        $absolutePath = GeneralUtility::getFileAbsFileName($fileLocation);
-        $webPath = PathUtility::getAbsoluteWebPath($absolutePath);
-
-        if (!is_file($absolutePath)) {
-            return $webPath;
-        }
-
-        $modificationTime = filemtime($absolutePath);
-
-        return false !== $modificationTime ? $webPath.'?'.$modificationTime : $webPath;
     }
 }
