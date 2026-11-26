@@ -364,6 +364,7 @@ final class ContentElementMenuGeneratorTest extends TestCase
         $backendUser = $this->createMock(BackendUserAuthentication::class);
         $backendUser->user = ['uid' => 1, 'admin' => 1];
         $backendUser->uc = [];
+        $backendUser->method('isAdmin')->willReturn($hasEditAccess);
         $backendUser->method('recordEditAccessInternals')->willReturn($hasEditAccess);
         $backendUser->method('check')->willReturn($canHide);
         $GLOBALS['BE_USER'] = $backendUser;

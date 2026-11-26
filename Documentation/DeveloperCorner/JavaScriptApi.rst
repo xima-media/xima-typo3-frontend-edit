@@ -34,6 +34,12 @@ mapping). Returns :code:`null` if the uid was not rendered.
     const info = window.XimaFrontendEdit.getElementInfo(42);
     // { uid: 42, element: HTMLElement, payload: { element: {...}, menu: {...} } }
 
+:code:`payload.element` only carries the fields :code:`uid`, :code:`pid`,
+:code:`header`, :code:`CType`, :code:`colPos`, :code:`tx_container_parent`,
+:code:`l18n_parent`, :code:`l10n_source`, :code:`ctypeLabel`, :code:`ctypeIcon`,
+:code:`_table`, :code:`_ext`, :code:`newBeforeUrl` and :code:`newAfterUrl`.
+Other fields of the record are not sent to the browser.
+
 ``notify({ title, message, severity })``
 ------------------------------------------
 

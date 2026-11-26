@@ -1,0 +1,4 @@
+"fe_users"
+,"uid","pid","username","deleted","disable"
+,1,1,"visitor",0,0
+,2,2,"locked-visitor",0,0

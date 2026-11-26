@@ -25,6 +25,7 @@ use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Utility\ElementPayloadUtility;
 
 use function is_array;
 
@@ -129,7 +130,7 @@ final class RecordMenuGenerator extends AbstractMenuGenerator
         $event = $this->eventDispatcher->dispatch(new FrontendEditDropdownModifyEvent($element, $menuButton, $returnUrl));
 
         return [
-            'element' => $element,
+            'element' => ElementPayloadUtility::restrict($element),
             'menu' => $event->getMenuButton()->render(),
         ];
     }
