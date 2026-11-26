@@ -80,6 +80,23 @@ PSR-15 middleware). It never runs for a frontend that TYPO3 itself does not
 render HTML for - there is no client-side integration path for a
 JSON-API/decoupled frontend.
 
+..  _setup-page-cache:
+
+Page cache
+==========
+
+The ViewHelpers ``xfe:editable``, ``xfe:data`` and ``xfe:columnTarget``
+render output for logged-in backend users only. The site set therefore gives
+backend users their own page cache entries, independent of
+:confval:`frontendEdit.markerBasedDetection`. Anonymous visitors never receive
+output produced for an editor, and editors get the output regardless of who
+warmed the cache.
+
+A cached parent object (``stdWrap.cache`` on e.g. a ``CONTENT`` footer) keeps
+the output of its first rendering, as described for the
+:ref:`render markers <setup-render-markers>` below. The same applies to the
+ViewHelpers.
+
 ..  _setup-render-markers:
 
 Render markers
@@ -94,8 +111,7 @@ Site Set
 
 Backend users and page type
     Markers are only rendered for logged-in backend users on page type ``0``.
-    Other page types (JSON, RSS, EXT:headless) are left untouched. Backend
-    users get their own page cache entries while the setting is active.
+    Other page types (JSON, RSS, EXT:headless) are left untouched.
 
 UserTSconfig
     Disabling frontend edit for a user through :ref:`user-tsconfig` does not

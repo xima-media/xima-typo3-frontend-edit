@@ -2,3 +2,4 @@
 ,"uid","pid","CType","header","bodytext","colPos","sorting","hidden","deleted","sys_language_uid"
 ,10,1,"text","Cached element","cached-output",0,100,0,0,0
 ,11,1,"xfe_uncached","Uncached element","",0,200,0,0,0
+,12,1,"xfe_editable","Editable element","",0,300,0,0,0

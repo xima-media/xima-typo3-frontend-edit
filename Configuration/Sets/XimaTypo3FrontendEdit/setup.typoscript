@@ -29,6 +29,14 @@
 # false flattens to an *empty* TypoScript constant, which would turn an unquoted
 # comparison into `[ == 1]`.
 #
+# Split from the marker condition below: the ViewHelpers (xfe:editable, xfe:data,
+# xfe:columnTarget) render differently for backend users independent of
+# markerBasedDetection. Without a verdict of their own, editors and anonymous
+# visitors would share one page cache entry and receive each other's output.
+#
+[backend.user.isLoggedIn && '{$frontendEdit.enabled}' == '1']
+[END]
+
 [backend.user.isLoggedIn && request.getPageArguments()?.getPageType() == '0' && '{$frontendEdit.enabled}' == '1' && '{$frontendEdit.markerBasedDetection}' == '1']
 tt_content.stdWrap.xfeMarkers = 1
 [END]
