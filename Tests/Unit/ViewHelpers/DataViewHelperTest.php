@@ -161,6 +161,27 @@ final class DataViewHelperTest extends TestCase
     }
 
     #[Test]
+    public function renderEscapesClassArgument(): void
+    {
+        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
+        $GLOBALS['BE_USER']->uc = [];
+
+        $this->viewHelper->setArguments([
+            'label' => 'Test',
+            'uid' => 1,
+            'table' => 'tt_content',
+            'url' => null,
+            'icon' => null,
+            'class' => 'x" onfocus="alert(1)',
+        ]);
+
+        $result = $this->viewHelper->render();
+
+        self::assertStringContainsString('class="frontend-edit__data x&quot; onfocus=&quot;alert(1)"', $result);
+        self::assertStringNotContainsString('" onfocus="', $result);
+    }
+
+    #[Test]
     public function renderOutputIsValidJson(): void
     {
         $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
