@@ -89,8 +89,13 @@ The ViewHelpers ``xfe:editable``, ``xfe:data`` and ``xfe:columnTarget``
 render output for logged-in backend users only. The site set therefore gives
 backend users their own page cache entries, independent of
 :confval:`frontendEdit.markerBasedDetection`. Anonymous visitors never receive
-output produced for an editor, and editors get the output regardless of who
-warmed the cache.
+output produced for an editor.
+
+All backend users share one page cache entry. The per-user switch and
+:ref:`user-tsconfig` are therefore not reflected in the cached output: if an
+editor with frontend edit disabled warms the cache, other editors get no
+attributes until the entry expires, and the other way round. The edit menu
+itself stays gated per user.
 
 A cached parent object (``stdWrap.cache`` on e.g. a ``CONTENT`` footer) keeps
 the output of its first rendering, as described for the
