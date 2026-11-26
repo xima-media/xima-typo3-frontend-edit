@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Functional\Repository;
 
 use PHPUnit\Framework\Attributes\Test;
+use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 use Xima\XimaTypo3FrontendEdit\Repository\ContentElementRepository;
 
@@ -226,6 +227,58 @@ final class ContentElementRepositoryTest extends FunctionalTestCase
     public function getTranslatedRecordReturnsFalseForUntranslatedTtContent(): void
     {
         self::assertFalse($this->subject->getTranslatedRecord('tt_content', 2, 1));
+    }
+
+    #[Test]
+    public function fetchRecordsByUidsReturnsEmptyArrayForEmptyInput(): void
+    {
+        self::assertSame([], $this->subject->fetchRecordsByUids('pages', []));
+    }
+
+    #[Test]
+    public function fetchRecordsByUidsReturnsRowsKeyedByUidLikeBackendUtilityGetRecord(): void
+    {
+        $records = $this->subject->fetchRecordsByUids('pages', [2, 5, 6, 7, 999]);
+
+        // Hidden records are included and deleted ones are not, as BackendUtility::getRecord() does.
+        self::assertSame([2, 5, 6], array_keys($records));
+        self::assertSame('Subpage DE', $records[5]['title']);
+    }
+
+    #[Test]
+    public function getTranslatedRecordsReturnsTranslationsKeyedByParentUid(): void
+    {
+        $records = $this->subject->getTranslatedRecords('pages', [2, 3], 1);
+
+        self::assertSame([2], array_keys($records));
+        self::assertSame(5, (int) $records[2]['uid']);
+    }
+
+    #[Test]
+    public function getTranslatedRecordsReturnsEmptyArrayForEmptyInput(): void
+    {
+        self::assertSame([], $this->subject->getTranslatedRecords('pages', [], 1));
+    }
+
+    #[Test]
+    public function batchMethodsRunOneQueryForAnyNumberOfRecords(): void
+    {
+        $queries = 0;
+        $connectionPool = $this->get(ConnectionPool::class);
+        $countingPool = $this->createMock(ConnectionPool::class);
+        $countingPool->method('getQueryBuilderForTable')->willReturnCallback(
+            static function (string $table) use (&$queries, $connectionPool) {
+                ++$queries;
+
+                return $connectionPool->getQueryBuilderForTable($table);
+            },
+        );
+        $subject = new ContentElementRepository($countingPool);
+
+        $subject->fetchRecordsByUids('pages', [1, 2, 3, 4, 5]);
+        $subject->getTranslatedRecords('pages', [1, 2, 3, 4], 1);
+
+        self::assertSame(2, $queries);
     }
 
     #[Test]
