@@ -49,12 +49,6 @@ parameters:
 			path: ../Unit/Service/Authentication/BackendUserServiceTest.php
 
 		-
-			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Service/Authentication/BackendUserServiceTest.php
-
-		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
 			identifier: ttt.directGlobalState
 			count: 2
@@ -173,24 +167,6 @@ parameters:
 			identifier: ttt.directGlobalState
 			count: 1
 			path: ../Unit/Service/Ui/UrlBuilderServiceTest.php
-
-		-
-			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Utility/Compatibility/BackendUserUtilityTest.php
-
-		-
-			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Utility/Compatibility/ButtonFactoryUtilityTest.php
-
-		-
-			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Utility/Compatibility/VersionUtilityTest.php
 
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'

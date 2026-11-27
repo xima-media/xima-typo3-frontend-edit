@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Authentication;
 
+use KonradMichalik\Ttt\Attribute\WithInstance;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -21,6 +22,7 @@ use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeTypo3Version;
 
 /**
  * BackendUserServiceTest.
@@ -355,10 +357,9 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithInstance(Typo3Version::class, new FakeTypo3Version(13))]
     public function hasPageEditAccessReturnsFalseWhenRecordEditAccessDenies(): void
     {
-        $this->registerVersion13();
-
         $backendUser = $this->createMock(BackendUserAuthentication::class);
         $backendUser->user = ['uid' => 1];
         $backendUser->method('isAdmin')->willReturn(false);
@@ -379,10 +380,9 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithInstance(Typo3Version::class, new FakeTypo3Version(13))]
     public function hasPageEditAccessReturnsTrueWhenAllChecksPass(): void
     {
-        $this->registerVersion13();
-
         $backendUser = $this->createMock(BackendUserAuthentication::class);
         $backendUser->user = ['uid' => 1];
         $backendUser->method('isAdmin')->willReturn(false);
@@ -400,10 +400,9 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithInstance(Typo3Version::class, new FakeTypo3Version(13))]
     public function hasPageEditAccessDefaultsDoktypeToStandardWhenMissing(): void
     {
-        $this->registerVersion13();
-
         $backendUser = $this->createMock(BackendUserAuthentication::class);
         $backendUser->user = ['uid' => 1];
         $backendUser->method('isAdmin')->willReturn(false);
@@ -456,7 +455,7 @@ final class BackendUserServiceTest extends TestCase
         self::assertFalse($service->hasFieldAccess('tt_content', 'hidden'));
     }
 
-    /**
+    /*
      * hasRecordEditAccess() (used by hasPageEditAccess()) branches on the installed
      * TYPO3 version: recordEditAccessInternals() on 13, checkRecordEditAccess() on
      * 14.2+ (see BackendUserUtility). The latter returns a final AccessCheckResult,
@@ -464,10 +463,4 @@ final class BackendUserServiceTest extends TestCase
      * deterministic hasRecordEditAccess() result force the v13 branch, exactly like
      * BackendUserUtilityTest already does for the same reason.
      */
-    private function registerVersion13(): void
-    {
-        $versionMock = $this->createMock(Typo3Version::class);
-        $versionMock->method('getMajorVersion')->willReturn(13);
-        GeneralUtility::addInstance(Typo3Version::class, $versionMock);
-    }
 }

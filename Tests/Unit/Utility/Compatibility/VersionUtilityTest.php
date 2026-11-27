@@ -13,10 +13,12 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Utility\Compatibility;
 
+use KonradMichalik\Ttt\Attribute\WithInstance;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeTypo3Version;
 use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\VersionUtility;
 
 /**
@@ -34,33 +36,23 @@ final class VersionUtilityTest extends TestCase
     }
 
     #[Test]
+    #[WithInstance(Typo3Version::class, new FakeTypo3Version(14))]
     public function is14OrHigherReturnsTrueForVersion14(): void
     {
-        $this->registerVersion(14);
-
         self::assertTrue(VersionUtility::is14OrHigher());
     }
 
     #[Test]
+    #[WithInstance(Typo3Version::class, new FakeTypo3Version(15))]
     public function is14OrHigherReturnsTrueForVersionAbove14(): void
     {
-        $this->registerVersion(15);
-
         self::assertTrue(VersionUtility::is14OrHigher());
     }
 
     #[Test]
+    #[WithInstance(Typo3Version::class, new FakeTypo3Version(13))]
     public function is14OrHigherReturnsFalseForVersion13(): void
     {
-        $this->registerVersion(13);
-
         self::assertFalse(VersionUtility::is14OrHigher());
-    }
-
-    private function registerVersion(int $majorVersion): void
-    {
-        $versionMock = $this->createMock(Typo3Version::class);
-        $versionMock->method('getMajorVersion')->willReturn($majorVersion);
-        GeneralUtility::addInstance(Typo3Version::class, $versionMock);
     }
 }

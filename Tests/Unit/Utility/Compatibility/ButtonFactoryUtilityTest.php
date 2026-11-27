@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Utility\Compatibility;
 
+use KonradMichalik\Ttt\Attribute\WithInstance;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Template\Components\ButtonBar;
 use TYPO3\CMS\Backend\Template\Components\Buttons\InputButton;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeTypo3Version;
 use Xima\XimaTypo3FrontendEdit\Utility\Compatibility\ButtonFactoryUtility;
 
 /**
@@ -36,10 +38,9 @@ final class ButtonFactoryUtilityTest extends TestCase
     }
 
     #[Test]
+    #[WithInstance(Typo3Version::class, new FakeTypo3Version(13))]
     public function createInputButtonUsesButtonBarOnVersion13(): void
     {
-        $this->registerVersion(13);
-
         $inputButton = new InputButton();
         $buttonBar = $this->createMock(ButtonBar::class);
         $buttonBar->expects(self::once())
@@ -47,12 +48,5 @@ final class ButtonFactoryUtilityTest extends TestCase
             ->willReturn($inputButton);
 
         self::assertSame($inputButton, ButtonFactoryUtility::createInputButton($buttonBar));
-    }
-
-    private function registerVersion(int $majorVersion): void
-    {
-        $versionMock = $this->createMock(Typo3Version::class);
-        $versionMock->method('getMajorVersion')->willReturn($majorVersion);
-        GeneralUtility::addInstance(Typo3Version::class, $versionMock);
     }
 }
