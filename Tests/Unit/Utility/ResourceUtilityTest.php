@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Utility;
 
+use KonradMichalik\Ttt\Attribute\WithTypo3ConfVars;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use ReflectionNamedType;
@@ -25,14 +26,9 @@ use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
+#[WithTypo3ConfVars(['EXTENSIONS' => [Configuration::EXT_KEY => []]])]
 class ResourceUtilityTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        // Reset globals for each test
-        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY] = [];
-    }
-
     public function testGetResourcesIgnoresUnsupportedFileTypesInConfiguration(): void
     {
         $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalFrontendResources'] = [
