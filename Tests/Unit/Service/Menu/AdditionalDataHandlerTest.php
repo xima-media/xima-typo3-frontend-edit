@@ -106,6 +106,7 @@ final class AdditionalDataHandlerTest extends TestCase
         }
         $backendUser->method('recordEditAccessInternals')->willReturn(false);
         $GLOBALS['BE_USER'] = $backendUser;
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
         $button = $this->createButton();
@@ -357,6 +358,113 @@ final class AdditionalDataHandlerTest extends TestCase
         $handler->handleData($button, $entries, ['icon' => 'content-text'], 1, '#anchor');
 
         self::assertArrayNotHasKey('data_0', $button->getChildren());
+    }
+
+    /**
+     * @param array<string, mixed> $entry
+     */
+    #[Test]
+    #[DataProvider('malformedEntryProvider')]
+    public function handleDataSkipsMalformedEntries(array $entry): void
+    {
+        $this->registerBackendUserWithAccess();
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        $handler->handleData($button, [$entry], ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertArrayNotHasKey('data_0', $button->getChildren());
+    }
+
+    public static function malformedEntryProvider(): Generator
+    {
+        $valid = ['label' => 'Record', 'table' => 'pages', 'uid' => 5, 'url' => null, 'icon' => null];
+
+        yield 'table is an array' => [[...$valid, 'table' => ['pages']]];
+        yield 'table with invalid characters' => [[...$valid, 'table' => 'pages; DROP']];
+        yield 'uid is not numeric' => [[...$valid, 'uid' => 'abc']];
+        yield 'uid is an array' => [[...$valid, 'uid' => [5]]];
+        yield 'uid is zero' => [[...$valid, 'uid' => 0]];
+        yield 'uid is negative' => [[...$valid, 'uid' => -5]];
+        yield 'label is an array' => [[...$valid, 'label' => ['x']]];
+        yield 'url is an array' => [[...$valid, 'url' => ['/x']]];
+        yield 'icon is an array' => [[...$valid, 'icon' => ['x']]];
+    }
+
+    #[Test]
+    public function handleDataSkipsNonArrayEntries(): void
+    {
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        $handler->handleData($button, ['not-an-array', 5], ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertSame(['div_data'], array_keys($button->getChildren()));
+    }
+
+    #[Test]
+    public function handleDataAcceptsNumericStringUid(): void
+    {
+        $this->registerBackendUserWithAccess();
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        $entries = [
+            ['label' => 'Record', 'table' => 'pages', 'uid' => '5', 'url' => null, 'icon' => null],
+        ];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertArrayHasKey('data_0', $button->getChildren());
+    }
+
+    #[Test]
+    public function handleDataChecksAccessAgainstDatabaseRow(): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = ['uid' => 1];
+        $denyLockedRecord = static fn (string $table, array $record): bool => 1 !== ($record['editlock'] ?? 0);
+        if (method_exists(BackendUserAuthentication::class, 'checkRecordEditAccess')) {
+            $backendUser->method('checkRecordEditAccess')->willReturnCallback(
+                static fn (string $table, array $record) => new \TYPO3\CMS\Core\Authentication\AccessCheckResult($denyLockedRecord($table, $record)),
+            );
+        }
+        $backendUser->method('recordEditAccessInternals')->willReturnCallback($denyLockedRecord);
+        $GLOBALS['BE_USER'] = $backendUser;
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0, 'editlock' => 1]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        // The client-supplied entry carries no editlock, only the database row does.
+        $entries = [
+            ['label' => 'Record', 'table' => 'pages', 'uid' => 5, 'url' => null, 'icon' => null],
+        ];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertArrayNotHasKey('data_0', $button->getChildren());
+    }
+
+    #[Test]
+    public function handleDataIgnoresEntriesBeyondTheLimit(): void
+    {
+        $this->registerBackendUserWithAccess();
+        $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
+
+        $handler = $this->createHandler(new BackendUserService());
+        $button = $this->createButton();
+
+        $entries = array_fill(0, 50, ['label' => '']);
+        $entries[] = ['label' => 'Record', 'table' => 'pages', 'uid' => 5, 'url' => null, 'icon' => null];
+
+        $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
+
+        self::assertArrayNotHasKey('data_50', $button->getChildren());
     }
 
     private function registerBackendUserWithAccess(): void
