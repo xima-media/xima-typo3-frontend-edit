@@ -366,7 +366,7 @@ final class ContentElementMenuGeneratorTest extends TestCase
         $backendUser->uc = [];
         $backendUser->method('isAdmin')->willReturn($hasEditAccess);
         $backendUser->method('recordEditAccessInternals')->willReturn($hasEditAccess);
-        $backendUser->method('check')->willReturn($canHide);
+        $backendUser->method('check')->willReturn($hasEditAccess && $canHide);
         $GLOBALS['BE_USER'] = $backendUser;
     }
 
