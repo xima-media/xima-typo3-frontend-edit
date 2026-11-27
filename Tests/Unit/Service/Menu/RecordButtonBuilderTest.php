@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
-use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton};
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton, WithTca};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -54,10 +54,9 @@ final class RecordButtonBuilderTest extends TestCase
 
     #[Test]
     #[WithGlobal('LANG', new FakeLanguageService('News'))]
+    #[WithTca('tx_news_domain_model_news', ['ctrl' => ['title' => 'LLL:EXT:news/.../news.xlf:tab1', 'label' => 'title']])]
     public function addInfoSectionAddsChildrenToMenuButton(): void
     {
-        $this->setUpGlobals();
-
         $builder = new RecordButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
@@ -70,10 +69,9 @@ final class RecordButtonBuilderTest extends TestCase
 
     #[Test]
     #[WithGlobal('LANG', new FakeLanguageService('News'))]
+    #[WithTca('tx_news_domain_model_news', ['ctrl' => ['title' => 'LLL:EXT:news/.../news.xlf:tab1', 'label' => 'title']])]
     public function addInfoSectionHandlesMissingTitle(): void
     {
-        $this->setUpGlobals();
-
         $builder = new RecordButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
@@ -146,11 +144,5 @@ final class RecordButtonBuilderTest extends TestCase
     private function urlBuilderService(): UrlBuilderService
     {
         return $this->urlBuilderService ??= new UrlBuilderService();
-    }
-
-    private function setUpGlobals(): void
-    {
-        $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['title'] = 'LLL:EXT:news/.../news.xlf:tab1';
-        $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['label'] = 'title';
     }
 }

@@ -103,28 +103,10 @@ parameters:
 			path: ../Unit/Service/Menu/ContentElementMenuGeneratorTest.php
 
 		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 2
-			path: ../Unit/Service/Menu/PageButtonBuilderTest.php
-
-		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
 			count: 1
 			path: ../Unit/Service/Menu/PageMenuGeneratorTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Service/Menu/PageMenuGeneratorTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 2
-			path: ../Unit/Service/Menu/RecordButtonBuilderTest.php
 
 		-
 			message: '#^Test changes global state directly\: GeneralUtility\:\:setSingletonInstance\(\)\.$#'
