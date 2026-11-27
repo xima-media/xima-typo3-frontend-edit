@@ -217,6 +217,19 @@ final readonly class SettingsService
         return (bool) $site->getSettings()->get('frontendEdit.enableDragAndDrop', false);
     }
 
+    /**
+     * Backend AJAX routes resolve the "site" attribute from the "id" parameter, which
+     * the frontend does not send, so the site settings would fall back to defaults.
+     */
+    public function withSiteOfPage(ServerRequestInterface $request, int $pageId): ServerRequestInterface
+    {
+        try {
+            return $request->withAttribute('site', $this->siteFinder->getSiteByPageId($pageId));
+        } catch (SiteNotFoundException) {
+            return $request;
+        }
+    }
+
     public function isEnableFlashMessages(ServerRequestInterface $request): bool
     {
         $settings = $this->getSiteSettings($request);
