@@ -14,15 +14,15 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Ui;
 
 use KonradMichalik\Ttt\Attribute\{WithEnvironment, WithSingleton, WithTypo3ConfVars};
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Package\{PackageInterface, PackageManager};
 use TYPO3\CMS\Core\Utility\{ExtensionManagementUtility, GeneralUtility};
 use Xima\XimaTypo3FrontendEdit\Service\Ui\BackendSettingsService;
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeLanguageService, FakeUriBuilder};
 
 use function dirname;
 
@@ -113,12 +113,9 @@ final class BackendSettingsServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function getSettingsScriptIncludesLanguageLabelsWhenLanguageServiceAvailable(): void
     {
-        $languageService = $this->createMock(LanguageService::class);
-        $languageService->method('sL')->willReturn('Translated');
-        $GLOBALS['LANG'] = $languageService;
-
         $service = new BackendSettingsService();
 
         $result = $service->getSettingsScript();
@@ -128,12 +125,9 @@ final class BackendSettingsServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService(''))]
     public function getSettingsScriptFallsBackToKeyWhenLabelEmpty(): void
     {
-        $languageService = $this->createMock(LanguageService::class);
-        $languageService->method('sL')->willReturn('');
-        $GLOBALS['LANG'] = $languageService;
-
         $service = new BackendSettingsService();
 
         $result = $service->getSettingsScript();

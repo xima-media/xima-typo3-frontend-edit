@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
-use KonradMichalik\Ttt\Attribute\WithSingleton;
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -23,7 +23,7 @@ use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\PageButtonBuilder;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeLanguageService, FakeUriBuilder};
 
 /**
  * PageButtonBuilderTest.
@@ -53,6 +53,7 @@ final class PageButtonBuilderTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionAddsChildrenToMenuButton(): void
     {
         $this->setUpGlobals();
@@ -68,6 +69,7 @@ final class PageButtonBuilderTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionHandlesEmptyTitle(): void
     {
         $this->setUpGlobals();
@@ -81,6 +83,7 @@ final class PageButtonBuilderTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionHandlesMissingTitle(): void
     {
         $this->setUpGlobals();
@@ -94,6 +97,7 @@ final class PageButtonBuilderTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionHandlesMissingDoktype(): void
     {
         $this->setUpGlobals();
@@ -181,9 +185,6 @@ final class PageButtonBuilderTest extends TestCase
 
     private function setUpGlobals(): void
     {
-        $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
-        $languageService->method('sL')->willReturn('Translated');
-        $GLOBALS['LANG'] = $languageService;
         $GLOBALS['TCA']['pages']['columns']['doktype']['config']['items'] = [
             ['label' => 'Standard', 'value' => 1],
         ];

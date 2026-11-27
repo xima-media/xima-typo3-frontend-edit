@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
-use KonradMichalik\Ttt\Attribute\WithSingleton;
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -24,7 +24,7 @@ use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\ContentElementButtonBuilder;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeLanguageService, FakeUriBuilder};
 
 /**
  * ContentElementButtonBuilderTest.
@@ -112,56 +112,41 @@ final class ContentElementButtonBuilderTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionAddsChildrenToMenuButton(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
-
-        $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
-        $languageService->method('sL')->willReturn('Translated');
-        $GLOBALS['LANG'] = $languageService;
 
         $builder->addInfoSection($menuButton, ['uid' => 1, 'CType' => 'text', 'header' => 'Test'], ['label' => 'Text', 'icon' => 'content-text']);
 
         $children = $menuButton->getChildren();
         self::assertArrayHasKey('div_info', $children);
         self::assertArrayHasKey('info_header', $children);
-
-        unset($GLOBALS['LANG']);
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionHandlesEmptyHeader(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
-        $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
-        $languageService->method('sL')->willReturn('Translated');
-        $GLOBALS['LANG'] = $languageService;
-
         $builder->addInfoSection($menuButton, ['uid' => 1, 'CType' => 'text', 'header' => ''], ['label' => 'Text']);
 
         self::assertArrayHasKey('info_header', $menuButton->getChildren());
-
-        unset($GLOBALS['LANG']);
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionHandlesMissingHeader(): void
     {
         $builder = new ContentElementButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
-        $languageService = $this->createMock(\TYPO3\CMS\Core\Localization\LanguageService::class);
-        $languageService->method('sL')->willReturn('Translated');
-        $GLOBALS['LANG'] = $languageService;
-
         $builder->addInfoSection($menuButton, ['uid' => 1, 'CType' => 'text'], ['label' => 'Text']);
 
         self::assertArrayHasKey('info_header', $menuButton->getChildren());
-
-        unset($GLOBALS['LANG']);
     }
 
     #[Test]
