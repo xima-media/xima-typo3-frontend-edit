@@ -96,7 +96,7 @@ class DataViewHelper extends AbstractViewHelper
 
         return sprintf(
             '<input type="hidden" class="frontend-edit__data %s" value="%s" />',
-            $class,
+            htmlspecialchars((string) $class, \ENT_QUOTES | \ENT_HTML5),
             htmlentities(false !== json_encode($dataAttributes) ? json_encode($dataAttributes) : '', \ENT_QUOTES),
         );
     }
