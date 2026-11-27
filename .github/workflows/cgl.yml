@@ -8,3 +8,5 @@ on:
 jobs:
   cgl:
     uses: konradmichalik/reusable-github-actions/.github/workflows/cgl-test.yml@48fcbd0657c3818eac74b9d91dc26c29ad76c5ab # 1.0.0
+    with:
+      extra-lint-scripts: '["sca:tests"]'
