@@ -1,0 +1,18 @@
+includes:
+	- ../../vendor/konradmichalik/ttt/extension.neon
+	- phpstan-tests-baseline.neon
+
+parameters:
+	level: 0
+
+	scanDirectories:
+		- ../../vendor
+		- ../../vendor/phpunit/phpunit/src
+	paths:
+		- ../../Tests/Unit
+
+	ignoreErrors:
+		# Exists in TYPO3 14 only, the tests guard its use with method_exists().
+		-
+			identifier: class.notFound
+			message: '#AccessCheckResult#'

@@ -64,13 +64,13 @@ Tools live in `Tests/CGL/` and run through `ddev cgl` (or `composer cgl`):
 ```bash
 ddev cgl lint                  # composer, editorconfig, language, php, typoscript
 ddev cgl fix
-ddev cgl sca                   # PHPStan level 8
+ddev cgl sca                   # PHPStan level 8, plus sca:tests (ttt rule on Tests/Unit, level 0, baseline)
 ddev cgl migration             # Rector
 ddev cgl analyze               # composer-dependency-analyser
 ```
 
 - Individual targets: `lint:php`, `lint:composer`, `lint:editorconfig`, `lint:language`, `lint:typoscript`
-- Config files: `Tests/CGL/phpstan.neon`, `Tests/CGL/.php-cs-fixer.php`, `Tests/CGL/rector.php`
+- Config files: `Tests/CGL/phpstan.neon`, `Tests/CGL/phpstan.tests.neon`, `Tests/CGL/.php-cs-fixer.php`, `Tests/CGL/rector.php`
 - Strict types are required
 - CI runs the CGL workflow (`.github/workflows/cgl.yml`) on pushes to `main` and on pull requests
 

@@ -70,8 +70,10 @@
 		],
 		"migration:rector": "rector process -c rector.php",
 		"sca": [
-			"@sca:php"
+			"@sca:php",
+			"@sca:tests"
 		],
-		"sca:php": "phpstan analyse --memory-limit=2G --autoload-file=../../vendor/autoload.php"
+		"sca:php": "phpstan analyse --memory-limit=2G --autoload-file=../../vendor/autoload.php",
+		"sca:tests": "phpstan analyse -c phpstan.tests.neon --memory-limit=2G --autoload-file=../../vendor/autoload.php"
 	}
 }
