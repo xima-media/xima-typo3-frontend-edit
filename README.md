@@ -47,7 +47,7 @@ See [Setup requirements & limits](https://docs.typo3.org/p/xima/xima-typo3-front
 
 | **Version** | **TYPO3** | **PHP** |
 |-------------|-----------|---------|
-| 2.x         | 13-14     | 8.2-8.5 |
+| 2.x         | 13-14     | 8.2-8.6 |
 | 1.x         | 11-13     | 8.1-8.5 |
 
 ### Composer

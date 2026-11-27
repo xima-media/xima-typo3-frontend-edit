@@ -6,7 +6,7 @@ Guidance for coding agents working in this repository.
 
 `xima/xima-typo3-frontend-edit` is a TYPO3 extension (`xima_typo3_frontend_edit`) that adds edit buttons to content elements in the frontend, so editors can jump into backend editing without leaving the frontend context.
 
-- PHP: `~8.2 || ~8.3 || ~8.4 || ~8.5`
+- PHP: `~8.2 || ~8.3 || ~8.4 || ~8.5 || ~8.6`
 - TYPO3: `^13.4 || ^14.0`
 - Namespace: `Xima\XimaTypo3FrontendEdit\` maps to `Classes/`
 
@@ -55,7 +55,7 @@ ddev exec -d /var/www/html/Tests/Playwright npx playwright install --with-deps c
 ddev exec -d /var/www/html/Tests/Playwright npx playwright test
 ```
 
-- CI (`.github/workflows/tests.yml`, reusable workflow) runs PHP 8.2 to 8.5 against TYPO3 13.4 and 14.3 with highest and lowest dependencies
+- CI (`.github/workflows/tests.yml`, reusable workflow) runs PHP 8.2 to 8.6 against TYPO3 13.4 and 14.3 with highest and lowest dependencies
 
 ## Code style and static analysis
 
