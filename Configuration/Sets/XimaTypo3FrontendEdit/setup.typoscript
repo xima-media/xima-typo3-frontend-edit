@@ -12,7 +12,7 @@
 # lib.dynamicContent's renderObj.stdWrap.dataWrap. A separate key survives the
 # array_replace_recursive() in ContentObjectRenderer::mergeTSRef().
 #
-# Cache safety rests on this condition: TypoScript condition verdicts are part of
+# Cache safety rests on these conditions: TypoScript condition verdicts are part of
 # the page cache identifier, so backend users and anonymous visitors get separate
 # page cache entries. The listener itself must never check the backend user,
 # because PHP behaviour does not vary the cache identifier. This does not cover
@@ -29,6 +29,13 @@
 # false flattens to an *empty* TypoScript constant, which would turn an unquoted
 # comparison into `[ == 1]`.
 #
+# Separate from the marker condition below, because the ViewHelpers render for
+# backend users independent of markerBasedDetection. Without its own verdict,
+# editors and anonymous visitors would share one page cache entry.
+#
+[backend.user.isLoggedIn && '{$frontendEdit.enabled}' == '1']
+[END]
+
 [backend.user.isLoggedIn && request.getPageArguments()?.getPageType() == '0' && '{$frontendEdit.enabled}' == '1' && '{$frontendEdit.markerBasedDetection}' == '1']
 tt_content.stdWrap.xfeMarkers = 1
 [END]
