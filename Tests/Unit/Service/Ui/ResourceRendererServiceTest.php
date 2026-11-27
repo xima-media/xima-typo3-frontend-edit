@@ -53,6 +53,7 @@ final class ResourceRendererServiceTest extends TestCase
         $packageManager = $this->createMock(PackageManager::class);
         $packageManager->method('resolvePackagePath')
             ->willReturnCallback(static fn (string $path): string => dirname(__DIR__, 4).'/'.preg_replace('#^EXT:[^/]+/#', '', $path));
+        $packageManager->method('extractPackageKeyFromPackagePath')->willReturn('xima_typo3_frontend_edit');
         $packageManager->method('isPackageActive')->willReturn(true);
         $packageManager->method('getPackage')->willReturn($package);
         $packageManager->method('getActivePackages')->willReturn([]);
