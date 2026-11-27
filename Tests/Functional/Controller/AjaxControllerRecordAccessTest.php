@@ -55,6 +55,7 @@ final class AjaxControllerRecordAccessTest extends FunctionalTestCase
         $this->importCSVDataSet(__DIR__.'/Fixtures/tt_content.csv');
         $this->importCSVDataSet(__DIR__.'/Fixtures/tt_content_without_edit_permission.csv');
         $this->importCSVDataSet(__DIR__.'/Fixtures/fe_users.csv');
+        $this->importCSVDataSet(__DIR__.'/Fixtures/sys_template.csv');
     }
 
     protected function tearDown(): void
@@ -70,6 +71,15 @@ final class AjaxControllerRecordAccessTest extends FunctionalTestCase
         $payload = $this->request(self::EDITOR, ['_records' => ['be_users:1']]);
 
         self::assertArrayNotHasKey('be_users:1', $payload['records']);
+    }
+
+    #[Test]
+    public function recordsOfAdminOnlyTablesOnEditablePagesAreOmittedForEditor(): void
+    {
+        // The editor may modify the table and edit the page, only adminOnly keeps the record out.
+        $payload = $this->request(self::EDITOR, ['_records' => ['sys_template:1']]);
+
+        self::assertArrayNotHasKey('sys_template:1', $payload['records']);
     }
 
     #[Test]

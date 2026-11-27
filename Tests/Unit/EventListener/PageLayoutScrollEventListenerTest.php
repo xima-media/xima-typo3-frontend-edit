@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\EventListener;
 
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -40,9 +41,9 @@ final class PageLayoutScrollEventListenerTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('TYPO3_REQUEST', null)]
     public function invokeReturnsEarlyWhenRequestIsNotServerRequest(): void
     {
-        $GLOBALS['TYPO3_REQUEST'] = null;
         $pageRenderer = $this->registerPageRenderer();
         $pageRenderer->expects(self::never())->method('loadJavaScriptModule');
 
