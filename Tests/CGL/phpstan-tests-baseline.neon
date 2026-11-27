@@ -159,7 +159,7 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'
 			identifier: ttt.directGlobalState
-			count: 8
+			count: 2
 			path: ../Unit/Service/Ui/ResourceRendererServiceTest.php
 
 		-

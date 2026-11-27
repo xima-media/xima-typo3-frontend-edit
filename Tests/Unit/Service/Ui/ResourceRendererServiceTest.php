@@ -86,7 +86,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderWithContextualEditingEnabledAddsBackendStubs(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(true);
 
@@ -100,7 +100,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderAddsCoreResources(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false);
 
@@ -116,7 +116,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderAddsDebugConfigWhenDebugModeEnabled(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false, debugMode: true);
 
@@ -128,7 +128,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderOmitsStickyToolbarWhenDisabled(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false);
 
@@ -141,7 +141,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderAddsFlashMessagesConfigWhenProvided(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false);
 
@@ -161,7 +161,7 @@ final class ResourceRendererServiceTest extends TestCase
         $backendUser->uc = ['frontendEditDisabled' => true];
         $GLOBALS['BE_USER'] = $backendUser;
 
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false);
 
@@ -173,7 +173,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderVersionsEveryInjectedScriptUrl(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(true);
 
@@ -194,7 +194,7 @@ final class ResourceRendererServiceTest extends TestCase
     /**
      * @param array<string, string>|null $captured
      */
-    private function createViewFactoryCapturingResources(?array &$captured): ViewFactoryInterface
+    private function registerViewFactoryCapturingResources(?array &$captured): void
     {
         $view = $this->createMock(ViewInterface::class);
         $view->method('assignMultiple')->willReturnCallback(
@@ -209,7 +209,7 @@ final class ResourceRendererServiceTest extends TestCase
         $viewFactory = $this->createMock(ViewFactoryInterface::class);
         $viewFactory->method('create')->willReturn($view);
 
-        return $viewFactory;
+        GeneralUtility::addInstance(ViewFactoryInterface::class, $viewFactory);
     }
 
     private function createService(bool $contextualEditing, bool $debugMode = false): ResourceRendererService
