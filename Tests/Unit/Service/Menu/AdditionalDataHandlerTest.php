@@ -305,6 +305,7 @@ final class AdditionalDataHandlerTest extends TestCase
                 static fn (string $table, array $record): \TYPO3\CMS\Core\Authentication\AccessCheckResult => new \TYPO3\CMS\Core\Authentication\AccessCheckResult(99 !== ($record['uid'] ?? 0)),
             );
         }
+        $backendUser->method('isAdmin')->willReturn(true);
         $backendUser->method('recordEditAccessInternals')->willReturnCallback(
             static fn (string $table, array $record): bool => 99 !== ($record['uid'] ?? 0),
         );
@@ -474,6 +475,7 @@ final class AdditionalDataHandlerTest extends TestCase
         if (method_exists(BackendUserAuthentication::class, 'checkRecordEditAccess')) {
             $backendUser->method('checkRecordEditAccess')->willReturn(new \TYPO3\CMS\Core\Authentication\AccessCheckResult(true));
         }
+        $backendUser->method('isAdmin')->willReturn(true);
         $backendUser->method('recordEditAccessInternals')->willReturn(true);
         $GLOBALS['BE_USER'] = $backendUser;
     }

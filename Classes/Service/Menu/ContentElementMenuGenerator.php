@@ -26,6 +26,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Content\ContentElementFilter;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Utility\ElementPayloadUtility;
 
 use function array_key_exists;
 use function array_slice;
@@ -140,7 +141,7 @@ final class ContentElementMenuGenerator extends AbstractMenuGenerator
 
             // Use potentially modified button from event listeners
             $result[$contentElement['uid']] = [
-                'element' => $contentElement,
+                'element' => ElementPayloadUtility::restrict($contentElement),
                 'menu' => $event->getMenuButton(),
             ];
         }
