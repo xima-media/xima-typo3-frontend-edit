@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Authentication;
 
-use KonradMichalik\Ttt\Attribute\WithInstance;
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithInstance};
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -22,7 +22,7 @@ use TYPO3\CMS\Core\Type\Bitmask\Permission;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeTypo3Version;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeBackendUser, FakeTypo3Version};
 
 /**
  * BackendUserServiceTest.
@@ -50,24 +50,18 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function getBackendUserReturnsBackendUserFromGlobals(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
-        self::assertSame($backendUser, $service->getBackendUser());
+        self::assertSame($GLOBALS['BE_USER'], $service->getBackendUser());
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function getBackendUserCachesResult(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         $first = $service->getBackendUser();
@@ -87,12 +81,9 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(user: null))]
     public function hasPageAccessReturnsFalseWhenUserDataIsNull(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = null;
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertFalse($service->hasPageAccess(1));
@@ -109,12 +100,9 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(user: null))]
     public function hasRecordEditAccessReturnsFalseWhenUserDataIsNull(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = null;
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertFalse($service->hasRecordEditAccess('tt_content', ['uid' => 1]));
@@ -131,38 +119,27 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(user: null))]
     public function isFrontendEditDisabledReturnsTrueWhenUserDataIsNull(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = null;
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertTrue($service->isFrontendEditDisabled());
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function isFrontendEditDisabledReturnsFalseByDefault(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->uc = [];
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertFalse($service->isFrontendEditDisabled());
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: [Configuration::UC_KEY_DISABLED => true]))]
     public function isFrontendEditDisabledReturnsTrueWhenUcKeyIsSet(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->uc = [Configuration::UC_KEY_DISABLED => true];
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertTrue($service->isFrontendEditDisabled());
@@ -216,59 +193,36 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(user: null))]
     public function isFrontendEditAllowedReturnsFalseWhenUserDataIsNull(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = null;
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertFalse($service->isFrontendEditAllowed());
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function isFrontendEditAllowedReturnsTrueByDefault(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('getTSConfig')->willReturn([]);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertTrue($service->isFrontendEditAllowed());
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(tsConfig: [Configuration::USER_TSCONFIG_KEY => [Configuration::USER_TSCONFIG_DISABLED => '1']]))]
     public function isFrontendEditAllowedReturnsFalseWhenDisabledViaTsConfig(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('getTSConfig')->willReturn([
-            Configuration::USER_TSCONFIG_KEY => [
-                Configuration::USER_TSCONFIG_DISABLED => '1',
-            ],
-        ]);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertFalse($service->isFrontendEditAllowed());
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(tsConfig: [Configuration::USER_TSCONFIG_KEY => [Configuration::USER_TSCONFIG_DISABLED => '0']]))]
     public function isFrontendEditAllowedReturnsTrueWhenExplicitlyEnabled(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('getTSConfig')->willReturn([
-            Configuration::USER_TSCONFIG_KEY => [
-                Configuration::USER_TSCONFIG_DISABLED => '0',
-            ],
-        ]);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertTrue($service->isFrontendEditAllowed());
@@ -285,25 +239,18 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(user: null))]
     public function hasPageEditAccessReturnsFalseWhenUserDataIsNull(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = null;
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertFalse($service->hasPageEditAccess(['uid' => 1]));
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(admin: true))]
     public function hasPageEditAccessReturnsTrueForAdminRegardlessOfPermissionBits(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('isAdmin')->willReturn(true);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertTrue($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
@@ -339,18 +286,9 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(permissions: Permission::PAGE_EDIT, checkResult: ['tables_modify:pages' => true, 'pagetypes_select:1' => false], recordEditAccess: true))]
     public function hasPageEditAccessReturnsFalseWhenPagetypesSelectDeniesDoktype(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('isAdmin')->willReturn(false);
-        $backendUser->method('calcPerms')->willReturn(Permission::PAGE_EDIT);
-        $backendUser->method('check')->willReturnMap([
-            ['tables_modify', 'pages', true],
-            ['pagetypes_select', '1', false],
-        ]);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertFalse($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
@@ -358,22 +296,9 @@ final class BackendUserServiceTest extends TestCase
 
     #[Test]
     #[WithInstance(Typo3Version::class, new FakeTypo3Version(13))]
+    #[WithGlobal('BE_USER', new FakeBackendUser(permissions: Permission::PAGE_EDIT, checkResult: ['tables_modify:pages' => true, 'pagetypes_select:1' => true]))]
     public function hasPageEditAccessReturnsFalseWhenRecordEditAccessDenies(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('isAdmin')->willReturn(false);
-        $backendUser->method('calcPerms')->willReturn(Permission::PAGE_EDIT);
-        $backendUser->method('check')->willReturnMap([
-            ['tables_modify', 'pages', true],
-            ['pagetypes_select', '1', true],
-        ]);
-        // e.g. editlock or a restricted language on the page record itself -
-        // tables_modify/PAGE_EDIT/pagetypes_select all pass, but the record
-        // itself is still locked, which only hasRecordEditAccess() catches.
-        $backendUser->method('recordEditAccessInternals')->willReturn(false);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertFalse($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
@@ -381,19 +306,9 @@ final class BackendUserServiceTest extends TestCase
 
     #[Test]
     #[WithInstance(Typo3Version::class, new FakeTypo3Version(13))]
+    #[WithGlobal('BE_USER', new FakeBackendUser(permissions: Permission::PAGE_EDIT, recordEditAccess: true, checkResult: ['tables_modify:pages' => true, 'pagetypes_select:1' => true]))]
     public function hasPageEditAccessReturnsTrueWhenAllChecksPass(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('isAdmin')->willReturn(false);
-        $backendUser->method('calcPerms')->willReturn(Permission::PAGE_EDIT);
-        $backendUser->method('check')->willReturnMap([
-            ['tables_modify', 'pages', true],
-            ['pagetypes_select', '1', true],
-        ]);
-        $backendUser->method('recordEditAccessInternals')->willReturn(true);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertTrue($service->hasPageEditAccess(['uid' => 1, 'doktype' => 1]));
@@ -401,19 +316,9 @@ final class BackendUserServiceTest extends TestCase
 
     #[Test]
     #[WithInstance(Typo3Version::class, new FakeTypo3Version(13))]
+    #[WithGlobal('BE_USER', new FakeBackendUser(permissions: Permission::PAGE_EDIT, recordEditAccess: true, checkResult: ['tables_modify:pages' => true, 'pagetypes_select:1' => true]))]
     public function hasPageEditAccessDefaultsDoktypeToStandardWhenMissing(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('isAdmin')->willReturn(false);
-        $backendUser->method('calcPerms')->willReturn(Permission::PAGE_EDIT);
-        $backendUser->method('check')->willReturnMap([
-            ['tables_modify', 'pages', true],
-            ['pagetypes_select', '1', true],
-        ]);
-        $backendUser->method('recordEditAccessInternals')->willReturn(true);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertTrue($service->hasPageEditAccess(['uid' => 1]));
@@ -443,13 +348,9 @@ final class BackendUserServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function hasFieldAccessReturnsFalseWhenCheckDenies(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('check')->willReturn(false);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = new BackendUserService();
 
         self::assertFalse($service->hasFieldAccess('tt_content', 'hidden'));

@@ -18,6 +18,7 @@ use TYPO3\CMS\Core\Authentication\{AccessCheckResult, BackendUserAuthentication}
 use TYPO3\CMS\Core\Session\UserSessionManager;
 
 use function array_key_exists;
+use function is_bool;
 
 /**
  * FakeBackendUser.
@@ -36,6 +37,7 @@ final class FakeBackendUser extends BackendUserAuthentication
      * @param array<string, mixed>|null $user
      * @param array<string, mixed>      $uc
      * @param array<string, mixed>      $tsConfig
+     * @param array<string, bool>|bool  $checkResult one result for check(), or results by "type:value", false for others
      * @param array<string, mixed>      $sessionData session values by key, set values are kept in memory
      */
     public function __construct(
@@ -43,8 +45,9 @@ final class FakeBackendUser extends BackendUserAuthentication
         array $uc = [],
         private readonly bool $admin = false,
         private readonly array $tsConfig = [],
-        private readonly bool $checkResult = false,
+        private readonly array|bool $checkResult = false,
         private readonly bool $recordEditAccess = false,
+        private readonly int $permissions = 0,
         private array $sessionData = [],
         private readonly mixed $defaultSessionData = null,
     ) {
@@ -71,7 +74,16 @@ final class FakeBackendUser extends BackendUserAuthentication
 
     public function check($type, $value): bool
     {
-        return $this->checkResult;
+        if (is_bool($this->checkResult)) {
+            return $this->checkResult;
+        }
+
+        return $this->checkResult[$type.':'.$value] ?? false;
+    }
+
+    public function calcPerms($row, bool $useDeleteClause = true): int
+    {
+        return $this->permissions;
     }
 
     public function recordEditAccessInternals(string $table, $row, $newRecord = false, $_ = null, $checkFullLanguageAccess = false): bool

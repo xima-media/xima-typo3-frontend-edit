@@ -39,7 +39,7 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 22
+			count: 4
 			path: ../Unit/Service/Authentication/BackendUserServiceTest.php
 
 		-
