@@ -49,6 +49,19 @@ final class BackendUserService
         return $this->backendUser;
     }
 
+    /**
+     * Whether a backend user is logged in. The ViewHelpers render for every backend user:
+     * all of them share one page cache entry, so the personal switch and UserTSconfig
+     * (see isFrontendEditDisabled(), isFrontendEditAllowed()) are applied by the
+     * middleware and the JavaScript instead.
+     */
+    public function isLoggedIn(): bool
+    {
+        $backendUser = $this->getBackendUser();
+
+        return null !== $backendUser && null !== $backendUser->user;
+    }
+
     public function hasPageAccess(int $pageId): bool
     {
         $backendUser = $this->getBackendUser();

@@ -58,8 +58,12 @@ final class DataViewHelperTest extends TestCase
         self::assertSame('', $this->viewHelper->render());
     }
 
+    /**
+     * All backend users share one page cache entry, so the output must not depend on the
+     * personal switch. The JavaScript applies it.
+     */
     #[Test]
-    public function renderReturnsEmptyStringWhenFrontendEditDisabled(): void
+    public function renderIgnoresThePersonalSwitchOfTheBackendUser(): void
     {
         $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
         $GLOBALS['BE_USER']->uc = [Configuration::UC_KEY_DISABLED => true];
@@ -73,7 +77,7 @@ final class DataViewHelperTest extends TestCase
             'class' => '',
         ]);
 
-        self::assertSame('', $this->viewHelper->render());
+        self::assertStringStartsWith('<input type="hidden"', $this->viewHelper->render());
     }
 
     #[Test]
