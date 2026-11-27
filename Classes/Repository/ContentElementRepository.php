@@ -221,11 +221,6 @@ final readonly class ContentElementRepository
         }
     }
 
-    public function isSubpageOf(int $subPageId, int $parentPageId): bool
-    {
-        return in_array($parentPageId, $this->getRootlinePageIds($subPageId), true);
-    }
-
     /**
      * @param array<int, mixed> $parentPageIds
      */

@@ -18,6 +18,8 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 /**
  * FrontendEditPageDropdownModifyEvent.
  *
+ * @api
+ *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */
