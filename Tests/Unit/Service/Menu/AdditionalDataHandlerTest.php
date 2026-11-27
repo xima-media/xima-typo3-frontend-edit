@@ -15,7 +15,7 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
 use Doctrine\DBAL\Result;
 use Generator;
-use KonradMichalik\Ttt\Attribute\WithSingleton;
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton};
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -30,7 +30,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\AdditionalDataHandler;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeBackendUser, FakeUriBuilder};
 
 /**
  * AdditionalDataHandlerTest.
@@ -39,6 +39,7 @@ use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
  * @license GPL-2.0-or-later
  */
 #[CoversClass(AdditionalDataHandler::class)]
+#[WithGlobal('BE_USER', new FakeBackendUser(admin: true, recordEditAccess: true))]
 #[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class AdditionalDataHandlerTest extends TestCase
 {
@@ -97,15 +98,9 @@ final class AdditionalDataHandlerTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function handleDataSkipsEntryWhenNoEditAccess(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        if (method_exists(BackendUserAuthentication::class, 'checkRecordEditAccess')) {
-            $backendUser->method('checkRecordEditAccess')->willReturn(new \TYPO3\CMS\Core\Authentication\AccessCheckResult(false));
-        }
-        $backendUser->method('recordEditAccessInternals')->willReturn(false);
-        $GLOBALS['BE_USER'] = $backendUser;
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -125,7 +120,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[Test]
     public function handleDataAddsButtonForResolvedRecord(): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -145,7 +139,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[Test]
     public function handleDataUsesEntryUrlWhenPresent(): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -163,7 +156,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[Test]
     public function handleDataRejectsUnsafeEntryUrl(): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -184,7 +176,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[DataProvider('schemeRelativeUrlProvider')]
     public function handleDataRejectsSchemeRelativeEntryUrl(string $url): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -215,7 +206,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[Test]
     public function handleDataAcceptsSafeAbsoluteEntryUrl(): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -233,7 +223,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[Test]
     public function handleDataToleratesEntryWithMissingKeys(): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -252,7 +241,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[Test]
     public function handleDataSkipsWhenRecordNotFound(): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(false);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -270,7 +258,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[Test]
     public function handleDataResolvesTranslatedRecord(): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $repository = new ContentElementRepository(
@@ -337,7 +324,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[Test]
     public function handleDataSkipsWhenTranslationMissing(): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $repository = new ContentElementRepository(
@@ -368,7 +354,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[DataProvider('malformedEntryProvider')]
     public function handleDataSkipsMalformedEntries(array $entry): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -408,7 +393,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[Test]
     public function handleDataAcceptsNumericStringUid(): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -454,7 +438,6 @@ final class AdditionalDataHandlerTest extends TestCase
     #[Test]
     public function handleDataIgnoresEntriesBeyondTheLimit(): void
     {
-        $this->registerBackendUserWithAccess();
         $this->registerRecordLookup(['uid' => 5, 'sys_language_uid' => 0]);
 
         $handler = $this->createHandler(new BackendUserService());
@@ -466,18 +449,6 @@ final class AdditionalDataHandlerTest extends TestCase
         $handler->handleData($button, $entries, ['icon' => 'content-text'], 0, '#anchor');
 
         self::assertArrayNotHasKey('data_50', $button->getChildren());
-    }
-
-    private function registerBackendUserWithAccess(): void
-    {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        if (method_exists(BackendUserAuthentication::class, 'checkRecordEditAccess')) {
-            $backendUser->method('checkRecordEditAccess')->willReturn(new \TYPO3\CMS\Core\Authentication\AccessCheckResult(true));
-        }
-        $backendUser->method('isAdmin')->willReturn(true);
-        $backendUser->method('recordEditAccessInternals')->willReturn(true);
-        $GLOBALS['BE_USER'] = $backendUser;
     }
 
     /**

@@ -36,7 +36,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\{PageButtonBuilder, PageMenuGenerator};
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeLanguageService, FakeUriBuilder};
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeBackendUser, FakeLanguageService, FakeUriBuilder};
 
 /**
  * PageMenuGeneratorTest.
@@ -45,14 +45,10 @@ use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeLanguageService, FakeUri
  * @license GPL-2.0-or-later
  */
 #[CoversClass(PageMenuGenerator::class)]
+#[WithGlobal('BE_USER', new FakeBackendUser(admin: true))]
 #[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class PageMenuGeneratorTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        $this->setUpBackendUserAsAdmin();
-    }
-
     protected function tearDown(): void
     {
         GeneralUtility::purgeInstances();
@@ -252,14 +248,6 @@ final class PageMenuGeneratorTest extends TestCase
      * control its behavior through a mocked BackendUserAuthentication rather than
      * mocking the service itself (mirrors ContentElementMenuGeneratorTest).
      */
-    private function setUpBackendUserAsAdmin(): void
-    {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('isAdmin')->willReturn(true);
-        $GLOBALS['BE_USER'] = $backendUser;
-    }
-
     private function setUpBackendUserWithoutPageEditAccess(): void
     {
         $backendUser = $this->createMock(BackendUserAuthentication::class);

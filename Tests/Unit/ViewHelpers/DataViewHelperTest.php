@@ -16,8 +16,8 @@ namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\ViewHelpers;
 use KonradMichalik\Ttt\Attribute\WithGlobal;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use Xima\XimaTypo3FrontendEdit\Configuration;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeBackendUser;
 use Xima\XimaTypo3FrontendEdit\ViewHelpers\DataViewHelper;
 
 /**
@@ -63,11 +63,9 @@ final class DataViewHelperTest extends TestCase
      * personal switch. The JavaScript applies it.
      */
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: [Configuration::UC_KEY_DISABLED => true]))]
     public function renderIgnoresThePersonalSwitchOfTheBackendUser(): void
     {
-        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
-        $GLOBALS['BE_USER']->uc = [Configuration::UC_KEY_DISABLED => true];
-
         $this->viewHelper->setArguments([
             'label' => 'Test',
             'uid' => 123,
@@ -81,11 +79,9 @@ final class DataViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: []))]
     public function renderReturnsEmptyStringWhenNoUidAndNoUrl(): void
     {
-        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
-        $GLOBALS['BE_USER']->uc = [];
-
         $this->viewHelper->setArguments([
             'label' => 'Test',
             'uid' => null,
@@ -99,11 +95,9 @@ final class DataViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: []))]
     public function renderReturnsHiddenInputWithUid(): void
     {
-        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
-        $GLOBALS['BE_USER']->uc = [];
-
         $this->viewHelper->setArguments([
             'label' => 'Test Label',
             'uid' => 42,
@@ -123,11 +117,9 @@ final class DataViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: []))]
     public function renderReturnsHiddenInputWithUrl(): void
     {
-        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
-        $GLOBALS['BE_USER']->uc = [];
-
         $this->viewHelper->setArguments([
             'label' => 'External Link',
             'uid' => null,
@@ -145,11 +137,9 @@ final class DataViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: []))]
     public function renderIncludesAdditionalClass(): void
     {
-        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
-        $GLOBALS['BE_USER']->uc = [];
-
         $this->viewHelper->setArguments([
             'label' => 'Test',
             'uid' => 1,
@@ -165,11 +155,9 @@ final class DataViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: []))]
     public function renderEscapesClassArgument(): void
     {
-        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
-        $GLOBALS['BE_USER']->uc = [];
-
         $this->viewHelper->setArguments([
             'label' => 'Test',
             'uid' => 1,
@@ -186,11 +174,9 @@ final class DataViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: []))]
     public function renderOutputIsValidJson(): void
     {
-        $GLOBALS['BE_USER'] = $this->createMock(BackendUserAuthentication::class);
-        $GLOBALS['BE_USER']->uc = [];
-
         $this->viewHelper->setArguments([
             'label' => 'Test',
             'uid' => 123,

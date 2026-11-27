@@ -39,7 +39,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Content\ContentElementFilter;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\{AdditionalDataHandler, ContentElementButtonBuilder, ContentElementMenuGenerator};
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeBackendUser, FakeUriBuilder};
 
 /**
  * ContentElementMenuGeneratorTest.
@@ -92,13 +92,9 @@ final class ContentElementMenuGeneratorTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: [Configuration::UC_KEY_DISABLED => true]))]
     public function getDropdownReturnsEmptyArrayWhenFrontendEditDisabled(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->uc = [Configuration::UC_KEY_DISABLED => true];
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $generator = $this->createGenerator();
 
         $request = $this->createRequestMock();
@@ -108,12 +104,9 @@ final class ContentElementMenuGeneratorTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(user: null))]
     public function getDropdownReturnsEmptyArrayWhenBackendUserHasNoUserData(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = null;
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $generator = $this->createGenerator();
 
         $request = $this->createRequestMock();

@@ -13,14 +13,13 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Ui;
 
-use KonradMichalik\Ttt\Attribute\{WithEnvironment, WithSingleton};
+use KonradMichalik\Ttt\Attribute\{WithEnvironment, WithGlobal, WithSingleton};
 use KonradMichalik\Ttt\Http\Requests;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Package\{PackageInterface, PackageManager};
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -30,7 +29,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{BackendSettingsService, ResourceRendererService, UrlBuilderService};
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeBackendUser, FakeUriBuilder};
 
 use function dirname;
 
@@ -154,13 +153,9 @@ final class ResourceRendererServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: ['frontendEditDisabled' => true]))]
     public function renderMarksToolbarDisabledWhenFrontendEditDisabled(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->uc = ['frontendEditDisabled' => true];
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false);
