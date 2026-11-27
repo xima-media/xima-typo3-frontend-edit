@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "36dc0b137e3f1a8e31a14dad607b3435",
+    "content-hash": "72490e5fce67b24cb50181ca3be7d048",
     "packages": [],
     "packages-dev": [
         {
@@ -120,7 +120,8 @@
                 "issues": "https://github.com/bnf/phpstan-psr-container/issues",
                 "source": "https://github.com/bnf/phpstan-psr-container/tree/1.1.0"
             },
-            "time": "2024-11-19T16:16:59+00:00"
+            "time": "2024-11-19T16:16:59+00:00",
+            "published-time": "2024-11-19T16:19:17+00:00"
         },
         {
             "name": "clue/ndjson-react",
@@ -337,7 +338,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-05T13:12:12+00:00"
+            "time": "2026-10-05T13:12:12+00:00",
+            "published-time": "2026-10-05T13:12:50+00:00"
         },
         {
             "name": "composer/xdebug-handler",
@@ -1151,7 +1153,8 @@
                 "security": "https://github.com/ergebnis/phpstan-rules/blob/main/.github/SECURITY.md",
                 "source": "https://github.com/ergebnis/phpstan-rules"
             },
-            "time": "2026-10-16T09:48:05+00:00"
+            "time": "2026-10-16T09:48:05+00:00",
+            "published-time": "2026-10-16T09:48:18+00:00"
         },
         {
             "name": "evenement/evenement",
@@ -1741,28 +1744,90 @@
             "time": "2026-09-28T09:09:31+00:00"
         },
         {
-            "name": "konradmichalik/phpstan-typo3-dead-code",
-            "version": "0.1.1",
+            "name": "konradmichalik/phpstan-exception-codes",
+            "version": "0.1.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/konradmichalik/phpstan-typo3-dead-code.git",
-                "reference": "2690dbf106af40bb2ade38756aad56725b8f6248"
+                "url": "https://github.com/konradmichalik/phpstan-exception-codes.git",
+                "reference": "97379822243fe48134143fd25abac62eee0d9fc2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/konradmichalik/phpstan-typo3-dead-code/zipball/2690dbf106af40bb2ade38756aad56725b8f6248",
-                "reference": "2690dbf106af40bb2ade38756aad56725b8f6248",
+                "url": "https://api.github.com/repos/konradmichalik/phpstan-exception-codes/zipball/97379822243fe48134143fd25abac62eee0d9fc2",
+                "reference": "97379822243fe48134143fd25abac62eee0d9fc2",
                 "shasum": ""
             },
             "require": {
                 "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
-                "phpstan/phpstan": "^2.1.41",
-                "shipmonk/dead-code-detector": "^1.4"
+                "phpstan/phpstan": "^2.1"
             },
             "require-dev": {
                 "armin/editorconfig-cli": "^2.0",
                 "ergebnis/composer-normalize": "^2.44",
                 "phpunit/phpunit": "^11.5 || ^12.0"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "rules.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "KonradMichalik\\PhpStanExceptionCodes\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Konrad Michalik",
+                    "email": "hej@konradmichalik.dev",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "PHPStan rules for unique, plausible exception codes, as TYPO3 expects them",
+            "support": {
+                "issues": "https://github.com/konradmichalik/phpstan-exception-codes/issues",
+                "source": "https://github.com/konradmichalik/phpstan-exception-codes/tree/0.1.0"
+            },
+            "time": "2026-11-24T19:56:09+00:00",
+            "published-time": "2026-11-24T19:59:10+00:00"
+        },
+        {
+            "name": "konradmichalik/phpstan-typo3-dead-code",
+            "version": "0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/konradmichalik/phpstan-typo3-dead-code.git",
+                "reference": "cd899a150e1f99fd823845d158e400cfb2b5511f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/konradmichalik/phpstan-typo3-dead-code/zipball/cd899a150e1f99fd823845d158e400cfb2b5511f",
+                "reference": "cd899a150e1f99fd823845d158e400cfb2b5511f",
+                "shasum": ""
+            },
+            "require": {
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
+                "phpstan/phpstan": "^2.1.41",
+                "shipmonk/dead-code-detector": "^1.4",
+                "symfony/yaml": "^6.4 || ^7.0 || ^8.0"
+            },
+            "conflict": {
+                "typo3/class-alias-loader": "<1.2.1"
+            },
+            "require-dev": {
+                "armin/editorconfig-cli": "^2.0",
+                "ergebnis/composer-normalize": "^2.44",
+                "konradmichalik/php-cs-fixer-preset": "^0.4.0",
+                "phpstan/phpstan-phpunit": "^2.1",
+                "phpunit/phpunit": "^11.5 || ^12.0",
+                "rector/rector": "^2.9"
             },
             "type": "phpstan-extension",
             "extra": {
@@ -1789,30 +1854,39 @@
                 }
             ],
             "description": "TYPO3 entry points for shipmonk/dead-code-detector: DI constructors, route targets and TypoScript userFunc",
+            "keywords": [
+                "PHPStan",
+                "dead-code",
+                "php",
+                "phpstan-extension",
+                "static-analysis",
+                "typo3"
+            ],
             "support": {
                 "issues": "https://github.com/konradmichalik/phpstan-typo3-dead-code/issues",
-                "source": "https://github.com/konradmichalik/phpstan-typo3-dead-code/tree/0.1.1"
+                "source": "https://github.com/konradmichalik/phpstan-typo3-dead-code/tree/0.2.0"
             },
-            "time": "2026-11-24T20:31:40+00:00",
-            "published-time": "2026-11-24T20:37:01+00:00"
+            "time": "2026-11-25T10:28:52+00:00",
+            "published-time": "2026-11-25T10:29:32+00:00"
         },
         {
             "name": "konradmichalik/phpstan-typo3-preset",
-            "version": "0.6.1",
+            "version": "0.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/konradmichalik/phpstan-typo3-preset.git",
-                "reference": "33629b68195b5965a4a7037be3678187e79f03a6"
+                "reference": "3221ad78f0df9c38f0589024c8e4e41069628c8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/konradmichalik/phpstan-typo3-preset/zipball/33629b68195b5965a4a7037be3678187e79f03a6",
-                "reference": "33629b68195b5965a4a7037be3678187e79f03a6",
+                "url": "https://api.github.com/repos/konradmichalik/phpstan-typo3-preset/zipball/3221ad78f0df9c38f0589024c8e4e41069628c8a",
+                "reference": "3221ad78f0df9c38f0589024c8e4e41069628c8a",
                 "shasum": ""
             },
             "require": {
                 "ergebnis/phpstan-rules": "^2.13",
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+                "konradmichalik/phpstan-exception-codes": "^0.1",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
                 "phpstan/phpstan": "^2.1",
                 "phpstan/phpstan-deprecation-rules": "^2.0",
                 "phpstan/phpstan-strict-rules": "^2.0",
@@ -1847,10 +1921,10 @@
             "description": "TYPO3 preset configuration for PHPStan",
             "support": {
                 "issues": "https://github.com/konradmichalik/phpstan-typo3-preset/issues",
-                "source": "https://github.com/konradmichalik/phpstan-typo3-preset/tree/0.6.1"
+                "source": "https://github.com/konradmichalik/phpstan-typo3-preset/tree/0.7.0"
             },
-            "time": "2026-11-10T09:01:58+00:00",
-            "published-time": "2026-11-10T09:02:32+00:00"
+            "time": "2026-11-24T20:06:10+00:00",
+            "published-time": "2026-11-24T20:08:09+00:00"
         },
         {
             "name": "league/flysystem",
@@ -2383,7 +2457,8 @@
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
                 "source": "https://github.com/nikic/PHP-Parser/tree/v5.9.0"
             },
-            "time": "2026-09-13T18:51:52+00:00"
+            "time": "2026-09-13T18:51:52+00:00",
+            "published-time": "2026-09-13T18:53:16+00:00"
         },
         {
             "name": "phar-io/version",
@@ -2498,7 +2573,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-08T21:09:11+00:00"
+            "time": "2026-10-08T21:09:11+00:00",
+            "published-time": "2026-10-08T21:09:23+00:00"
         },
         {
             "name": "phpstan/phpstan-deprecation-rules",
@@ -2549,7 +2625,8 @@
                 "issues": "https://github.com/phpstan/phpstan-deprecation-rules/issues",
                 "source": "https://github.com/phpstan/phpstan-deprecation-rules/tree/2.0.5"
             },
-            "time": "2026-07-22T06:50:43+00:00"
+            "time": "2026-07-22T06:50:43+00:00",
+            "published-time": "2026-07-27T15:18:00+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
@@ -2659,7 +2736,8 @@
                 "issues": "https://github.com/phpstan/phpstan-strict-rules/issues",
                 "source": "https://github.com/phpstan/phpstan-strict-rules/tree/2.1.0"
             },
-            "time": "2026-10-01T21:30:37+00:00"
+            "time": "2026-10-01T21:30:37+00:00",
+            "published-time": "2026-10-06T07:32:29+00:00"
         },
         {
             "name": "psr/container",
@@ -2712,7 +2790,8 @@
                 "issues": "https://github.com/php-fig/container/issues",
                 "source": "https://github.com/php-fig/container/tree/2.0.2"
             },
-            "time": "2021-11-05T16:47:00+00:00"
+            "time": "2021-11-05T16:47:00+00:00",
+            "published-time": "2021-11-05T16:53:27+00:00"
         },
         {
             "name": "psr/event-dispatcher",
@@ -3518,7 +3597,8 @@
                     "type": "liberapay"
                 }
             ],
-            "time": "2026-07-30T21:38:28+00:00"
+            "time": "2026-07-30T21:38:28+00:00",
+            "published-time": "2026-07-30T21:48:44+00:00"
         },
         {
             "name": "sebastian/diff",
@@ -3808,7 +3888,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-13T00:31:30+00:00"
+            "time": "2026-10-13T00:31:30+00:00",
+            "published-time": "2026-10-13T00:56:49+00:00"
         },
         {
             "name": "ssch/typo3-debug-dump-pass",
@@ -3866,7 +3947,8 @@
                 "issues": "https://github.com/sabbelasichon/typo3-debug-dump-pass/issues",
                 "source": "https://github.com/sabbelasichon/typo3-debug-dump-pass/tree/v0.0.3"
             },
-            "time": "2026-02-04T08:23:17+00:00"
+            "time": "2026-02-04T08:23:17+00:00",
+            "published-time": "2026-02-04T08:31:52+00:00"
         },
         {
             "name": "ssch/typo3-rector",
@@ -3986,16 +4068,16 @@
         },
         {
             "name": "symfony/config",
-            "version": "v7.4.17",
+            "version": "v7.4.24",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "696e12da8eea497a1a3808d714b43ff67a7df43e"
+                "reference": "5faae9e1d39de4a73159858c341dbb31a679aabf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/696e12da8eea497a1a3808d714b43ff67a7df43e",
-                "reference": "696e12da8eea497a1a3808d714b43ff67a7df43e",
+                "url": "https://api.github.com/repos/symfony/config/zipball/5faae9e1d39de4a73159858c341dbb31a679aabf",
+                "reference": "5faae9e1d39de4a73159858c341dbb31a679aabf",
                 "shasum": ""
             },
             "require": {
@@ -4041,7 +4123,7 @@
             "description": "Helps you find, load, combine, autofill and validate configuration values of any kind",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/config/tree/v7.4.17"
+                "source": "https://github.com/symfony/config/tree/v7.4.24"
             },
             "funding": [
                 {
@@ -4061,7 +4143,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-20T09:55:18+00:00"
+            "time": "2026-11-09T20:02:17+00:00",
+            "published-time": "2026-11-25T09:23:43+00:00"
         },
         {
             "name": "symfony/console",
@@ -4243,7 +4326,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-13T12:53:30+00:00"
+            "time": "2026-10-13T12:53:30+00:00",
+            "published-time": "2026-10-14T06:45:52+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -4314,7 +4398,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-05T06:23:12+00:00"
+            "time": "2026-06-05T06:23:12+00:00",
+            "published-time": "2026-06-27T21:46:34+00:00"
         },
         {
             "name": "symfony/event-dispatcher",
@@ -4483,16 +4568,16 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v7.4.21",
+            "version": "v7.4.24",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "fd0e3462be6d32a0d130e8423e4940a7688162d8"
+                "reference": "37a6b215cf82c881409e2ffaec61757964abd1f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/fd0e3462be6d32a0d130e8423e4940a7688162d8",
-                "reference": "fd0e3462be6d32a0d130e8423e4940a7688162d8",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/37a6b215cf82c881409e2ffaec61757964abd1f7",
+                "reference": "37a6b215cf82c881409e2ffaec61757964abd1f7",
                 "shasum": ""
             },
             "require": {
@@ -4529,7 +4614,7 @@
             "description": "Provides basic utilities for the filesystem",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/filesystem/tree/v7.4.21"
+                "source": "https://github.com/symfony/filesystem/tree/v7.4.24"
             },
             "funding": [
                 {
@@ -4549,7 +4634,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-06T20:05:19+00:00"
+            "time": "2026-11-24T15:20:15+00:00",
+            "published-time": "2026-11-25T09:23:31+00:00"
         },
         {
             "name": "symfony/finder",
@@ -4860,7 +4946,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T16:19:22+00:00"
+            "time": "2026-04-10T16:19:22+00:00",
+            "published-time": "2026-04-26T14:44:50+00:00"
         },
         {
             "name": "symfony/polyfill-intl-grapheme",
@@ -5199,7 +5286,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-24T15:19:04+00:00"
+            "time": "2026-09-24T15:19:04+00:00",
+            "published-time": "2026-09-30T10:23:35+00:00"
         },
         {
             "name": "symfony/polyfill-php80",
@@ -5283,7 +5371,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-25T15:50:05+00:00"
+            "time": "2026-09-25T15:50:05+00:00",
+            "published-time": "2026-09-30T10:23:35+00:00"
         },
         {
             "name": "symfony/polyfill-php81",
@@ -5363,7 +5452,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-05-26T12:45:58+00:00"
+            "time": "2026-05-26T12:45:58+00:00",
+            "published-time": "2026-05-26T13:40:34+00:00"
         },
         {
             "name": "symfony/polyfill-php84",
@@ -5508,7 +5598,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-08T16:56:12+00:00"
+            "time": "2026-10-08T16:56:12+00:00",
+            "published-time": "2026-10-14T06:45:44+00:00"
         },
         {
             "name": "symfony/service-contracts",
@@ -5595,7 +5686,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-07-27T15:39:01+00:00"
+            "time": "2026-07-27T15:39:01+00:00",
+            "published-time": "2026-08-30T19:56:37+00:00"
         },
         {
             "name": "symfony/stopwatch",
@@ -6015,20 +6107,21 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-08-23T10:03:40+00:00"
+            "time": "2026-08-23T10:03:40+00:00",
+            "published-time": "2026-08-30T21:38:40+00:00"
         },
         {
             "name": "symfony/yaml",
-            "version": "v7.4.21",
+            "version": "v7.4.24",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/yaml.git",
-                "reference": "044907929c7999814378be22da34722c7a86bad4"
+                "reference": "f97f59f67644c715788d1bde4d81186e48ee1dbf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/yaml/zipball/044907929c7999814378be22da34722c7a86bad4",
-                "reference": "044907929c7999814378be22da34722c7a86bad4",
+                "url": "https://api.github.com/repos/symfony/yaml/zipball/f97f59f67644c715788d1bde4d81186e48ee1dbf",
+                "reference": "f97f59f67644c715788d1bde4d81186e48ee1dbf",
                 "shasum": ""
             },
             "require": {
@@ -6071,7 +6164,7 @@
             "description": "Loads and dumps YAML files",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/yaml/tree/v7.4.21"
+                "source": "https://github.com/symfony/yaml/tree/v7.4.24"
             },
             "funding": [
                 {
@@ -6091,7 +6184,8 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-12T12:34:30+00:00"
+            "time": "2026-11-16T12:32:16+00:00",
+            "published-time": "2026-11-25T09:24:23+00:00"
         },
         {
             "name": "tomasvotruba/cognitive-complexity",
@@ -6143,7 +6237,8 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-05-25T12:12:55+00:00"
+            "time": "2026-05-25T12:12:55+00:00",
+            "published-time": "2026-05-25T12:12:39+00:00"
         },
         {
             "name": "tomasvotruba/type-coverage",
