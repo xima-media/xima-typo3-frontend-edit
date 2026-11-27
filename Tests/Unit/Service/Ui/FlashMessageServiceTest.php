@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Ui;
 
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -21,6 +22,7 @@ use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Messaging\{FlashMessageQueue, FlashMessageService as CoreFlashMessageService};
 use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\FlashMessageService;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeBackendUser;
 
 /**
  * FlashMessageServiceTest.
@@ -47,25 +49,18 @@ final class FlashMessageServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(user: null))]
     public function collectFromSessionReturnsEmptyArrayWhenUserDataMissing(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = null;
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = $this->createSubject();
 
         self::assertSame([], $service->collectFromSession());
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(defaultSessionData: []))]
     public function collectFromSessionReturnsEmptyArrayWhenQueuesEmpty(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('getSessionData')->willReturn([]);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = $this->createSubject();
 
         self::assertSame([], $service->collectFromSession());
@@ -181,13 +176,9 @@ final class FlashMessageServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function collectFromSessionSkipsNonArraySessionData(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('getSessionData')->willReturn(null);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $service = $this->createSubject();
 
         self::assertSame([], $service->collectFromSession());

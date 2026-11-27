@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
 use Doctrine\DBAL\Result;
-use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton};
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton, WithTca};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -36,7 +36,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\{PageButtonBuilder, PageMenuGenerator};
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeLanguageService, FakeUriBuilder};
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeBackendUser, FakeLanguageService, FakeUriBuilder};
 
 /**
  * PageMenuGeneratorTest.
@@ -45,14 +45,11 @@ use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeLanguageService, FakeUri
  * @license GPL-2.0-or-later
  */
 #[CoversClass(PageMenuGenerator::class)]
+#[WithTca('pages', ['ctrl' => ['typeicon_classes' => [1 => 'apps-pagetree-page-default']], 'columns' => ['doktype' => ['config' => ['items' => [['value' => 1, 'label' => 'Standard']]]]]])]
+#[WithGlobal('BE_USER', new FakeBackendUser(admin: true))]
 #[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class PageMenuGeneratorTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        $this->setUpBackendUserAsAdmin();
-    }
-
     protected function tearDown(): void
     {
         GeneralUtility::purgeInstances();
@@ -111,8 +108,6 @@ final class PageMenuGeneratorTest extends TestCase
     #[WithGlobal('LANG', new FakeLanguageService())]
     public function getDropdownReturnsRenderedMenuForPageWithRecord(): void
     {
-        $this->setUpTca();
-
         $connectionPool = $this->createConnectionPoolReturning(['uid' => 5, 'title' => 'My Page', 'doktype' => 1]);
         $generator = $this->createGenerator($connectionPool);
 
@@ -129,8 +124,6 @@ final class PageMenuGeneratorTest extends TestCase
     #[WithGlobal('LANG', new FakeLanguageService())]
     public function getDropdownSkipsInfoSectionWhenPageRecordNotFound(): void
     {
-        $this->setUpTca();
-
         $connectionPool = $this->createConnectionPoolReturning(false);
         $generator = $this->createGenerator($connectionPool);
 
@@ -147,8 +140,6 @@ final class PageMenuGeneratorTest extends TestCase
     #[WithGlobal('LANG', new FakeLanguageService())]
     public function getDropdownOmitsEditPagePropertiesWhenUserLacksPageEditAccess(): void
     {
-        $this->setUpTca();
-
         $connectionPool = $this->createConnectionPoolReturning(['uid' => 5, 'title' => 'My Page', 'doktype' => 1]);
         $this->setUpBackendUserWithoutPageEditAccess();
         $generator = $this->createGenerator($connectionPool);
@@ -166,8 +157,6 @@ final class PageMenuGeneratorTest extends TestCase
     #[WithGlobal('LANG', new FakeLanguageService())]
     public function getDropdownRespectsEventListenerModifiedButton(): void
     {
-        $this->setUpTca();
-
         $connectionPool = $this->createConnectionPoolReturning(['uid' => 3, 'title' => 'Page', 'doktype' => 1]);
 
         $replacement = new Button('replaced', ButtonType::Link, '/replaced-page', null, false);
@@ -202,26 +191,6 @@ final class PageMenuGeneratorTest extends TestCase
         return $request;
     }
 
-    private function setUpTca(): void
-    {
-        $GLOBALS['TCA'] = [
-            'pages' => [
-                'ctrl' => [
-                    'typeicon_classes' => [1 => 'apps-pagetree-page-default'],
-                ],
-                'columns' => [
-                    'doktype' => [
-                        'config' => [
-                            'items' => [
-                                ['value' => 1, 'label' => 'Standard'],
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ];
-    }
-
     /**
      * @param array<string, mixed>|false $record
      */
@@ -252,14 +221,6 @@ final class PageMenuGeneratorTest extends TestCase
      * control its behavior through a mocked BackendUserAuthentication rather than
      * mocking the service itself (mirrors ContentElementMenuGeneratorTest).
      */
-    private function setUpBackendUserAsAdmin(): void
-    {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('isAdmin')->willReturn(true);
-        $GLOBALS['BE_USER'] = $backendUser;
-    }
-
     private function setUpBackendUserWithoutPageEditAccess(): void
     {
         $backendUser = $this->createMock(BackendUserAuthentication::class);

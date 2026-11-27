@@ -13,11 +13,13 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\ViewHelpers;
 
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeBackendUser;
 use Xima\XimaTypo3FrontendEdit\ViewHelpers\ColumnTargetViewHelper;
 
 /**
@@ -80,14 +82,9 @@ final class ColumnTargetViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderReturnsHiddenDivWithColPos(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->uc = [];
-        $backendUser->method('getTSConfig')->willReturn([]);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $viewHelper = new ColumnTargetViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['colPos' => 3, 'containerUid' => null]);
@@ -98,14 +95,9 @@ final class ColumnTargetViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderIncludesContainerUidAttribute(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->uc = [];
-        $backendUser->method('getTSConfig')->willReturn([]);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $viewHelper = new ColumnTargetViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['colPos' => 200, 'containerUid' => 42]);
@@ -116,14 +108,9 @@ final class ColumnTargetViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderOmitsContainerAttributeWhenNull(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->uc = [];
-        $backendUser->method('getTSConfig')->willReturn([]);
-        $GLOBALS['BE_USER'] = $backendUser;
-
         $viewHelper = new ColumnTargetViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['colPos' => 0, 'containerUid' => null]);

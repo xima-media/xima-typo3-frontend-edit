@@ -13,14 +13,13 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Ui;
 
-use KonradMichalik\Ttt\Attribute\{WithEnvironment, WithSingleton};
+use KonradMichalik\Ttt\Attribute\{WithEnvironment, WithGlobal, WithSingleton};
 use KonradMichalik\Ttt\Http\Requests;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use ReflectionClass;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\Package\{PackageInterface, PackageManager};
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -30,7 +29,7 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\PageMenuGenerator;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{BackendSettingsService, ResourceRendererService, UrlBuilderService};
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeBackendUser, FakeUriBuilder};
 
 use function dirname;
 
@@ -86,7 +85,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderWithContextualEditingEnabledAddsBackendStubs(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(true);
 
@@ -100,7 +99,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderAddsCoreResources(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false);
 
@@ -116,7 +115,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderAddsDebugConfigWhenDebugModeEnabled(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false, debugMode: true);
 
@@ -128,7 +127,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderOmitsStickyToolbarWhenDisabled(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false);
 
@@ -141,7 +140,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderAddsFlashMessagesConfigWhenProvided(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false);
 
@@ -154,14 +153,10 @@ final class ResourceRendererServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser(uc: ['frontendEditDisabled' => true]))]
     public function renderMarksToolbarDisabledWhenFrontendEditDisabled(): void
     {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->uc = ['frontendEditDisabled' => true];
-        $GLOBALS['BE_USER'] = $backendUser;
-
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(false);
 
@@ -173,7 +168,7 @@ final class ResourceRendererServiceTest extends TestCase
     #[Test]
     public function renderVersionsEveryInjectedScriptUrl(): void
     {
-        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+        $this->registerViewFactoryCapturingResources($captured);
 
         $service = $this->createService(true);
 
@@ -194,7 +189,7 @@ final class ResourceRendererServiceTest extends TestCase
     /**
      * @param array<string, string>|null $captured
      */
-    private function createViewFactoryCapturingResources(?array &$captured): ViewFactoryInterface
+    private function registerViewFactoryCapturingResources(?array &$captured): void
     {
         $view = $this->createMock(ViewInterface::class);
         $view->method('assignMultiple')->willReturnCallback(
@@ -209,7 +204,7 @@ final class ResourceRendererServiceTest extends TestCase
         $viewFactory = $this->createMock(ViewFactoryInterface::class);
         $viewFactory->method('create')->willReturn($view);
 
-        return $viewFactory;
+        GeneralUtility::addInstance(ViewFactoryInterface::class, $viewFactory);
     }
 
     private function createService(bool $contextualEditing, bool $debugMode = false): ResourceRendererService

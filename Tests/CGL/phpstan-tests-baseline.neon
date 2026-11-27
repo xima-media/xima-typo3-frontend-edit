@@ -39,19 +39,7 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Middleware/ToolRendererMiddlewareTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 22
-			path: ../Unit/Service/Authentication/BackendUserServiceTest.php
-
-		-
-			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
+			count: 4
 			path: ../Unit/Service/Authentication/BackendUserServiceTest.php
 
 		-
@@ -75,7 +63,7 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 4
+			count: 2
 			path: ../Unit/Service/Menu/AdditionalDataHandlerTest.php
 
 		-
@@ -93,7 +81,7 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 3
+			count: 1
 			path: ../Unit/Service/Menu/ContentElementMenuGeneratorTest.php
 
 		-
@@ -115,28 +103,10 @@ parameters:
 			path: ../Unit/Service/Menu/ContentElementMenuGeneratorTest.php
 
 		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 2
-			path: ../Unit/Service/Menu/PageButtonBuilderTest.php
-
-		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 2
-			path: ../Unit/Service/Menu/PageMenuGeneratorTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
 			identifier: ttt.directGlobalState
 			count: 1
 			path: ../Unit/Service/Menu/PageMenuGeneratorTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 2
-			path: ../Unit/Service/Menu/RecordButtonBuilderTest.php
 
 		-
 			message: '#^Test changes global state directly\: GeneralUtility\:\:setSingletonInstance\(\)\.$#'
@@ -147,19 +117,13 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 8
+			count: 5
 			path: ../Unit/Service/Ui/FlashMessageServiceTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Service/Ui/ResourceRendererServiceTest.php
 
 		-
 			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'
 			identifier: ttt.directGlobalState
-			count: 8
+			count: 2
 			path: ../Unit/Service/Ui/ResourceRendererServiceTest.php
 
 		-
@@ -175,37 +139,13 @@ parameters:
 			path: ../Unit/Service/Ui/UrlBuilderServiceTest.php
 
 		-
-			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Utility/Compatibility/BackendUserUtilityTest.php
-
-		-
-			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Utility/Compatibility/ButtonFactoryUtilityTest.php
-
-		-
-			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Utility/Compatibility/VersionUtilityTest.php
-
-		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 4
+			count: 1
 			path: ../Unit/ViewHelpers/ColumnTargetViewHelperTest.php
 
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 7
-			path: ../Unit/ViewHelpers/DataViewHelperTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 2
+			count: 1
 			path: ../Unit/ViewHelpers/EditableViewHelperTest.php

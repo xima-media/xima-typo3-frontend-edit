@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
-use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton};
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton, WithTca};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -32,6 +32,7 @@ use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeLanguageService, FakeUri
  * @license GPL-2.0-or-later
  */
 #[CoversClass(PageButtonBuilder::class)]
+#[WithTca('pages', ['columns' => ['doktype' => ['config' => ['items' => [['label' => 'Standard', 'value' => 1]]]]], 'ctrl' => ['typeicon_classes' => [1 => 'apps-pagetree-page-default']]])]
 #[WithSingleton(UriBuilder::class, new FakeUriBuilder())]
 final class PageButtonBuilderTest extends TestCase
 {
@@ -56,8 +57,6 @@ final class PageButtonBuilderTest extends TestCase
     #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionAddsChildrenToMenuButton(): void
     {
-        $this->setUpGlobals();
-
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
@@ -72,8 +71,6 @@ final class PageButtonBuilderTest extends TestCase
     #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionHandlesEmptyTitle(): void
     {
-        $this->setUpGlobals();
-
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
@@ -86,8 +83,6 @@ final class PageButtonBuilderTest extends TestCase
     #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionHandlesMissingTitle(): void
     {
-        $this->setUpGlobals();
-
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
@@ -100,8 +95,6 @@ final class PageButtonBuilderTest extends TestCase
     #[WithGlobal('LANG', new FakeLanguageService('Translated'))]
     public function addInfoSectionHandlesMissingDoktype(): void
     {
-        $this->setUpGlobals();
-
         $builder = new PageButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
@@ -181,15 +174,5 @@ final class PageButtonBuilderTest extends TestCase
     private function urlBuilderService(): UrlBuilderService
     {
         return $this->urlBuilderService ??= new UrlBuilderService();
-    }
-
-    private function setUpGlobals(): void
-    {
-        $GLOBALS['TCA']['pages']['columns']['doktype']['config']['items'] = [
-            ['label' => 'Standard', 'value' => 1],
-        ];
-        $GLOBALS['TCA']['pages']['ctrl']['typeicon_classes'] = [
-            1 => 'apps-pagetree-page-default',
-        ];
     }
 }

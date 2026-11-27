@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\ViewHelpers;
 
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use Xima\XimaTypo3FrontendEdit\Configuration;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeBackendUser;
 use Xima\XimaTypo3FrontendEdit\ViewHelpers\EditableViewHelper;
 
 /**
@@ -81,10 +83,9 @@ final class EditableViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderReturnsEmptyStringWhenNeitherRecordNorUidGiven(): void
     {
-        $this->setUpAuthenticatedBackendUser();
-
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['record' => null, 'uid' => null, 'table' => 'tt_content']);
@@ -93,10 +94,9 @@ final class EditableViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderReturnsEmptyStringForNonPositiveUid(): void
     {
-        $this->setUpAuthenticatedBackendUser();
-
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['record' => null, 'uid' => 0, 'table' => 'tt_content']);
@@ -105,10 +105,9 @@ final class EditableViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderReturnsDataAttributeFromUidArgument(): void
     {
-        $this->setUpAuthenticatedBackendUser();
-
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['record' => null, 'uid' => 42, 'table' => 'tt_content']);
@@ -117,10 +116,9 @@ final class EditableViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderReturnsDataAttributeFromRecordArgument(): void
     {
-        $this->setUpAuthenticatedBackendUser();
-
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['record' => ['uid' => 99, 'CType' => 'text'], 'uid' => null, 'table' => 'tt_content']);
@@ -129,10 +127,9 @@ final class EditableViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderReturnsDataAttributeFromRecordObject(): void
     {
-        $this->setUpAuthenticatedBackendUser();
-
         // Stands in for Extbase models and core Record objects, both expose getUid().
         $record = new class {
             public function getUid(): int
@@ -149,10 +146,9 @@ final class EditableViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderReturnsEmptyStringForRecordObjectWithoutUid(): void
     {
-        $this->setUpAuthenticatedBackendUser();
-
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['record' => new stdClass(), 'uid' => null, 'table' => 'tt_content']);
@@ -161,10 +157,9 @@ final class EditableViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderPrefersUidArgumentOverRecordArgument(): void
     {
-        $this->setUpAuthenticatedBackendUser();
-
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['record' => ['uid' => 99], 'uid' => 42, 'table' => 'tt_content']);
@@ -173,10 +168,9 @@ final class EditableViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderReturnsDataAttributeWithCustomTable(): void
     {
-        $this->setUpAuthenticatedBackendUser();
-
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['record' => null, 'uid' => 42, 'table' => 'tx_news_domain_model_news']);
@@ -185,23 +179,13 @@ final class EditableViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', new FakeBackendUser())]
     public function renderReturnsEmptyStringForInvalidTableFormat(): void
     {
-        $this->setUpAuthenticatedBackendUser();
-
         $viewHelper = new EditableViewHelper(new BackendUserService());
         $viewHelper->initializeArguments();
         $viewHelper->setArguments(['record' => null, 'uid' => 42, 'table' => 'tt_content"><script>']);
 
         self::assertSame('', $viewHelper->render());
-    }
-
-    private function setUpAuthenticatedBackendUser(): void
-    {
-        $backendUser = $this->createMock(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->uc = [];
-        $backendUser->method('getTSConfig')->willReturn([]);
-        $GLOBALS['BE_USER'] = $backendUser;
     }
 }

@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Middleware;
 
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use ReflectionClass;
-use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Http\{Response, ServerRequest};
 use TYPO3\CMS\Core\Site\Entity\Site;
@@ -26,6 +26,7 @@ use Xima\XimaTypo3FrontendEdit\Middleware\ToolRendererMiddleware;
 use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{FlashMessageService, ResourceRendererService};
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeBackendUser;
 
 /**
  * ToolRendererMiddlewareTest.
@@ -36,21 +37,9 @@ use Xima\XimaTypo3FrontendEdit\Service\Ui\{FlashMessageService, ResourceRenderer
  * @license GPL-2.0-or-later
  */
 #[CoversClass(ToolRendererMiddleware::class)]
+#[WithGlobal('BE_USER', new FakeBackendUser())]
 final class ToolRendererMiddlewareTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        $backendUser = $this->createStub(BackendUserAuthentication::class);
-        $backendUser->user = ['uid' => 1];
-        $backendUser->method('getTSConfig')->willReturn([]);
-        $GLOBALS['BE_USER'] = $backendUser;
-    }
-
-    protected function tearDown(): void
-    {
-        unset($GLOBALS['BE_USER']);
-    }
-
     /**
      * @return array<string, array{string}>
      */
