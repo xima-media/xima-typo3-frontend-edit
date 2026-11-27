@@ -1,5 +1,7 @@
 includes:
 	- %rootDir%/../../konradmichalik/phpstan-typo3-preset/phpstan.neon.dist
+	- %rootDir%/../../shipmonk/dead-code-detector/rules.neon
+	- %rootDir%/../../konradmichalik/phpstan-typo3-dead-code/rules.neon
 	- phpstan-baseline.neon
 
 parameters:
@@ -11,6 +13,7 @@ parameters:
 	paths:
 		- ../../Classes
 		- ../../Configuration
+		- ../../ext_localconf.php
 		- ../../Resources
 
 	excludePaths:

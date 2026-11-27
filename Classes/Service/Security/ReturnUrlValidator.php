@@ -17,11 +17,14 @@ use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Exception\SiteNotFoundException;
 use TYPO3\CMS\Core\Site\Entity\Site;
 use TYPO3\CMS\Core\Site\SiteFinder;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 use function array_filter;
 use function array_values;
+use function in_array;
 use function parse_url;
 use function strcasecmp;
+use function strtolower;
 
 /**
  * ReturnUrlValidator.
@@ -36,7 +39,7 @@ final readonly class ReturnUrlValidator
     ) {}
 
     /**
-     * Accepts a relative returnUrl, or one whose host matches the current request
+     * Accepts a local relative returnUrl (as the core defines it), or an http(s) one whose host matches the current request
      * or one of the resolved site's base URLs (including per-language bases).
      * Rejects malformed URLs and everything else.
      */
@@ -47,7 +50,12 @@ final readonly class ReturnUrlValidator
             return false;
         }
         if (null === $host) {
-            return true;
+            // Covers what parse_url() reports without a host: "javascript:...", "/\\evil.com", "https:evil.com".
+            return '' !== GeneralUtility::sanitizeLocalUrl($returnUrl);
+        }
+
+        if (!in_array(strtolower((string) parse_url($returnUrl, \PHP_URL_SCHEME)), ['http', 'https'], true)) {
+            return false;
         }
 
         if (0 === strcasecmp($host, $request->getUri()->getHost())) {

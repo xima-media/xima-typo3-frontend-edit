@@ -15,6 +15,7 @@ namespace Xima\XimaTypo3FrontendEdit\Repository;
 
 use ArrayObject;
 use TYPO3\CMS\Core\Database\{Connection, ConnectionPool};
+use TYPO3\CMS\Core\Database\Query\Restriction\DeletedRestriction;
 use TYPO3\CMS\Core\Exception;
 use TYPO3\CMS\Core\Utility\{GeneralUtility, RootlineUtility};
 
@@ -171,6 +172,76 @@ final readonly class ContentElementRepository
     }
 
     /**
+     * Batch counterpart of BackendUtility::getRecord(): hidden records are included,
+     * deleted ones are not.
+     *
+     * @param array<int, int> $uids
+     *
+     * @return array<int, array<string, mixed>> rows keyed by uid
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function fetchRecordsByUids(string $table, array $uids): array
+    {
+        if ([] === $uids || !isset($GLOBALS['TCA'][$table])) {
+            return [];
+        }
+
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable($table);
+        $queryBuilder->getRestrictions()->removeAll()->add(GeneralUtility::makeInstance(DeletedRestriction::class));
+
+        $rows = $queryBuilder
+            ->select('*')
+            ->from($table)
+            ->where($queryBuilder->expr()->in('uid', $queryBuilder->createNamedParameter($uids, Connection::PARAM_INT_ARRAY)))
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        $records = [];
+        foreach ($rows as $row) {
+            $records[(int) $row['uid']] = $row;
+        }
+
+        return $records;
+    }
+
+    /**
+     * Batch counterpart of getTranslatedRecord().
+     *
+     * @param array<int, int> $parentUids
+     *
+     * @return array<int, array<string, mixed>> translations keyed by parent uid
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function getTranslatedRecords(string $table, array $parentUids, int $languageUid): array
+    {
+        if ([] === $parentUids) {
+            return [];
+        }
+
+        $queryBuilder = $this->connectionPool->getQueryBuilderForTable($table);
+        $parentField = $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] ?? 'l10n_parent';
+
+        $rows = $queryBuilder
+            ->select('*')
+            ->from($table)
+            ->where(
+                $queryBuilder->expr()->in($parentField, $queryBuilder->createNamedParameter($parentUids, Connection::PARAM_INT_ARRAY)),
+                $queryBuilder->expr()->eq('sys_language_uid', $queryBuilder->createNamedParameter($languageUid, Connection::PARAM_INT)),
+            )
+            ->executeQuery()
+            ->fetchAllAssociative();
+
+        $translations = [];
+        foreach ($rows as $row) {
+            $translations[(int) $row[$parentField]] ??= $row;
+        }
+
+        return $translations;
+    }
+
+    /**
      * @return array<string, mixed>|false
      */
     public function getContentElementConfig(string $cType, string $listType): array|false
@@ -219,11 +290,6 @@ final readonly class ContentElementRepository
         } catch (\Doctrine\DBAL\Exception) {
             return null;
         }
-    }
-
-    public function isSubpageOf(int $subPageId, int $parentPageId): bool
-    {
-        return in_array($parentPageId, $this->getRootlinePageIds($subPageId), true);
     }
 
     /**

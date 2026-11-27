@@ -143,6 +143,8 @@ readonly class AjaxController
             return new JsonResponse(['error' => 'Invalid request data'], 400);
         }
 
+        $request = $this->settingsService->withSiteOfPage($request, $pid);
+
         $dropdown = $this->contentElementMenuGenerator->getDropdown($pid, $returnUrl, $languageUid, $request, $data);
         $deduplicated = $this->iconDeduplicationService->deduplicate($dropdown);
 

@@ -49,6 +49,8 @@ final class ContentElementMarkerRenderingTest extends FunctionalTestCase
 
     private const MARKED_UNCACHED_ELEMENT = '<!--xfe:b:tt_content:11--><div class="site-wrap">uncached-output</div><!--xfe:e:tt_content:11-->';
 
+    private const EDITABLE_ATTRIBUTE = 'data-frontend-edit="tt_content:12"';
+
     protected array $testExtensionsToLoad = [
         'xima/xima-typo3-frontend-edit',
     ];
@@ -157,18 +159,42 @@ final class ContentElementMarkerRenderingTest extends FunctionalTestCase
     }
 
     /**
-     * With the setting off the condition is false for everyone, so enabling the
-     * extension must not double the page cache for editors.
+     * ViewHelper output depends on the backend user, so editors and anonymous
+     * visitors need separate page cache entries even with the setting off.
      */
     #[Test]
-    public function backendUserSharesTheAnonymousCacheEntryWhenSettingIsDisabled(): void
+    public function backendUserAndAnonymousVisitorHaveSeparateCacheEntriesWhenSettingIsDisabled(): void
     {
         $this->configureSite(enabled: true, markerBasedDetection: false);
 
         $this->render(asBackendUser: false);
         $this->render(asBackendUser: true);
 
-        self::assertSame(1, $this->countPageCacheEntries());
+        self::assertSame(2, $this->countPageCacheEntries());
+    }
+
+    #[Test]
+    #[DataProvider('warmingOrderDataProvider')]
+    public function viewHelperOutputFollowsTheBackendUserRegardlessOfWhoWarmedTheCache(bool $backendUserFirst): void
+    {
+        $this->configureSite(enabled: true, markerBasedDetection: false);
+
+        $firstHtml = $this->render(asBackendUser: $backendUserFirst);
+        $secondHtml = $this->render(asBackendUser: !$backendUserFirst);
+        $backendUserHtml = $backendUserFirst ? $firstHtml : $secondHtml;
+        $anonymousHtml = $backendUserFirst ? $secondHtml : $firstHtml;
+
+        self::assertStringContainsString(self::EDITABLE_ATTRIBUTE, $backendUserHtml);
+        self::assertStringNotContainsString('data-frontend-edit', $anonymousHtml);
+    }
+
+    /**
+     * @return iterable<string, array{bool}>
+     */
+    public static function warmingOrderDataProvider(): iterable
+    {
+        yield 'backend user warms the cache' => [true];
+        yield 'anonymous visitor warms the cache' => [false];
     }
 
     /**

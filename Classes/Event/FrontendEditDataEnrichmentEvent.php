@@ -36,6 +36,8 @@ use function sprintf;
  * Namespacing prevents key collisions between listeners; core frontend-edit
  * keys are never exposed under `_ext`.
  *
+ * @api
+ *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
  */

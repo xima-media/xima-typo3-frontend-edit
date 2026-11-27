@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "04da247fa45ca4d43052a5c2ee398257",
+    "content-hash": "80da34c06f810ad7b27b65fceae4888e",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -5923,27 +5923,32 @@
         },
         {
             "name": "konradmichalik/ttt",
-            "version": "0.6.0",
+            "version": "0.8.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/konradmichalik/ttt.git",
-                "reference": "3a4a7a3b474f31c9ced92d5bc8e9f9503b42a0c4"
+                "reference": "fa8bded0ffffdb3159d91c87455d82881d45c33e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/konradmichalik/ttt/zipball/3a4a7a3b474f31c9ced92d5bc8e9f9503b42a0c4",
-                "reference": "3a4a7a3b474f31c9ced92d5bc8e9f9503b42a0c4",
+                "url": "https://api.github.com/repos/konradmichalik/ttt/zipball/fa8bded0ffffdb3159d91c87455d82881d45c33e",
+                "reference": "fa8bded0ffffdb3159d91c87455d82881d45c33e",
                 "shasum": ""
             },
             "require": {
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0 || ~8.6.0",
                 "phpunit/phpunit": "^10.5 || ^11.0 || ^12.0 || ^13.0"
+            },
+            "conflict": {
+                "typo3/cms-core": "<13.4 || >=15.0"
             },
             "require-dev": {
                 "armin/editorconfig-cli": "^2.0",
                 "ergebnis/composer-normalize": "^2.44",
-                "konradmichalik/php-cs-fixer-preset": "^0.2.0",
-                "konradmichalik/php-doc-block-header-fixer": "^0.3.4",
+                "fakerphp/faker": "^1.24",
+                "konradmichalik/php-cs-fixer-preset": "^0.4.0",
+                "konradmichalik/php-doc-block-header-fixer": "^0.5.0",
+                "nikic/php-parser": "^5.0",
                 "phpstan/phpstan": "^2.0",
                 "phpstan/phpstan-phpunit": "^2.0",
                 "rector/rector": "^2.2",
@@ -5951,10 +5956,20 @@
                 "typo3/cms-frontend": "^13.4 || ^14.0"
             },
             "suggest": {
+                "ext-gd": "Required for ImageFixtures",
+                "fakerphp/faker": "Required for the record factories (RecordFactory, #[WithRecords]) (^1.24)",
+                "phpstan/extension-installer": "Activates the PHPStan rule that points direct global state changes in tests to ttt attributes (^1.4)",
                 "typo3/cms-core": "Required for TYPO3-specific attributes like InApplicationContext and WithEnvironment (^13.4 || ^14.0)",
                 "typo3/cms-frontend": "Required for WithFrontendUser (^13.4 || ^14.0)"
             },
             "type": "library",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "extension.neon"
+                    ]
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "KonradMichalik\\Ttt\\": "src"
@@ -5984,10 +5999,10 @@
             ],
             "support": {
                 "issues": "https://github.com/konradmichalik/ttt/issues",
-                "source": "https://github.com/konradmichalik/ttt/tree/0.6.0"
+                "source": "https://github.com/konradmichalik/ttt/tree/0.8.0"
             },
-            "time": "2026-09-28T09:15:46+00:00",
-            "published-time": "2026-09-28T09:28:08+00:00"
+            "time": "2026-11-25T10:59:29+00:00",
+            "published-time": "2026-11-25T11:00:52+00:00"
         },
         {
             "name": "myclabs/deep-copy",

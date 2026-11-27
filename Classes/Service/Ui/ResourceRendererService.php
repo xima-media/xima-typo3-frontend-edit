@@ -96,9 +96,7 @@ final readonly class ResourceRendererService
      */
     private function addFloatingUiResource(array $resources, string $nonceAttribute): array
     {
-        $floatingUiPath = PathUtility::getAbsoluteWebPath(
-            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/vendor/floating-ui.dom.bundle.js'),
-        );
+        $floatingUiPath = ResourceUtility::versionedWebPath('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/vendor/floating-ui.dom.bundle.js');
         $resources['floating_ui'] = sprintf(
             '<script%s type="module">import * as FloatingUIDOM from "%s"; window.FloatingUIDOM = FloatingUIDOM; window.dispatchEvent(new Event("floatingui:ready"));</script>',
             $nonceAttribute,
@@ -227,9 +225,7 @@ final readonly class ResourceRendererService
             return $resources;
         }
 
-        $contextualEditPath = PathUtility::getAbsoluteWebPath(
-            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/contextual_edit.js'),
-        );
+        $contextualEditPath = ResourceUtility::versionedWebPath('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/contextual_edit.js');
         $resources['contextual_edit'] = sprintf(
             '<script%s src="%s"></script>',
             $nonceAttribute,
@@ -261,9 +257,7 @@ final readonly class ResourceRendererService
      */
     private function addIframeEditResource(array $resources, string $nonceAttribute): array
     {
-        $iframeEditPath = PathUtility::getAbsoluteWebPath(
-            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/iframe_edit.js'),
-        );
+        $iframeEditPath = ResourceUtility::versionedWebPath('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/iframe_edit.js');
         $resources['iframe_edit'] = sprintf(
             '<script%s src="%s"></script>',
             $nonceAttribute,
@@ -372,9 +366,7 @@ final readonly class ResourceRendererService
         }
 
         // Add sticky toolbar script
-        $stickyToolbarPath = PathUtility::getAbsoluteWebPath(
-            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/sticky_toolbar.js'),
-        );
+        $stickyToolbarPath = ResourceUtility::versionedWebPath('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/sticky_toolbar.js');
         $resources['sticky_toolbar'] = sprintf(
             '<script%s src="%s"></script>',
             $nonceAttribute,

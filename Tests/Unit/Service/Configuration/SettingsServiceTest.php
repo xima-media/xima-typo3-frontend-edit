@@ -19,6 +19,8 @@ use PHPUnit\Framework\TestCase;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Exception\SiteNotFoundException;
+use TYPO3\CMS\Core\Http\ServerRequest;
 use TYPO3\CMS\Core\Settings\SettingsInterface;
 use TYPO3\CMS\Core\Site\Entity\{Site, SiteSettings};
 use TYPO3\CMS\Core\Site\SiteFinder;
@@ -33,6 +35,30 @@ use Xima\XimaTypo3FrontendEdit\Service\Configuration\SettingsService;
 #[CoversClass(SettingsService::class)]
 final class SettingsServiceTest extends TestCase
 {
+    #[Test]
+    public function withSiteOfPageAttachesTheSiteOfThePage(): void
+    {
+        $site = $this->createMock(Site::class);
+        $siteFinder = $this->createMock(SiteFinder::class);
+        $siteFinder->expects(self::once())->method('getSiteByPageId')->with(7)->willReturn($site);
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $siteFinder);
+
+        $request = $service->withSiteOfPage(new ServerRequest('https://example.com/'), 7);
+
+        self::assertSame($site, $request->getAttribute('site'));
+    }
+
+    #[Test]
+    public function withSiteOfPageKeepsTheRequestWhenNoSiteIsFound(): void
+    {
+        $siteFinder = $this->createMock(SiteFinder::class);
+        $siteFinder->method('getSiteByPageId')->willThrowException(new SiteNotFoundException('no site', 1));
+        $service = new SettingsService($this->createMock(ExtensionConfiguration::class), $siteFinder);
+        $original = new ServerRequest('https://example.com/');
+
+        self::assertSame($original, $service->withSiteOfPage($original, 7));
+    }
+
     #[Test]
     public function isEnabledReturnsFalseWhenNoSite(): void
     {

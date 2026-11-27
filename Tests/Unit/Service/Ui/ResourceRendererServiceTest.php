@@ -52,7 +52,8 @@ final class ResourceRendererServiceTest extends TestCase
 
         $packageManager = $this->createMock(PackageManager::class);
         $packageManager->method('resolvePackagePath')
-            ->willReturnCallback(static fn (string $path): string => '/var/www/html/public/'.ltrim(str_replace('EXT:', 'typo3conf/ext/', $path), '/'));
+            ->willReturnCallback(static fn (string $path): string => dirname(__DIR__, 4).'/'.preg_replace('#^EXT:[^/]+/#', '', $path));
+        $packageManager->method('extractPackageKeyFromPackagePath')->willReturn('xima_typo3_frontend_edit');
         $packageManager->method('isPackageActive')->willReturn(true);
         $packageManager->method('getPackage')->willReturn($package);
         $packageManager->method('getActivePackages')->willReturn([]);
@@ -167,6 +168,27 @@ final class ResourceRendererServiceTest extends TestCase
         $service->render($this->createRequest([]));
 
         self::assertStringContainsString('data-disabled="true"', $captured['toolbar_config']);
+    }
+
+    #[Test]
+    public function renderVersionsEveryInjectedScriptUrl(): void
+    {
+        GeneralUtility::addInstance(ViewFactoryInterface::class, $this->createViewFactoryCapturingResources($captured));
+
+        $service = $this->createService(true);
+
+        $service->render($this->createRequest(['frontendEdit' => ['enableContextualEditing' => true]]));
+
+        $urls = [];
+        foreach ($captured as $resource) {
+            preg_match_all('#(?:src="|from ")([^"]+\.js[^"]*)"#', $resource, $matches);
+            array_push($urls, ...$matches[1]);
+        }
+
+        self::assertCount(6, $urls, implode(', ', $urls));
+        foreach ($urls as $url) {
+            self::assertMatchesRegularExpression('#\.js\?\d+$#', $url);
+        }
     }
 
     /**
