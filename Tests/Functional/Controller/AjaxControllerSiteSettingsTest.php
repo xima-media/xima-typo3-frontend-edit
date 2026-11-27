@@ -109,7 +109,7 @@ final class AjaxControllerSiteSettingsTest extends FunctionalTestCase
         $GLOBALS['LANG'] = $this->get(LanguageServiceFactory::class)->createFromUserPreferences($backendUser);
 
         $request = (new ServerRequest('https://example.com/', 'GET'))
-            ->withQueryParams(['pid' => '1', 'returnUrl' => '/']);
+            ->withQueryParams(['pid' => '1', 'returnUrl' => 'https://example.com/']);
         $response = $this->get(AjaxController::class)->editInformationAction($request);
         $response->getBody()->rewind();
         $payload = json_decode($response->getBody()->getContents(), true, 512, \JSON_THROW_ON_ERROR);
