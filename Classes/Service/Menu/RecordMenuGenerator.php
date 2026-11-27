@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Service\Menu;
 
 use TYPO3\CMS\Backend\Routing\Exception\RouteNotFoundException;
-use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
 use TYPO3\CMS\Core\EventDispatcher\EventDispatcher;
 use TYPO3\CMS\Core\Localization\LanguageService;
@@ -26,7 +25,12 @@ use Xima\XimaTypo3FrontendEdit\Service\Authentication\BackendUserService;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 
-use function is_array;
+use function array_diff;
+use function array_filter;
+use function array_keys;
+use function array_map;
+use function array_unique;
+use function array_values;
 
 /**
  * RecordMenuGenerator.
@@ -38,6 +42,8 @@ use function is_array;
  * BackendUserService::hasRecordEditAccess() path, and extensibility reuses
  * the existing FrontendEditDropdownModifyEvent (the record row carries a
  * `_table` marker so listeners can tell it apart from a tt_content row).
+ *
+ * @phpstan-type RecordLookup array{requested: array<string, array<int, array<string, mixed>>>, default: array<string, array<int, array<string, mixed>>>, translated: array<string, array<int, array<string, mixed>>>}
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
@@ -65,9 +71,20 @@ final class RecordMenuGenerator extends AbstractMenuGenerator
      */
     public function getDropdown(array $references, int $languageUid, string $returnUrl): array
     {
+        $references = array_values(array_filter(
+            $references,
+            static fn (array $reference): bool => isset($GLOBALS['TCA'][$reference['table']]),
+        ));
+        if ([] === $references) {
+            return [];
+        }
+
+        $records = $this->loadRecords($references, $languageUid);
+        $contextualEditAvailable = $this->urlBuilderService->isContextualEditRouteAvailable();
+
         $result = [];
         foreach ($references as $reference) {
-            $menuData = $this->buildMenuForReference($reference['table'], $reference['uid'], $languageUid, $returnUrl);
+            $menuData = $this->buildMenuForReference($reference['table'], $reference['uid'], $languageUid, $returnUrl, $records, $contextualEditAvailable);
             if (null === $menuData) {
                 continue;
             }
@@ -79,28 +96,61 @@ final class RecordMenuGenerator extends AbstractMenuGenerator
     }
 
     /**
-     * @return array{element: array<string, mixed>, menu: array<string, mixed>}|null
+     * Loads everything the menus need with a constant number of queries per table:
+     * the requested records, the default-language records of requested translations
+     * and the translations into the requested language.
      *
-     * @throws RouteNotFoundException
+     * @param array<int, array{table: string, uid: int}> $references
+     *
+     * @return RecordLookup
      */
-    private function buildMenuForReference(string $table, int $uid, int $languageUid, string $returnUrl): ?array
+    private function loadRecords(array $references, int $languageUid): array
     {
-        if (!isset($GLOBALS['TCA'][$table])) {
-            return null;
+        $uidsByTable = [];
+        foreach ($references as $reference) {
+            $uidsByTable[$reference['table']][] = $reference['uid'];
         }
 
-        $requestedRecord = BackendUtility::getRecord($table, $uid);
+        $records = ['requested' => [], 'default' => [], 'translated' => []];
+        foreach ($uidsByTable as $table => $uids) {
+            $requested = $this->contentElementRepository->fetchRecordsByUids($table, array_values(array_unique($uids)));
+            $defaultUids = array_values(array_unique(array_map(
+                fn (array $record): int => $this->getDefaultLanguageUid($table, $record),
+                $requested,
+            )));
+
+            $records['requested'][$table] = $requested;
+            $records['default'][$table] = $requested + $this->contentElementRepository->fetchRecordsByUids(
+                $table,
+                array_values(array_diff($defaultUids, array_keys($requested))),
+            );
+            $records['translated'][$table] = $languageUid > 0
+                ? $this->contentElementRepository->getTranslatedRecords($table, $defaultUids, $languageUid)
+                : [];
+        }
+
+        return $records;
+    }
+
+    /**
+     * @param RecordLookup $records
+     *
+     * @return array{element: array<string, mixed>, menu: array<string, mixed>}|null
+     */
+    private function buildMenuForReference(string $table, int $uid, int $languageUid, string $returnUrl, array $records, bool $contextualEditAvailable): ?array
+    {
+        $requestedRecord = $records['requested'][$table][$uid] ?? null;
         if (null === $requestedRecord) {
             return null;
         }
 
-        $targetRecord = $this->resolveTargetRecord($table, $requestedRecord, $languageUid);
+        $targetRecord = $this->resolveTargetRecord($table, $requestedRecord, $languageUid, $records);
         if (!$this->backendUserService->hasRecordEditAccess($table, $targetRecord)) {
             return null;
         }
 
         $targetUid = (int) $targetRecord['uid'];
-        $contextualUrl = $this->urlBuilderService->isContextualEditRouteAvailable()
+        $contextualUrl = $contextualEditAvailable
             ? $this->urlBuilderService->buildContextualEditUrl($targetUid, $table, $languageUid, $returnUrl)
             : null;
 
@@ -141,29 +191,33 @@ final class RecordMenuGenerator extends AbstractMenuGenerator
      * record verbatim when it is itself in neither language).
      *
      * @param array<string, mixed> $requestedRecord
+     * @param RecordLookup         $records
      *
      * @return array<string, mixed>
      */
-    private function resolveTargetRecord(string $table, array $requestedRecord, int $languageUid): array
+    private function resolveTargetRecord(string $table, array $requestedRecord, int $languageUid, array $records): array
     {
-        $recordLanguage = (int) ($requestedRecord['sys_language_uid'] ?? 0);
-        $transOrigPointerField = $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] ?? 'l10n_parent';
-        $defaultUid = $recordLanguage > 0 ? (int) ($requestedRecord[$transOrigPointerField] ?? 0) : (int) $requestedRecord['uid'];
-        if ($defaultUid <= 0) {
-            $defaultUid = (int) $requestedRecord['uid'];
-        }
-
-        $defaultRecord = $recordLanguage > 0
-            ? (BackendUtility::getRecord($table, $defaultUid) ?? $requestedRecord)
+        $defaultUid = $this->getDefaultLanguageUid($table, $requestedRecord);
+        $defaultRecord = (int) ($requestedRecord['sys_language_uid'] ?? 0) > 0
+            ? ($records['default'][$table][$defaultUid] ?? $requestedRecord)
             : $requestedRecord;
 
         if ($languageUid <= 0) {
             return $defaultRecord;
         }
 
-        $translated = $this->contentElementRepository->getTranslatedRecord($table, $defaultUid, $languageUid);
+        return $records['translated'][$table][$defaultUid] ?? $defaultRecord;
+    }
 
-        return is_array($translated) ? $translated : $defaultRecord;
+    /**
+     * @param array<string, mixed> $record
+     */
+    private function getDefaultLanguageUid(string $table, array $record): int
+    {
+        $transOrigPointerField = $GLOBALS['TCA'][$table]['ctrl']['transOrigPointerField'] ?? 'l10n_parent';
+        $defaultUid = (int) ($record['sys_language_uid'] ?? 0) > 0 ? (int) ($record[$transOrigPointerField] ?? 0) : (int) $record['uid'];
+
+        return $defaultUid > 0 ? $defaultUid : (int) $record['uid'];
     }
 
     private function getLanguageService(): LanguageService

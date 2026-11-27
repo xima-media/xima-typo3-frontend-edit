@@ -34,10 +34,7 @@ use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
  * The full happy-path (real record fetch + translation resolution) requires
  * a database and is covered by
  * Tests/Functional/Controller/AjaxControllerTest.php instead - this suite
- * only covers what's reachable without one: BackendUtility::getRecord() is
- * a static core call this class does not abstract away (same as
- * AdditionalDataHandler), so unit tests are limited to the guard that runs
- * before it.
+ * only covers what's reachable without one: the guard for tables without TCA.
  *
  * @author Konrad Michalik <hej@konradmichalik.dev>
  * @license GPL-2.0-or-later
