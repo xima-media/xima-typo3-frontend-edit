@@ -11,7 +11,7 @@
 		"ergebnis/composer-normalize": "^2.59.0",
 		"helmich/typo3-typoscript-lint": "^3.3.0",
 		"konradmichalik/php-cs-fixer-preset": "^0.3.0",
-		"konradmichalik/php-doc-block-header-fixer": "^0.4.0",
+		"konradmichalik/php-doc-block-header-fixer": "^0.5.0",
 		"konradmichalik/phpstan-typo3-dead-code": "^0.1.1",
 		"konradmichalik/phpstan-typo3-preset": "^0.6",
 		"move-elevator/composer-translation-validator": "^1.6.0",
