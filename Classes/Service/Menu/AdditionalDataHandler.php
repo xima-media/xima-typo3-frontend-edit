@@ -24,8 +24,11 @@ use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
 use Xima\XimaTypo3FrontendEdit\Utility\StringUtility;
 
 use function array_key_exists;
+use function array_slice;
 use function in_array;
 use function is_array;
+use function is_int;
+use function is_string;
 
 /**
  * AdditionalDataHandler.
@@ -35,6 +38,8 @@ use function is_array;
  */
 final readonly class AdditionalDataHandler
 {
+    private const MAX_ENTRIES = 50;
+
     public function __construct(
         private BackendUserService $backendUserService,
         private UrlBuilderService $urlBuilderService,
@@ -43,8 +48,8 @@ final readonly class AdditionalDataHandler
     ) {}
 
     /**
-     * @param array<int, array<string, mixed>> $dataEntries
-     * @param array<string, mixed>             $contentElementConfig
+     * @param array<int, mixed>    $dataEntries
+     * @param array<string, mixed> $contentElementConfig
      */
     public function handleData(
         Button $button,
@@ -59,8 +64,8 @@ final readonly class AdditionalDataHandler
 
         $this->addDataDivider($button);
 
-        foreach ($dataEntries as $key => $dataEntry) {
-            if (!$this->isValidDataEntry($dataEntry)) {
+        foreach (array_slice($dataEntries, 0, self::MAX_ENTRIES, true) as $key => $dataEntry) {
+            if (!is_array($dataEntry) || !$this->isValidDataEntry($dataEntry)) {
                 continue;
             }
 
@@ -93,19 +98,47 @@ final readonly class AdditionalDataHandler
     private function isValidDataEntry(array $dataEntry): bool
     {
         $label = $dataEntry['label'] ?? null;
-        if (null === $label || '' === $label) {
+        if (!is_string($label) || '' === $label) {
             return false;
         }
 
         $url = $dataEntry['url'] ?? null;
-        if (null !== $url && !$this->isSafeUrl((string) $url)) {
+        $icon = $dataEntry['icon'] ?? null;
+        if ((null !== $url && !is_string($url)) || (null !== $icon && !is_string($icon))) {
             return false;
         }
 
-        $hasTableAndUid = (null !== ($dataEntry['table'] ?? null) && null !== ($dataEntry['uid'] ?? null));
-        $hasUrl = (null !== $url);
+        if (null !== $url && !$this->isSafeUrl($url)) {
+            return false;
+        }
 
-        return $hasTableAndUid || $hasUrl;
+        return null !== $this->extractRecordReference($dataEntry) || null !== $url;
+    }
+
+    /**
+     * @param array<string, mixed> $dataEntry
+     *
+     * @return array{table: string, uid: int}|null
+     */
+    private function extractRecordReference(array $dataEntry): ?array
+    {
+        $table = $dataEntry['table'] ?? null;
+        $uid = $dataEntry['uid'] ?? null;
+
+        if (!is_string($table) || 1 !== preg_match('/^[a-z][a-z0-9_]*$/', $table)) {
+            return null;
+        }
+
+        if (!is_int($uid) && !is_string($uid)) {
+            return null;
+        }
+
+        $uid = filter_var($uid, \FILTER_VALIDATE_INT);
+        if (false === $uid || $uid < 1) {
+            return null;
+        }
+
+        return ['table' => $table, 'uid' => $uid];
     }
 
     /**
@@ -153,25 +186,24 @@ final readonly class AdditionalDataHandler
      */
     private function resolveRecordUid(array $dataEntry, int $languageUid): ?int
     {
-        if (null === ($dataEntry['table'] ?? null) || null === ($dataEntry['uid'] ?? null)) {
+        $reference = $this->extractRecordReference($dataEntry);
+        if (null === $reference) {
             return null;
         }
 
-        if (!$this->backendUserService->hasRecordEditAccess($dataEntry['table'], $dataEntry)) {
-            return null;
-        }
+        ['table' => $table, 'uid' => $recordUid] = $reference;
+        $record = BackendUtility::getRecord($table, $recordUid);
 
-        $recordUid = $dataEntry['uid'];
-        $record = BackendUtility::getRecord($dataEntry['table'], $recordUid);
-
-        if (null === $record) {
+        // Check access on the loaded row: the entry comes from the browser, so its
+        // editlock and language values must not decide anything.
+        if (null === $record || !$this->backendUserService->hasRecordEditAccess($table, $record)) {
             return null;
         }
 
         // Check if record needs translation
         if ($this->needsTranslation($record, $languageUid)) {
             $translatedRecord = $this->contentElementRepository->getTranslatedRecord(
-                $dataEntry['table'],
+                $table,
                 $recordUid,
                 $languageUid,
             );
@@ -182,7 +214,7 @@ final readonly class AdditionalDataHandler
 
             // The access check above applied to the parent record; re-check it on the
             // resolved translation before its uid is turned into an edit link.
-            if (!$this->backendUserService->hasRecordEditAccess($dataEntry['table'], $translatedRecord)) {
+            if (!$this->backendUserService->hasRecordEditAccess($table, $translatedRecord)) {
                 return null;
             }
 

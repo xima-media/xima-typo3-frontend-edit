@@ -33,18 +33,6 @@ final class ConfigurationTest extends TestCase
     }
 
     #[Test]
-    public function extensionNameConstantHasCorrectValue(): void
-    {
-        self::assertSame('XimaTypo3FrontendEdit', Configuration::EXT_NAME);
-    }
-
-    #[Test]
-    public function pluginNameConstantHasCorrectValue(): void
-    {
-        self::assertSame('FrontendEdit', Configuration::PLUGIN_NAME);
-    }
-
-    #[Test]
     public function userConfigurationKeyDisabledConstantHasCorrectValue(): void
     {
         self::assertSame('frontendEditDisabled', Configuration::UC_KEY_DISABLED);
@@ -66,8 +54,6 @@ final class ConfigurationTest extends TestCase
     public function allConstantsAreNonEmpty(): void
     {
         self::assertNotEmpty(Configuration::EXT_KEY);
-        self::assertNotEmpty(Configuration::EXT_NAME);
-        self::assertNotEmpty(Configuration::PLUGIN_NAME);
         self::assertNotEmpty(Configuration::UC_KEY_DISABLED);
         self::assertNotEmpty(Configuration::USER_TSCONFIG_KEY);
         self::assertNotEmpty(Configuration::USER_TSCONFIG_DISABLED);
