@@ -13,12 +13,13 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Template\Component;
 
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Imaging\Icon;
-use TYPO3\CMS\Core\Localization\LanguageService;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeLanguageService;
 
 /**
  * ButtonTest.
@@ -230,10 +231,9 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderReturnsBasicStructure(): void
     {
-        $this->setupLanguageServiceStub();
-
         $button = new Button('LLL:EXT:test/label', ButtonType::Link, null, null, false);
         $result = $button->render();
 
@@ -243,10 +243,9 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderIncludesUrlAndTargetBlankWhenUrlIsSet(): void
     {
-        $this->setupLanguageServiceStub();
-
         $button = new Button('Label', ButtonType::Link, 'https://example.com', null, true);
         $result = $button->render();
 
@@ -257,10 +256,9 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderExcludesUrlWhenEmpty(): void
     {
-        $this->setupLanguageServiceStub();
-
         $button = new Button('Label', ButtonType::Link, '', null, false);
         $result = $button->render();
 
@@ -268,10 +266,9 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderExcludesUrlWhenNull(): void
     {
-        $this->setupLanguageServiceStub();
-
         $button = new Button('Label', ButtonType::Link, null, null, false);
         $result = $button->render();
 
@@ -279,10 +276,9 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderIncludesIconMarkupWhenIconIsSet(): void
     {
-        $this->setupLanguageServiceStub();
-
         $icon = $this->createStub(Icon::class);
         $icon->method('getAlternativeMarkup')->willReturn('<svg>icon</svg>');
 
@@ -294,10 +290,9 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderExcludesIconWhenNull(): void
     {
-        $this->setupLanguageServiceStub();
-
         $button = new Button('Label', ButtonType::Link, null, null, false);
         $result = $button->render();
 
@@ -305,10 +300,9 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderIncludesChildrenWhenPresent(): void
     {
-        $this->setupLanguageServiceStub();
-
         $parent = new Button('Parent', ButtonType::Menu, null, null, false);
         $child = new Button('Child', ButtonType::Link, 'https://child.com', null, false);
 
@@ -322,10 +316,9 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderExcludesChildrenWhenEmpty(): void
     {
-        $this->setupLanguageServiceStub();
-
         $button = new Button('Label', ButtonType::Menu, null, null, false);
         $result = $button->render();
 
@@ -350,10 +343,9 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderIncludesContextualUrlWhenSet(): void
     {
-        $this->setupLanguageServiceStub();
-
         $button = new Button('Label', ButtonType::Link, 'https://example.com', null, false);
         $button->setContextualUrl('https://contextual.com/edit');
         $result = $button->render();
@@ -363,10 +355,9 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderExcludesContextualUrlWhenNull(): void
     {
-        $this->setupLanguageServiceStub();
-
         $button = new Button('Label', ButtonType::Link, 'https://example.com', null, false);
         $result = $button->render();
 
@@ -374,21 +365,13 @@ final class ButtonTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function renderExcludesContextualUrlWhenEmpty(): void
     {
-        $this->setupLanguageServiceStub();
-
         $button = new Button('Label', ButtonType::Link, 'https://example.com', null, false);
         $button->setContextualUrl('');
         $result = $button->render();
 
         self::assertArrayNotHasKey('contextualUrl', $result);
-    }
-
-    private function setupLanguageServiceStub(): void
-    {
-        $languageService = $this->createStub(LanguageService::class);
-        $languageService->method('sL')->willReturnCallback(static fn (string $key): string => $key);
-        $GLOBALS['LANG'] = $languageService;
     }
 }

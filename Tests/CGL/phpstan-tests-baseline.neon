@@ -73,12 +73,6 @@ parameters:
 			path: ../Unit/Service/Content/EmptyColumnServiceTest.php
 
 		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''LANG''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Service/Menu/AbstractMenuButtonBuilderTest.php
-
-		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
 			count: 4
@@ -97,12 +91,6 @@ parameters:
 			path: ../Unit/Service/Menu/AdditionalDataHandlerTest.php
 
 		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''LANG''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 3
-			path: ../Unit/Service/Menu/ContentElementButtonBuilderTest.php
-
-		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
 			count: 3
@@ -127,12 +115,6 @@ parameters:
 			path: ../Unit/Service/Menu/ContentElementMenuGeneratorTest.php
 
 		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''LANG''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Service/Menu/PageButtonBuilderTest.php
-
-		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
 			identifier: ttt.directGlobalState
 			count: 2
@@ -145,7 +127,7 @@ parameters:
 			path: ../Unit/Service/Menu/PageMenuGeneratorTest.php
 
 		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''LANG''\] assignment\.$#'
+			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
 			identifier: ttt.directGlobalState
 			count: 1
 			path: ../Unit/Service/Menu/PageMenuGeneratorTest.php
@@ -153,26 +135,8 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Service/Menu/PageMenuGeneratorTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''LANG''\] assignment\.$#'
-			identifier: ttt.directGlobalState
 			count: 2
 			path: ../Unit/Service/Menu/RecordButtonBuilderTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 2
-			path: ../Unit/Service/Menu/RecordButtonBuilderTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''LANG''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 2
-			path: ../Unit/Service/Ui/BackendSettingsServiceTest.php
 
 		-
 			message: '#^Test changes global state directly\: GeneralUtility\:\:setSingletonInstance\(\)\.$#'
@@ -209,12 +173,6 @@ parameters:
 			identifier: ttt.directGlobalState
 			count: 1
 			path: ../Unit/Service/Ui/UrlBuilderServiceTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''LANG''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Template/Component/ButtonTest.php
 
 		-
 			message: '#^Test changes global state directly\: GeneralUtility\:\:addInstance\(\)\.$#'

@@ -13,18 +13,17 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
-use KonradMichalik\Ttt\Attribute\WithSingleton;
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Imaging\{Icon, IconFactory};
-use TYPO3\CMS\Core\Localization\LanguageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\RecordButtonBuilder;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeLanguageService, FakeUriBuilder};
 
 /**
  * RecordButtonBuilderTest.
@@ -54,6 +53,7 @@ final class RecordButtonBuilderTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService('News'))]
     public function addInfoSectionAddsChildrenToMenuButton(): void
     {
         $this->setUpGlobals();
@@ -69,6 +69,7 @@ final class RecordButtonBuilderTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService('News'))]
     public function addInfoSectionHandlesMissingTitle(): void
     {
         $this->setUpGlobals();
@@ -82,15 +83,12 @@ final class RecordButtonBuilderTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function addInfoSectionFallsBackToTableNameWhenNoTcaTitle(): void
     {
         // Real sL() returns a non-"LLL:"-prefixed string unchanged; only the
         // missing TCA ctrl.title (never passed to sL() at all, see addInfoSection's
         // `?? ''` fallback) is what should resolve to "empty", not the label itself.
-        $languageService = $this->createMock(LanguageService::class);
-        $languageService->method('sL')->willReturnArgument(0);
-        $GLOBALS['LANG'] = $languageService;
-
         $builder = new RecordButtonBuilder($this->iconService, $this->urlBuilderService());
         $menuButton = new Button('Menu', ButtonType::Menu, null, null, false);
 
@@ -152,9 +150,6 @@ final class RecordButtonBuilderTest extends TestCase
 
     private function setUpGlobals(): void
     {
-        $languageService = $this->createMock(LanguageService::class);
-        $languageService->method('sL')->willReturn('News');
-        $GLOBALS['LANG'] = $languageService;
         $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['title'] = 'LLL:EXT:news/.../news.xlf:tab1';
         $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['label'] = 'title';
     }

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
-use KonradMichalik\Ttt\Attribute\WithSingleton;
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -24,7 +24,7 @@ use Xima\XimaTypo3FrontendEdit\Enumerations\ButtonType;
 use Xima\XimaTypo3FrontendEdit\Service\Menu\AbstractMenuButtonBuilder;
 use Xima\XimaTypo3FrontendEdit\Service\Ui\{IconService, UrlBuilderService};
 use Xima\XimaTypo3FrontendEdit\Template\Component\Button;
-use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\FakeUriBuilder;
+use Xima\XimaTypo3FrontendEdit\Tests\Unit\Fixtures\{FakeLanguageService, FakeUriBuilder};
 
 /**
  * AbstractMenuButtonBuilderTest.
@@ -84,14 +84,12 @@ final class AbstractMenuButtonBuilderTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('LANG', new FakeLanguageService())]
     public function getLanguageServiceReturnsGlobalLanguageService(): void
     {
-        $languageService = $this->createMock(LanguageService::class);
-        $GLOBALS['LANG'] = $languageService;
-
         $builder = $this->createBuilder();
 
-        self::assertSame($languageService, $builder->exposeLanguageService());
+        self::assertSame($GLOBALS['LANG'], $builder->exposeLanguageService());
     }
 
     private function createBuilder(): TestableMenuButtonBuilder
