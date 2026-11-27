@@ -11,7 +11,7 @@ Installation
 Requirements
 ============
 
-*   PHP 8.2 - 8.5
+*   PHP 8.2 - 8.6
 *   TYPO3 13.4 LTS - 14.x
 
 ..  _version-matrix:
@@ -28,7 +28,7 @@ Version matrix
         -   PHP
     *   -   2.x
         -   13.4 LTS - 14.x
-        -   8.2 - 8.5
+        -   8.2 - 8.6
     *   -   1.x
         -   11 - 13
         -   8.1 - 8.5
