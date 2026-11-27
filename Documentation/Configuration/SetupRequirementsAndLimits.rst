@@ -91,11 +91,12 @@ backend users their own page cache entries, independent of
 :confval:`frontendEdit.markerBasedDetection`. Anonymous visitors never receive
 output produced for an editor.
 
-All backend users share one page cache entry. The per-user switch and
-:ref:`user-tsconfig` are therefore not reflected in the cached output: if an
-editor with frontend edit disabled warms the cache, other editors get no
-attributes until the entry expires, and the other way round. The edit menu
-itself stays gated per user.
+All backend users share one page cache entry. The ViewHelpers therefore do
+not depend on the personal switch or on :ref:`user-tsconfig`: they render for
+every logged-in backend user, whoever warmed the cache. The decision per user
+is applied afterwards. With the UserTSconfig the toolbar and the scripts are
+not injected at all, with the personal switch the JavaScript does not read the
+elements, and the edit menu stays gated per user.
 
 A cached parent object (``stdWrap.cache`` on e.g. a ``CONTENT`` footer) keeps
 the output of its first rendering, as described for the

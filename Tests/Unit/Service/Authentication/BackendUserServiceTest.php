@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Authentication;
 
-use PHPUnit\Framework\Attributes\{CoversClass, Test};
+use PHPUnit\Framework\Attributes\{CoversClass, DataProvider, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
 use TYPO3\CMS\Core\Information\Typo3Version;
@@ -164,6 +164,43 @@ final class BackendUserServiceTest extends TestCase
         $service = new BackendUserService();
 
         self::assertTrue($service->isFrontendEditDisabled());
+    }
+
+    #[Test]
+    public function isLoggedInReturnsFalseWhenNoBackendUser(): void
+    {
+        unset($GLOBALS['BE_USER']);
+
+        self::assertFalse((new BackendUserService())->isLoggedIn());
+    }
+
+    /**
+     * @param array<string, mixed>|null $user
+     * @param array<string, mixed>      $uc
+     * @param array<string, mixed>      $tsConfig
+     */
+    #[Test]
+    #[DataProvider('loggedInDataProvider')]
+    public function isLoggedInDependsOnTheUserDataOnly(?array $user, array $uc, array $tsConfig, bool $expected): void
+    {
+        $backendUser = $this->createMock(BackendUserAuthentication::class);
+        $backendUser->user = $user;
+        $backendUser->uc = $uc;
+        $backendUser->method('getTSConfig')->willReturn($tsConfig);
+        $GLOBALS['BE_USER'] = $backendUser;
+
+        self::assertSame($expected, (new BackendUserService())->isLoggedIn());
+    }
+
+    /**
+     * @return iterable<string, array{array<string, mixed>|null, array<string, mixed>, array<string, mixed>, bool}>
+     */
+    public static function loggedInDataProvider(): iterable
+    {
+        yield 'user data is null' => [null, [], [], false];
+        yield 'user data present' => [['uid' => 1], [], [], true];
+        yield 'personal switch off' => [['uid' => 1], [Configuration::UC_KEY_DISABLED => true], [], true];
+        yield 'disabled by UserTSconfig' => [['uid' => 1], [], [Configuration::USER_TSCONFIG_KEY => [Configuration::USER_TSCONFIG_DISABLED => '1']], true];
     }
 
     #[Test]

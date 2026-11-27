@@ -55,9 +55,7 @@ class EditableViewHelper extends AbstractViewHelper
 
     public function render(): string
     {
-        if (!$this->backendUserService->isFrontendEditAllowed()
-            || $this->backendUserService->isFrontendEditDisabled()
-        ) {
+        if (!$this->backendUserService->isLoggedIn()) {
             return '';
         }
 
