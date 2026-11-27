@@ -16,8 +16,9 @@ namespace Xima\XimaTypo3FrontendEdit\Service\Ui;
 use Exception;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
 use TYPO3\CMS\Core\Localization\LanguageService;
-use TYPO3\CMS\Core\Utility\{GeneralUtility, PathUtility};
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 use Xima\XimaTypo3FrontendEdit\Configuration;
+use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 
 use function sprintf;
 
@@ -107,9 +108,7 @@ final readonly class BackendSettingsService
             'lang' => $this->buildLangLabels(),
         ], \JSON_HEX_TAG | \JSON_HEX_AMP) ?: '{}';
 
-        $stubsPath = PathUtility::getAbsoluteWebPath(
-            GeneralUtility::getFileAbsFileName('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/backend_stubs.js'),
-        );
+        $stubsPath = ResourceUtility::versionedWebPath('EXT:'.Configuration::EXT_KEY.'/Resources/Public/JavaScript/backend_stubs.js');
 
         return sprintf(
             '<script%s type="application/json" id="frontend-edit-backend-stubs-data">%s</script>'
