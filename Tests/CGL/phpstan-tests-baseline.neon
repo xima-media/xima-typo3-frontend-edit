@@ -9,7 +9,7 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''TYPO3_REQUEST''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 2
+			count: 1
 			path: ../Unit/EventListener/ModifyButtonBarEventListenerTest.php
 
 		-
@@ -27,7 +27,7 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''TYPO3_REQUEST''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 2
+			count: 1
 			path: ../Unit/EventListener/PageLayoutScrollEventListenerTest.php
 
 		-
@@ -105,7 +105,7 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 4
+			count: 3
 			path: ../Unit/Service/Menu/ContentElementMenuGeneratorTest.php
 
 		-
@@ -169,12 +169,6 @@ parameters:
 			path: ../Unit/Service/Menu/RecordButtonBuilderTest.php
 
 		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Service/Menu/RecordMenuGeneratorTest.php
-
-		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''LANG''\] assignment\.$#'
 			identifier: ttt.directGlobalState
 			count: 2
@@ -191,12 +185,6 @@ parameters:
 			identifier: ttt.directGlobalState
 			count: 8
 			path: ../Unit/Service/Ui/FlashMessageServiceTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 5
-			path: ../Unit/Service/Ui/IconServiceTest.php
 
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
@@ -247,18 +235,6 @@ parameters:
 			path: ../Unit/Utility/Compatibility/VersionUtilityTest.php
 
 		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TCA''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 4
-			path: ../Unit/Utility/RecordAccessUtilityTest.php
-
-		-
-			message: '#^Test changes global state directly\: \$GLOBALS\[''TYPO3_CONF_VARS''\] assignment\.$#'
-			identifier: ttt.directGlobalState
-			count: 1
-			path: ../Unit/Utility/ResourceUtilityTest.php
-
-		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
 			count: 4
@@ -267,7 +243,7 @@ parameters:
 		-
 			message: '#^Test changes global state directly\: \$GLOBALS\[''BE_USER''\] assignment\.$#'
 			identifier: ttt.directGlobalState
-			count: 8
+			count: 7
 			path: ../Unit/ViewHelpers/DataViewHelperTest.php
 
 		-

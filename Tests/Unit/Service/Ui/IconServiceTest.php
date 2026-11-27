@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Ui;
 
+use KonradMichalik\Ttt\Attribute\WithTca;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Imaging\{Icon, IconFactory, IconSize};
@@ -27,11 +28,6 @@ use Xima\XimaTypo3FrontendEdit\Service\Ui\IconService;
 #[CoversClass(IconService::class)]
 final class IconServiceTest extends TestCase
 {
-    protected function tearDown(): void
-    {
-        unset($GLOBALS['TCA']);
-    }
-
     #[Test]
     public function getIconReturnsIconFromFactory(): void
     {
@@ -84,14 +80,9 @@ final class IconServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithTca('tx_news_domain_model_news', ['ctrl' => ['typeicon_column' => 'CType', 'typeicon_classes' => ['default' => 'content-news', 'foo' => 'content-news-foo']]])]
     public function getIconIdentifierForRecordResolvesViaTypeiconColumn(): void
     {
-        $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['typeicon_column'] = 'CType';
-        $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['typeicon_classes'] = [
-            'default' => 'content-news',
-            'foo' => 'content-news-foo',
-        ];
-
         $service = new IconService($this->createMock(IconFactory::class));
 
         self::assertSame(
@@ -101,13 +92,9 @@ final class IconServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithTca('tx_news_domain_model_news', ['ctrl' => ['typeicon_column' => 'CType', 'typeicon_classes' => ['default' => 'content-news']]])]
     public function getIconIdentifierForRecordFallsBackToDefaultWhenColumnValueUnknown(): void
     {
-        $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['typeicon_column'] = 'CType';
-        $GLOBALS['TCA']['tx_news_domain_model_news']['ctrl']['typeicon_classes'] = [
-            'default' => 'content-news',
-        ];
-
         $service = new IconService($this->createMock(IconFactory::class));
 
         self::assertSame(
@@ -117,12 +104,9 @@ final class IconServiceTest extends TestCase
     }
 
     #[Test]
+    #[WithTca('sys_category', ['ctrl' => ['typeicon_classes' => ['default' => 'mimetypes-x-sys_category']]])]
     public function getIconIdentifierForRecordUsesDefaultWhenNoTypeiconColumnConfigured(): void
     {
-        $GLOBALS['TCA']['sys_category']['ctrl']['typeicon_classes'] = [
-            'default' => 'mimetypes-x-sys_category',
-        ];
-
         $service = new IconService($this->createMock(IconFactory::class));
 
         self::assertSame(

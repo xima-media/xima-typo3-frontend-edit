@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\ViewHelpers;
 
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -42,10 +43,9 @@ final class DataViewHelperTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', null)]
     public function renderReturnsEmptyStringWhenNoBackendUser(): void
     {
-        $GLOBALS['BE_USER'] = null;
-
         $this->viewHelper->setArguments([
             'label' => 'Test',
             'uid' => 123,

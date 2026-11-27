@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\EventListener;
 
+use KonradMichalik\Ttt\Attribute\WithGlobal;
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -64,10 +65,10 @@ final class ModifyButtonBarEventListenerTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('TYPO3_REQUEST', null)]
     public function invokeReturnsEarlyWhenRequestIsNotServerRequest(): void
     {
         $listener = $this->createListener(['enableSaveAndCloseButton' => true]);
-        $GLOBALS['TYPO3_REQUEST'] = null;
         $event = $this->createEvent([]);
 
         $listener($event);

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
-use KonradMichalik\Ttt\Attribute\WithSingleton;
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use TYPO3\CMS\Backend\Routing\UriBuilder;
@@ -58,10 +58,9 @@ final class RecordMenuGeneratorTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('TCA', [])]
     public function getDropdownSkipsReferencesForTablesNotInTca(): void
     {
-        $GLOBALS['TCA'] = [];
-
         $generator = $this->createGenerator();
 
         $result = $generator->getDropdown([['table' => 'tx_news_domain_model_news', 'uid' => 42]], 0, '/return');

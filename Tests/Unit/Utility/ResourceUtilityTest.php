@@ -29,12 +29,9 @@ use Xima\XimaTypo3FrontendEdit\Utility\ResourceUtility;
 #[WithTypo3ConfVars(['EXTENSIONS' => [Configuration::EXT_KEY => []]])]
 class ResourceUtilityTest extends TestCase
 {
+    #[WithTypo3ConfVars(['EXTENSIONS' => [Configuration::EXT_KEY => ['registerAdditionalFrontendResources' => ['unsupported.txt']]]])]
     public function testGetResourcesIgnoresUnsupportedFileTypesInConfiguration(): void
     {
-        $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalFrontendResources'] = [
-            'unsupported.txt',
-        ];
-
         // We can test the configuration handling without full TYPO3 context
         $additionalResources = $GLOBALS['TYPO3_CONF_VARS']['EXTENSIONS'][Configuration::EXT_KEY]['registerAdditionalFrontendResources'];
 

@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Xima\XimaTypo3FrontendEdit\Tests\Unit\Service\Menu;
 
 use Doctrine\DBAL\Result;
-use KonradMichalik\Ttt\Attribute\WithSingleton;
+use KonradMichalik\Ttt\Attribute\{WithGlobal, WithSingleton};
 use PHPUnit\Framework\Attributes\{CoversClass, Test};
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -80,10 +80,9 @@ final class ContentElementMenuGeneratorTest extends TestCase
     }
 
     #[Test]
+    #[WithGlobal('BE_USER', null)]
     public function getDropdownReturnsEmptyArrayWhenBackendUserIsNull(): void
     {
-        $GLOBALS['BE_USER'] = null;
-
         $generator = $this->createGenerator();
 
         $request = $this->createRequestMock();
